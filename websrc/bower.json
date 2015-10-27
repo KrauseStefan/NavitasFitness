@@ -1,0 +1,19 @@
+{
+  "name": "NavitasFitnes",
+  "version": "0.0.0",
+  "authors": [
+    "stkkj <stefan.krausekjaer@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "paper-header-panel": "PolymerElements/paper-header-panel#~1.0.5",
+    "polymer": "Polymer/polymer#~1.1.3"
+  }
+}
