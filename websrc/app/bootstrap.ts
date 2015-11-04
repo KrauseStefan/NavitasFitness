@@ -1,14 +1,5 @@
 import { Component, bootstrap } from "angular2/angular2"
+import { CkeEditorComponent } from "./ckEditor/CkEditor"
+import { Main } from "./main/Main"
 
-@Component({
-  selector: 'main',
-  template: '<div>test</div>'
-})
-export class AppComponent {
-
-  public mainEntry: string
-
-
-}
-
-bootstrap(AppComponent)
+bootstrap(Main)

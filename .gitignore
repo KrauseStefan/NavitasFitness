@@ -29,3 +29,8 @@ bower_components
 
 #Other
 .idea
+*.iml
+
+webapp
+
+typings
