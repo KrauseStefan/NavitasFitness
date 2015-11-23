@@ -1,0 +1,37 @@
+application: navitas-fitness
+version: 1
+runtime: go
+api_version: go1
+
+instance_class: F1
+
+
+automatic_scaling:
+  min_idle_instances: 0 # 5 # default value
+  max_idle_instances: 1 #automatic  # default value
+  min_pending_latency: 500ms # 30ms  # default value
+  max_pending_latency: automatic
+  max_concurrent_requests: 50
+
+handlers:
+- url: /rest/.*
+  script: _go_app
+
+- url: /(.*)$
+  static_files: webapp/\1
+  upload: webapp/.*\.(js|html|css|gif|png|jpg)$
+
+skip_files:
+- ^\.idea/.*$
+- ^\.vscode/.*$
+- ^.*.gitignore$
+
+#F{1-4} auto        Free 28 instance hours
+#B{1-4} man/Basic   Free  8 instance hours
+# https://cloud.google.com/appengine/docs/go/modules/#instance_classes
+
+# https://cloud.google.com/appengine/docs/quotas
+
+# https://cloud.google.com/appengine/docs/go/blobstore/#Go_Serving_a_blob
+
+# https://cloud.google.com/appengine/docs/go/config/appconfig

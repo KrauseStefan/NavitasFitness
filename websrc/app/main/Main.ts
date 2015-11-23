@@ -12,7 +12,7 @@ export class Main {
   public entries: string[] = [];
 
   constructor() {
-    for(let i = 0; i < 10; i++){
+    for(let i = 0; i < 2; i++){
       this.entries.push(`tekst streng $i`)
     }
   }

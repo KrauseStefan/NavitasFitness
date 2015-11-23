@@ -5,15 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "install": "bower install"
+    "install": "bower install; tsd install"
   },
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "dependencies": {
-    "systemjs": "^0.18.17",
-    "angular2": "^2.0.0-alpha.44",
-    "requirejs": "^2.1.20"
+    "angular2": "^2.0.0-alpha.46",
+    "requirejs": "^2.1.20",
+    "systemjs": "^0.18.17"
   }
 }

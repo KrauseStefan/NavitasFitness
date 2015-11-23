@@ -1,6 +1,6 @@
 'use strict';
 function GulpConfig() {
-  this.outputPath = './webapp';
+  this.outputPath = './app-engine/webapp';
 
   this.outputLibs = this.outputPath + '/libs';
 

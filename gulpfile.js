@@ -1,10 +1,10 @@
 'use strict';
 
-const buildenvFolder = './websrc/buildenv/';
+const buildenvFolder = './buildenv/';
 
 const gulp = require('gulp'),
     config = require( buildenvFolder + 'gulpfile.config'),
-    connectServer = require(buildenvFolder + 'connect.server')(config),
+    connectServer = require(`${buildenvFolder}connect.server`)(config),
     inject = require('gulp-inject'),
     ts = require('gulp-typescript'),
     gulpTslint = require('gulp-tslint'),
@@ -65,14 +65,8 @@ function compileTs() {
 
 gulp.task(clean);
 function clean(done) {
-  const typeScriptGenFiles = [
-    config.outputPath +'/**/*.js',    // path to all JS files auto gen'd by editor
-    config.outputPath +'/**/*.js.map', // path to all sourcemap files auto gen'd by editor
-    '!' + config.outputPath + '/lib'
-  ];
-
   // delete the files
-  del(typeScriptGenFiles, done);
+  return del([`${config.outputPath}/**/*`]);
 }
 
 gulp.task(watch);
@@ -88,20 +82,33 @@ function jade() {
     .pipe(gulp.dest(config.outputPath));
 }
 
-gulp.task(serve);
-function serve(done) {
-  const goapp = spawn('bash', ['-c','goapp serve'], {
-    stdio: 'inherit'
+function runGoappCmd(cmd, done) {
+  const goapp = spawn('bash', ['-c',`goapp ${cmd}`], {
+    stdio: 'inherit',
+    cwd: './app-engine'
   });
 
-  goapp.on('close', function (code) {
-    console.log('child process exited with code ' + code);
+  goapp.on('close', function (exitCode) {
+    if(exitCode !== 0){
+      console.log('child process exited with code ' + exitCode);
+    }
     done();
   });
 
   goapp.on('error', function (err) {
-    console.log('Failed to start child process.');
+    console.log('Failed to start child process: ', err);
+    done();
   });
+}
+
+gulp.task(serve);
+function serve(done) {
+  runGoappCmd('serve', done);
+}
+
+gulp.task(deploy);
+function deploy(done) {
+  runGoappCmd('deploy', done);
 }
 
 gulp.task(build);
@@ -113,8 +120,6 @@ gulp.task(connect);
 function connect() {
   return connectServer.connect(config);
 }
-
-gulp.task('test', gulp.parallel(connect));
 
 gulp.task('default', gulp.series(build, gulp.parallel(connect, serve, watch)));
 
