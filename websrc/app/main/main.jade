@@ -1,2 +1,5 @@
-div
-  ck-editor(*ng-for="#entry of entries; #i = index")
+div(*ng-for="#entry of entries; #i = index")
+  span
+    button((click)="enabled = !enabled") edit
+
+  ck-editor([content]="entry.Content", [is-editable]="enabled")

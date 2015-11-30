@@ -121,5 +121,5 @@ function connect() {
   return connectServer.connect(config);
 }
 
-gulp.task('default', gulp.series(build, gulp.parallel(connect, serve, watch)));
+gulp.task('default', gulp.parallel(gulp.series(build, gulp.parallel(connect, watch)), serve));
 

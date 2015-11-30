@@ -1,6 +1,7 @@
 import {Component, NgFor} from "angular2/angular2"
+import {HTTP_PROVIDERS} from "angular2/http"
 import {CkeEditorComponent} from "../ckEditor/CkEditor"
-
+import {BlogPostsService, BlogEntry} from "./BlogPostsService"
 
 @Component({
   selector: 'main',
@@ -9,12 +10,14 @@ import {CkeEditorComponent} from "../ckEditor/CkEditor"
 })
 export class Main {
 
-  public entries: string[] = [];
+  public entries: BlogEntry[] = [];
+  public enabled: boolean = false;
 
-  constructor() {
-    for(let i = 0; i < 2; i++){
-      this.entries.push(`tekst streng $i`)
-    }
+  constructor(blogPostsService: BlogPostsService) {
+
+    blogPostsService.getBlogEntries()
+      .subscribe(blogEntries => this.entries = (<BlogEntry[]>blogEntries.json()));
+
   }
 
 

@@ -3,12 +3,17 @@ html
     script(src="/libs/systemjs/dist/system.src.js")
 
     script(src="/libs/angular2/bundles/angular2.dev.js")
+    script(src="/libs/angular2/bundles/http.dev.js")
     script(src="/libs/angular2/bundles/router.dev.js")
     script(src="/libs/ckeditor/ckeditor.js")
 
     script.
       System.config({
-        packages: {'app': {defaultExtension: 'js'}}
+        defaultExtension: 'js',
+
+        packages: {
+          'app': {defaultExtension: 'js'}
+          }
       });
 
       System.import('app/bootstrap').catch(console.log.bind(console));
