@@ -1,5 +1,6 @@
 html
   head
+    link(rel="shortcut icon" href="/favicon.ico")
     script(src="/libs/systemjs/dist/system.src.js")
 
     script(src="/libs/angular2/bundles/angular2.dev.js")
@@ -11,9 +12,14 @@ html
       System.config({
         defaultExtension: 'js',
 
+        map: {
+          rxjs: 'libs/rxjs'
+        },
+
         packages: {
-          'app': {defaultExtension: 'js'}
-          }
+          'app': { defaultExtension: 'js' },
+          'rxjs': { defaultExtension: 'js' }
+        }
       });
 
       System.import('app/bootstrap').catch(console.log.bind(console));

@@ -1,13 +1,15 @@
 package main
+
 import (
-	"net/http"
 	"fmt"
+	"net/http"
 	"time"
+
+	"encoding/json"
+	"strconv"
 
 	"appengine"
 	"appengine/datastore"
-	"encoding/json"
-	"strconv"
 )
 
 type BlogEntry struct {
@@ -33,7 +35,6 @@ func writeJSON(w http.ResponseWriter, data interface{}) ([]byte, error) {
 
 	return js, err
 }
-
 
 func init() {
 	http.HandleFunc("/rest/blogEntry", blogEntry)
@@ -66,7 +67,7 @@ func blogEntryGet(c appengine.Context, w http.ResponseWriter, r *http.Request) {
 
 	blogEntries := make([]BlogEntry, 0, 10)
 
-	keys, err := q.GetAll(c, &blogEntries);
+	keys, err := q.GetAll(c, &blogEntries)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -91,15 +92,26 @@ func blogEntryPut(c appengine.Context, w http.ResponseWriter, r *http.Request) {
 	//		b.Author = u.String()
 	//	}
 
-	b := BlogEntry{
-		Author: "skk",
-		Content: "test",
-		Date: time.Now(),
+	var b BlogEntry
+	var key *datastore.Key
+
+	fmt.Print("content: ", r.Body)
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&b)
+	if err != nil {
+		panic(err)
 	}
 
-	key := datastore.NewIncompleteKey(c, KIND, blogEntryParentKey(c))
+	if (b.Id != 0) {
+		key = datastore.NewIncompleteKey(c, KIND, blogEntryParentKey(c))
+	} else {
+		key = datastore.NewKey(c, KIND, "", b.Id, blogEntryParentKey(c))
+	}
+	b.Date = time.Now()
+	b.Author = "skk"
 
-	key, err := datastore.Put(c, key, &b)
+	key, err = datastore.Put(c, key, &b)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

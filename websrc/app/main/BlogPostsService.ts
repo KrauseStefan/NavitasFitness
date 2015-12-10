@@ -1,6 +1,6 @@
 import {provide, Injectable, Observable} from "angular2/angular2"
 import {Http, Response} from "angular2/http"
-// import { Observable } from "@reactivex/rxjs"
+import "rxjs/add/operator/map"
 
 @Injectable()
 export class BlogPostsService {
@@ -9,29 +9,25 @@ export class BlogPostsService {
 
   constructor(private http: Http) { }
 
-  getBlogEntries() {
-    //  public getBlogEntries() : Observable<Array<BlogEntry>> {
+  public getBlogEntries(): Observable<BlogEntryDTO[]> {
     return this.http.get(this.serviceUrl)
-      // .map((res: Response) => res.json());
+      .map((res: Response) => (<BlogEntryDTO[]>res.json()));
   }
 
-  createBlogEntries(blogEntry: BlogEntry) {
+  saveBlogEntry(blogEntry: BlogEntryDTO) {
     const data = JSON.stringify(blogEntry);
 
     return this.http.put(this.serviceUrl, data);
   }
 
-  deleteBlogEntry(blogEntry: BlogEntry | String) {
-    const id = (blogEntry instanceof BlogEntry) ? blogEntry.Id : blogEntry;
-
-    return this.http.delete(this.serviceUrl + `?id=${id}`)
+  deleteBlogEntry(blogEntry: BlogEntryDTO) {
+    return this.http.delete(this.serviceUrl + `?id=${blogEntry.Id}`)
   }
 }
 
 provide('blogPostsService', { useClass: BlogPostsService });
 
-
-export class BlogEntry {
+export class BlogEntryDTO {
   Author: String
   Content: String
   Date: String
