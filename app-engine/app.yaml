@@ -5,7 +5,6 @@ api_version: go1
 
 instance_class: F1
 
-
 automatic_scaling:
   min_idle_instances: 0 # 5 # default value
   max_idle_instances: 1 #automatic  # default value
@@ -16,6 +15,10 @@ automatic_scaling:
 handlers:
 - url: /rest/.*
   script: _go_app
+
+- url: /
+  static_files: webapp/index.html
+  upload: webapp/index.html
 
 - url: /(.*)$
   static_files: webapp/\1
