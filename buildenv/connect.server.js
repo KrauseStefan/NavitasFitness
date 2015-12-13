@@ -20,7 +20,7 @@ let ConnectServer = function(conf) {
 
           fs.copy(fileFrom, fileTo, (err) => {
             if (err === null) {
-              console.log('copying: ' + fileFrom + ' to ' + fileTo);
+//              console.log('copying: ' + fileFrom + ' to ' + fileTo);
               notFound = -1;
               next();
             } else if(--notFound === 0) {

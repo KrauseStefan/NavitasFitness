@@ -83,7 +83,8 @@ function jade() {
 }
 
 function runGoappCmd(cmd, done) {
-  const goapp = spawn('bash', ['-c',`goapp ${cmd}`], {
+
+  const goapp = spawn('bash', ['-c',`${cmd} `], {
     stdio: 'inherit',
     cwd: './app-engine'
   });
@@ -103,12 +104,14 @@ function runGoappCmd(cmd, done) {
 
 gulp.task(serve);
 function serve(done) {
-  runGoappCmd('serve', done);
+  runGoappCmd('dev_appserver.py --dev_appserver_log_level error .', done);
+//  runGoappCmd('goapp serve', done);
+
 }
 
 gulp.task(deploy);
 function deploy(done) {
-  runGoappCmd('deploy', done);
+  runGoappCmd('goapp deploy', done);
 }
 
 gulp.task(build);
@@ -121,5 +124,6 @@ function connect() {
   return connectServer.connect(config);
 }
 
+gulp.task('buildAndWatch', gulp.parallel(gulp.series(build, gulp.parallel(connect, watch))));
 gulp.task('default', gulp.parallel(gulp.series(build, gulp.parallel(connect, watch)), serve));
 
