@@ -6,17 +6,16 @@ import (
 	"time"
 
 	"encoding/json"
-	"strconv"
-
 	"appengine"
 	"appengine/datastore"
+	"strconv"
 )
 
 type BlogEntry struct {
 	Author  string
 	Content string `datastore:",noindex"`
 	Date    time.Time
-	Id      int64 `datastore:"-"`
+	Id     string `datastore:"-"`
 }
 
 const KIND = "BlogEntry"
@@ -24,6 +23,11 @@ const PARENT_STRING_ID = "default_blogentry"
 
 func blogEntryParentKey(c appengine.Context) *datastore.Key {
 	return datastore.NewKey(c, KIND, PARENT_STRING_ID, 0, nil)
+}
+
+func intIDToKeyInt64(c appengine.Context, id string) *datastore.Key {
+	intId, _ := strconv.ParseInt(id, 10, 64)
+	return datastore.NewKey(c, KIND, "", intId, blogEntryParentKey(c))
 }
 
 func writeJSON(w http.ResponseWriter, data interface{}) ([]byte, error) {
@@ -38,14 +42,14 @@ func writeJSON(w http.ResponseWriter, data interface{}) ([]byte, error) {
 
 func init() {
 	http.HandleFunc("/rest/blogEntry", blogEntry)
-	http.HandleFunc("/rest/", root)
+//	http.HandleFunc("/rest/", root)
 }
 
-func root(w http.ResponseWriter, r *http.Request) {
-	//	w.Header().Set("Location", "static/index.html")
-	//	w.WriteHeader(http.StatusFound)
-	fmt.Fprint(w, "Hello, world!")
-}
+//func root(w http.ResponseWriter, r *http.Request) {
+//	//	w.Header().Set("Location", "static/index.html")
+//	//	w.WriteHeader(http.StatusFound)
+//	fmt.Fprint(w, "Hello, world!")
+//}
 
 func blogEntry(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
@@ -74,7 +78,7 @@ func blogEntryGet(c appengine.Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	for i, key := range keys {
-		blogEntries[i].Id = key.IntID()
+		blogEntries[i].Id = strconv.FormatInt(key.IntID(), 10)
 	}
 
 	if _, err := writeJSON(w, blogEntries); err != nil {
@@ -88,25 +92,26 @@ func blogEntryPost(c appengine.Context, w http.ResponseWriter, r *http.Request) 
 }
 
 func blogEntryPut(c appengine.Context, w http.ResponseWriter, r *http.Request) {
+	var b BlogEntry
+	var key *datastore.Key
+
 	//	if u := user.Current(c); u != nil {
 	//		b.Author = u.String()
 	//	}
-
-	var b BlogEntry
-	var key *datastore.Key
 
 	fmt.Print("content: ", r.Body)
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&b)
 	if err != nil {
-		panic(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	if (b.Id != 0) {
+	if (len(b.Id) == 0) {
 		key = datastore.NewIncompleteKey(c, KIND, blogEntryParentKey(c))
 	} else {
-		key = datastore.NewKey(c, KIND, "", b.Id, blogEntryParentKey(c))
+		key = intIDToKeyInt64(c, b.Id)
 	}
 	b.Date = time.Now()
 	b.Author = "skk"
@@ -117,8 +122,6 @@ func blogEntryPut(c appengine.Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b.Id = key.IntID()
-
 	if _, err := writeJSON(w, b); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -127,12 +130,10 @@ func blogEntryPut(c appengine.Context, w http.ResponseWriter, r *http.Request) {
 
 func blogEntryDelete(c appengine.Context, w http.ResponseWriter, r *http.Request) {
 	intIdStr := r.URL.Query().Get("id")
-	intId, _ := strconv.Atoi(intIdStr)
-	key := datastore.NewKey(c, KIND, "", int64(intId), blogEntryParentKey(c))
+	key := intIDToKeyInt64(c, intIdStr)
 
 	if err := datastore.Delete(c, key); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 }

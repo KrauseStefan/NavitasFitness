@@ -7,7 +7,7 @@ import { BlogEntryDTO } from '../main/BlogPostsService'
   selector: 'ck-editor',
   templateUrl: '/ckEditor/CkEditor.html'
 })
-export class CkEditorComponent implements OnChanges{
+export class CkEditorComponent implements OnChanges {
 
   @Input() content: string = '';
   @Input() isEditable: boolean = false;
@@ -16,12 +16,12 @@ export class CkEditorComponent implements OnChanges{
 
   editor: CKEDITOR.editor = null;
 
-  constructor(private elementRef: ElementRef) {
-      // this.updateContent(this.content);
-  }
+  constructor(private elementRef: ElementRef) { }
 
   enableEditor() {
-    this.editor = CKEDITOR.replace(this.elementRef.nativeElement);
+    // this.editor = CKEDITOR.replace(<any>this.getEditordiv());
+    this.getEditordiv().contentEditable = 'true';
+    this.editor = CKEDITOR.inline(<any>this.getEditordiv());
     this.editor.on('change', (event) => {
       this.content = event.editor.getData();
       console.log(this.content)
@@ -33,26 +33,29 @@ export class CkEditorComponent implements OnChanges{
     if (this.editor !== null) {
       this.editor.destroy();
       this.editor = null;
+      this.getEditordiv().contentEditable = 'false';
     }
+  }
+
+  getEditordiv(): HTMLDivElement {
+    return this.elementRef.nativeElement.querySelector('.editorContent');
   }
 
   updateContent(content) {
-      this.elementRef.nativeElement.querySelector('.editorContent').innerHTML = content;
+    this.getEditordiv().innerHTML = content;
   }
 
   public ngOnChanges(changes: { [key: string]: SimpleChange }) {
-    for (const key in changes) {
-      console.log(`onChanges - ${key} =`, changes[key].currentValue);
-    }
+    // for (const key in changes) {
+    //   console.log(`onChanges - ${key} =`, changes[key].currentValue);
+    // }
 
-    if(changes['content'] && !this.isEditable) {
+    if (changes['content'] && !this.isEditable) {
       this.updateContent(changes['content'].currentValue);
     }
 
-    if (changes['isEditable'] && changes['isEditable'].currentValue) {
-      this.enableEditor();
-    } else {
-      this.disableEditor();
+    if (changes['isEditable']) {
+      changes['isEditable'].currentValue ? this.enableEditor() : this.disableEditor();
     }
   }
 
