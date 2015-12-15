@@ -1,14 +1,15 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "module": "commonjs",
-    "declaration": true,
-    "noImplicitAny": false,
-    "removeComments": false,
-    "noLib": false,
+    "module": "system",
+    "moduleResolution": "node",
+    "sourceMap": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "sourceMap": true,
+    "removeComments": false,
+    "noImplicitAny": false,
+    "declaration": true,
+    "noLib": false,
     "listFiles": false,
     "outDir": "../webapp/",
     "rootDir": "./"

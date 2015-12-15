@@ -1,4 +1,4 @@
-import {Component, NgFor, NgIf} from "angular2/angular2"
+import {Component} from "angular2/core"
 import {HTTP_PROVIDERS} from "angular2/http"
 import {CkEditorComponent} from "../ckEditor/CkEditor"
 import {BlogPostsService, BlogEntryDTO} from "./BlogPostsService"
@@ -6,7 +6,7 @@ import {BlogPostsService, BlogEntryDTO} from "./BlogPostsService"
 @Component({
   selector: 'main',
   templateUrl: '/main/main.html',
-  directives: [CkEditorComponent, NgFor, NgIf]
+  directives: [CkEditorComponent]
 })
 export class Main {
 
@@ -46,9 +46,7 @@ export class Main {
         const index = this.entries.indexOf(entry) //onCompleate
         this.entries.splice(index, 1);
       })
-
   }
-
 }
 
 export class BlogEntry {

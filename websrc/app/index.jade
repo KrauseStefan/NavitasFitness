@@ -3,6 +3,7 @@ html
     link(rel="shortcut icon" href="/favicon.ico")
     script(src="/libs/systemjs/dist/system.src.js")
 
+    script(src="/libs/angular2/bundles/angular2-polyfills.js")
     script(src="/libs/angular2/bundles/angular2.dev.js")
     script(src="/libs/angular2/bundles/http.dev.js")
     script(src="/libs/angular2/bundles/router.dev.js")
@@ -22,7 +23,7 @@ html
         }
       });
 
-      System.import('app/bootstrap').catch(console.log.bind(console));
+      System.import('app/boot').catch(console.log.bind(console));
 
     link(rel="import" href="/libs/polymer/polymer.html")
     link(rel="import" href="/libs/paper-header-panel/paper-header-panel.html")

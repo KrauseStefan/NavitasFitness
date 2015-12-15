@@ -1,6 +1,7 @@
-import {provide, Injectable, Observable} from "angular2/angular2"
+import {provide, Injectable} from "angular2/core"
 import {Http, Response} from "angular2/http"
-import "rxjs/add/operator/map" //This error can be ignored and will be fixed in a later version of typescript
+import {Observable} from "rxjs/Observable"
+import "rxjs/add/operator/map" //TODO: This error can be ignored and will be fixed in a later version of typescript
 
 @Injectable()
 export class BlogPostsService {

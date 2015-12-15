@@ -1,6 +1,6 @@
 /// <reference path="../../typings/ckeditor/ckeditor"/>
 
-import { Component, ElementRef, Input, Output, OnChanges, SimpleChange, EventEmitter } from 'angular2/angular2'
+import { Component, ElementRef, Input, Output, OnChanges, SimpleChange, EventEmitter } from 'angular2/core'
 import { BlogEntryDTO } from '../main/BlogPostsService'
 
 @Component({
@@ -24,7 +24,6 @@ export class CkEditorComponent implements OnChanges {
     this.editor = CKEDITOR.inline(<any>this.getEditordiv());
     this.editor.on('change', (event) => {
       this.content = event.editor.getData();
-      console.log(this.content)
       this.contentChange.next(this.content)
     });
   }
