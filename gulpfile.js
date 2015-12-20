@@ -1,17 +1,19 @@
 'use strict';
 
-const buildenvFolder = './buildenv/';
+const config = require( './buildenv/gulpfile.config'),
+    connectServer = require('./buildenv/connect.server')(config),
 
-const gulp = require('gulp'),
-    config = require( buildenvFolder + 'gulpfile.config'),
-    connectServer = require(`${buildenvFolder}connect.server`)(config),
+    gulp = require('gulp'),
     inject = require('gulp-inject'),
     ts = require('gulp-typescript'),
+    gulpSass = require('gulp-sass'),
     gulpTslint = require('gulp-tslint'),
     sourcemaps = require('gulp-sourcemaps'),
-    del = require('del'),
     gulpJade = require('gulp-jade'),
+
+    del = require('del'),
     spawn = require('child_process').spawn,
+
     tsProject = ts.createProject( './websrc/tsconfig.json', {
       typescript: require('typescript')
     });
@@ -71,7 +73,19 @@ function clean(done) {
 
 gulp.task(watch);
 function watch() {
-  return gulp.watch([config.allTypeScript, config.views], build);
+  // const config = {
+  //   config.allTypeScript: buildTs
+  // }
+  let conf = new Map();
+  conf.set(config.allTypeScript, buildTs);
+  conf.set(config.views, jade);
+  conf.set(config.styles, sass);
+
+  conf.forEach((value, key) => {
+    gulp.watch(key, value);
+  });
+
+  // return gulp.watch([config.allTypeScript, config.views, config.styles], build);
 }
 
 function jade() {
@@ -105,8 +119,6 @@ function runGoappCmd(cmd, done) {
 gulp.task(serve);
 function serve(done) {
   runGoappCmd('dev_appserver.py --dev_appserver_log_level error .', done);
-//  runGoappCmd('goapp serve', done);
-
 }
 
 gulp.task(deploy);
@@ -114,14 +126,29 @@ function deploy(done) {
   runGoappCmd('goapp deploy', done);
 }
 
+gulp.task(buildTs);
+function buildTs(done) {
+  return gulp.series(tsLint, compileTs)(done);
+}
+
 gulp.task(build);
 function build(done) {
-  return gulp.series(tsLint, compileTs, jade)(done);
+  return gulp.parallel(
+    buildTs,
+    sass,
+    jade)(done);
 }
 
 gulp.task(connect);
 function connect() {
   return connectServer.connect(config);
+}
+
+gulp.task(sass);
+function sass() {
+  return gulp.src(config.styles)
+    .pipe(gulpSass().on('error', gulpSass.logError))
+    .pipe(gulp.dest(`${config.outputPath}/styles`));
 }
 
 gulp.task('buildAndWatch', gulp.parallel(gulp.series(build, gulp.parallel(connect, watch))));

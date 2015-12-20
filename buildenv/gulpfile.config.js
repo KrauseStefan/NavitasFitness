@@ -12,6 +12,8 @@ function GulpConfig() {
 
   this.views = this.sourceApp + '/**/*.jade';
 
+  this.styles = this.source + '/styles/**/*.scss';
+
   this.typings = this.source + '/typings/';
   this.libraryTypeScriptDefinitions = this.typings + '**/*.ts';
 

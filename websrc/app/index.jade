@@ -1,6 +1,10 @@
 html
   head
+    meta(charset="UTF-8")
+
     link(rel="shortcut icon" href="/favicon.ico")
+
+    script(src="./libs/webcomponentsjs/webcomponents.js")
     script(src="/libs/systemjs/dist/system.src.js")
 
     script(src="/libs/angular2/bundles/angular2-polyfills.js")
@@ -8,6 +12,13 @@ html
     script(src="/libs/angular2/bundles/http.dev.js")
     script(src="/libs/angular2/bundles/router.dev.js")
     script(src="/libs/ckeditor/ckeditor.js")
+
+    link(rel="import" href="/libs/polymer/polymer.html")
+    link(rel="import" href="/libs/paper-header-panel/paper-header-panel.html")
+    link(rel="import" href="/libs/paper-card/paper-card.html")
+    link(rel="import" href="/libs/paper-button/paper-button.html")
+
+    link(rel="stylesheet" href="/styles/main.css")
 
     script.
       System.config({
@@ -25,17 +36,11 @@ html
 
       System.import('app/boot').catch(console.log.bind(console));
 
-    link(rel="import" href="/libs/polymer/polymer.html")
-    link(rel="import" href="/libs/paper-header-panel/paper-header-panel.html")
-
-
-
   body.fullbleed.layout.vertical
-    paper-header-panel.flex(style="width: 1000px; margin: 0 auto;")
-      .paper-header
+    paper-header-panel.flex(mode="standard")
+      paper-toolbar
         h1 Navitas Fitness
-      .content
-        main
+      main.fit
 
 
 

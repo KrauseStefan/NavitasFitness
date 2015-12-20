@@ -1,8 +1,7 @@
 {
-  "name": "NavitasFitnes",
-  "version": "0.0.0",
+  "name": "Navitas-Fitness",
   "authors": [
-    "stkkj <stefan.krausekjaer@gmail.com>"
+    "Stefan Krause-Kjær <stefan.krausekjaer@gmail.com>"
   ],
   "license": "MIT",
   "ignore": [
@@ -13,8 +12,13 @@
     "tests"
   ],
   "dependencies": {
+    "ckeditor": "~4.5.4",
     "paper-header-panel": "PolymerElements/paper-header-panel#~1.0.5",
-    "polymer": "Polymer/polymer#~1.1.3",
-    "ckeditor": "~4.5.4"
-  }
+    "paper-card": "PolymerElements/paper-card#~1.0.8",
+    "paper-button": "PolymerElements/paper-button#~1.0.11"
+  },
+  "moduleType": [
+    "es6"
+  ],
+  "private": true
 }

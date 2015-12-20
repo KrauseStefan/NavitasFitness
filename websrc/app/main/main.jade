@@ -1,9 +1,13 @@
 div
-  button((click)="createBlogPost()") create new
-  div(*ngFor="#entry of entries; #i = index")
-    span
-      button((click)="entry.enabled = !entry.enabled", *ngIf="!entry.enabled") edit
-      button((click)="saveEntry(entry)", *ngIf="entry.enabled") save
-      button((click)="deleteEntry(entry)") delete
+  div
+    paper-button((click)="createBlogPost()") create new
+  paper-card(*ngFor="#entry of entries; #i = index")
+    .card-content
+      ck-editor([(content)]="entry.blogEntry.Content", [isEditable]="entry.enabled")
+    .card-actions
+      paper-button((click)="entry.enabled = !entry.enabled", *ngIf="!entry.enabled") edit
+      paper-button((click)="saveEntry(entry)", *ngIf="entry.enabled") save
+      paper-button((click)="deleteEntry(entry)") delete
 
-    ck-editor([(content)]="entry.blogEntry.Content", [isEditable]="entry.enabled")
+
+
