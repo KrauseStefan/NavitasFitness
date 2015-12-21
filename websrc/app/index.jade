@@ -25,6 +25,7 @@ html
     link(rel="import" href="/libs/paper-header-panel/paper-header-panel.html")
     link(rel="import" href="/libs/paper-card/paper-card.html")
     link(rel="import" href="/libs/paper-button/paper-button.html")
+    link(rel="import" href="/libs/paper-tabs/paper-tabs.html")
 
     link(rel="stylesheet" href="/styles/main.css")
 
@@ -48,6 +49,10 @@ html
     paper-header-panel.flex(mode="standard")
       paper-toolbar
         h1 Navitas Fitness
+        paper-tabs(selected="0")
+          paper-tab Forside
+          paper-tab Blog
+          paper-tab Registrer
       main.fit
 
 
