@@ -1,11 +1,11 @@
 /// <reference path="../../typings/ckeditor/ckeditor"/>
 
 import { Component, ElementRef, Input, Output, OnChanges, SimpleChange, EventEmitter } from 'angular2/core'
-import { BlogEntryDTO } from '../main/BlogPostsService'
+import { BlogEntryDTO } from '../MainPage/BlogPostsService'
 
 @Component({
   selector: 'ck-editor',
-  templateUrl: '/ckEditor/CkEditor.html'
+  templateUrl: '/CkEditor/CkEditor.html'
 })
 export class CkEditorComponent implements OnChanges {
 

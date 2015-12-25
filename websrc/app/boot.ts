@@ -1,9 +1,10 @@
 import { bootstrap } from "angular2/platform/browser"
 import { HTTP_PROVIDERS } from "angular2/http"
-import { Main } from "./main/Main"
-import { BlogPostsService } from "./main/BlogPostsService"
+import { BlogPostsService } from "./MainPage/BlogPostsService"
 
-bootstrap(Main, [
-  BlogPostsService,
-  HTTP_PROVIDERS
+import {AppComponent} from "./AppComponent"
+
+bootstrap(AppComponent, [
+    BlogPostsService,
+    HTTP_PROVIDERS
   ])

@@ -1,14 +1,14 @@
 import {Component} from "angular2/core"
 import {HTTP_PROVIDERS} from "angular2/http"
-import {CkEditorComponent} from "../ckEditor/CkEditor"
+import {CkEditorComponent} from "../CkEditor/CkEditor"
 import {BlogPostsService, BlogEntryDTO} from "./BlogPostsService"
 
 @Component({
-  selector: 'main',
-  templateUrl: '/main/main.html',
+  selector: 'main-page',
+  templateUrl: '/MainPage/MainPage.html',
   directives: [CkEditorComponent]
 })
-export class Main {
+export class MainPage {
 
   public entries: BlogEntry[] = [];
 
