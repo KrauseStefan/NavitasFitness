@@ -16,13 +16,13 @@ handlers:
 - url: /rest/.*
   script: _go_app
 
-- url: /
-  static_files: webapp/index.html
-  upload: webapp/index.html
-
-- url: /(.*)$
+- url: /(.*\.(js|html|css|gif|png|jpg))$
   static_files: webapp/\1
   upload: webapp/.*\.(js|html|css|gif|png|jpg)$
+
+- url: /.*
+  static_files: webapp/index.html
+  upload: webapp/index.html
 
 skip_files:
 - ^\.idea/.*$

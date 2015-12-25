@@ -2,7 +2,7 @@ html
   head
     meta(charset="UTF-8")
     meta(name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes")
-
+    base(href="/")
     title Navitas-Fitness
 
     link(rel="shortcut icon" href="/favicon.ico")
@@ -11,6 +11,8 @@ html
 
     script(src="./libs/webcomponentsjs/webcomponents-lite.js")
     script.
+      //https://github.com/PolymerLabs/polymer-experiments/blob/master/patch-dom.html
+      //https://github.com/Polymer/polymer/issues/2526
       window.Polymer = window.Polymer || {};
       window.Polymer.dom = 'shadow';
 
@@ -25,7 +27,7 @@ html
     script(src="/libs/angular2/bundles/http.dev.js")
     script(src="/libs/angular2/bundles/router.dev.js")
     script(src="/libs/ckeditor/ckeditor.js")
-    script(src="./libs/webcomponentsjs/webcomponents-lite.js")
+    script(src="/libs/webcomponentsjs/webcomponents-lite.js")
 
     link(rel="stylesheet" href="/styles/main.css")
 
@@ -47,14 +49,4 @@ html
 
   body.fullbleed.layout.vertical
     app-component
-    // paper-header-panel.flex(mode="standard")
-    //   paper-toolbar
-    //     h1 Navitas Fitness
-    //     paper-tabs(selected="0")
-    //       paper-tab Forside
-    //       paper-tab Blog
-    //       paper-tab Registrer
-    //   main-page.fit
-
-
 

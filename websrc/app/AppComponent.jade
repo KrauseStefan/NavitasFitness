@@ -2,8 +2,9 @@ paper-header-panel.flex(mode="standard")
   paper-toolbar
     h1 Navitas Fitness
     paper-tabs(selected="0")
-      paper-tab Forside
-      paper-tab Blog
-      paper-tab Registrer
-  main-page.fit
+      paper-tab([routerLink]="['FrontPage']") Forside
+      paper-tab([routerLink]="['Blog']") Blog
+      paper-tab([routerLink]="['Registrer']") Registrer
+  .fit
+    router-outlet
 
