@@ -1,0 +1,11 @@
+.vertical.layout
+  paper-card
+    //(*ngFor="#entry of entries; #i = index")
+    .card-content
+      ck-editor([(content)]="entry.blogEntry.Content", [isEditable]="entry.enabled")
+    .card-actions
+      paper-button((click)="entry.enabled = !entry.enabled", *ngIf="!entry.enabled") edit
+      paper-button((click)="saveEntry(entry)", *ngIf="entry.enabled") save
+
+
+

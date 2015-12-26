@@ -1,31 +1,22 @@
 import {Component} from "angular2/core"
 import {HTTP_PROVIDERS} from "angular2/http"
-import {CkEditorComponent} from "../CkEditor/CkEditor"
-import {BlogPostsService, BlogEntryDTO} from "./BlogPostsService"
+import {CkEditorComponent} from "../../Components/CkEditor/CkEditor"
+import {BlogPostsService, BlogEntryDTO} from "../Blog/BlogPostsService"
 
 @Component({
   selector: 'main-page',
-  templateUrl: '/MainPage/MainPage.html',
+  templateUrl: '/PageComponents/MainPage/MainPage.html',
   directives: [CkEditorComponent]
 })
 export class MainPage {
 
-  public entries: BlogEntry[] = [];
+  public entry: BlogEntry = new BlogEntry();
 
   constructor(public blogPostsService: BlogPostsService) {
-
     blogPostsService.getBlogEntries()
       .subscribe(blogEntries => {
-        this.entries = blogEntries.map(blogEntry => {
-          return new BlogEntry(blogEntry);
-        });
+        this.entry = new BlogEntry(blogEntries[0]);
       });
-  }
-
-  createBlogPost() {
-    let entry = new BlogEntry();
-    entry.enabled = true;
-    this.entries.push(entry);
   }
 
   saveEntry(entry: BlogEntry) {
@@ -35,17 +26,6 @@ export class MainPage {
       () => { }, //onError
       () => entry.enabled = false //onCompleate
       )
-  }
-
-  deleteEntry(entry: BlogEntry) {
-    this.blogPostsService.deleteBlogEntry(entry.blogEntry)
-      .subscribe(
-      () => { }, //onNext
-      () => { }, //onError
-      () => {
-        const index = this.entries.indexOf(entry) //onCompleate
-        this.entries.splice(index, 1);
-      })
   }
 }
 
