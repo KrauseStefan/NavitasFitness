@@ -54,6 +54,9 @@ paper-toolbar {
   background: $primary-color-dark;
   color: $primary-color-text
 }
+.paper-header-panel-0 .paper-header-panel#mainPanel {
+  display: block;
+}
 
 paper-header-panel::shadow #mainPanel {
   display: block;
