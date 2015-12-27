@@ -43,10 +43,10 @@ paper-card {
   margin: 5px 2px;
   display: block;
   width: calc(100% - 4px);
-  // margin: 0 auto;
 }
 
-#mainContainer, paper-toolbar {
+paper-header-panel>* {
+  display: block;
   padding: 0 50px;
 }
 
@@ -54,3 +54,8 @@ paper-toolbar {
   background: $primary-color-dark;
   color: $primary-color-text
 }
+
+paper-header-panel::shadow #mainPanel {
+  display: block;
+}
+

@@ -1,12 +1,11 @@
-paper-header-panel.flex(mode="standard")
+paper-header-panel(mode="standard")
   paper-toolbar
     h1 Navitas Fitness
     paper-tabs(selected="0")
       paper-tab([routerLink]="['MainPage']") Forside
       paper-tab([routerLink]="['Blog']") Blog
       paper-tab((click)="openRegistrerDialog()") Registrer
-      
       // paper-tab([routerLink]="['/test', ['Modal'] ]") Registrer
-  router-outlet.fit
 
+  router-outlet
   router-outlet(name="modal")

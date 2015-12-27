@@ -6,7 +6,7 @@ import {Blog} from "./PageComponents/Blog/Blog"
 @Component({
   selector: 'app-component',
   templateUrl: './AppComponent.html',
-  directives: [ROUTER_DIRECTIVES]
+  directives: [ ROUTER_DIRECTIVES ]
 })
 @RouteConfig([
   {path:'/',          name: 'MainPage', component: MainPage,  useAsDefault: true},
@@ -21,7 +21,6 @@ export class AppComponent {
 
   //hack until aux routes gets fixed
   openRegistrerDialog() {
-    // const base = window.location.pathname.split(/[\/()]/g).filter(i => i !== '')[0]
     const base = this.location.path().split(/[\/()]/g).filter(i => i !== '')[0]
     this.router.navigateByUrl(`/${base}(modal)`);
   }
