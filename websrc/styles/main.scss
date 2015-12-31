@@ -1,35 +1,6 @@
 
-// // @import 'reset';
 @import 'palette';
 @import 'paper-typografi';
-
-// h1 {
-// }
-
-// body {
-//   color: $primary-text-color;
-//   // color: $primary-color-text;
-//   background-color: $primary-color-light;
-// }
-
-// paper-header-panel {
-//   // margin: 0 200px;
-// }
-
-// paper-toolbar {
-//   color: $primary-color-text;
-//   background: $primary-color;
-// }
-
-// paper-button {
-//   color: $primary-color-text;
-//   background: $accent-color;
-// }
-
-// paper-card card-content {
-//   // background: $primary-color-light;
-//   color: $primary-text-color;
-// }
 
 body {
   font-size: 14px;
@@ -62,3 +33,14 @@ paper-header-panel::shadow #mainPanel {
   display: block;
 }
 
+
+paper-input::shadow input[type=number]::-webkit-inner-spin-button,
+paper-input::shadow input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.button.primary {
+  background: $accent-color;
+  color: $primary-color-text;
+}

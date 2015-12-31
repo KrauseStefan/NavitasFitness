@@ -1,0 +1,13 @@
+paper-dialog(modal="true")
+  h2 Create User
+  form
+    paper-dialog-scrollable
+      paper-input(label="E-Mail", type="email")
+      paper-input(label="Repeat E-Mail", type="email")
+      paper-input(label="Password", type="password")
+      paper-input(label="Repeat Password", type="password")
+      paper-input(label="Student Id/Other Id", type="number")
+
+    div.buttons
+      paper-button((click)="cancel()") Cancel
+      paper-button.button.primary Create

@@ -1,7 +1,7 @@
 import {provide, Injectable} from "angular2/core"
 import {Http, Response} from "angular2/http"
 import {Observable} from "rxjs/Observable"
-import "rxjs/add/operator/map" //TODO: This error can be ignored and will be fixed in a later version of typescript
+import "rxjs/add/operator/map"
 
 @Injectable()
 export class BlogPostsService {
