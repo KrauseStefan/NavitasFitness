@@ -1,4 +1,4 @@
-package Services
+package BlogEntry
 
 import (
 	"fmt"
@@ -11,26 +11,21 @@ import (
 	"strconv"
 	"encoding/json"
 	"time"
+	"src/Services/Common"
 )
 
 type BlogEntry struct {
 	Author  string
 	Content string `datastore:",noindex"`
 	Date    time.Time
-	Id     string `datastore:"-"`
+	Id      string `datastore:"-"`
 }
 
 const BLOG_KIND = "BlogEntry"
 const BLOG_PARENT_STRING_ID = "default_blogentry"
 
-func blogIntIDToKeyInt64(c appengine.Context, id string) *datastore.Key {
-	intId, _ := strconv.ParseInt(id, 10, 64)
-	return datastore.NewKey(c, BLOG_KIND, "", intId, blogEntryParentKey(c))
-}
-
-func blogEntryParentKey(c appengine.Context) *datastore.Key {
-	return datastore.NewKey(c, BLOG_KIND, BLOG_PARENT_STRING_ID, 0, nil)
-}
+var blogCollectionParentKey = Common.CollectionParentKeyGetFnGenerator(BLOG_KIND, BLOG_PARENT_STRING_ID, 0)
+var blogIntIDToKeyInt64 = Common.IntIDToKeyInt64(BLOG_KIND, blogCollectionParentKey)
 
 func HandleBlogEntryRequest(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
@@ -48,7 +43,7 @@ func HandleBlogEntryRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func blogEntryGet(c appengine.Context, w http.ResponseWriter, r *http.Request) {
-	q := datastore.NewQuery(BLOG_KIND).Ancestor(blogEntryParentKey(c)).Order("Date").Limit(10)
+	q := datastore.NewQuery(BLOG_KIND).Ancestor(blogCollectionParentKey(c)).Order("Date").Limit(10)
 
 	blogEntries := make([]BlogEntry, 0, 10)
 
@@ -62,7 +57,7 @@ func blogEntryGet(c appengine.Context, w http.ResponseWriter, r *http.Request) {
 		blogEntries[i].Id = strconv.FormatInt(key.IntID(), 10)
 	}
 
-	if _, err := writeJSON(w, blogEntries); err != nil {
+	if _, err := Common.WriteJSON(w, blogEntries); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -90,7 +85,7 @@ func blogEntryPut(c appengine.Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if (len(b.Id) == 0) {
-		key = datastore.NewIncompleteKey(c, BLOG_KIND, blogEntryParentKey(c))
+		key = datastore.NewIncompleteKey(c, BLOG_KIND, blogCollectionParentKey(c))
 	} else {
 		key = blogIntIDToKeyInt64(c, b.Id)
 	}
@@ -103,7 +98,7 @@ func blogEntryPut(c appengine.Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := writeJSON(w, b); err != nil {
+	if _, err := Common.WriteJSON(w, b); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

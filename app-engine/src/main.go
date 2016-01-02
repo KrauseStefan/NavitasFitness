@@ -2,12 +2,13 @@ package main
 
 import (
 	"net/http"
-	"src/Services"
+	"src/Services/Blog"
+	"src/Services/User"
 )
 
 func init() {
-	http.HandleFunc("/rest/blogEntry", Services.HandleBlogEntryRequest)
-	http.HandleFunc("/rest/user", Services.HandleUserServiceRequest)
+	http.HandleFunc("/rest/blogEntry", BlogEntry.HandleBlogEntryRequest)
+	http.HandleFunc("/rest/user", User.HandleUserServiceRequest)
 //	http.HandleFunc("/rest/", root)
 }
 

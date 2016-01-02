@@ -1,4 +1,4 @@
-package Services
+package User
 
 import (
 	"fmt"
@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"encoding/json"
 	"time"
+	"src/Services/Common"
 )
 
 type UserEntry struct {
@@ -23,14 +24,8 @@ type UserEntry struct {
 const USER_KIND = "User"
 const PARENT_STRING_ID = "default_user"
 
-func userEntryParentKey(c appengine.Context) *datastore.Key {
-	return datastore.NewKey(c, USER_KIND, PARENT_STRING_ID, 0, nil)
-}
-
-func userIntIDToKeyInt64(c appengine.Context, id string) *datastore.Key {
-	intId, _ := strconv.ParseInt(id, 10, 64)
-	return datastore.NewKey(c, USER_KIND, "", intId, userEntryParentKey(c))
-}
+var userCollectionParentKey = Common.CollectionParentKeyGetFnGenerator(USER_KIND, PARENT_STRING_ID, 0)
+var userIntIDToKeyInt64 = Common.IntIDToKeyInt64(USER_KIND, userCollectionParentKey)
 
 func HandleUserServiceRequest(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
@@ -47,7 +42,7 @@ func HandleUserServiceRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func userGet(c appengine.Context, w http.ResponseWriter, r *http.Request) {
-	q := datastore.NewQuery(USER_KIND).Ancestor(userEntryParentKey(c)).Order("Date").Limit(10)
+	q := datastore.NewQuery(USER_KIND).Ancestor(userCollectionParentKey(c)).Order("Date").Limit(10)
 
 	userEntries := make([]UserEntry, 0, 10)
 
@@ -61,7 +56,7 @@ func userGet(c appengine.Context, w http.ResponseWriter, r *http.Request) {
 		userEntries[i].Id = strconv.FormatInt(key.IntID(), 10)
 	}
 
-	if _, err := writeJSON(w, userEntries); err != nil {
+	if _, err := Common.WriteJSON(w, userEntries); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -89,7 +84,7 @@ func userPut(c appengine.Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if (len(b.Id) == 0) {
-		key = datastore.NewIncompleteKey(c, USER_KIND, userEntryParentKey(c))
+		key = datastore.NewIncompleteKey(c, USER_KIND, userCollectionParentKey(c))
 	} else {
 		key = userIntIDToKeyInt64(c, b.Id)
 	}
@@ -100,7 +95,7 @@ func userPut(c appengine.Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := writeJSON(w, b); err != nil {
+	if _, err := Common.WriteJSON(w, b); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
