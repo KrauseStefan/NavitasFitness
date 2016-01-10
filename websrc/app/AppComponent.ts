@@ -13,17 +13,12 @@ import {RegistrationForm} from "./PageComponents/RegistrationForm/RegistrationFo
   {path:'/',          name: 'MainPage', component: MainPage,  useAsDefault: true},
   {path:'/main-page', name: 'MainPage', component: MainPage},
   {path:'/blog',      name: 'Blog',     component: Blog},
-  {aux: '/modal',     name: 'Modal',    component: RegistrationForm}
+  {aux: '/modal',     name: 'Modal',    component: RegistrationForm},
+  {aux: '/',          name: 'None',     component: DummyComponent}
 ])
 export class AppComponent {
 
   constructor(private router: Router, private location: Location) {
-  }
-
-  //hack until aux routes gets fixed
-  openRegistrerDialog() {
-    const base = this.location.path().split(/[\/()]/g).filter(i => i !== '')[0]
-    this.router.navigateByUrl(`/${base}(modal)`);
   }
 
 }

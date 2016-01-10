@@ -8,14 +8,20 @@ import { Router, Location} from "angular2/router"
 export class RegistrationForm implements AfterViewInit {
 
   constructor(private elementRef: ElementRef, private location: Location, private router: Router) {
-    if(!this.getDialogElement().opened){
-      this.getDialogElement().open();
-    }
   }
+
   ngAfterViewInit() {
+
+    //work around
+    // https://github.com/PolymerElements/paper-dialog/issues/80
     window.setTimeout(() => {
-      this.getDialogElement().center();
-    })
+      if(!this.getDialogElement().opened){
+        this.getDialogElement().open();
+      }
+      window.setTimeout(() => {
+        this.getDialogElement().fit();
+      });
+    });
   }
 
   getDialogElement() {
@@ -23,13 +29,11 @@ export class RegistrationForm implements AfterViewInit {
   }
 
   cancel() {
-  //hack until aux routes gets fixed
+    //hack until aux routes gets fixed
     const base = this.location.path().split(/[\/()]/g).filter(i => i !== '')[0]
     this.router.navigateByUrl(`/${base}`);
-    if(!this.getDialogElement().opened){
-      this.getDialogElement().toogle();
-    }
 
+    this.getDialogElement().close();
   }
 
 }
