@@ -11,16 +11,13 @@ export class RegistrationForm implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-
     //work around
-    // https://github.com/PolymerElements/paper-dialog/issues/80
+    // https://github.com/PolymerElements/paper-dialog-scrollable/issues/13
+    if(!this.getDialogElement().opened){
+      this.getDialogElement().open();
+    }
     window.setTimeout(() => {
-      if(!this.getDialogElement().opened){
-        this.getDialogElement().open();
-      }
-      window.setTimeout(() => {
-        this.getDialogElement().fit();
-      });
+      this.getDialogElement().fit();
     });
   }
 

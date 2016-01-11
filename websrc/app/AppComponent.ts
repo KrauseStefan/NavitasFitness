@@ -17,8 +17,5 @@ import {RegistrationForm} from "./PageComponents/RegistrationForm/RegistrationFo
   {aux: '/',          name: 'None',     component: DummyComponent}
 ])
 export class AppComponent {
-
-  constructor(private router: Router, private location: Location) {
-  }
-
+  constructor() {  }
 }
