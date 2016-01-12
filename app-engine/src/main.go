@@ -2,14 +2,21 @@ package main
 
 import (
 	"net/http"
-	"src/Services/Blog"
+	"src/Services/BlogPost"
 	"src/Services/User"
+
+	"github.com/gorilla/mux"
 )
 
 func init() {
-	http.HandleFunc("/rest/blogEntry", BlogEntry.HandleBlogEntryRequest)
-	http.HandleFunc("/rest/user", User.HandleUserServiceRequest)
-//	http.HandleFunc("/rest/", root)
+
+	router := mux.NewRouter().StrictSlash(true)
+	BlogPostService.IntegrateRoutes(router)
+	UserService.IntegrateRoutes(router)
+//	router.HandleFunc("/rest/user", UserService.HandleUserServiceRequest)
+
+	http.Handle("/", router)
+	//	http.HandleFunc("/rest/", root)
 }
 
 //func root(w http.ResponseWriter, r *http.Request) {

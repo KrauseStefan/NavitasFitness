@@ -1,4 +1,4 @@
-package User
+package UserService
 
 import (
 	"fmt"
@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"time"
 	"src/Services/Common"
+	"github.com/gorilla/mux"
 )
 
 type UserEntry struct {
@@ -27,21 +28,25 @@ const PARENT_STRING_ID = "default_user"
 var userCollectionParentKey = Common.CollectionParentKeyGetFnGenerator(USER_KIND, PARENT_STRING_ID, 0)
 var userIntIDToKeyInt64 = Common.IntIDToKeyInt64(USER_KIND, userCollectionParentKey)
 
-func HandleUserServiceRequest(w http.ResponseWriter, r *http.Request) {
-	c := appengine.NewContext(r)
-	switch r.Method {
-	case "GET":
-		userGet(c, w, r)
-	case "POST":
-		userPost(c, w, r)
-	case "PUT":
-		userPut(c, w, r)
-	case "DELETE":
-		userDelete(c, w, r)
-	}
+func IntegrateRoutes(router *mux.Router) {
+	path := "/rest/user"
+
+	router.
+		Methods("GET").
+		Path(path).
+		Name("GetUserInfo").
+		HandlerFunc(userGet)
+
+	router.
+		Methods("PUT").
+		Path(path).
+		Name("PersistUserInfo").
+		HandlerFunc(userPut)
+
 }
 
-func userGet(c appengine.Context, w http.ResponseWriter, r *http.Request) {
+func userGet(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
 	q := datastore.NewQuery(USER_KIND).Ancestor(userCollectionParentKey(c)).Order("Date").Limit(10)
 
 	userEntries := make([]UserEntry, 0, 10)
@@ -62,11 +67,8 @@ func userGet(c appengine.Context, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func userPost(c appengine.Context, w http.ResponseWriter, r *http.Request) {
-
-}
-
-func userPut(c appengine.Context, w http.ResponseWriter, r *http.Request) {
+func userPut(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
 	var b UserEntry
 	var key *datastore.Key
 
@@ -96,16 +98,6 @@ func userPut(c appengine.Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := Common.WriteJSON(w, b); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-func userDelete(c appengine.Context, w http.ResponseWriter, r *http.Request) {
-	intIdStr := r.URL.Query().Get("id")
-	key := userIntIDToKeyInt64(c, intIdStr)
-
-	if err := datastore.Delete(c, key); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

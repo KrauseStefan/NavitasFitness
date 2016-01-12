@@ -1,4 +1,4 @@
-package BlogEntry
+package BlogPostService
 
 import (
 	"fmt"
@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"time"
 	"src/Services/Common"
+	 "github.com/gorilla/mux"
 )
 
 type BlogEntry struct {
@@ -27,23 +28,32 @@ const BLOG_PARENT_STRING_ID = "default_blogentry"
 var blogCollectionParentKey = Common.CollectionParentKeyGetFnGenerator(BLOG_KIND, BLOG_PARENT_STRING_ID, 0)
 var blogIntIDToKeyInt64 = Common.IntIDToKeyInt64(BLOG_KIND, blogCollectionParentKey)
 
-func HandleBlogEntryRequest(w http.ResponseWriter, r *http.Request) {
-	c := appengine.NewContext(r)
+func IntegrateRoutes(router *mux.Router) {
+	path := "/rest/blogEntry"
 
-	switch r.Method {
-	case "GET":
-		blogEntryGet(c, w, r)
-	case "POST":
-		blogEntryPost(c, w, r)
-	case "PUT":
-		blogEntryPut(c, w, r)
-	case "DELETE":
-		blogEntryDelete(c, w, r)
-	}
+ 	router.
+		Methods("GET").
+		Path(path).
+		Name("GetAllBlogPosts").
+		HandlerFunc(blogEntryGet)
+
+	router.
+		Methods("PUT").
+		Path(path).
+		Name("PersistBlogPost").
+		HandlerFunc(blogEntryPut)
+
+	router.
+		Methods("DELETE").
+		Path(path).
+		Name("DeleteBlogPost").
+		HandlerFunc(blogEntryDelete)
+
 }
 
-func blogEntryGet(c appengine.Context, w http.ResponseWriter, r *http.Request) {
-	q := datastore.NewQuery(BLOG_KIND).Ancestor(blogCollectionParentKey(c)).Order("Date").Limit(10)
+func blogEntryGet(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+	q := datastore.NewQuery(BLOG_KIND).Ancestor(blogCollectionParentKey(c)).Order("Date")
 
 	blogEntries := make([]BlogEntry, 0, 10)
 
@@ -63,11 +73,8 @@ func blogEntryGet(c appengine.Context, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func blogEntryPost(c appengine.Context, w http.ResponseWriter, r *http.Request) {
-
-}
-
-func blogEntryPut(c appengine.Context, w http.ResponseWriter, r *http.Request) {
+func blogEntryPut(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
 	var b BlogEntry
 	var key *datastore.Key
 
@@ -104,7 +111,9 @@ func blogEntryPut(c appengine.Context, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func blogEntryDelete(c appengine.Context, w http.ResponseWriter, r *http.Request) {
+func blogEntryDelete(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+
 	intIdStr := r.URL.Query().Get("id")
 	key := blogIntIDToKeyInt64(c, intIdStr)
 
