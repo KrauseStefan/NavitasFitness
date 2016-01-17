@@ -2,7 +2,6 @@ package AuthService
 
 import "github.com/gorilla/securecookie"
 
-
 //The hashKey is required, used to authenticate the cookie value using HMAC
 // It is recommended to use a key with 32 or 64 bytes.
 var hashKey = []byte("very-secret")
@@ -13,7 +12,6 @@ var hashKey = []byte("very-secret")
 // var blockKey = []byte("a-lot-secret")
 var s = securecookie.New(hashKey, nil)
 
-
-func GetSecureCookieInst() *securecookie.SecureCookie{
+func GetSecureCookieInst() *securecookie.SecureCookie {
 	return s
 }

@@ -1,21 +1,19 @@
 package Common
+
 import (
-	"net/http"
-	"encoding/json"
-	"appengine/datastore"
 	"appengine"
-	"strconv"
+	"appengine/datastore"
+	"encoding/json"
 	"github.com/gorilla/schema"
+	"net/http"
+	"strconv"
 )
 
-
 var formDataDecoder = schema.NewDecoder()
-
 
 type FormDataDecoderFn func(interface{}) error
 
 type httpHandlerWithData func(http.ResponseWriter, *http.Request, FormDataDecoderFn)
-
 
 func ParseFormDataWrap(handler httpHandlerWithData) http.HandlerFunc {
 
@@ -40,8 +38,6 @@ func ParseFormDataWrap(handler httpHandlerWithData) http.HandlerFunc {
 	}
 }
 
-
-
 func WriteJSON(w http.ResponseWriter, data interface{}) ([]byte, error) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -56,13 +52,13 @@ type CollectionParentKeyGetter func(c appengine.Context) *datastore.Key
 type Int64KeyGetter func(c appengine.Context, id string) *datastore.Key
 
 func CollectionParentKeyGetFnGenerator(kind string, parentStringId string, keyId int64) CollectionParentKeyGetter {
-	return func (c appengine.Context) *datastore.Key {
+	return func(c appengine.Context) *datastore.Key {
 		return datastore.NewKey(c, kind, parentStringId, 0, nil)
 	}
 }
 
 func IntIDToKeyInt64(kind string, parentKeyGetter CollectionParentKeyGetter) Int64KeyGetter {
-	return func (c appengine.Context, id string) *datastore.Key {
+	return func(c appengine.Context, id string) *datastore.Key {
 		intId, _ := strconv.ParseInt(id, 10, 64)
 		return datastore.NewKey(c, kind, "", intId, parentKeyGetter(c))
 	}

@@ -17,11 +17,10 @@ func IntegrateRoutes(router *mux.Router) {
 
 	router.
 		Methods("POST").
-		Path(path +  "/login").
+		Path(path + "/login").
 		Name("loginUser").
 		HandlerFunc(Common.ParseFormDataWrap(doLogin))
 }
-
 
 func doLogin(w http.ResponseWriter, r *http.Request, getCred Common.FormDataDecoderFn) {
 

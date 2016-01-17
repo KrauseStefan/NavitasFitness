@@ -8,11 +8,11 @@ import (
 	"appengine"
 	"appengine/datastore"
 
-	"strconv"
 	"encoding/json"
-	"time"
+	"github.com/gorilla/mux"
 	"src/Services/Common"
-	 "github.com/gorilla/mux"
+	"strconv"
+	"time"
 )
 
 type BlogEntry struct {
@@ -31,7 +31,7 @@ var blogIntIDToKeyInt64 = Common.IntIDToKeyInt64(BLOG_KIND, blogCollectionParent
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/blogEntry"
 
- 	router.
+	router.
 		Methods("GET").
 		Path(path).
 		Name("GetAllBlogPosts").
@@ -91,7 +91,7 @@ func blogEntryPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if (len(b.Id) == 0) {
+	if len(b.Id) == 0 {
 		key = datastore.NewIncompleteKey(c, BLOG_KIND, blogCollectionParentKey(c))
 	} else {
 		key = blogIntIDToKeyInt64(c, b.Id)

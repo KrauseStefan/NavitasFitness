@@ -58,7 +58,7 @@ func userPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if (user.HasId()) {
+	if user.HasId() {
 		CreateUser(ctx, &user)
 	} else {
 		UpdateUser(ctx, &user)

@@ -2,13 +2,12 @@ package main
 
 import (
 	"net/http"
+	"src/Services/Auth"
 	"src/Services/BlogPost"
 	"src/Services/User"
-	"src/Services/Auth"
 
 	"github.com/gorilla/mux"
 )
-
 
 // http://blog.golang.org/context
 // http://blog.golang.org/go-videos-from-google-io-2012
@@ -19,7 +18,7 @@ func init() {
 	BlogPostService.IntegrateRoutes(router)
 	UserService.IntegrateRoutes(router)
 	AuthService.IntegrateRoutes(router)
-//	router.HandleFunc("/rest/user", UserService.HandleUserServiceRequest)
+	//	router.HandleFunc("/rest/user", UserService.HandleUserServiceRequest)
 
 	http.Handle("/", router)
 	//	http.HandleFunc("/rest/", root)
