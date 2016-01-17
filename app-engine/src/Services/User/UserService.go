@@ -1,32 +1,17 @@
 package UserService
 
 import (
-	"fmt"
-
 	"net/http"
 
 	"appengine"
 	"appengine/datastore"
 
-	"strconv"
 	"encoding/json"
-	"time"
-	"src/Services/Common"
+
 	"github.com/gorilla/mux"
+
+	"src/Services/Common"
 )
-
-type UserEntry struct {
-	email     string
-	password  string `datastore:",noindex"`
-	navitasId time.Time
-	Id        string `datastore:"-"`
-}
-
-const USER_KIND = "User"
-const PARENT_STRING_ID = "default_user"
-
-var userCollectionParentKey = Common.CollectionParentKeyGetFnGenerator(USER_KIND, PARENT_STRING_ID, 0)
-var userIntIDToKeyInt64 = Common.IntIDToKeyInt64(USER_KIND, userCollectionParentKey)
 
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/user"
@@ -46,58 +31,46 @@ func IntegrateRoutes(router *mux.Router) {
 }
 
 func userGet(w http.ResponseWriter, r *http.Request) {
-	c := appengine.NewContext(r)
-	q := datastore.NewQuery(USER_KIND).Ancestor(userCollectionParentKey(c)).Order("Date").Limit(10)
+	userName := "name"
+	ctx := appengine.NewContext(r)
 
-	userEntries := make([]UserEntry, 0, 10)
-
-	keys, err := q.GetAll(c, &userEntries)
+	userDto, err := GetUserByUserName(ctx, userName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	for i, key := range keys {
-		userEntries[i].Id = strconv.FormatInt(key.IntID(), 10)
-	}
-
-	if _, err := Common.WriteJSON(w, userEntries); err != nil {
+	if _, err := Common.WriteJSON(w, userDto); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
 
 func userPut(w http.ResponseWriter, r *http.Request) {
-	c := appengine.NewContext(r)
-	var b UserEntry
+	ctx := appengine.NewContext(r)
+	var user UserDTO
 	var key *datastore.Key
 
-	//	if u := user.Current(c); u != nil {
-	//		b.Author = u.String()
-	//	}
-
-	fmt.Print("content: ", r.Body)
-
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&b)
+	err := decoder.Decode(&user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if (len(b.Id) == 0) {
-		key = datastore.NewIncompleteKey(c, USER_KIND, userCollectionParentKey(c))
+	if (user.HasId()) {
+		CreateUser(ctx, &user)
 	} else {
-		key = userIntIDToKeyInt64(c, b.Id)
+		UpdateUser(ctx, &user)
 	}
 
-	key, err = datastore.Put(c, key, &b)
+	key, err = datastore.Put(ctx, key, &user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if _, err := Common.WriteJSON(w, b); err != nil {
+	if _, err := Common.WriteJSON(w, user); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

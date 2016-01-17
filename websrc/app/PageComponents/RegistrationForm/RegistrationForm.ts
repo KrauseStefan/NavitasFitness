@@ -1,24 +1,28 @@
-import { Component, ElementRef, AfterViewInit, AfterContentInit, OnInit } from "angular2/core"
+import { Component, ElementRef, AfterViewInit, AfterContentInit, AfterViewChecked, OnInit } from "angular2/core"
 import { Router, Location} from "angular2/router"
 
 @Component({
   templateUrl: '/PageComponents/RegistrationForm/RegistrationForm.html',
   selector: 'registration-form'
 })
-export class RegistrationForm implements AfterViewInit {
+export class RegistrationForm implements AfterViewChecked {
 
   constructor(private elementRef: ElementRef, private location: Location, private router: Router) {
   }
 
-  ngAfterViewInit() {
+  ngAfterViewChecked() {
     //work around
     // https://github.com/PolymerElements/paper-dialog-scrollable/issues/13
-    if(!this.getDialogElement().opened){
-      this.getDialogElement().open();
-    }
+
     window.setTimeout(() => {
-      this.getDialogElement().fit();
+      if(!this.getDialogElement().opened){
+        this.getDialogElement().open();
+      }
+      window.setTimeout(() => {
+        this.getDialogElement().fit();
+      });
     });
+
   }
 
   getDialogElement() {

@@ -5,7 +5,42 @@ import (
 	"appengine/datastore"
 	"appengine"
 	"strconv"
+	"github.com/gorilla/schema"
 )
+
+
+var formDataDecoder = schema.NewDecoder()
+
+
+type FormDataDecoderFn func(interface{}) error
+
+type httpHandlerWithData func(http.ResponseWriter, *http.Request, FormDataDecoderFn)
+
+
+func ParseFormDataWrap(handler httpHandlerWithData) http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		parseFormData := func(dst interface{}) error {
+			err := r.ParseForm()
+
+			if err != nil {
+				return err
+			}
+
+			err = formDataDecoder.Decode(dst, r.PostForm)
+
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+
+		handler(w, r, parseFormData)
+	}
+}
+
+
 
 func WriteJSON(w http.ResponseWriter, data interface{}) ([]byte, error) {
 	w.Header().Set("Content-Type", "application/json")
