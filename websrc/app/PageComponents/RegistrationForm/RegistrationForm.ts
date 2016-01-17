@@ -5,12 +5,12 @@ import { Router, Location} from "angular2/router"
   templateUrl: '/PageComponents/RegistrationForm/RegistrationForm.html',
   selector: 'registration-form'
 })
-export class RegistrationForm implements AfterViewChecked {
+export class RegistrationForm implements AfterViewInit {
 
   constructor(private elementRef: ElementRef, private location: Location, private router: Router) {
   }
 
-  ngAfterViewChecked() {
+  ngAfterViewInit() {
     //work around
     // https://github.com/PolymerElements/paper-dialog-scrollable/issues/13
 
