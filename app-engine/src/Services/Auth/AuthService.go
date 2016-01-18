@@ -6,11 +6,10 @@ import (
 	"net/http"
 
 	"src/Services/Common"
+	"src/Services/User"
+	"appengine"
 )
 
-type LoginCredentials struct {
-
-}
 
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/auth"
@@ -24,10 +23,22 @@ func IntegrateRoutes(router *mux.Router) {
 
 func doLogin(w http.ResponseWriter, r *http.Request, getCred Common.FormDataDecoderFn) {
 
-	loginCredentials := new(LoginCredentials)
+	ctx := appengine.NewContext(r)
 
-	if err := getCred(loginCredentials); err != nil {
+	loginRequestUser := new(UserService.UserDTO)
+
+	if err := getCred(loginRequestUser); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	user, err := UserService.GetUserByUserName(ctx, loginRequestUser.UserName)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	if(user.UserName != loginRequestUser.UserName || user.Password != loginRequestUser.Password){
+		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		return
 	}
 
 	s := GetSecureCookieInst()

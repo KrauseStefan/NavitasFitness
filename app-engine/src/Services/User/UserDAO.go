@@ -19,7 +19,7 @@ var (
 type UserDTO struct {
 	UserName  string `json:"userName"`
 	Email     string `json:"email"`
-	password  string `datastore:"noindex"`
+	Password  string `json:"password",datastore:"noindex"`
 	NavitasId string `json:"navitasId"`
 	Id        string `json:"id",datastore:"-"`
 }
