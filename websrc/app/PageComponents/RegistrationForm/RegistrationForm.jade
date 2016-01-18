@@ -3,11 +3,26 @@ paper-dialog
   h2 Create User
   form
     paper-dialog-scrollable
-      paper-input(label="E-Mail", type="email")
-      paper-input(label="Repeat E-Mail", type="email")
-      paper-input(label="Password", type="password")
-      paper-input(label="Repeat Password", type="password")
-      paper-input(label="Student Id/Other Id", type="number")
+      paper-input-container(attr-for-value="")
+        label E-Mail
+        input(is="iron-input", type="email", [(ngModel)]="model.email")
+      {{model.email}}
+
+      paper-input-container(attr-for-value="")
+        label Repeat E-Mail
+        input(is="iron-input", type="email", [(ngModel)]="model.emailRepeat")
+
+      paper-input-container(attr-for-value="")
+        label Password
+        input(is="iron-input", type="password", [(ngModel)]="model.password")
+
+      paper-input-container(attr-for-value="")
+        label Repeat Password
+        input(is="iron-input", type="password", [(ngModel)]="model.passwordRepeat")
+
+      paper-input-container(attr-for-value="")
+        label Student Id/Other Id
+        input(is="iron-input", type="number", [(ngModel)]="model.navitasId")
 
   div.buttons
     // paper-button([routerLink]="['/', ['None'] ]") Cancel
