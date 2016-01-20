@@ -49,9 +49,10 @@ html
           'rxjs': { defaultExtension: 'js' }
         }
       });
-
-      System.import('app/boot').catch(console.log.bind(console));
-
+      HTMLImports.whenReady(function () {
+        System.import('app/boot').catch(console.log.bind(console));
+      });
+      // System.import('app/boot').catch(console.log.bind(console));
   body.fullbleed.layout.vertical
     app-component
 

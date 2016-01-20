@@ -1,12 +1,11 @@
 //(opened="true")
 paper-dialog
   h2 Create User
-  form
+  form((ngSubmit)="submit()", #heroForm="ngForm")
     paper-dialog-scrollable
       paper-input-container(attr-for-value="")
         label E-Mail
         input(is="iron-input", type="email", [(ngModel)]="model.email")
-      {{model.email}}
 
       paper-input-container(attr-for-value="")
         label Repeat E-Mail
@@ -22,9 +21,9 @@ paper-dialog
 
       paper-input-container(attr-for-value="")
         label Student Id/Other Id
-        input(is="iron-input", type="number", [(ngModel)]="model.navitasId")
+        input(is="iron-input", [(ngModel)]="model.navitasId")
 
   div.buttons
     // paper-button([routerLink]="['/', ['None'] ]") Cancel
-    paper-button((click)="cancel()") Cancel
-    paper-button.button.primary Create
+    paper-button((click)="close()") Cancel
+    paper-button.button.primary((click)="submit()") Create

@@ -22,6 +22,9 @@ type BlogEntry struct {
 	Id      string `datastore:"-"`
 }
 
+func (blogPost BlogEntry) hasId() bool {
+	return len(blogPost.Id) > 0
+}
 const BLOG_KIND = "BlogEntry"
 const BLOG_PARENT_STRING_ID = "default_blogentry"
 
@@ -74,38 +77,34 @@ func blogEntryGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func blogEntryPut(w http.ResponseWriter, r *http.Request) {
-	c := appengine.NewContext(r)
-	var b BlogEntry
+	ctx := appengine.NewContext(r)
+	var blog BlogEntry
 	var key *datastore.Key
-
-	//	if u := user.Current(c); u != nil {
-	//		b.Author = u.String()
-	//	}
 
 	fmt.Print("content: ", r.Body)
 
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&b)
+	err := decoder.Decode(&blog)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if len(b.Id) == 0 {
-		key = datastore.NewIncompleteKey(c, BLOG_KIND, blogCollectionParentKey(c))
+	if blog.hasId() {
+		key = blogIntIDToKeyInt64(ctx, blog.Id)
 	} else {
-		key = blogIntIDToKeyInt64(c, b.Id)
+		key = datastore.NewIncompleteKey(ctx, BLOG_KIND, blogCollectionParentKey(ctx))
 	}
-	b.Date = time.Now()
-	b.Author = "skk"
+	blog.Date = time.Now()
+	blog.Author = "skk" //TODO remove static user
 
-	key, err = datastore.Put(c, key, &b)
+	key, err = datastore.Put(ctx, key, &blog)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if _, err := Common.WriteJSON(w, b); err != nil {
+	if _, err := Common.WriteJSON(w, blog); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

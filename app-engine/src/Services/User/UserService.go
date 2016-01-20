@@ -4,13 +4,11 @@ import (
 	"net/http"
 
 	"appengine"
-	"appengine/datastore"
-
-	"encoding/json"
 
 	"github.com/gorilla/mux"
 
 	"src/Services/Common"
+	"encoding/json"
 )
 
 func IntegrateRoutes(router *mux.Router) {
@@ -23,10 +21,10 @@ func IntegrateRoutes(router *mux.Router) {
 		HandlerFunc(userGet)
 
 	router.
-		Methods("PUT").
+		Methods("POST").
 		Path(path).
-		Name("PersistUserInfo").
-		HandlerFunc(userPut)
+		Name("CreateUserInfo").
+		HandlerFunc(userPost)
 
 }
 
@@ -34,7 +32,7 @@ func userGet(w http.ResponseWriter, r *http.Request) {
 	userName := "name"
 	ctx := appengine.NewContext(r)
 
-	userDto, err := GetUserByUserName(ctx, userName)
+	userDto, err := GetUserByEmail(ctx, userName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -46,26 +44,22 @@ func userGet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func userPut(w http.ResponseWriter, r *http.Request) {
+func userPost(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
-	var user UserDTO
-	var key *datastore.Key
+	user := &UserDTO{}
+
+//	user.Email = "test"
+//	user.Password = "test"
+//	user.NavitasId = "test"
 
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&user)
+	err := decoder.Decode(user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if user.HasId() {
-		CreateUser(ctx, &user)
-	} else {
-		UpdateUser(ctx, &user)
-	}
-
-	key, err = datastore.Put(ctx, key, &user)
-	if err != nil {
+	if err := CreateUser(ctx, user); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

@@ -52,14 +52,14 @@ type CollectionParentKeyGetter func(c appengine.Context) *datastore.Key
 type Int64KeyGetter func(c appengine.Context, id string) *datastore.Key
 
 func CollectionParentKeyGetFnGenerator(kind string, parentStringId string, keyId int64) CollectionParentKeyGetter {
-	return func(c appengine.Context) *datastore.Key {
-		return datastore.NewKey(c, kind, parentStringId, 0, nil)
+	return func(ctx appengine.Context) *datastore.Key {
+		return datastore.NewKey(ctx, kind, parentStringId, 0, nil)
 	}
 }
 
 func IntIDToKeyInt64(kind string, parentKeyGetter CollectionParentKeyGetter) Int64KeyGetter {
-	return func(c appengine.Context, id string) *datastore.Key {
+	return func(ctx appengine.Context, id string) *datastore.Key {
 		intId, _ := strconv.ParseInt(id, 10, 64)
-		return datastore.NewKey(c, kind, "", intId, parentKeyGetter(c))
+		return datastore.NewKey(ctx, kind, "", intId, parentKeyGetter(ctx))
 	}
 }

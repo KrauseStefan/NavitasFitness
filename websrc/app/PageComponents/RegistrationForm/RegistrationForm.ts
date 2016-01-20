@@ -1,6 +1,8 @@
 import { Component, ElementRef, AfterViewInit, AfterContentInit, AfterViewChecked, OnInit } from "angular2/core"
-import {NgForm}    from 'angular2/common';
 import { Router, Location} from "angular2/router"
+// import "rxjs/observable/"
+
+import { UserService, UserDTO } from './UserService'
 
 export class RegistrationFormModel {
   email: string = ""
@@ -8,6 +10,14 @@ export class RegistrationFormModel {
   password: string = ""
   passwordRepeat: string = ""
   navitasId: string = ""
+
+  toUserDTO(): UserDTO {
+    return {
+      email: this.email,
+      password: this.password,
+      navitasId: this.navitasId
+    }
+  }
 }
 
 @Component({
@@ -17,15 +27,13 @@ export class RegistrationFormModel {
 export class RegistrationForm implements AfterViewInit {
 
   submitted = false;
-  model = new RegistrationFormModel(); //= {
-  //   email: 'test@mail.com',
-  //   emailRepeat: 'test@mail.com',
-  //   password: '1234567',
-  //   passwordRepeat: '1234567',
-  //   navitasId: '1234567'
-  // }
+  model = new RegistrationFormModel();
 
-  constructor(private elementRef: ElementRef, private location: Location, private router: Router) {
+  constructor(
+    private elementRef: ElementRef,
+    private location: Location,
+    private router: Router,
+    private userService: UserService) {
   }
 
   ngAfterViewInit() {
@@ -46,11 +54,14 @@ export class RegistrationForm implements AfterViewInit {
     return this.elementRef.nativeElement.getElementsByTagName('paper-dialog')[0];
   }
 
-  onSubmit() {
-    this.submitted = true;
+  submit() {
+    this.userService.createUser(this.model.toUserDTO()).subscribe(()=>{}, ()=>{}, ()=>{
+      this.model = new RegistrationFormModel();
+      this.close();
+    });
   }
 
-  cancel() {
+  close() {
     //hack until aux routes gets fixed
     const base = this.location.path().split(/[\/()]/g).filter(i => i !== '')[0]
     this.router.navigateByUrl(`/${base}`);
@@ -58,4 +69,7 @@ export class RegistrationForm implements AfterViewInit {
     this.getDialogElement().close();
   }
 
+  getDebugModel() {
+    JSON.stringify(this.model, null, 2)
+  }
 }

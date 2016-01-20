@@ -31,12 +31,12 @@ func doLogin(w http.ResponseWriter, r *http.Request, getCred Common.FormDataDeco
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	user, err := UserService.GetUserByUserName(ctx, loginRequestUser.UserName)
+	user, err := UserService.GetUserByEmail(ctx, loginRequestUser.Email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	if(user.UserName != loginRequestUser.UserName || user.Password != loginRequestUser.Password){
+	if(user.Email != loginRequestUser.Email || user.Password != loginRequestUser.Password){
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}

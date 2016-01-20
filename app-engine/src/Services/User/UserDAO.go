@@ -8,30 +8,31 @@ import (
 
 	"errors"
 	"src/Services/Common"
+	"time"
 )
 
 var (
-	userHasIdError         = errors.New("Cannot create new user with id")
+	userHasIdError         = errors.New("Cannot create new user, Id must be nil")
 	userAlreadyExistsError = errors.New("Cannot update an already existing user")
 	userNotFoundError      = errors.New("User does not exist in datastore")
 )
 
 type UserDTO struct {
-	UserName  string `json:"userName"`
-	Email     string `json:"email"`
-	Password  string `json:"password",datastore:"noindex"`
-	NavitasId string `json:"navitasId"`
-	Id        string `json:"id",datastore:"-"`
+	Email     	string 		`json:"email"`
+	Password  	string 		`json:"password",datastore:",noindex"`
+	NavitasId 	string 		`json:"navitasId"`
+	CreatedDate	time.Time	`json:"createdDate"`
+	Id        	string 		`json:"id",datastore:"-"`
 }
 
-func (user UserDTO) HasId() bool {
-	return len(user.Id) == 0
+func (user UserDTO) hasId() bool {
+	return len(user.Id) > 0
 }
 
 const USER_KIND = "User"
-const PARENT_STRING_ID = "default_user"
+const USER_PARENT_STRING_ID = "default_user"
 
-var userCollectionParentKey = Common.CollectionParentKeyGetFnGenerator(USER_KIND, PARENT_STRING_ID, 0)
+var userCollectionParentKey = Common.CollectionParentKeyGetFnGenerator(USER_KIND, USER_PARENT_STRING_ID, 0)
 var userIntIDToKeyInt64 = Common.IntIDToKeyInt64(USER_KIND, userCollectionParentKey)
 
 func GetUserById(ctx appengine.Context, Id string) (*UserDTO, error) {
@@ -47,10 +48,10 @@ func GetUserById(ctx appengine.Context, Id string) (*UserDTO, error) {
 	return &user, nil
 }
 
-func GetUserByUserName(ctx appengine.Context, userName string) (*UserDTO, error) {
+func GetUserByEmail(ctx appengine.Context, email string) (*UserDTO, error) {
 	q := datastore.NewQuery(USER_KIND).
 		Ancestor(userCollectionParentKey(ctx)).
-		Filter("UserName=", userName).
+		Filter("Email=", email).
 		Limit(1)
 
 	userDtoList := make([]UserDTO, 0, 1)
@@ -71,51 +72,29 @@ func GetUserByUserName(ctx appengine.Context, userName string) (*UserDTO, error)
 
 func CreateUser(ctx appengine.Context, user *UserDTO) error {
 
-	if user.HasId() {
+	if user.hasId() {
 		return userHasIdError
 	}
 
-	if _, err := GetUserById(ctx, user.Id); err != userNotFoundError {
-		if err != nil {
-			return err
-		}
-		return userAlreadyExistsError
+	key := datastore.NewIncompleteKey(ctx, USER_KIND, userCollectionParentKey(ctx))
+	newKey, err := datastore.Put(ctx, key, user)
+	if  err != nil {
+		return err
 	}
 
-	putUser(ctx, user)
+	user.Id = strconv.FormatInt(newKey.IntID(), 10)
 
 	return nil
 }
 
 //TODO: figure out if this should be possible
-func UpdateUser(ctx appengine.Context, user *UserDTO) error {
-
-	if _, err := GetUserById(ctx, user.Id); err == nil {
-		return err
-	}
-
-	putUser(ctx, user)
-
-	return nil
-}
-
-func putUser(ctx appengine.Context, user *UserDTO) (*datastore.Key, error) {
-	var (
-		err error
-		key *datastore.Key
-	)
-
-	if user.HasId() {
-		key = datastore.NewIncompleteKey(ctx, USER_KIND, userCollectionParentKey(ctx))
-	} else {
-		key = userIntIDToKeyInt64(ctx, user.Id)
-	}
-
-	if key, err = datastore.Put(ctx, key, &user); err != nil {
-		return nil, err
-	}
-
-	user.Id = strconv.FormatInt(key.IntID(), 10)
-
-	return key, nil
-}
+//func UpdateUser(ctx appengine.Context, user *UserDTO) error {
+//
+//	if _, err := GetUserById(ctx, user.Id); err == nil {
+//		return err
+//	}
+//
+//	putUser(ctx, user)
+//
+//	return nil
+//}
