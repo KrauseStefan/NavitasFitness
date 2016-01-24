@@ -1,33 +1,32 @@
-import {Component} from "angular2/core"
-import {HTTP_PROVIDERS} from "angular2/http"
-import {CkEditorComponent} from "../../Components/CkEditor/CkEditor"
-import {BlogPostsService, BlogEntryDTO} from "../Blog/BlogPostsService"
 
-@Component({
-  selector: 'main-page',
-  templateUrl: '/PageComponents/MainPage/MainPage.html',
-  directives: [CkEditorComponent]
-})
+import {BlogPostsService, BlogEntryDTO} from "../Blog/BlogPostsService"
+import "../../Components/CkEditor/CkEditor"
+
 export class MainPage {
 
-  public entry: BlogEntry = new BlogEntry();
+  public entry: BlogEntry = new BlogEntry({
+    Author: "",
+    Content: "",
+    Date: "",
+    Id: null
+  });
 
   constructor(public blogPostsService: BlogPostsService) {
     blogPostsService.getBlogEntries()
-      .subscribe(blogEntries => {
-        this.entry = new BlogEntry(blogEntries[0]);
-      });
+      .then(blogEntries => this.entry = new BlogEntry(blogEntries[0]));
   }
 
   saveEntry(entry: BlogEntry) {
     this.blogPostsService.saveBlogEntry(entry.blogEntry)
-      .subscribe(
-      () => { }, //onNext
-      () => { }, //onError
-      () => entry.enabled = false //onCompleate
-      )
+      .then(() => entry.enabled = false)
   }
 }
+
+angular.module('NavitasFitness')
+  .component('mainPage', {
+    templateUrl: '/PageComponents/MainPage/MainPage.html',
+    controller: MainPage
+  });
 
 export class BlogEntry {
 

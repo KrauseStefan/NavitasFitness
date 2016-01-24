@@ -1,20 +1,15 @@
-import {Component} from "angular2/core"
-import {HTTP_PROVIDERS} from "angular2/http"
+/// <reference path=".../../../../../typings/angularjs/angular.d.ts"/>
+
 import {CkEditorComponent} from "../../Components/CkEditor/CkEditor"
 import {BlogPostsService, BlogEntryDTO} from "./BlogPostsService"
 
-@Component({
-  selector: 'Blog',
-  templateUrl: '/PageComponents/Blog/Blog.html',
-  directives: [CkEditorComponent]
-})
 export class Blog {
 
   public entries: BlogEntry[] = [];
 
   constructor(public blogPostsService: BlogPostsService) {
     blogPostsService.getBlogEntries()
-      .subscribe(blogEntries => {
+      .then(blogEntries => {
         this.entries = blogEntries.map(blogEntry => {
           return new BlogEntry(blogEntry);
         });
@@ -29,20 +24,13 @@ export class Blog {
 
   saveEntry(entry: BlogEntry) {
     this.blogPostsService.saveBlogEntry(entry.blogEntry)
-      .subscribe(
-      () => { }, //onNext
-      () => { }, //onError
-      () => entry.enabled = false //onCompleate
-      )
+      .then(() => entry.enabled = false)
   }
 
   deleteEntry(entry: BlogEntry) {
     this.blogPostsService.deleteBlogEntry(entry.blogEntry)
-      .subscribe(
-      () => { }, //onNext
-      () => { }, //onError
-      () => {
-        const index = this.entries.indexOf(entry) //onCompleate
+      .then(() => {
+        const index = this.entries.indexOf(entry);
         this.entries.splice(index, 1);
       })
   }
@@ -57,3 +45,9 @@ export class BlogEntry {
     this.blogEntry = blogEntry
   }
 }
+
+angular.module('NavitasFitness')
+  .component('blog', {
+    templateUrl: '/PageComponents/Blog/Blog.html',
+    controller: Blog
+  });

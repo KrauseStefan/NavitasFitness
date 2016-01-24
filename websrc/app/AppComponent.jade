@@ -1,11 +1,12 @@
-paper-header-panel(mode="standard")
-  paper-toolbar
-    h1 Navitas Fitness
-    paper-tabs(selected="0")
-      paper-tab([routerLink]="['MainPage']") Forside
-      paper-tab([routerLink]="['Blog']") Blog
-      paper-tab([routerLink]="['/', ['Modal'] ]") Registrer
-
-  router-outlet
-
-router-outlet(name="modal")
+div(layout="column" layout-fill)
+  md-toolbar
+    .md-toolbar-tools
+      h1 Navitas Fitness
+      // span(flex)
+      // md-button right bar button
+    md-tabs
+      md-tab(ui-sref="MainPage") Forside
+      md-tab(ui-sref="Blog") Blog
+      md-tab(ng-click="$ctrl.openRegistrationDialog($event)") Registrer
+  md-content
+    ui-view

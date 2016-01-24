@@ -1,29 +1,29 @@
 /// <reference path="../../../typings/ckeditor/ckeditor"/>
+/// <reference path=".../../../../../typings/angularjs/angular.d.ts"/>
 
-import { Component, ElementRef, Input, Output, OnChanges, SimpleChange, EventEmitter } from 'angular2/core'
+export class CkEditorComponent {
 
-@Component({
-  selector: 'ck-editor',
-  templateUrl: '/Components/CkEditor/CkEditor.html'
-})
-export class CkEditorComponent implements OnChanges {
-
-  @Input() content: string = '';
-  @Input() isEditable: boolean = false;
-
-  @Output() contentChange = new EventEmitter<string>();
-
+  content: string;
+  isEditable: boolean = false;
+  unsubscribe: Function = angular.noop;
   editor: CKEDITOR.editor = null;
 
-  constructor(private elementRef: ElementRef) { }
+  constructor(private $scope: angular.IScope, private $element: JQuery) {
+    this.$scope.$watch('$ctrl.isEditable', () => {
+      this.isEditable ? this.enableEditor() : this.disableEditor();
+    });
+  }
 
   enableEditor() {
     // this.editor = CKEDITOR.replace(<any>this.getEditordiv());
+    this.unsubscribe();
+    this.unsubscribe = angular.noop
+
     this.getEditordiv().contentEditable = 'true';
+
     this.editor = CKEDITOR.inline(<any>this.getEditordiv());
     this.editor.on('change', (event) => {
-      this.content = event.editor.getData();
-      this.contentChange.next(this.content)
+      this.$scope.$apply(() => this.content = event.editor.getData());
     });
   }
 
@@ -33,28 +33,18 @@ export class CkEditorComponent implements OnChanges {
       this.editor = null;
       this.getEditordiv().contentEditable = 'false';
     }
+
+    this.unsubscribe = this.$scope.$watch('$ctrl.content', ((content: string) => {
+      this.updateContent(content);
+    }));
   }
 
-  getEditordiv(): HTMLDivElement {
-    return this.elementRef.nativeElement.querySelector('.editorContent');
+  getEditordiv() {
+    return <HTMLDivElement> this.$element[0].querySelector('.editorContent');
   }
 
-  updateContent(content) {
+  updateContent(content: string) {
     this.getEditordiv().innerHTML = content;
-  }
-
-  public ngOnChanges(changes: { [key: string]: SimpleChange }) {
-    // for (const key in changes) {
-    //   console.log(`onChanges - ${key} =`, changes[key].currentValue);
-    // }
-
-    if (changes['content'] && !this.isEditable) {
-      this.updateContent(changes['content'].currentValue);
-    }
-
-    if (changes['isEditable']) {
-      changes['isEditable'].currentValue ? this.enableEditor() : this.disableEditor();
-    }
   }
 
   resetEditor() {
@@ -62,3 +52,12 @@ export class CkEditorComponent implements OnChanges {
   }
 
 }
+angular.module('NavitasFitness')
+  .component('ckEditor', {
+    template: '<div class="editorContent"></div>',
+    controller: CkEditorComponent,
+    bindings: {
+      content: '=',
+      isEditable: '='
+    }
+  });

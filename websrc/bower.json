@@ -12,15 +12,7 @@
     "tests"
   ],
   "dependencies": {
-    "ckeditor": "~4.5.4",
-    "paper-header-panel": "PolymerElements/paper-header-panel#~1.0.5",
-    "paper-card": "PolymerElements/paper-card#~1.0.8",
-    "paper-button": "PolymerElements/paper-button#~1.0.11",
-    "paper-tabs": "PolymerElements/paper-tabs#~1.2.4",
-    "paper-dialog": "PolymerElements/paper-dialog#~1.0.3",
-    "paper-input": "git@github.com:KrauseStefan/paper-input.git#Feature-support-dynamical-creation",
-    "paper-dialog-scrollable": "https://github.com/PolymerElements/paper-dialog-scrollable.git#issue-22",
-    "paper-menu-button": "PolymerElements/paper-menu-button#~1.0.4"
+    "ckeditor": "~4.5.4"
   },
   "moduleType": [
     "es6"

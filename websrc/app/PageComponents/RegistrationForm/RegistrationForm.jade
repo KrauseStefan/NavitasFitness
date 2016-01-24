@@ -1,29 +1,36 @@
-//(opened="true")
-paper-dialog
-  h2 Create User
-  form(#heroForm="ngForm")
-    paper-dialog-scrollable
-      paper-input-container(attr-for-value="")
+md-dialog
+  md-toolbar.md-toolbar-tools
+    h2 Create User
+    span(flex)
+    md-button.md-icon-button(ng-click="cancel()")
+      md-icon(aria-label="Close dialog") close
+  md-dialog-content.md-dialog-content
+    div
+      md-input-container
         label E-Mail
-        input(is="iron-input", type="email", [(ngModel)]="model.email")
+        input(type="email", ng-model="model.email")
 
-      paper-input-container(attr-for-value="")
+    div
+      md-input-container
         label Repeat E-Mail
-        input(is="iron-input", type="email", [(ngModel)]="model.emailRepeat")
+        input(type="email", ng-model="model.emailRepeat")
 
-      paper-input-container(attr-for-value="")
+    div
+      md-input-container
         label Password
-        input(is="iron-input", type="password", [(ngModel)]="model.password")
+        input(type="password", ng-model="model.password")
 
-      paper-input-container(attr-for-value="")
+    div
+      md-input-container
         label Repeat Password
-        input(is="iron-input", type="password", [(ngModel)]="model.passwordRepeat")
+        input(type="password", ng-model="model.passwordRepeat")
 
-      paper-input-container(attr-for-value="")
+    div
+      md-input-container
         label Student Id/Other Id
-        input(is="iron-input", [(ngModel)]="model.navitasId")
+        input(ng-model="model.navitasId")
 
-  div.buttons
-    // paper-button([routerLink]="['/', ['None'] ]") Cancel
-    paper-button((click)="close()") Cancel
-    paper-button.button.primary((click)="submit()") Create
+  md-dialog-actions
+    md-button(ng-click="cancel()") Cancel
+    md-button.md-primary(ng-click="submit()") Create
+

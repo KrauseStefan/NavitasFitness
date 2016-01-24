@@ -1,32 +1,34 @@
-import {provide, Injectable} from "angular2/core"
-import {Http, Response} from "angular2/http"
-import {Observable} from "rxjs/Observable"
-import "rxjs/add/operator/map"
+/// <reference path=".../../../../../typings/angularjs/angular.d.ts"/>
 
-@Injectable()
+
+import "../../Components/CkEditor/CkEditor"
+
 export class BlogPostsService {
 
   private serviceUrl = 'rest/blogEntry'
 
-  constructor(private http: Http) { }
+  constructor(private $http: angular.IHttpService) { }
 
-  public getBlogEntries(): Observable<BlogEntryDTO[]> {
-    return this.http.get(this.serviceUrl)
-      .map((res: Response) => (<BlogEntryDTO[]>res.json()));
+  public getBlogEntries(): angular.IPromise<BlogEntryDTO[]> {
+    return this.$http
+      .get(this.serviceUrl)
+      .then((res: any) => {
+        return (<BlogEntryDTO[]>res.data)
+      });
   }
 
   saveBlogEntry(blogEntry: BlogEntryDTO) {
     const data = JSON.stringify(blogEntry);
 
-    return this.http.put(this.serviceUrl, data);
+    return this.$http.put(this.serviceUrl, data);
   }
 
   deleteBlogEntry(blogEntry: BlogEntryDTO) {
-    return this.http.delete(this.serviceUrl + `?id=${blogEntry.Id}`)
+    return this.$http.delete(this.serviceUrl + `?id=${blogEntry.Id}`)
   }
 }
 
-provide('blogPostsService', { useClass: BlogPostsService });
+angular.module('NavitasFitness').service('blogPostsService', BlogPostsService)
 
 export class BlogEntryDTO {
   Author: String

@@ -1,9 +1,6 @@
-paper-card
-  .card-content
-    ck-editor([(content)]="entry.blogEntry.Content", [isEditable]="entry.enabled")
-  .card-actions
-    paper-button((click)="entry.enabled = !entry.enabled", *ngIf="!entry.enabled") edit
-    paper-button((click)="saveEntry(entry)", *ngIf="entry.enabled") save
-
-
-
+md-card
+  md-content
+    ck-editor(content="$ctrl.entry.blogEntry.Content", is-editable="$ctrl.entry.enabled")
+  md-card-actions
+    md-button(ng-click="$ctrl.entry.enabled = !$ctrl.entry.enabled", ng-if="!$ctrl.entry.enabled") edit
+    md-button(ng-click="$ctrl.saveEntry($ctrl.entry)", ng-if="$ctrl.entry.enabled") save

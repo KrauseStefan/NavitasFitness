@@ -11,48 +11,22 @@ html
     link(rel="shortcut icon" href="/favicon.ico")
 
     script(src="/libs/es6-shim/es6-shim.js")
-    script(src="/libs/systemjs/dist/system-polyfills.js")
-    script(src="/libs/angular2/bundles/angular2-polyfills.js")
-    script(src="/libs/webcomponentsjs/webcomponents-lite.js")
-    script.
-      //https://github.com/PolymerLabs/polymer-experiments/blob/master/patch-dom.html
-      //https://github.com/Polymer/polymer/issues/2526
-      window.Polymer = window.Polymer || {};
-      window.Polymer.dom = 'shadow'; //'shady';
 
-    link(rel="import" href="/libs/paper-button/paper-button.html")
-    link(rel="import" href="/libs/paper-card/paper-card.html")
-    link(rel="import" href="/libs/paper-tabs/paper-tabs.html")
-    link(rel="import" href="/libs/paper-header-panel/paper-header-panel.html")
-    link(rel="import" href="/libs/paper-dialog-scrollable/paper-dialog-scrollable.html")
-    link(rel="import" href="/libs/paper-dialog/paper-dialog.html")
-    link(rel="import" href="/libs/paper-input/paper-input.html")
+    script(src="/libs/angular/angular.js")
+    script(src="/libs/angular-aria/angular-aria.js")
+    script(src="/libs/angular-animate/angular-animate.js")
+    script(src="/libs/angular-material/angular-material.js")
+    script(src="/libs/angular-ui-router/build/angular-ui-router.js")
 
-    script(src="/libs/systemjs/dist/system.src.js")
-    script(src="/libs/angular2/bundles/angular2.dev.js")
-    script(src="/libs/angular2/bundles/http.dev.js")
-    script(src="/libs/angular2/bundles/router.dev.js")
     script(src="/libs/ckeditor/ckeditor.js")
 
+    script(src="/app.js")
+
+    link(href="https://fonts.googleapis.com/icon?family=Material+Icons", rel="stylesheet")
+    
+    link(rel="stylesheet" href="/libs/angular-material/angular-material.min.css")
     link(rel="stylesheet" href="/styles/main.css")
 
-    script.
-      System.config({
-        defaultExtension: 'js',
-
-        map: {
-          rxjs: 'libs/rxjs'
-        },
-
-        packages: {
-          'app': { defaultExtension: 'js' },
-          'rxjs': { defaultExtension: 'js' }
-        }
-      });
-      HTMLImports.whenReady(function () {
-        System.import('app/boot').catch(console.log.bind(console));
-      });
-      // System.import('app/boot').catch(console.log.bind(console));
-  body.fullbleed.layout.vertical
+  body(ng-app="NavitasFitness")
     app-component
 

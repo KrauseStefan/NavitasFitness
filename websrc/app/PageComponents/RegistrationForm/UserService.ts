@@ -1,27 +1,23 @@
-import { provide, Injectable } from "angular2/core"
-import { Http, Response }  from "angular2/http"
-import {Observable} from "rxjs/Observable"
-import "rxjs/add/operator/map"
+/// <reference path=".../../../../../typings/angularjs/angular.d.ts"/>
 
-@Injectable()
 export class UserService {
 
   private serviceUrl = 'rest/user'
 
-  constructor(private http: Http) { }
+  constructor(private $http: angular.IHttpService) { }
 
-  createUser(user: UserDTO): Observable<UserDTO> {
+  createUser(user: UserDTO): angular.IPromise<UserDTO> {
     console.log(user);
 
-    const data = JSON.stringify(user);
-    return this.http.post(this.serviceUrl, data)
-      .map((res: Response) => (<UserDTO>res.json()))
-
+    return this.$http.post(this.serviceUrl, user)
+      .then((res) => (<UserDTO>res.data));
   }
 
   createUserSession(user: UserDTO) {
   }
 }
+
+angular.module('NavitasFitness').service('userService', UserService);
 
 export class UserDTO {
   email: string
