@@ -21,7 +21,8 @@
     "gulp-sass": "^2.1.1",
     "gulp-sourcemaps": "^1.5.2",
     "gulp-tslint": "^3.2.0",
-    "gulp-typescript": "^2.8.1",
-    "typescript": "^1.6.2"
+    "gulp-typescript": "^2.10.0",
+    "ts-loader": "^0.8.0",
+    "typescript": "^1.7.5"
   }
 }

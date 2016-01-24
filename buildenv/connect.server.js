@@ -1,10 +1,10 @@
 'use strict';
 let ConnectServer = function(conf) {
+  const connect = require('gulp-connect'),
+    modRewrite = require('connect-modrewrite'),
+    fs = require('fs-extra');
 
-  function connectFn() {
-    const connect = require('gulp-connect'),
-      modRewrite = require('connect-modrewrite'),
-      fs = require('fs-extra');
+  function startConnectServer() {
 
     const libPath = '/libs/';
 
@@ -43,7 +43,7 @@ let ConnectServer = function(conf) {
     connect.server({
       root: ['/'],
       port: 9000,
-      // livereload: true,
+      livereload: true,
       middleware: function (connect, opt) {
         let proxy = modRewrite([
           '^/(.*)$ http://localhost:8080/$1 [P]'
@@ -55,7 +55,8 @@ let ConnectServer = function(conf) {
   }
 
   return {
-    connect: connectFn
+    startConnectServer: startConnectServer,
+    reload: connect.reload
   };
 };
 

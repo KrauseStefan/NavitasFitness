@@ -10,6 +10,7 @@ const config = require( './buildenv/gulpfile.config'),
     gulpTslint = require('gulp-tslint'),
     sourcemaps = require('gulp-sourcemaps'),
     gulpJade = require('gulp-jade'),
+    webpack = require('webpack'),
 
     del = require('del'),
     spawn = require('child_process').spawn,
@@ -53,16 +54,20 @@ function tsLint() {
 /**
  * Compile TypeScript and include references to library and app .d.ts files.
  */
+function compileTs(callback) {
 
-function compileTs() {
-  const tsResult = tsProject.src()
-    .pipe(sourcemaps.init())
-    .pipe(ts(tsProject));
+  webpack(require('./websrc/webpack.config'), function(err, stats) {
+      callback();
+  });
 
-  tsResult.dts.pipe(gulp.dest(config.outputPath));
-  return tsResult.js
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest(config.outputPath));
+  // const tsResult = tsProject.src()
+  //   .pipe(sourcemaps.init())
+  //   .pipe(ts(tsProject));
+
+  // tsResult.dts.pipe(gulp.dest(config.outputPath));
+  // return tsResult.js
+  //   .pipe(sourcemaps.write('.'))
+  //   .pipe(gulp.dest(config.outputPath));
 }
 
 gulp.task(clean);
@@ -77,8 +82,8 @@ function watch() {
   //   config.allTypeScript: buildTs
   // }
   let conf = new Map();
-  conf.set(config.allTypeScript, buildTs);
-  conf.set(config.views, jade);
+  conf.set(config.allTypeScript, gulp.series(buildTs, liveReload));
+  conf.set(config.views, gulp.series(jade, liveReload));
   conf.set(config.styles, sass);
 
   conf.forEach((value, key) => {
@@ -86,6 +91,11 @@ function watch() {
   });
 
   // return gulp.watch([config.allTypeScript, config.views, config.styles], build);
+}
+
+function liveReload(done) {
+  connectServer.reload();
+  done();
 }
 
 function jade() {
@@ -141,7 +151,7 @@ function build(done) {
 
 gulp.task(connect);
 function connect() {
-  return connectServer.connect(config);
+  return connectServer.startConnectServer();
 }
 
 gulp.task(sass);
