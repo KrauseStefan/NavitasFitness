@@ -1,26 +1,25 @@
 /// <reference path=".../../../../../typings/angularjs/angular.d.ts"/>
+/// <reference path=".../../../../../typings/angular-material/angular-material"/>
 
-import { UserService, UserDTO } from './UserService'
-import './UserService'
+import { UserService, UserDTO } from '../UserService'
 
-export class RegistrationFormModel {
-  email: string = ""
-  emailRepeat: string = ""
-  password: string = ""
-  passwordRepeat: string = ""
-  navitasId: string = ""
+export class RegistrationFormModel implements UserDTO {
+  email: string = "";
+  emailRepeat: string = "";
+  password: string = "";
+  passwordRepeat: string = "";
+  navitasId: string = "";
 
   toUserDTO(): UserDTO {
     return {
       email: this.email,
       password: this.password,
       navitasId: this.navitasId
-    }
+    };
   }
 }
 
 export class RegistrationForm {
-
 
   constructor(
     private $scope: any,

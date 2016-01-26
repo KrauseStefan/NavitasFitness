@@ -5,6 +5,7 @@
 import "./PageComponents/MainPage/MainPage"
 import "./PageComponents/Blog/Blog"
 import { RegistrationForm } from "./PageComponents/RegistrationForm/RegistrationForm"
+import { LoginForm } from "./PageComponents/LoginForm/LoginForm"
 
 export class AppComponent {
 
@@ -20,6 +21,19 @@ export class AppComponent {
       templateUrl: '/PageComponents/RegistrationForm/RegistrationForm.html',
       targetEvent: event,
       controller: RegistrationForm,
+      parent: angular.element(document.body),
+      clickOutsideToClose: true,
+      fullscreen: false
+    });
+
+  }
+  
+  openLoginDialog(event: MouseEvent) {
+
+    this.$mdDialog.show({
+      templateUrl: '/PageComponents/LoginForm/LoginForm.html',
+      targetEvent: event,
+      controller: LoginForm,
       parent: angular.element(document.body),
       clickOutsideToClose: true,
       fullscreen: false

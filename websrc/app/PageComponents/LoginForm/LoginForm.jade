@@ -1,6 +1,6 @@
 md-dialog
   md-toolbar.md-toolbar-tools
-    h2.md-display-2 Create User
+    h2.md-display-2 Login
     span(flex)
     md-button.md-icon-button(ng-click="cancel()")
       md-icon(aria-label="Close dialog") close
@@ -12,25 +12,10 @@ md-dialog
 
     div
       md-input-container
-        label Repeat E-Mail
-        input(type="email", ng-model="model.emailRepeat")
-
-    div
-      md-input-container
         label Password
         input(type="password", ng-model="model.password")
 
-    div
-      md-input-container
-        label Repeat Password
-        input(type="password", ng-model="model.passwordRepeat")
-
-    div
-      md-input-container
-        label Student Id/Other Id
-        input(ng-model="model.navitasId")
-
   md-dialog-actions
     md-button(ng-click="cancel()") Cancel
-    md-button.md-primary(ng-click="submit()") Create
+    md-button.md-primary(ng-click="submit()") Login
 

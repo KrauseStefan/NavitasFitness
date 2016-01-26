@@ -9,3 +9,4 @@ angular.module( 'NavitasFitness', [ 'ngMaterial', 'ui.router' ] )
   });
   
 import './AppComponent';
+import './PageComponents/UserService'
