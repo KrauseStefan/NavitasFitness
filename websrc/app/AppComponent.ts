@@ -14,16 +14,17 @@ export class AppComponent {
 
   }
 
-  openRegistrationDialog(event) {
+  openRegistrationDialog(event: MouseEvent) {
+
     this.$mdDialog.show({
-      controller: RegistrationForm,
-      // controller: DialogController,
       templateUrl: '/PageComponents/RegistrationForm/RegistrationForm.html',
-      parent: angular.element(document.body),
       targetEvent: event,
+      controller: RegistrationForm,
+      parent: angular.element(document.body),
       clickOutsideToClose: true,
       fullscreen: false
-    })
+    });
+
   }
 }
 

@@ -1,12 +1,28 @@
-div(layout="column" layout-fill)
+.header-panel(layout="column", layout-fill)
   md-toolbar
     .md-toolbar-tools
-      h1 Navitas Fitness
-      // span(flex)
-      // md-button right bar button
-    md-tabs
+      h1.md-title Navitas Fitness
+      span(flex)
+      md-menu(md-offset="80 45")
+        md-button(ng-click="$mdOpenMenu()", md-no-ink="true")
+          span Menu
+          md-icon menu
+        md-menu-content
+          md-menu-item
+            md-button(ng-click="$ctrl.openRegistrationDialog($event)") 
+              md-icon assignment_ind
+              span Registrer
+          md-menu-item
+            md-button(ng-click="$ctrl.openRegistrationDialog($event)") 
+              md-icon lock_outline
+              span Login
+          md-menu-item
+            md-button(ng-click="$ctrl.openRegistrationDialog($event)") 
+              md-icon perm_identity
+              span My status
+
+    md-tabs(md-stretch-tabs="always")
       md-tab(ui-sref="MainPage") Forside
       md-tab(ui-sref="Blog") Blog
-      md-tab(ng-click="$ctrl.openRegistrationDialog($event)") Registrer
-  md-content
-    ui-view
+
+  ui-view
