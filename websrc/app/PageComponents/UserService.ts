@@ -12,7 +12,7 @@ export class UserService {
   }
 
   createUserSession(user: BaseUserDTO) {
-    return this.$http.put(`${this.serviceUrl}/createSession`, user)
+    return this.$http.post(`rest/auth/login`, user)
       .then((res) => (<UserDTO>res.data));
   }
   

@@ -48,10 +48,6 @@ func userPost(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 	user := &UserDTO{}
 
-//	user.Email = "test"
-//	user.Password = "test"
-//	user.NavitasId = "test"
-
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(user)
 	if err != nil {

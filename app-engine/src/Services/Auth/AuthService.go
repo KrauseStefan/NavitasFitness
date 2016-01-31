@@ -5,11 +5,28 @@ import (
 
 	"net/http"
 
-	"src/Services/Common"
 	"src/Services/User"
 	"appengine"
+	"errors"
+	"encoding/json"
 )
 
+const UserLoggedInSessionKey = "UserLoggedIn"
+const AdminLoggedInSessionKey = "AdminLoggedIn"
+
+
+type UserLogin struct {
+	Password	string `json:"password"`
+	Email			string `json:"email"`
+}
+
+func (ul UserLogin) hasValues() bool {
+	return len(ul.Email) > 0 && len(ul.Password) > 0
+}
+
+var (
+	invalidLoginError	= errors.New("Invalid login information, both password and email must be provided")
+)
 
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/auth"
@@ -18,34 +35,42 @@ func IntegrateRoutes(router *mux.Router) {
 		Methods("POST").
 		Path(path + "/login").
 		Name("loginUser").
-		HandlerFunc(Common.ParseFormDataWrap(doLogin))
+		HandlerFunc(doLogin)
 }
 
-func doLogin(w http.ResponseWriter, r *http.Request, getCred Common.FormDataDecoderFn) {
+func doLogin(w http.ResponseWriter, r *http.Request) {
 
 	ctx := appengine.NewContext(r)
 
-	loginRequestUser := new(UserService.UserDTO)
+	loginRequestUser := new(UserLogin)
 
-	if err := getCred(loginRequestUser); err != nil {
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(loginRequestUser); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if(!loginRequestUser.hasValues()) {
+		http.Error(w, invalidLoginError.Error(), http.StatusBadRequest)
+		return
 	}
 
 	user, err := UserService.GetUserByEmail(ctx, loginRequestUser.Email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	if(user.Email != loginRequestUser.Email || user.Password != loginRequestUser.Password){
+	if(user == nil || user.Password != loginRequestUser.Password){
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}
 
 	s := GetSecureCookieInst()
 
-	value := "someRandomKey" //TODO
+	value := UserLoggedInSessionKey
 
-	cookieName := "Session-Id"
+	cookieName := "Session-Key"
 
 	if encoded, err := s.Encode(cookieName, value); err == nil {
 		cookie := &http.Cookie{
@@ -55,5 +80,9 @@ func doLogin(w http.ResponseWriter, r *http.Request, getCred Common.FormDataDeco
 		}
 		http.SetCookie(w, cookie)
 	}
+
+}
+
+func isLoggedIn() {
 
 }
