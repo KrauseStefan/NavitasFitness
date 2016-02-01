@@ -23,6 +23,7 @@
     "gulp-tslint": "^3.2.0",
     "gulp-typescript": "^2.10.0",
     "ts-loader": "^0.8.0",
-    "typescript": "^1.7.5"
+    "typescript": "^1.7.5",
+    "webpack": "^1.12.12"
   }
 }
