@@ -9,6 +9,9 @@ import (
 	"appengine"
 	"errors"
 	"encoding/json"
+	"src/Services/Common"
+	"crypto/rand"
+	"encoding/hex"
 )
 
 const UserLoggedInSessionKey = "UserLoggedIn"
@@ -28,6 +31,19 @@ var (
 	invalidLoginError	= errors.New("Invalid login information, both password and email must be provided")
 )
 
+func generateUUID() (string, error) {
+	u := make([]byte, 16)
+	_, err := rand.Read(u)
+	if err != nil {
+		return "", err
+	}
+
+	u[8] = (u[8] | 0x80) & 0xBF // what does this do?
+	u[6] = (u[6] | 0x40) & 0x4F // what does this do?
+
+	return hex.EncodeToString(u), nil
+}
+
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/auth"
 
@@ -39,6 +55,12 @@ func IntegrateRoutes(router *mux.Router) {
 }
 
 func doLogin(w http.ResponseWriter, r *http.Request) {
+
+	var (
+		user 	*UserService.UserDTO
+		uuid 	string
+		err		error
+	)
 
 	ctx := appengine.NewContext(r)
 
@@ -55,7 +77,7 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := UserService.GetUserByEmail(ctx, loginRequestUser.Email)
+	user, err = UserService.GetUserByEmail(ctx, loginRequestUser.Email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -68,21 +90,28 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 
 	s := GetSecureCookieInst()
 
-	value := UserLoggedInSessionKey
-
 	cookieName := "Session-Key"
+	uuid, err = generateUUID()
 
-	if encoded, err := s.Encode(cookieName, value); err == nil {
+	if err != nil {
+		http.Error(w, "Error Generating UUID", http.StatusUnauthorized)
+		return
+	}
+
+	if encoded, err := s.Encode(cookieName, uuid); err == nil {
 		cookie := &http.Cookie{
 			Name:  cookieName,
 			Value: encoded,
-			Path:  "/rest/",
+			Path:  "/",
 		}
 		http.SetCookie(w, cookie)
 	}
 
-}
+	UserService.SetSessionUUID(ctx, user, uuid)
 
-func isLoggedIn() {
+	if _, err := Common.WriteJSON(w, user); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 }

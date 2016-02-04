@@ -1,4 +1,5 @@
 /// <reference path=".../../../typings/angularjs/angular"/>
+/// <reference path=".../../../typings/angularjs/angular-cookies"/>
 /// <reference path=".../../../typings/angular-material/angular-material"/>
 /// <reference path=".../../../typings/angular-ui-router/angular-ui-router"/>
 
@@ -6,13 +7,15 @@ import "./PageComponents/MainPage/MainPage"
 import "./PageComponents/Blog/Blog"
 import { RegistrationForm } from "./PageComponents/RegistrationForm/RegistrationForm"
 import { LoginForm } from "./PageComponents/LoginForm/LoginForm"
+import { UserService } from "./PageComponents/UserService"
 
 export class AppComponent {
 
   constructor(
     private $mdDialog: angular.material.IDialogService,
-    private $mdMedia: angular.material.IMedia) {
-
+    private $mdMedia: angular.material.IMedia,
+    private userService: UserService) {
+      
   }
 
   openRegistrationDialog(event: MouseEvent) {
@@ -40,6 +43,17 @@ export class AppComponent {
     });
 
   }
+  
+  logout() {
+    this.userService.logout().then(() => {
+      //TODO display a message
+    });
+  }
+  
+  isLoggedIn() {
+    return angular.isObject(this.userService.getLoggedinUser());
+  }
+  
 }
 
 angular.module('NavitasFitness')

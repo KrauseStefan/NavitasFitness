@@ -16,14 +16,14 @@ import (
 )
 
 type BlogEntry struct {
-	Author  string
-	Content string `datastore:",noindex"`
-	Date    time.Time
-	Id      string `datastore:"-"`
+	Key			string 		`json:"key",datastore:"-"`
+	Author	string 		`json:"author"`
+	Content	string 		`json:"content",datastore:",noindex"`
+	Date		time.Time	`json:"date"`
 }
 
 func (blogPost BlogEntry) hasId() bool {
-	return len(blogPost.Id) > 0
+	return len(blogPost.Key) > 0
 }
 const BLOG_KIND = "BlogEntry"
 const BLOG_PARENT_STRING_ID = "default_blogentry"
@@ -67,7 +67,7 @@ func blogEntryGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for i, key := range keys {
-		blogEntries[i].Id = strconv.FormatInt(key.IntID(), 10)
+		blogEntries[i].Key = strconv.FormatInt(key.IntID(), 10)
 	}
 
 	if _, err := Common.WriteJSON(w, blogEntries); err != nil {
@@ -91,7 +91,7 @@ func blogEntryPut(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if blog.hasId() {
-		key = blogIntIDToKeyInt64(ctx, blog.Id)
+		key = blogIntIDToKeyInt64(ctx, blog.Key)
 	} else {
 		key = datastore.NewIncompleteKey(ctx, BLOG_KIND, blogCollectionParentKey(ctx))
 	}

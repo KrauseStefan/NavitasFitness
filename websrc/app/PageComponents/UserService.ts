@@ -2,18 +2,48 @@
 
 export class UserService {
 
-  private serviceUrl = 'rest/user'
+  private userServiceUrl = 'rest/user';
+  private authServiceUrl = 'rest/auth';
 
-  constructor(private $http: angular.IHttpService) { }
+  private currentUser: UserDTO = null;
+
+
+  constructor(
+    private $http: angular.IHttpService,
+    private $cookies: angular.cookies.ICookiesService) {
+    
+      const cookieName = "Session-Key";
+      const sessionKey = $cookies.get(cookieName);
+      if(angular.isDefined(sessionKey)) {
+        this.getUserFromSessionData(sessionKey);
+      };
+      
+    }
 
   createUser(user: UserDTO): angular.IPromise<UserDTO> {
-    return this.$http.post(this.serviceUrl, user)
+    return this.$http.post(this.userServiceUrl, user)
       .then((res) => (<UserDTO>res.data));
   }
 
   createUserSession(user: BaseUserDTO) {
-    return this.$http.post(`rest/auth/login`, user)
-      .then((res) => (<UserDTO>res.data));
+    return this.$http.post(`${this.authServiceUrl}/login`, user)
+      .then((res) => {
+        this.currentUser = <UserDTO>res.data 
+        return (this.currentUser)
+      });
+  }
+
+  getUserFromSessionData(sessionKey: string) {
+    this.$http.get(`${this.userServiceUrl}`)
+      .then((res) => this.currentUser = <UserDTO>res.data )
+  }
+  
+  logout() {
+    return this.$http.post(`${this.authServiceUrl}/logout`, undefined);
+  }
+  
+  getLoggedinUser() {
+    return this.currentUser;
   }
   
 }

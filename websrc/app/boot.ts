@@ -1,7 +1,7 @@
 /// <reference path=".../../../typings/angularjs/angular.d.ts"/>
 /// <reference path=".../../../typings/angular-material/angular-material"/>
 
-angular.module( 'NavitasFitness', [ 'ngMaterial', 'ui.router' ] )
+angular.module( 'NavitasFitness', [ 'ngMaterial', 'ui.router', 'ngCookies' ] )
   .config(function($mdThemingProvider: angular.material.IThemingProvider) {
     $mdThemingProvider.theme('default')
       .primaryPalette('blue')

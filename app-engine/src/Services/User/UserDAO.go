@@ -12,22 +12,11 @@ import (
 )
 
 var (
-	userHasIdError         = errors.New("Cannot create new user, Id must be nil")
-	userAlreadyExistsError = errors.New("Cannot update an already existing user")
-	userNotFoundError      = errors.New("User does not exist in datastore")
+	userHasIdError					= errors.New("Cannot create new user, key must be nil")
+	userHasNoIDError				= errors.New("Cannot create new user, key must be defined")
+	userAlreadyExistsError	= errors.New("Cannot update an already existing user")
+	userNotFoundError				= errors.New("User does not exist in datastore")
 )
-
-type UserDTO struct {
-	Email     	string 		`json:"email"`
-	Password  	string 		`json:"password",datastore:",noindex"`
-	NavitasId 	string 		`json:"navitasId"`
-	CreatedDate	time.Time	`json:"createdDate"`
-	Id        	string 		`json:"id",datastore:"-"`
-}
-
-func (user UserDTO) hasId() bool {
-	return len(user.Id) > 0
-}
 
 const USER_KIND = "User"
 const USER_PARENT_STRING_ID = "default_user"
@@ -35,16 +24,38 @@ const USER_PARENT_STRING_ID = "default_user"
 var userCollectionParentKey = Common.CollectionParentKeyGetFnGenerator(USER_KIND, USER_PARENT_STRING_ID, 0)
 var userIntIDToKeyInt64 = Common.IntIDToKeyInt64(USER_KIND, userCollectionParentKey)
 
-func GetUserById(ctx appengine.Context, Id string) (*UserDTO, error) {
+type UserDTO struct {
+	Key									string 		`json:"key",datastore:"-"`
+	Email								string 		`json:"email"`
+	Password						string 		`json:"password",datastore:",noindex"`
+	NavitasId						string 		`json:"navitasId"`
+	CreatedDate					time.Time	`json:"createdDate"`
+	LastLogin						time.Time	`json:"lastLogin"`
+	CurrentSessionUUID	string 		`json:"currentSessionKey"`
+	IsAdmin							string			`json:"isAdmin,omitempty"`
+}
+
+func (user UserDTO) hasKey() bool {
+	return len(user.Key) > 0
+}
+
+func (user UserDTO) getDataStoreKey(ctx appengine.Context) *datastore.Key {
+	return userIntIDToKeyInt64(ctx, user.Key)
+}
+
+func(user UserDTO) setKey(key *datastore.Key) UserDTO {
+	user.Key = strconv.FormatInt(key.IntID(), 10)
+	return user
+}
+
+func GetUserByKey(ctx appengine.Context, key *datastore.Key) (*UserDTO, error) {
 	var user UserDTO
-	//	user := new(UserDTO)
-	key := userIntIDToKeyInt64(ctx, Id)
 
 	if err := datastore.Get(ctx, key, &user); err != nil {
 		return nil, err
 	}
 
-	user.Id = strconv.FormatInt(key.IntID(), 10)
+	user.setKey(key)
 	return &user, nil
 }
 
@@ -65,14 +76,14 @@ func GetUserByEmail(ctx appengine.Context, email string) (*UserDTO, error) {
 		return nil, userNotFoundError
 	}
 
-	userDtoList[0].Id = strconv.FormatInt(keys[0].IntID(), 10)
+	userDtoList[0].Key = strconv.FormatInt(keys[0].IntID(), 10)
 
 	return &userDtoList[0], nil
 }
 
 func CreateUser(ctx appengine.Context, user *UserDTO) error {
 
-	if user.hasId() {
+	if user.hasKey() {
 		return userHasIdError
 	}
 
@@ -82,19 +93,28 @@ func CreateUser(ctx appengine.Context, user *UserDTO) error {
 		return err
 	}
 
-	user.Id = strconv.FormatInt(newKey.IntID(), 10)
+	user.Key = strconv.FormatInt(newKey.IntID(), 10)
 
 	return nil
 }
 
-//TODO: figure out if this should be possible
-//func UpdateUser(ctx appengine.Context, user *UserDTO) error {
-//
-//	if _, err := GetUserById(ctx, user.Id); err == nil {
-//		return err
-//	}
-//
-//	putUser(ctx, user)
-//
-//	return nil
-//}
+func saveUser(ctx appengine.Context, user *UserDTO) error {
+	if !user.hasKey() {
+		return userHasIdError
+	}
+
+	key, err := datastore.Put(ctx, user.getDataStoreKey(ctx), &user)
+
+	if err == nil {
+		user.setKey(key)
+	}
+
+	return err
+}
+
+func SetSessionUUID(ctx appengine.Context, user *UserDTO, uuid string) error {
+
+	user.CurrentSessionUUID = uuid
+
+	return saveUser(ctx, user)
+}

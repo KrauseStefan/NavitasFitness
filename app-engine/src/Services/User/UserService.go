@@ -11,14 +11,23 @@ import (
 	"encoding/json"
 )
 
+const emailParam = "email"
+
+
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/user"
 
 	router.
 		Methods("GET").
 		Path(path).
-		Name("GetUserInfo").
-		HandlerFunc(userGet)
+		Name("GetUserCurrentUserInfo").
+		HandlerFunc(getUserFromSession)
+
+	router.
+	Methods("GET").
+	Path(path + "/{" + emailParam + "}").
+	Name("GetUserCurrentUserInfo").
+	HandlerFunc(userGetByEmail)
 
 	router.
 		Methods("POST").
@@ -28,11 +37,18 @@ func IntegrateRoutes(router *mux.Router) {
 
 }
 
-func userGet(w http.ResponseWriter, r *http.Request) {
-	userName := "name"
+func getUserFromSession(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func userGetByEmail(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	email := vars[emailParam]
+
 	ctx := appengine.NewContext(r)
 
-	userDto, err := GetUserByEmail(ctx, userName)
+	userDto, err := GetUserByEmail(ctx, email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

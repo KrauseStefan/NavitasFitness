@@ -24,15 +24,15 @@ export class BlogPostsService {
   }
 
   deleteBlogEntry(blogEntry: BlogEntryDTO) {
-    return this.$http.delete(this.serviceUrl + `?id=${blogEntry.Id}`)
+    return this.$http.delete(this.serviceUrl + `?id=${blogEntry.key}`)
   }
 }
 
 angular.module('NavitasFitness').service('blogPostsService', BlogPostsService)
 
 export class BlogEntryDTO {
-  Author: String
-  Content: String
-  Date: String
-  Id: String
+  author: String
+  content: String
+  date: String
+  key: String
 }
