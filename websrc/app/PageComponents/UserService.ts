@@ -46,6 +46,9 @@ export class UserService {
     return this.currentUser;
   }
   
+  isAdmin() {
+    return angular.isObject(this.currentUser) && !!this.currentUser.isAdmin;
+  }
 }
 
 angular.module('NavitasFitness').service('userService', UserService);
@@ -57,4 +60,5 @@ export interface BaseUserDTO {
 
 export interface UserDTO extends BaseUserDTO{
   navitasId: string;
+  isAdmin ?: boolean;
 }

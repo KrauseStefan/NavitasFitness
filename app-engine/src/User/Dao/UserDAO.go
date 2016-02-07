@@ -33,7 +33,7 @@ type UserDTO struct {
 	CreatedDate					time.Time	`json:"createdDate"`
 	LastLogin						time.Time	`json:"lastLogin"`
 	CurrentSessionUUID	string 		`json:"currentSessionKey"`
-	IsAdmin							string		`json:"isAdmin,omitempty"`
+	IsAdmin							bool			`json:"isAdmin,omitempty"`
 }
 
 func (user UserDTO) hasKey() bool {

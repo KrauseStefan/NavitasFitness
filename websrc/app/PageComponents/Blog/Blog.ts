@@ -1,13 +1,16 @@
 /// <reference path=".../../../../../typings/angularjs/angular.d.ts"/>
 
-import {CkEditorComponent} from "../../Components/CkEditor/CkEditor"
-import {BlogPostsService, BlogEntryDTO} from "./BlogPostsService"
+import {CkEditorComponent} from '../../Components/CkEditor/CkEditor'
+import {BlogPostsService, BlogEntryDTO} from './BlogPostsService'
+import {UserService} from '../UserService'
 
 export class Blog {
 
   public entries: BlogEntry[] = [];
 
-  constructor(public blogPostsService: BlogPostsService) {
+  constructor(
+    private blogPostsService: BlogPostsService,
+    private userService: UserService) {
     blogPostsService.getBlogEntries()
       .then(blogEntries => {
         this.entries = blogEntries.map(blogEntry => {
@@ -33,6 +36,10 @@ export class Blog {
         const index = this.entries.indexOf(entry);
         this.entries.splice(index, 1);
       })
+  }
+  
+  isAdmin() {
+    return this.userService.isAdmin();
   }
 }
 
