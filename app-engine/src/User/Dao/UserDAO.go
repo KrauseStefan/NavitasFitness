@@ -1,4 +1,4 @@
-package UserService
+package UserDao
 
 import (
 	"strconv"
@@ -7,7 +7,7 @@ import (
 	"appengine/datastore"
 
 	"errors"
-	"src/Services/Common"
+	"src/Common"
 	"time"
 )
 
@@ -16,6 +16,7 @@ var (
 	userHasNoIDError				= errors.New("Cannot create new user, key must be defined")
 	userAlreadyExistsError	= errors.New("Cannot update an already existing user")
 	userNotFoundError				= errors.New("User does not exist in datastore")
+	invalidSessionError			= errors.New("Invalid user session")
 )
 
 const USER_KIND = "User"
@@ -32,7 +33,7 @@ type UserDTO struct {
 	CreatedDate					time.Time	`json:"createdDate"`
 	LastLogin						time.Time	`json:"lastLogin"`
 	CurrentSessionUUID	string 		`json:"currentSessionKey"`
-	IsAdmin							string			`json:"isAdmin,omitempty"`
+	IsAdmin							string		`json:"isAdmin,omitempty"`
 }
 
 func (user UserDTO) hasKey() bool {
@@ -103,7 +104,7 @@ func saveUser(ctx appengine.Context, user *UserDTO) error {
 		return userHasIdError
 	}
 
-	key, err := datastore.Put(ctx, user.getDataStoreKey(ctx), &user)
+	key, err := datastore.Put(ctx, user.getDataStoreKey(ctx), user)
 
 	if err == nil {
 		user.setKey(key)
@@ -117,4 +118,23 @@ func SetSessionUUID(ctx appengine.Context, user *UserDTO, uuid string) error {
 	user.CurrentSessionUUID = uuid
 
 	return saveUser(ctx, user)
+}
+
+func GetUserFromSessionUUID(ctx appengine.Context, uuid string) (*UserDTO, error){
+
+	users := make([]UserDTO, 0, 2)
+
+	keys, err := datastore.NewQuery(USER_KIND).
+		Ancestor(userCollectionParentKey(ctx)).
+		Filter("CurrentSessionUUID =", uuid).
+		Limit(2).
+		GetAll(ctx, &users)
+
+	if(err != nil) {
+		return nil, err
+	} else if len(keys) != 1 {
+		return nil, errors.New(invalidSessionError.Error() + " - uuid: " + uuid)
+	}
+
+	return &users[0], nil
 }

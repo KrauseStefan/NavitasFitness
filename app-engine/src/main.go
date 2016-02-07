@@ -2,9 +2,9 @@ package main
 
 import (
 	"net/http"
-	"src/Services/Auth"
-	"src/Services/BlogPost"
-	"src/Services/User"
+	"src/Auth"
+	"src/BlogPost"
+	"src/User/Service"
 
 	"github.com/gorilla/mux"
 )

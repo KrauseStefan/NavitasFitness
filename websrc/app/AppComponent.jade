@@ -26,7 +26,10 @@
               span My status
 
     md-tabs(md-stretch-tabs="always")
-      md-tab(ui-sref="MainPage") Forside
-      md-tab(ui-sref="Blog") Blog
-
+      md-tab(ui-sref="MainPage") 
+        span Forside
+        md-icon home
+      md-tab(ui-sref="Blog") 
+        span Blog
+        md-icon subject
   ui-view

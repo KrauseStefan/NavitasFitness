@@ -10,7 +10,7 @@ import (
 
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"src/Services/Common"
+	"src/Common"
 	"strconv"
 	"time"
 )
@@ -55,12 +55,12 @@ func IntegrateRoutes(router *mux.Router) {
 }
 
 func blogEntryGet(w http.ResponseWriter, r *http.Request) {
-	c := appengine.NewContext(r)
-	q := datastore.NewQuery(BLOG_KIND).Ancestor(blogCollectionParentKey(c)).Order("Date")
+	ctx := appengine.NewContext(r)
+	q := datastore.NewQuery(BLOG_KIND).Ancestor(blogCollectionParentKey(ctx)).Order("Date")
 
 	blogEntries := make([]BlogEntry, 0, 10)
 
-	keys, err := q.GetAll(c, &blogEntries)
+	keys, err := q.GetAll(ctx, &blogEntries)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

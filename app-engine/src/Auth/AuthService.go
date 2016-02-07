@@ -5,18 +5,19 @@ import (
 
 	"net/http"
 
-	"src/Services/User"
+	"src/User/Dao"
 	"appengine"
 	"errors"
 	"encoding/json"
-	"src/Services/Common"
+	"src/Common"
 	"crypto/rand"
 	"encoding/hex"
 )
 
-const UserLoggedInSessionKey = "UserLoggedIn"
-const AdminLoggedInSessionKey = "AdminLoggedIn"
+//const UserLoggedInSessionKey = "UserLoggedIn"
+//const AdminLoggedInSessionKey = "AdminLoggedIn"
 
+const sessionCookieName = "Session-Key"
 
 type UserLogin struct {
 	Password	string `json:"password"`
@@ -52,12 +53,51 @@ func IntegrateRoutes(router *mux.Router) {
 		Path(path + "/login").
 		Name("loginUser").
 		HandlerFunc(doLogin)
+
+	router.
+		Methods("POST").
+		Path(path + "/logout").
+		Name("logoutUser").
+		HandlerFunc(doLogout)
+
+}
+
+func setSessionCookie(w http.ResponseWriter, uuid string) error {
+	var (
+		err error
+		encoded string
+	)
+	s := GetSecureCookieInst()
+
+	if(uuid != ""){
+		encoded, err = s.Encode(sessionCookieName, uuid)
+		if err != nil {
+			return err
+		}
+	}
+
+	cookie := &http.Cookie{
+		Name:  sessionCookieName,
+		Value: encoded,
+		Path:  "/",
+	}
+	http.SetCookie(w, cookie)
+
+	return nil
+}
+
+func doLogout(w http.ResponseWriter, r *http.Request) {
+	err := setSessionCookie(w, "")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func doLogin(w http.ResponseWriter, r *http.Request) {
 
 	var (
-		user 	*UserService.UserDTO
+		user 	*UserDao.UserDTO
 		uuid 	string
 		err		error
 	)
@@ -67,7 +107,7 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 	loginRequestUser := new(UserLogin)
 
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(loginRequestUser); err != nil {
+	if err = decoder.Decode(loginRequestUser); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -77,7 +117,7 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err = UserService.GetUserByEmail(ctx, loginRequestUser.Email)
+	user, err = UserDao.GetUserByEmail(ctx, loginRequestUser.Email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -88,30 +128,46 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s := GetSecureCookieInst()
-
-	cookieName := "Session-Key"
 	uuid, err = generateUUID()
-
 	if err != nil {
 		http.Error(w, "Error Generating UUID", http.StatusUnauthorized)
 		return
 	}
 
-	if encoded, err := s.Encode(cookieName, uuid); err == nil {
-		cookie := &http.Cookie{
-			Name:  cookieName,
-			Value: encoded,
-			Path:  "/",
-		}
-		http.SetCookie(w, cookie)
+	err = setSessionCookie(w, uuid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
 	}
 
-	UserService.SetSessionUUID(ctx, user, uuid)
+	err = UserDao.SetSessionUUID(ctx, user, uuid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
 
 	if _, err := Common.WriteJSON(w, user); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+}
+
+func GetSessionUUID(r *http.Request) (string, error) {
+	cookie, err := r.Cookie(sessionCookieName)
+	if err != nil {
+		return "", err
+	}
+
+	if cookie.Value == "" {
+		return "", nil
+	}
+
+	uuid := ""
+
+	if err := GetSecureCookieInst().Decode(sessionCookieName, cookie.Value, &uuid); err != nil {
+		return "", err
+	}
+
+	return uuid, nil
 }

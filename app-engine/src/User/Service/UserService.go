@@ -7,12 +7,14 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"src/Services/Common"
+	"src/Common"
 	"encoding/json"
+	"src/Auth"
+
+	"src/User/Dao"
 )
 
 const emailParam = "email"
-
 
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/user"
@@ -24,10 +26,10 @@ func IntegrateRoutes(router *mux.Router) {
 		HandlerFunc(getUserFromSession)
 
 	router.
-	Methods("GET").
-	Path(path + "/{" + emailParam + "}").
-	Name("GetUserCurrentUserInfo").
-	HandlerFunc(userGetByEmail)
+		Methods("GET").
+		Path(path + "/{" + emailParam + "}").
+		Name("GetUserCurrentUserInfo").
+		HandlerFunc(userGetByEmail)
 
 	router.
 		Methods("POST").
@@ -38,7 +40,30 @@ func IntegrateRoutes(router *mux.Router) {
 }
 
 func getUserFromSession(w http.ResponseWriter, r *http.Request) {
+	uuid, err := AuthService.GetSessionUUID(r)
 
+	if uuid == "" {
+		http.Error(w, "", http.StatusNoContent)
+	}
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+//		http.Error(w, "", http.StatusNoContent)
+		return
+	}
+
+	ctx := appengine.NewContext(r)
+
+	user, err := UserDao.GetUserFromSessionUUID(ctx, uuid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	if _, err := Common.WriteJSON(w, user); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func userGetByEmail(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +73,7 @@ func userGetByEmail(w http.ResponseWriter, r *http.Request) {
 
 	ctx := appengine.NewContext(r)
 
-	userDto, err := GetUserByEmail(ctx, email)
+	userDto, err := UserDao.GetUserByEmail(ctx, email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -62,7 +87,7 @@ func userGetByEmail(w http.ResponseWriter, r *http.Request) {
 
 func userPost(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
-	user := &UserDTO{}
+	user := &UserDao.UserDTO{}
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(user)
@@ -71,7 +96,7 @@ func userPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := CreateUser(ctx, user); err != nil {
+	if err := UserDao.CreateUser(ctx, user); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
