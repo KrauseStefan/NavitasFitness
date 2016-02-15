@@ -1,4 +1,6 @@
-/// <reference path=".../../../../typings/angularjs/angular.d.ts"/>
+import IHttpService = angular.IHttpService;
+import IPromise = angular.IPromise;
+import ICookiesService = angular.cookies.ICookiesService;
 
 export class UserService {
 
@@ -9,10 +11,10 @@ export class UserService {
 
 
   constructor(
-    private $http: angular.IHttpService,
-    private $cookies: angular.cookies.ICookiesService) {
+    private $http: IHttpService,
+    private $cookies: ICookiesService) {
     
-      const cookieName = "Session-Key";
+      const cookieName = 'Session-Key';
       const sessionKey = $cookies.get(cookieName);
       if(angular.isDefined(sessionKey)) {
         this.getUserFromSessionData(sessionKey);
@@ -20,7 +22,7 @@ export class UserService {
       
     }
 
-  createUser(user: UserDTO): angular.IPromise<UserDTO> {
+  createUser(user: UserDTO): IPromise<UserDTO> {
     return this.$http.post(this.userServiceUrl, user)
       .then((res) => (<UserDTO>res.data));
   }
@@ -35,7 +37,7 @@ export class UserService {
 
   getUserFromSessionData(sessionKey: string) {
     this.$http.get(`${this.userServiceUrl}`)
-      .then((res) => this.currentUser = <UserDTO>res.data )
+      .then((res) => this.currentUser = <UserDTO>res.data );
   }
   
   logout() {

@@ -1,14 +1,13 @@
-/// <reference path=".../../../../../typings/angularjs/angular.d.ts"/>
-/// <reference path=".../../../../../typings/angular-material/angular-material"/>
+import { UserService, BaseUserDTO } from '../UserService';
 
-import { UserService, BaseUserDTO } from '../UserService'
+import IDialogService = angular.material.IDialogService;
 
 export class LoginForm {
   
   constructor(
     private $scope: any,
     private userService: UserService,
-    private $mdDialog: angular.material.IDialogService) {
+    private $mdDialog: IDialogService) {
         
     $scope.submit = () => this.submit();
     $scope.cancel = () => this.cancel();

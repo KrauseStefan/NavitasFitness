@@ -1,7 +1,6 @@
-/// <reference path=".../../../../../typings/angularjs/angular.d.ts"/>
-/// <reference path=".../../../../../typings/angular-material/angular-material"/>
+import { UserService, UserDTO } from '../UserService';
 
-import { UserService, UserDTO } from '../UserService'
+import IDialogService = angular.material.IDialogService;
 
 export class RegistrationFormModel implements UserDTO {
   email: string = "";
@@ -24,7 +23,7 @@ export class RegistrationForm {
   constructor(
     private $scope: any,
     private userService: UserService,
-    private $mdDialog: angular.material.IDialogService) {
+    private $mdDialog: IDialogService) {
     
     $scope.submit = () => this.submit();
     $scope.cancel = () => this.cancel();

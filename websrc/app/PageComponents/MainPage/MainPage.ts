@@ -1,14 +1,14 @@
 
-import {BlogPostsService, BlogEntryDTO} from "../Blog/BlogPostsService"
-import "../../Components/CkEditor/CkEditor"
+import {BlogPostsService, BlogEntryDTO} from '../Blog/BlogPostsService';
+import '../../Components/CkEditor/CkEditor';
 
 export class MainPage {
 
   public entry: BlogEntry = new BlogEntry({
-    Author: "",
-    Content: "",
-    Date: "",
-    Id: null
+    author: '',
+    content: '',
+    date: '',
+    key: null
   });
 
   constructor(public blogPostsService: BlogPostsService) {
@@ -18,7 +18,7 @@ export class MainPage {
 
   saveEntry(entry: BlogEntry) {
     this.blogPostsService.saveBlogEntry(entry.blogEntry)
-      .then(() => entry.enabled = false)
+      .then(() => entry.enabled = false);
   }
 }
 
@@ -34,6 +34,6 @@ export class BlogEntry {
   public enabled = false;
 
   constructor(blogEntry: BlogEntryDTO = new BlogEntryDTO()) {
-    this.blogEntry = blogEntry
+    this.blogEntry = blogEntry;
   }
 }

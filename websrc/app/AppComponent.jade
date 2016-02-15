@@ -20,16 +20,17 @@
             md-button(ng-click="$ctrl.logout($event)") 
               md-icon lock_outline
               span Logout
-          md-menu-item
-            md-button(ng-click="$ctrl.openRegistrationDialog($event)") 
-              md-icon perm_identity
-              span My status
 
     md-tabs(md-stretch-tabs="always")
       md-tab(ui-sref="MainPage") 
-        span Forside
         md-icon home
-      md-tab(ui-sref="Blog") 
-        span Blog
+        span Forside
+      md-tab(ui-sref="Blog")
         md-icon subject
-  ui-view
+        span Blog
+      md-tab(ui-sref="Status")
+        md-icon perm_identity
+        span My status
+
+  md-content(flex, layout-padding)
+    ui-view

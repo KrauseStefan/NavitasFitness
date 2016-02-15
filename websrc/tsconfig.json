@@ -26,6 +26,7 @@
     "placeOpenBraceOnNewLineForControlBlocks": false
   },
   "files": [
+    "./typings/main.d.ts",
     "./app/boot.ts"
   ]
 

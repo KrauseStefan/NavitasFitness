@@ -1,19 +1,21 @@
-/// <reference path=".../../../typings/angularjs/angular"/>
-/// <reference path=".../../../typings/angularjs/angular-cookies"/>
-/// <reference path=".../../../typings/angular-material/angular-material"/>
-/// <reference path=".../../../typings/angular-ui-router/angular-ui-router"/>
+import './PageComponents/MainPage/MainPage';
+import './PageComponents/Blog/Blog';
+import './PageComponents/UserStatus/UserStatus';
+import { RegistrationForm } from './PageComponents/RegistrationForm/RegistrationForm';
+import { LoginForm } from './PageComponents/LoginForm/LoginForm';
+import { UserService } from './PageComponents/UserService';
 
-import "./PageComponents/MainPage/MainPage"
-import "./PageComponents/Blog/Blog"
-import { RegistrationForm } from "./PageComponents/RegistrationForm/RegistrationForm"
-import { LoginForm } from "./PageComponents/LoginForm/LoginForm"
-import { UserService } from "./PageComponents/UserService"
+import IDialogService = angular.material.IDialogService;
+import IMedia = angular.material.IMedia;
+import IStateProvider = angular.ui.IStateProvider;
+import IUrlRouterProvider = angular.ui.IUrlRouterProvider;
+import ILocationProvider = angular.ILocationProvider;
 
 export class AppComponent {
 
   constructor(
-    private $mdDialog: angular.material.IDialogService,
-    private $mdMedia: angular.material.IMedia,
+    private $mdDialog: IDialogService,
+    private $mdMedia: IMedia,
     private userService: UserService) {
       
   }
@@ -62,18 +64,24 @@ angular.module('NavitasFitness')
     controller: AppComponent
   })
   .config((
-      $stateProvider: angular.ui.IStateProvider,
-      $urlRouterProvider: angular.ui.IUrlRouterProvider
+      $stateProvider: IStateProvider,
+      $urlRouterProvider: IUrlRouterProvider,
+      $locationProvider: ILocationProvider
     ) => {
-    $urlRouterProvider.otherwise("/")
+      $locationProvider.html5Mode(true);
+      $urlRouterProvider.otherwise("/");
 
-    $stateProvider
-      .state('MainPage', {
-        url: "/main-page",
-        template: "<main-page></main-page>",
-      })
-      .state('Blog', {
-        url: "/blog",
-        template: "<blog></blog>",
-      });
+      $stateProvider
+        .state('MainPage', {
+          url: "/main-page",
+          template: "<main-page></main-page>",
+        })
+        .state('Blog', {
+          url: "/blog",
+          template: "<blog></blog>",
+        })
+        .state('Status', {
+          url: "/status",
+          template: "<user-status></user-status>",
+        });
   });

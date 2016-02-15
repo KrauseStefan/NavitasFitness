@@ -1,15 +1,16 @@
-/// <reference path=".../../../../../typings/angularjs/angular.d.ts"/>
+/// <reference path="../../../typings/main"/>
+import '../../Components/CkEditor/CkEditor';
 
-
-import "../../Components/CkEditor/CkEditor"
+import IHttpService = angular.IHttpService;
+import IPromise = angular.IPromise;
 
 export class BlogPostsService {
 
-  private serviceUrl = 'rest/blogEntry'
+  private serviceUrl = 'rest/blogEntry';
 
-  constructor(private $http: angular.IHttpService) { }
+  constructor(private $http: IHttpService) { }
 
-  public getBlogEntries(): angular.IPromise<BlogEntryDTO[]> {
+  public getBlogEntries(): IPromise<BlogEntryDTO[]> {
     return this.$http
       .get(this.serviceUrl)
       .then((res: any) => {
@@ -28,7 +29,7 @@ export class BlogPostsService {
   }
 }
 
-angular.module('NavitasFitness').service('blogPostsService', BlogPostsService)
+angular.module('NavitasFitness').service('blogPostsService', BlogPostsService);
 
 export class BlogEntryDTO {
   author: String

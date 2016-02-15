@@ -1,5 +1,5 @@
-/// <reference path="../../../typings/ckeditor/ckeditor"/>
-/// <reference path=".../../../../../typings/angularjs/angular.d.ts"/>
+import IScope = angular.IScope;
+import IAugmentedJQuery = angular.IAugmentedJQuery;
 
 export class CkEditorComponent {
 
@@ -8,7 +8,7 @@ export class CkEditorComponent {
   unsubscribe: Function = angular.noop;
   editor: CKEDITOR.editor = null;
 
-  constructor(private $scope: angular.IScope, private $element: JQuery) {
+  constructor(private $scope: IScope, private $element: IAugmentedJQuery) {
     this.$scope.$watch('$ctrl.isEditable', () => {
       this.isEditable ? this.enableEditor() : this.disableEditor();
     });
@@ -17,7 +17,7 @@ export class CkEditorComponent {
   enableEditor() {
     // this.editor = CKEDITOR.replace(<any>this.getEditordiv());
     this.unsubscribe();
-    this.unsubscribe = angular.noop
+    this.unsubscribe = angular.noop;
 
     this.getEditordiv().contentEditable = 'true';
 
