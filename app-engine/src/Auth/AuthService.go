@@ -14,9 +14,6 @@ import (
 	"encoding/hex"
 )
 
-//const UserLoggedInSessionKey = "UserLoggedIn"
-//const AdminLoggedInSessionKey = "AdminLoggedIn"
-
 const sessionCookieName = "Session-Key"
 
 type UserLogin struct {
@@ -39,8 +36,8 @@ func generateUUID() (string, error) {
 		return "", err
 	}
 
-	u[8] = (u[8] | 0x80) & 0xBF // what does this do?
-	u[6] = (u[6] | 0x40) & 0x4F // what does this do?
+	u[8] = (u[8] | 0x80) & 0xBF
+	u[6] = (u[6] | 0x40) & 0x4F
 
 	return hex.EncodeToString(u), nil
 }

@@ -11,6 +11,12 @@ import (
 	"time"
 )
 
+const (
+	USER_KIND 						= "User"
+	USER_PARENT_STRING_ID	= "default_user"
+)
+
+
 var (
 	userHasIdError					= errors.New("Cannot create new user, key must be nil")
 	userHasNoIDError				= errors.New("Cannot create new user, key must be defined")
@@ -19,11 +25,10 @@ var (
 	invalidSessionError			= errors.New("Invalid user session")
 )
 
-const USER_KIND = "User"
-const USER_PARENT_STRING_ID = "default_user"
-
-var userCollectionParentKey = Common.CollectionParentKeyGetFnGenerator(USER_KIND, USER_PARENT_STRING_ID, 0)
-var userIntIDToKeyInt64 = Common.IntIDToKeyInt64(USER_KIND, userCollectionParentKey)
+var (
+	userCollectionParentKey	= Common.CollectionParentKeyGetFnGenerator(USER_KIND, USER_PARENT_STRING_ID, 0)
+	userIntIDToKeyInt64			= Common.IntIDToKeyInt64(USER_KIND, userCollectionParentKey)
+)
 
 type UserDTO struct {
 	Key									string 		`json:"key",datastore:"-"`
