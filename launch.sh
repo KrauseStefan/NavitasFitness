@@ -4,9 +4,10 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 cd ${DIR}
 
-gulp clean
+./node_modules/.bin/gulp clean
 
-gnome-terminal -e "gulp buildAndWatch" &
+
+gnome-terminal -e "./node_modules/.bin/gulp buildAndWatch" &
 
 gnome-terminal -e "goapp serve ./app-engine/" &
 
