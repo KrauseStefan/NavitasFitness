@@ -57,7 +57,7 @@ function tsLint() {
 function compileTs(callback) {
 
   webpack(require('./websrc/webpack.config'), function(err, stats) {
-      callback();
+    callback(err);
   });
 
   // const tsResult = tsProject.src()

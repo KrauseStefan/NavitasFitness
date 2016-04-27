@@ -1,9 +1,11 @@
 
+import { UserService } from '../UserService';
+
 export class UserStatus {
-  
+
   model: UserStatusModel;
-    
-  constructor() {
+
+  constructor(private userService: UserService) {
     this.model = {
       statusMsg: 'test status msg',
       validUntill: '19/05-2016',
@@ -12,9 +14,15 @@ export class UserStatus {
         { amountKr: 200 },
         { amountKr: 200 },
         { amountKr: 200 },
-        { amountKr: 200 }]
+        { amountKr: 200 }
+      ]
     }
   }
+
+  public getUserEmail() {
+    return this.userService.getLoggedinUser().email;
+  }
+
 }
 
 class UserStatusModel {

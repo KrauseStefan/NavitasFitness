@@ -1,0 +1,17 @@
+
+# https://cloud.google.com/appengine/docs/go/config/queue#Go_Queue_definitions
+# Set the total storage limit for all queues to 120MB
+# total_storage_limit: 120M #Default: 500M for free apps
+queue:
+- name: paypalIpn
+  max_concurrent_requests: 1
+  bucket_size: 10 #Number of tasks that can execute immedietly
+  # rate default is 5/s
+  rate: 5/s #One task per second (put one token in bucket each second)
+  mode: push
+  retry_parameters:
+#      task_retry_limit: 7
+      task_age_limit: 2d
+      min_backoff_seconds: 10
+      max_backoff_seconds: 1000
+      max_doublings: 5

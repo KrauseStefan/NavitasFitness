@@ -30,6 +30,7 @@ var (
 	userIntIDToKeyInt64			= Common.IntIDToKeyInt64(USER_KIND, userCollectionParentKey)
 )
 
+
 type UserDTO struct {
 	Key									string 		`json:"key",datastore:"-"`
 	Email								string 		`json:"email"`
@@ -53,6 +54,7 @@ func(user UserDTO) setKey(key *datastore.Key) UserDTO {
 	user.Key = strconv.FormatInt(key.IntID(), 10)
 	return user
 }
+
 
 func GetUserByKey(ctx appengine.Context, key *datastore.Key) (*UserDTO, error) {
 	var user UserDTO
@@ -86,6 +88,7 @@ func GetUserByEmail(ctx appengine.Context, email string) (*UserDTO, error) {
 
 	return &userDtoList[0], nil
 }
+
 
 func CreateUser(ctx appengine.Context, user *UserDTO) error {
 

@@ -1,6 +1,7 @@
 import './PageComponents/MainPage/MainPage';
 import './PageComponents/Blog/Blog';
 import './PageComponents/UserStatus/UserStatus';
+
 import { RegistrationForm } from './PageComponents/RegistrationForm/RegistrationForm';
 import { LoginForm } from './PageComponents/LoginForm/LoginForm';
 import { UserService } from './PageComponents/UserService';
@@ -17,7 +18,6 @@ export class AppComponent {
     private $mdDialog: IDialogService,
     private $mdMedia: IMedia,
     private userService: UserService) {
-      
   }
 
   openRegistrationDialog(event: MouseEvent) {
