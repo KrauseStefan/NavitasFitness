@@ -1,7 +1,7 @@
-/// <reference path="typings/main.d.ts" />
-
-import * as http from "http";
-import * as net from "net";
+import * as http from 'http';
+import * as url from 'url';
+import * as _ from 'lodash';
+import * as qs  from 'querystring';
 
 import RequestOptions = http.RequestOptions;
 import ServerResponse = http.ServerResponse;
@@ -34,7 +34,9 @@ http.createServer((req, res) => {
 
   if (req.url === configuration.serverProcessPaymentUrl) {
     console.log('')
-    sendIpnDataMessage(res).then((sentMessage: string) => {
+    sendIpnDataMessage(req, res).then((sentMessage: string) => {
+      res.write('<a href="//localhost:9000/status">back</a>\n');
+
       log('Data message sent', res);
       log('server closed connection', res);
       log('status code 200 and empty response (OK)', res);
@@ -52,7 +54,7 @@ http.createServer((req, res) => {
       processIpnResponse = null;
     }
   } else {
-    if (req.url !== '/favicon.ico'){
+    if (req.url !== '/favicon.ico') {
       console.log('Ignoring request: ' + req.url);
     }
     res.end();
@@ -71,7 +73,7 @@ function waitIpnDataMessageResponse(expectedMsg: string, res: ServerResponse): (
   let isPending = true;
 
   setTimeout(() => {
-    if(isPending) {
+    if (isPending) {
       isPending = false;
       log("Timeout: Message was not recived in time", res);
       res.end();
@@ -87,14 +89,14 @@ function waitIpnDataMessageResponse(expectedMsg: string, res: ServerResponse): (
     }
     isPending = false;
     const extraValues = "cmd=_notify-validate&";
-    
+
     readAllData(req).then((recivedMsg) => {
       const messageValid = (recivedMsg === extraValues + expectedMsg);
 
       if (res.statusCode !== 200) {
         log('Status code was not 200 it was: ' + res.statusCode + '\n' + recivedMsg);
       } else if (messageValid) {
-        log("Sucess VERIFIED", res);
+        log("Success VERIFIED", res);
         newRes.write("VERIFIED");
       } else {
         log("failure INVALID", res);
@@ -103,55 +105,67 @@ function waitIpnDataMessageResponse(expectedMsg: string, res: ServerResponse): (
         newRes.write("INVALID");
       }
 
-      // newRes.writeHead(200, "OK", {'Content-Type': 'text/html'});
+      log('<br>', res)
+
+      recivedMsg.split('&').forEach((line) => {
+        log(`${line}&`, res);
+      });
+
       newRes.end();
       res.end();
     });
-    
+
   }
 }
 
-function sendIpnDataMessage(serverRes: ServerResponse) {
+function sendIpnDataMessage(clientReq: IncomingMessage, serverRes: ServerResponse) {
 
   return new Promise<string>((resole, reject) => {
 
-    const ipnBody = encodePostData(paypalSampleIpnMsg);
+    readAllData(clientReq).then((body) => {
+      const formQueryObj = qs.parse(body)
 
-    // log(JSON.stringify(body, null, 2), res);
+      const queryObj = url.parse(clientReq.url, true).query;
 
-    const options: RequestOptions = {
-      hostname: configuration.ipnAddress,
-      port: configuration.ipnPort,
-      path: configuration.ipnPath,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Content-Length': ipnBody.length
-      }
-    }
+      const ipnBody = [paypalSampleIpnMsg, queryObj, formQueryObj].reduce((prev, cur) => {
+        return _.merge(prev, cur);
+      }, {});
 
-    // https://developer.paypal.com/webapps/developer/docs/classic/ipn/integration-guide/IPNIntro/#id08CKFJ00JYK
-    const req = http.request(options, (res: IncomingMessage) => {
-      readAllData(res).then((responseBody) => {
-        if (res.statusCode !== 200) {
-          reject('Status code was not 200 it was: ' + res.statusCode + '\n' + responseBody);
-        } else if (responseBody != '') {
-          reject('Body was not empty it contained: ' + responseBody)
-        } else {
-          resole(ipnBody);
+      const ipnBodyEncoded = encodePostData(ipnBody);
+
+      const options: RequestOptions = {
+        hostname: configuration.ipnAddress,
+        port: configuration.ipnPort,
+        path: configuration.ipnPath,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': ipnBodyEncoded.length
         }
+      }
+
+      // https://developer.paypal.com/webapps/developer/docs/classic/ipn/integration-guide/IPNIntro/#id08CKFJ00JYK
+      const req = http.request(options, (res: IncomingMessage) => {
+        readAllData(res).then((responseBody) => {
+          if (res.statusCode !== 200) {
+            reject('Status code was not 200 it was: ' + res.statusCode + '\n' + responseBody);
+          } else if (responseBody != '') {
+            reject('Body was not empty it contained: ' + responseBody)
+          } else {
+            resole(ipnBodyEncoded);
+          }
+        });
       });
-    });
-    
-    req.on('error', (err: Error) => {
-      reject(err.message);
-    });
 
-    req.write(ipnBody);
+      req.on('error', (err: Error) => {
+        reject(err.message);
+      });
 
-    req.end();
+      req.write(ipnBodyEncoded);
+
+      req.end();
+    });
   });
-
 }
 
 
@@ -239,7 +253,7 @@ function encodePostData(data: any) {
 function log(msg: string, res?: ServerResponse) {
 
   if (res && res.writable) {
-    res.write(msg + '\n');
+    res.write(`<div>${msg}</div>\n`);
   }
   console.log(msg);
 
@@ -249,11 +263,11 @@ function log(msg: string, res?: ServerResponse) {
 function readAllData(res: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
     let fullBody = '';
-    
+
     res.on('data', (chunk: Buffer) => {
       fullBody += chunk.toString();
     });
-    
+
     res.on('end', () => {
       resolve(fullBody);
     });
