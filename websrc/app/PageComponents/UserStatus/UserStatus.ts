@@ -19,8 +19,12 @@ export class UserStatus {
     }
   }
 
-  public getUserEmail() {
-    return this.userService.getLoggedinUser().email;
+  public getUserEmail(): string {
+    if(this.userService.getLoggedinUser()) {
+      return this.userService.getLoggedinUser().email;
+    } else {
+      return "";
+    }
   }
 
 }

@@ -10,17 +10,19 @@ import (
 	"appengine/urlfetch"
 	"appengine/taskqueue"
 	"src/IPN/Transaction"
+	"net/url"
+	"src/User/Dao"
 )
 
 const (
-	localIpn					= "http://localhost:8081/cgi-bin/webscr" //(Will behave like a live IPN)
-	PaypalIpn					= "https://www.paypal.com/cgi-bin/webscr" //(for live IPNs)
-	PaypalIpnSandBox	= "https://www.sandbox.paypal.com/cgi-bin/webscr" // (for Sandbox IPNs)
+	localIpn = "http://localhost:8081/cgi-bin/webscr" //(Will behave like a live IPN)
+	PaypalIpn = "https://www.paypal.com/cgi-bin/webscr" //(for live IPNs)
+	PaypalIpnSandBox = "https://www.sandbox.paypal.com/cgi-bin/webscr" // (for Sandbox IPNs)
 
-	IpnQueueName					= "paypalIpn"
+	IpnQueueName = "paypalIpn"
 
-	basePath 					= "/rest/paypal"
-	ipnUrl 						= basePath + "/ipn"
+	basePath = "/rest/paypal"
+	ipnUrl = basePath + "/ipn"
 	ipnRespondTaskUrl = basePath + "/ipnDoRespone"
 
 	FromEncodedContentType = "application/x-www-form-urlencoded"
@@ -31,19 +33,22 @@ const (
 func IntegrateRoutes(router *mux.Router) {
 
 	router.
-		Methods("POST").
-		Path(ipnUrl).
-		Name("ipn notification").
-		HandlerFunc(processIPN)
+	Methods("POST").
+	Path(ipnUrl).
+	Name("ipn notification").
+	HandlerFunc(processIPN)
 
 	router.
-		Methods("POST").
-		Path(ipnRespondTaskUrl).
-		Name("ipn notification responder task").
-		HandlerFunc(ipnDoResponseTask)
+	Methods("POST").
+	Path(ipnRespondTaskUrl).
+	Name("ipn notification responder task").
+	HandlerFunc(ipnDoResponseTask)
 
 }
 
+//Receives the IPN message from PayPal and sends a empty response back code 200
+//The received package is parsed to the task queue, where the appropriate response is made
+//This is need in order to close the original request before responding
 func processIPN(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
@@ -65,10 +70,28 @@ func processIPN(w http.ResponseWriter, r *http.Request) {
 	// Persist transaction details in unconfirmed state (processing?)
 }
 
-func ipnDoResponseTask(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
+func sendVerificationMassageToPaypall(ctx appengine.Context, content string) (string, error) {
 
 	extraData := []byte("cmd=_notify-validate&")
+	client := urlfetch.Client(ctx)
+	resp, err := client.Post(localIpn, FromEncodedContentType, bytes.NewBuffer(append(extraData, content...)))
+	if err != nil {
+		return "", err
+	}
+
+	respBody, err := ioutil.ReadAll(resp.Body)
+
+	resp.Body.Close()
+	return string(respBody), err
+}
+
+// Send message for verification with cmd=_notify-validate prepended
+// Verify message
+// Lookup user
+// Lookup Transaction?
+func ipnDoResponseTask(w http.ResponseWriter, r *http.Request) {
+	ctx := appengine.NewContext(r)
+	var t TransActionDao.TransactionMsgDTO
 
 	content, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -76,29 +99,50 @@ func ipnDoResponseTask(w http.ResponseWriter, r *http.Request) {
 		ctx.Infof("error: " + err.Error())
 		return
 	}
+	t.IpnMessage = string(content)
 
-	//ctx.Infof("content: " + string(content))
-
-	client := urlfetch.Client(ctx)
-	resp, err := client.Post(localIpn, FromEncodedContentType, bytes.NewBuffer(append(extraData, content...)))
-	defer resp.Body.Close()
-
+	respBody, err := sendVerificationMassageToPaypall(ctx, t.IpnMessage)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.Infof("error: " + err.Error())
+		return
+	}
+	t.StatusResp = string(respBody)
+
+	body, err := url.ParseQuery(t.IpnMessage)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.Infof("error: " + err.Error())
 		return
 	}
 
-	respBody, _ := ioutil.ReadAll(resp.Body)
+	email := body.Get(TransActionDao.FIELD_CUSTOM)
+	if email == "" {
+		http.Error(w, "No email recived", http.StatusBadRequest)
+		ctx.Errorf("No email recived")
+		return
+	}
 
-	//ctx.Infof("resp body: " + string(respBody))
-
-	var t TransActionDao.TransactionMsgDTO
-	t.IpnMessage = string(content)
-	t.StatusResp = string(respBody)
-
-
-	if err := TransActionDao.PersistIpnMessage(ctx, &t); err != nil {
+	ctx.Infof("Recived transaction from: " + email)
+	user, err := UserDao.GetUserByEmail(ctx, email)
+	if (err != nil) {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		ctx.Errorf(err.Error())
+		return
+	}
+	if user == nil {
+		http.Error(w, "User does not exist", http.StatusBadRequest)
+		ctx.Errorf("User does not exist")
+		return
+	}
+
+	if (user != nil) {
+		ctx.Infof("id: " + user.Key)
+
+		if err := TransActionDao.PersistIpnMessage(ctx, &t, user.Key); err != nil {
+			ctx.Errorf(err.Error())
+		}
+
 	}
 
 	//if(string(respBody) == "VERIFIED") {
@@ -110,7 +154,6 @@ func ipnDoResponseTask(w http.ResponseWriter, r *http.Request) {
 	//	// Log Severe error (We are properly being hacked at this point) How to make sure this could never happen
 	//}
 }
-
 
 func newTask(path string, data []byte) *taskqueue.Task {
 	h := make(http.Header)

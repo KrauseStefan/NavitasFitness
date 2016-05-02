@@ -46,13 +46,17 @@ func (user UserDTO) hasKey() bool {
 	return len(user.Key) > 0
 }
 
-func (user UserDTO) getDataStoreKey(ctx appengine.Context) *datastore.Key {
-	return userIntIDToKeyInt64(ctx, user.Key)
+func (user UserDTO) GetDataStoreKey(ctx appengine.Context) *datastore.Key {
+	return StringToKey(ctx, user.Key)
 }
 
 func(user UserDTO) setKey(key *datastore.Key) UserDTO {
 	user.Key = strconv.FormatInt(key.IntID(), 10)
 	return user
+}
+
+func StringToKey(ctx appengine.Context, key string) *datastore.Key {
+	return userIntIDToKeyInt64(ctx, key)
 }
 
 
@@ -112,7 +116,7 @@ func saveUser(ctx appengine.Context, user *UserDTO) error {
 		return userHasIdError
 	}
 
-	key, err := datastore.Put(ctx, user.getDataStoreKey(ctx), user)
+	key, err := datastore.Put(ctx, user.GetDataStoreKey(ctx), user)
 
 	if err == nil {
 		user.setKey(key)

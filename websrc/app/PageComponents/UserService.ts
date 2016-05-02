@@ -17,7 +17,7 @@ export class UserService {
       const cookieName = 'Session-Key';
       const sessionKey = $cookies.get(cookieName);
       if(angular.isDefined(sessionKey)) {
-        this.getUserFromSessionData(sessionKey);
+        this.getUserFromSessionData();
       };
       
     }
@@ -35,9 +35,11 @@ export class UserService {
       });
   }
 
-  getUserFromSessionData(sessionKey: string) {
-    this.$http.get(`${this.userServiceUrl}`)
-      .then((res) => this.currentUser = <UserDTO>res.data );
+  getUserFromSessionData() {
+    this.$http.get(this.userServiceUrl)
+      .then((res) => {
+        this.currentUser = <UserDTO>res.data; 
+      });
   }
   
   logout() {

@@ -8,6 +8,7 @@ import (
 	"errors"
 	"net/url"
 	"strconv"
+	"src/User/Dao"
 )
 
 const (
@@ -151,8 +152,8 @@ type TransactionMsgDTO struct {
 	IpnMessage				string
 	StatusResp				string
 
-	txnId							string
-	paymentDate				time.Time
+	PaymentDate				time.Time
+	TxnId							string
 	parsedIpnMessage	url.Values `datastore:"-"`
 }
 
@@ -160,8 +161,8 @@ func (txDto *TransactionMsgDTO) parseMessage() *url.Values {
 	if txDto.parsedIpnMessage == nil {
 		parsedIpnMessage, _ := url.ParseQuery(string(txDto.IpnMessage))
 		txDto.parsedIpnMessage = parsedIpnMessage
-		txDto.paymentDate = txDto.GetPaymentDate()
-		txDto.txnId = txDto.GetTxnId()
+		txDto.PaymentDate = txDto.GetPaymentDate()
+		txDto.TxnId = txDto.GetTxnId()
 	}
 
 	return &txDto.parsedIpnMessage
@@ -195,67 +196,9 @@ func (txDto *TransactionMsgDTO) PaymentIsComplected() bool {
 	return txDto.IsVerified() && txDto.GetPaymentStatus() == STATUS_COMPLEATED && txDto.GetAmount() == 200
 }
 
-type TransactionMsgDTO_Old struct {
-	msgVerified           bool
-
-	TxnId                 string    // "61E67681CH3238416",
-	TxnType               string    //"express_checkout",
-	TestIpn               string    //"1", only exists in test messages, should properly not be sent when testing locally
-	TransactionSubject    string    // "",
-
-	PaymentDate           time.Time //"20:12:59 Jan 13, 2009 PST",
-	PaymentStatus         string    //"Completed",
-	PaymentType           string    // "instant",
-	PaymentFee            float64   //"0.88",
-
-	VerifySign            string    // "AtkOfCXbDm2hu0ZELryHFjY-Vb7PAUvS6nMXgysbElEn9v-1XcmSoGtf",
-	ReceiverEmail         string    //"gpmac_1231902686_biz@paypal.com",
-	ReceiverId            string    // "S8XGHLYDW9T3S",
-
-	PayerId               string    //"LPLWNMTBWMFAY",
-	PayerStatus           string    //"verified",
-	PayerEmail            string    // "gpmac_1231902590_per@paypal.com",
-	ResidenceCountry      string    // "US",
-
-	ItemName              string    //"",
-	ItemNumber            int64     //"",
-	McCurrency            string    // "USD",
-	McGross               float64   // "19.95",
-	PaymentGross          float64   //"19.95",
-	Quantity              int64     // "1",
-	Tax                   float64   //"0.00",
-	ProtectionEligibility string    // "Eligible",
-	NotifyVersion         float64   // "2.6",
-	HandlingAmount        float64   // "0.00",
-	Custom                string    // "",
-
-	FirstName             string    // "Test",
-	LastName              string    // "User",
-
-
-																	//"address_status": "confirmed",
-																	//"address_street": "1 Main St",
-																	//"charset": "windows-1252",
-																	//"address_zip": "95131",
-																	//"mc_fee": "0.88",
-																	//"address_country_code": "US",
-																	//"address_name": "Test User",
-																	//"address_country": "United States",
-																	//"address_city": "San Jose",
-																	//"address_state": "CA",
-																	//"shipping": "0.00"
-}
-
-func PersistIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO/*, userKey datastore.Key*/) error {
-
-	//ctx.Debugf("IpnMessage: %s", ipnTxn.IpnMessage)
-	//ctx.Debugf("StatusResp: %s", ipnTxn.StatusResp)
+func PersistIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO, userKey string) error {
 
 	key, dbTxn, err := GetTransaction(ctx, ipnTxn.GetTxnId())
-
-	//ctx.Debugf("GetTxnId: " + ipnTxn.GetTxnId())
-	//ctx.Debugf("GetPaymentStatus: " + ipnTxn.GetPaymentStatus())
-	//ctx.Debugf("GetPaymentStatus: " + ipnTxn.GetPaymentStatus())
 
 	if err != nil && err != txnNotFoundError {
 		return err
@@ -269,9 +212,14 @@ func PersistIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO/*, userK
 	}
 
 	if key == nil {
-		key = datastore.NewIncompleteKey(ctx, TXN_KIND, txnCollectionParentKey(ctx))
+		if(userKey == "") {
+			key = datastore.NewIncompleteKey(ctx, TXN_KIND, txnCollectionParentKey(ctx))
+		} else {
+			key = datastore.NewIncompleteKey(ctx, TXN_KIND, UserDao.StringToKey(ctx, userKey))
+		}
 	}
 
+	ipnTxn.PaymentDate = ipnTxn.GetPaymentDate()
 	if _, err := datastore.Put(ctx, key, ipnTxn); err != nil {
 		return err
 	}
@@ -305,7 +253,7 @@ func GetTransactionsByUser(ctx appengine.Context, parentUserKey *datastore.Key) 
 
 	q := datastore.NewQuery(TXN_KIND).
 		Ancestor(parentUserKey).
-		Order("paymentDate")
+		Order("PaymentDate")
 
 	entryCount, err = q.Count(ctx);
 	if err != nil {
@@ -314,7 +262,7 @@ func GetTransactionsByUser(ctx appengine.Context, parentUserKey *datastore.Key) 
 
 	txnDtoList := make([]TransactionMsgDTO, 0, entryCount)
 
-	_, err = q.GetAll(ctx, txnDtoList)
+	_, err = q.GetAll(ctx, &txnDtoList)
 	if err != nil {
 		return nil, err
 	}

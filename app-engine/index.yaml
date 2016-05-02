@@ -14,3 +14,8 @@ indexes:
   ancestor: yes
   properties:
   - name: Date
+
+- kind: txn
+  ancestor: yes
+  properties:
+  - name: PaymentDate
