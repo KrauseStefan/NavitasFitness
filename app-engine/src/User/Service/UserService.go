@@ -13,6 +13,7 @@ import (
 
 	"src/User/Dao"
 	"src/IPN/Transaction"
+	"time"
 )
 
 const emailParam = "email"
@@ -108,10 +109,35 @@ func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := Common.WriteJSON(w, transactions); err != nil {
+	txnClientDtoList := make([]*TransactionMsgClientDTO, len(transactions))
+
+	for i, txn := range transactions {
+		txnClientDtoList[i] = newTransactionMsgClientDTO(&txn)
+	}
+
+	if _, err := Common.WriteJSON(w, txnClientDtoList); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+type TransactionMsgClientDTO struct {
+	Amount      float64   `json:"amount"`
+	Currency    string    `json:"currency"`
+	PaymentDate time.Time `json:"paymentDate"`
+	Status      string    `json:"status"`
+}
+
+func newTransactionMsgClientDTO(source *TransActionDao.TransactionMsgDTO) *TransactionMsgClientDTO {
+
+	txClient := TransactionMsgClientDTO{
+		Amount: source.GetAmount(),
+		Currency: source.GetCurrency(),
+		PaymentDate: source.GetPaymentDate(),
+		Status: source.GetPaymentStatus(),
+	}
+
+	return &txClient
 }
 
 //func userGetByEmail(w http.ResponseWriter, r *http.Request) {

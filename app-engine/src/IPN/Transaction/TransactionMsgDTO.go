@@ -46,6 +46,10 @@ func (txDto *TransactionMsgDTO) GetAmount() float64 {
 	return value
 }
 
+func (txDto *TransactionMsgDTO) GetCurrency() string {
+	return txDto.parseMessage().Get(FIELD_MC_CURRENCY)
+}
+
 func (txDto *TransactionMsgDTO) IsVerified() bool {
 	return txDto.StatusResp == "VERIFIED" // other option is "INVALID"
 }
