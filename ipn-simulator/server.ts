@@ -1,11 +1,19 @@
 import * as http from 'http';
 import * as url from 'url';
 import * as _ from 'lodash';
-import * as qs  from 'querystring';
+import * as qs from 'querystring';
+import * as momentOrg from 'moment';
+const moment: () => IMoment = require('moment-timezone');
+
 
 import RequestOptions = http.RequestOptions;
 import ServerResponse = http.ServerResponse;
 import IncomingMessage = http.IncomingMessage;
+
+
+interface IMoment extends momentOrg.Moment {
+  tz(ofset: string|number): IMoment;
+}
 
 /**
  * 1: recive post request to process payment
@@ -123,11 +131,13 @@ function sendIpnDataMessage(clientReq: IncomingMessage, serverRes: ServerRespons
   return new Promise<string>((resole, reject) => {
 
     readAllData(clientReq).then((body) => {
+      const dynamicFields = {
+        "payment_date": moment().tz("Europe/Copenhagen").utcOffset('+08:00').format('HH:mm:ss MMM D, YYYY z') //"20:12:59 Jan 13, 2009 PST",
+      };
       const formQueryObj = qs.parse(body)
-
       const queryObj = url.parse(clientReq.url, true).query;
 
-      const ipnBody = [paypalSampleIpnMsg, queryObj, formQueryObj].reduce((prev, cur) => {
+      const ipnBody = [paypalSampleIpnMsg, queryObj, formQueryObj, dynamicFields].reduce((prev, cur) => {
         return _.merge(prev, cur);
       }, {});
 
@@ -208,9 +218,9 @@ const paypalSampleIpnMsg = {
   "receiver_id": "S8XGHLYDW9T3S",
   "txn_type": "express_checkout",
   "item_name": "",
-  "mc_currency": "USD",
+  "mc_currency": "DKK",
   "item_number": "",
-  "residence_country": "US",
+  "residence_country": "DK",
   "test_ipn": "1",
   "handling_amount": "0.00",
   "transaction_subject": "",

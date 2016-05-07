@@ -15,7 +15,6 @@
   "compileOnSave": true,
   "files": [
     "typings/main.d.ts",
-    "index.ts"
+    "server.ts"
   ]
-
 }

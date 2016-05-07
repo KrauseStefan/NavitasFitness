@@ -2,11 +2,13 @@
   "name": "ipn-simulator",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "author": "",
   "license": "ISC",
   "dependencies": {
     "lodash": "^4.11.1",
+    "moment": "^2.13.0",
+    "moment-timezone": "^0.5.4",
     "typescript": "^1.9.0-dev.20160325"
   },
   "scripts": {
