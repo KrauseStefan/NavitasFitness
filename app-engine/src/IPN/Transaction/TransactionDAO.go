@@ -14,7 +14,7 @@ const (
 )
 
 var (
-	txnNotFoundError = errors.New("User does not exist in datastore")
+	txnNotFoundError = errors.New("Transaction does not exist in datastore")
 	txnDuplicateTxnMsg = errors.New("Doublicate message recived, this is likely not a programming error")
 	txnUnableToVerify = errors.New("Unable to verify message")
 )
@@ -40,7 +40,7 @@ func PersistIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO, userKey
 	}
 
 	if key == nil {
-		if(userKey == "") {
+		if userKey == "" {
 			key = datastore.NewIncompleteKey(ctx, TXN_KIND, txnCollectionParentKey(ctx))
 		} else {
 			key = datastore.NewIncompleteKey(ctx, TXN_KIND, UserDao.StringToKey(ctx, userKey))
@@ -57,7 +57,6 @@ func PersistIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO, userKey
 
 func GetTransaction(ctx appengine.Context, txnId string) (*datastore.Key, *TransactionMsgDTO, error) {
 	q := datastore.NewQuery(TXN_KIND).
-	//Ancestor(txnCollectionParentKey(ctx)).
 	Filter("TxnId=", txnId).
 	Limit(1)
 
