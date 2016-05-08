@@ -6,5 +6,5 @@ Start-Process ".\node_modules\.bin\gulp" "buildAndWatch"
 Start-Process "goapp" "serve ./app-engine/"
 
 cd ipn-simulator
-Start-Process "node index.js"
+Start-Process "npm start"
 cd ..

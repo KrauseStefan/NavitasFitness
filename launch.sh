@@ -13,7 +13,7 @@ gnome-terminal -e "goapp serve ./app-engine/" &
 
 cd ipn-simulator
 
-gnome-terminal -e "node index.js" &
+gnome-terminal -e "npm start" &
 
 
 cd -
