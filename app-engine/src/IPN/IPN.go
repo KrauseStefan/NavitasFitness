@@ -99,9 +99,9 @@ func ipnDoResponseTask(w http.ResponseWriter, r *http.Request) {
 		ctx.Infof("error: " + err.Error())
 		return
 	}
-	t.IpnMessage = string(content)
+	t.AddNewIpnMessage(string(content))
 
-	respBody, err := sendVerificationMassageToPaypall(ctx, t.IpnMessage)
+	respBody, err := sendVerificationMassageToPaypall(ctx, t.GetLatestIPNMessage())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		ctx.Infof("error: " + err.Error())
@@ -109,7 +109,7 @@ func ipnDoResponseTask(w http.ResponseWriter, r *http.Request) {
 	}
 	t.StatusResp = string(respBody)
 
-	body, err := url.ParseQuery(t.IpnMessage)
+	body, err := url.ParseQuery(t.GetLatestIPNMessage())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		ctx.Infof("error: " + err.Error())

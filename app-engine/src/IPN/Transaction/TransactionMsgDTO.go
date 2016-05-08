@@ -7,17 +7,17 @@ import (
 )
 
 type TransactionMsgDTO struct {
-	IpnMessage				string
-	StatusResp				string
+	IpnMessages      []string //History of IpnMessages
+	StatusResp       string
 
-	PaymentDate				time.Time
-	TxnId							string
-	parsedIpnMessage	url.Values `datastore:"-"`
+	PaymentDate      time.Time
+	TxnId            string
+	parsedIpnMessage url.Values `datastore:"-"`
 }
 
 func (txDto *TransactionMsgDTO) parseMessage() *url.Values {
 	if txDto.parsedIpnMessage == nil {
-		parsedIpnMessage, _ := url.ParseQuery(string(txDto.IpnMessage))
+		parsedIpnMessage, _ := url.ParseQuery(txDto.GetLatestIPNMessage())
 		txDto.parsedIpnMessage = parsedIpnMessage
 		txDto.PaymentDate = txDto.GetPaymentDate()
 		txDto.TxnId = txDto.GetTxnId()
@@ -28,6 +28,21 @@ func (txDto *TransactionMsgDTO) parseMessage() *url.Values {
 
 func (txDto *TransactionMsgDTO) GetTxnId() string {
 	return txDto.parseMessage().Get(FIELD_TXN_ID)
+}
+
+func (txDto *TransactionMsgDTO) GetLatestIPNMessage() string {
+	if len(txDto.IpnMessages) > 0 {
+		return txDto.IpnMessages[0]
+	} else {
+		return ""
+	}
+}
+
+func (txDto *TransactionMsgDTO) AddNewIpnMessage(ipnMessage string) *TransactionMsgDTO {
+	txDto.IpnMessages = append([]string{ipnMessage}, txDto.IpnMessages...)
+	txDto.parsedIpnMessage = nil
+	txDto.parseMessage()
+	return txDto
 }
 
 func (txDto *TransactionMsgDTO) GetPaymentStatus() string {

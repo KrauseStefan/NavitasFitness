@@ -39,6 +39,11 @@ func PersistIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO, userKey
 		return txnDuplicateTxnMsg
 	}
 
+	if dbTxn != nil {
+		//Add new ipn message to current DTO
+		ipnTxn = dbTxn.AddNewIpnMessage(ipnTxn.GetLatestIPNMessage())
+	}
+
 	if key == nil {
 		if userKey == "" {
 			key = datastore.NewIncompleteKey(ctx, TXN_KIND, txnCollectionParentKey(ctx))
