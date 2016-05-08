@@ -37,7 +37,6 @@ type UserDTO struct {
 	Password						string 		`json:"password",datastore:",noindex"`
 	NavitasId						string 		`json:"navitasId"`
 	CreatedDate					time.Time	`json:"createdDate"`
-	LastLogin						time.Time	`json:"lastLogin"`
 	CurrentSessionUUID	string 		`json:"currentSessionKey"`
 	IsAdmin							bool			`json:"isAdmin,omitempty"`
 }
@@ -57,18 +56,6 @@ func(user UserDTO) setKey(key *datastore.Key) UserDTO {
 
 func StringToKey(ctx appengine.Context, key string) *datastore.Key {
 	return userIntIDToKeyInt64(ctx, key)
-}
-
-
-func GetUserByKey(ctx appengine.Context, key *datastore.Key) (*UserDTO, error) {
-	var user UserDTO
-
-	if err := datastore.Get(ctx, key, &user); err != nil {
-		return nil, err
-	}
-
-	user.setKey(key)
-	return &user, nil
 }
 
 func GetUserByEmail(ctx appengine.Context, email string) (*UserDTO, error) {
@@ -98,6 +85,10 @@ func CreateUser(ctx appengine.Context, user *UserDTO) error {
 
 	if user.hasKey() {
 		return userHasIdError
+	}
+
+	if user, _ := GetUserByEmail(ctx, user.Email); user != nil{
+		return userAlreadyExistsError
 	}
 
 	key := datastore.NewIncompleteKey(ctx, USER_KIND, userCollectionParentKey(ctx))
