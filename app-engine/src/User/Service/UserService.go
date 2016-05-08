@@ -16,8 +16,6 @@ import (
 	"time"
 )
 
-const emailParam = "email"
-
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/user"
 
@@ -32,12 +30,6 @@ func IntegrateRoutes(router *mux.Router) {
 		Path(path + "/transactions").
 		Name("GetLatestTransactions").
 		HandlerFunc(getUserTransactionsHandler)
-
-	//router.
-	//	Methods("GET").
-	//	Path(path + "/{" + emailParam + "}").
-	//	Name("GetUserCurrentUserInfo").
-	//	HandlerFunc(userGetByEmail)
 
 	router.
 		Methods("POST").
@@ -139,22 +131,3 @@ func newTransactionMsgClientDTO(source *TransActionDao.TransactionMsgDTO) *Trans
 
 	return &txClient
 }
-
-//func userGetByEmail(w http.ResponseWriter, r *http.Request) {
-//
-//	vars := mux.Vars(r)
-//	email := vars[emailParam]
-//
-//	ctx := appengine.NewContext(r)
-//
-//	userDto, err := UserDao.GetUserByEmail(ctx, email)
-//	if err != nil {
-//		http.Error(w, err.Error(), http.StatusInternalServerError)
-//		return
-//	}
-//
-//	if _, err := Common.WriteJSON(w, userDto); err != nil {
-//		http.Error(w, err.Error(), http.StatusInternalServerError)
-//		return
-//	}
-//}

@@ -17,8 +17,8 @@ import (
 const sessionCookieName = "Session-Key"
 
 type UserLogin struct {
-	Password	string `json:"password"`
-	Email			string `json:"email"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
 }
 
 func (ul UserLogin) hasValues() bool {
@@ -26,7 +26,7 @@ func (ul UserLogin) hasValues() bool {
 }
 
 var (
-	invalidLoginError	= errors.New("Invalid login information, both password and email must be provided")
+	invalidLoginError = errors.New("Invalid login information, both password and email must be provided")
 )
 
 func generateUUID() (string, error) {
@@ -46,37 +46,43 @@ func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/auth"
 
 	router.
-		Methods("POST").
-		Path(path + "/login").
-		Name("loginUser").
-		HandlerFunc(doLogin)
+	Methods("POST").
+	Path(path + "/login").
+	Name("loginUser").
+	HandlerFunc(doLogin)
 
 	router.
-		Methods("POST").
-		Path(path + "/logout").
-		Name("logoutUser").
-		HandlerFunc(doLogout)
+	Methods("POST").
+	Path(path + "/logout").
+	Name("logoutUser").
+	HandlerFunc(doLogout)
 
 }
 
 func setSessionCookie(w http.ResponseWriter, uuid string) error {
+	const MaxAgeDeleteNow = -1
+	const MaxAgeDefault = 0
 	var (
 		err error
 		encoded string
+		maxAge int = MaxAgeDefault
 	)
 	s := GetSecureCookieInst()
 
-	if(uuid != ""){
+	if (uuid != "") {
 		encoded, err = s.Encode(sessionCookieName, uuid)
 		if err != nil {
 			return err
 		}
+	} else {
+		maxAge = MaxAgeDeleteNow;
 	}
 
 	cookie := &http.Cookie{
 		Name:  sessionCookieName,
 		Value: encoded,
 		Path:  "/",
+		MaxAge: maxAge,
 	}
 	http.SetCookie(w, cookie)
 
@@ -94,9 +100,9 @@ func doLogout(w http.ResponseWriter, r *http.Request) {
 func doLogin(w http.ResponseWriter, r *http.Request) {
 
 	var (
-		user 	*UserDao.UserDTO
-		uuid 	string
-		err		error
+		user  *UserDao.UserDTO
+		uuid string
+		err error
 	)
 
 	ctx := appengine.NewContext(r)
@@ -109,7 +115,7 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if(!loginRequestUser.hasValues()) {
+	if !loginRequestUser.hasValues() {
 		http.Error(w, invalidLoginError.Error(), http.StatusBadRequest)
 		return
 	}
@@ -120,7 +126,7 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if(user == nil || user.Password != loginRequestUser.Password){
+	if user == nil || user.VerifyPassword(loginRequestUser.Password) {
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}
