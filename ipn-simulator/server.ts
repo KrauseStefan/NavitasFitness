@@ -132,7 +132,8 @@ function sendIpnDataMessage(clientReq: IncomingMessage, serverRes: ServerRespons
 
     readAllData(clientReq).then((body) => {
       const dynamicFields = {
-        "payment_date": moment().tz("Europe/Copenhagen").utcOffset('+08:00').format('HH:mm:ss MMM D, YYYY z') //"20:12:59 Jan 13, 2009 PST",
+        "payment_date": moment().tz("Europe/Copenhagen").utcOffset('+08:00').format('HH:mm:ss MMM DD, YYYY z'), //"20:12:59 Jan 13, 2009 PST",
+        "txn_id": "" + new Date().getTime()
       };
       const formQueryObj = qs.parse(body)
       const queryObj = url.parse(clientReq.url, true).query;
