@@ -26,7 +26,7 @@ export class UserStatus {
   }
 
   getTransactionsUpdate() {
-    this.$http.get('http://localhost:9000/rest/user/transactions').then(
+    this.$http.get('/rest/user/transactions').then(
       (res) => {
         this.model.transactionHistory = <TransactionEntry[]>res.data;
       }

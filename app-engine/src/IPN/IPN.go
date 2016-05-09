@@ -51,8 +51,6 @@ func IntegrateRoutes(router *mux.Router) {
 //This is need in order to close the original request before responding
 func processIPN(w http.ResponseWriter, r *http.Request) {
 
-	w.WriteHeader(http.StatusOK)
-
 	ctx := appengine.NewContext(r)
 
 	content, err := ioutil.ReadAll(r.Body)
@@ -70,11 +68,11 @@ func processIPN(w http.ResponseWriter, r *http.Request) {
 	// Persist transaction details in unconfirmed state (processing?)
 }
 
-func sendVerificationMassageToPaypall(ctx appengine.Context, content string) (string, error) {
+func sendVerificationMassageToPaypal(ctx appengine.Context, content string) (string, error) {
 
 	extraData := []byte("cmd=_notify-validate&")
 	client := urlfetch.Client(ctx)
-	resp, err := client.Post(localIpn, FromEncodedContentType, bytes.NewBuffer(append(extraData, content...)))
+	resp, err := client.Post(PaypalIpnSandBox, FromEncodedContentType, bytes.NewBuffer(append(extraData, content...)))
 	if err != nil {
 		return "", err
 	}
@@ -96,15 +94,15 @@ func ipnDoResponseTask(w http.ResponseWriter, r *http.Request) {
 	content, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		ctx.Infof("error: " + err.Error())
+		ctx.Errorf("error: " + err.Error())
 		return
 	}
 	t.AddNewIpnMessage(string(content))
 
-	respBody, err := sendVerificationMassageToPaypall(ctx, t.GetLatestIPNMessage())
+	respBody, err := sendVerificationMassageToPaypal(ctx, t.GetLatestIPNMessage())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		ctx.Infof("error: " + err.Error())
+		ctx.Errorf("error: " + err.Error())
 		return
 	}
 	t.StatusResp = string(respBody)
@@ -112,12 +110,12 @@ func ipnDoResponseTask(w http.ResponseWriter, r *http.Request) {
 	body, err := url.ParseQuery(t.GetLatestIPNMessage())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		ctx.Infof("error: " + err.Error())
+		ctx.Errorf("error: " + err.Error())
 		return
 	}
 
 	email := body.Get(TransActionDao.FIELD_CUSTOM)
-	if email == "" {
+	if email == "" { // TODO: handle bad request in a way other then discarding
 		http.Error(w, "No email recived", http.StatusBadRequest)
 		ctx.Errorf("No email recived")
 		return
@@ -140,6 +138,7 @@ func ipnDoResponseTask(w http.ResponseWriter, r *http.Request) {
 		ctx.Infof("id: " + user.Key)
 
 		if err := TransActionDao.PersistIpnMessage(ctx, &t, user.Key); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			ctx.Errorf(err.Error())
 		}
 

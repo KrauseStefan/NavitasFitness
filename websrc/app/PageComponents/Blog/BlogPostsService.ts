@@ -1,4 +1,3 @@
-/// <reference path="../../../typings/main"/>
 import '../../Components/CkEditor/CkEditor';
 
 import IHttpService = angular.IHttpService;
