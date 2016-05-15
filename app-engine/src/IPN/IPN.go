@@ -12,6 +12,7 @@ import (
 	"src/IPN/Transaction"
 	"net/url"
 	"src/User/Dao"
+	"errors"
 )
 
 const (
@@ -42,7 +43,7 @@ func IntegrateRoutes(router *mux.Router) {
 	Methods("POST").
 	Path(ipnRespondTaskUrl).
 	Name("ipn notification responder task").
-	HandlerFunc(ipnDoResponseTask)
+	HandlerFunc(ipnDoResponseTaskHandler)
 
 }
 
@@ -68,11 +69,21 @@ func processIPN(w http.ResponseWriter, r *http.Request) {
 	// Persist transaction details in unconfirmed state (processing?)
 }
 
-func sendVerificationMassageToPaypal(ctx appengine.Context, content string) (string, error) {
+func sendVerificationMassageToPaypal(ctx appengine.Context, content string, testIpnField string) (string, error) {
 
+	paypalIpnUrl := PaypalIpn
+	if testIpnField != "" {
+		if testIpnField == "1" {
+			paypalIpnUrl = PaypalIpnSandBox
+		} else {
+			paypalIpnUrl = localIpn
+		}
+	}
+
+	ctx.Infof("Sending msg to: " + paypalIpnUrl)
 	extraData := []byte("cmd=_notify-validate&")
 	client := urlfetch.Client(ctx)
-	resp, err := client.Post(PaypalIpnSandBox, FromEncodedContentType, bytes.NewBuffer(append(extraData, content...)))
+	resp, err := client.Post(paypalIpnUrl, FromEncodedContentType, bytes.NewBuffer(append(extraData, content...)))
 	if err != nil {
 		return "", err
 	}
@@ -84,66 +95,85 @@ func sendVerificationMassageToPaypal(ctx appengine.Context, content string) (str
 }
 
 // Send message for verification with cmd=_notify-validate prepended
-// Verify message
-// Lookup user
-// Lookup Transaction?
-func ipnDoResponseTask(w http.ResponseWriter, r *http.Request) {
+// Verify message //discard if message cannot be verified
+// Lookup Transaction to update (or create new)
+// Lookup user, if it exists verify that it is the same as a found transaction
+func ipnDoResponseTaskHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
-	var t TransActionDao.TransactionMsgDTO
+
+	if err := ipnDoResponseTask(ctx, r); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.Errorf(err.Error())
+	}
+}
+
+func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error{
+	var transaction TransActionDao.TransactionMsgDTO
 
 	content, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		ctx.Errorf("error: " + err.Error())
-		return
+		return err
 	}
-	t.AddNewIpnMessage(string(content))
-
-	respBody, err := sendVerificationMassageToPaypal(ctx, t.GetLatestIPNMessage())
+	body, err := url.ParseQuery(string(content))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		ctx.Errorf("error: " + err.Error())
-		return
+		return err
 	}
-	t.StatusResp = string(respBody)
-
-	body, err := url.ParseQuery(t.GetLatestIPNMessage())
+	testIpnField := body.Get(TransActionDao.FIELD_TEST_IPN)
+	email := body.Get(TransActionDao.FIELD_CUSTOM) //The custom field should contain the email
+	respBody, err := sendVerificationMassageToPaypal(ctx, string(content), testIpnField)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		ctx.Errorf("error: " + err.Error())
-		return
+		return err
+	}
+	if string(respBody) != "VERIFIED" {
+		return errors.New("Message was not verified by paypal, either a fake message or program error, msg: " + string(respBody))
 	}
 
-	email := body.Get(TransActionDao.FIELD_CUSTOM)
-	if email == "" { // TODO: handle bad request in a way other then discarding
-		http.Error(w, "No email recived", http.StatusBadRequest)
-		ctx.Errorf("No email recived")
-		return
+	//message is now verified and should be persisted
+
+	savedTransaction, err := TransActionDao.GetTransaction(ctx, transaction.TxnId)
+	if  err != nil {
+		return err
+	}
+	if savedTransaction != nil {
+		savedTransaction.AddNewIpnMessage(string(content))
+		savedTransaction.StatusResp = string(respBody)
+	} else {
+		if email == "" { // TODO: handle bad request in a way other then discarding, save without a parent user
+			//http.Error(w, "No email received", http.StatusBadRequest)
+			return errors.New("No email recived")
+		}
+
+		transaction.AddNewIpnMessage(string(content))
+		transaction.StatusResp = string(respBody)
 	}
 
 	ctx.Infof("Recived transaction from: " + email)
 	user, err := UserDao.GetUserByEmail(ctx, email)
-	if (err != nil) {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		ctx.Errorf(err.Error())
-		return
+	if err != nil {
+		return err
 	}
-	if user == nil {
-		http.Error(w, "User does not exist", http.StatusBadRequest)
-		ctx.Errorf("User does not exist")
-		return
+	if user == nil && savedTransaction == nil{
+		//http.Error(w, "User does not exist", http.StatusBadRequest)
+		return errors.New("User does not exist")
 	}
 
 	if (user != nil) {
 		ctx.Infof("id: " + user.Key)
-
-		if err := TransActionDao.PersistIpnMessage(ctx, &t, user.Key); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			ctx.Errorf(err.Error())
-		}
-
 	}
 
+	if savedTransaction != nil && transaction.GetPaymentStatus() == savedTransaction.GetPaymentStatus() {
+		//Verify that the IPN is not a duplicate. To do this, save the transaction ID and last payment status in each IPN message in a database and verify that the current IPN's values for these fields are not already in this database.
+		//Duplicate txnMsg
+		//Persist anyway?, with status duplicate?
+		return TransActionDao.TxnDuplicateTxnMsg
+	}
+
+
+	if err := TransActionDao.PersistIpnMessage(ctx, &transaction, user.Key); err != nil {
+		return err
+	}
+
+	return nil
 	//if(string(respBody) == "VERIFIED") {
 	//	// register ipn message
 	//	// Verify amount is correct

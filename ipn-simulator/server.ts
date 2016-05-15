@@ -222,7 +222,7 @@ const paypalSampleIpnMsg = {
   "mc_currency": "DKK",
   "item_number": "",
   "residence_country": "DK",
-  "test_ipn": "1",
+  "test_ipn": "-1", //"test_ipn": "1", -1 for local host testing
   "handling_amount": "0.00",
   "transaction_subject": "",
   "payment_gross": "19.95",

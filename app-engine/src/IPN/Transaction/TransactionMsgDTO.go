@@ -4,15 +4,46 @@ import (
 	"time"
 	"net/url"
 	"strconv"
+	"appengine"
+	"appengine/datastore"
+	"src/Common"
+)
+
+const (
+	TXN_KIND = "txn"
+	TXN_PARENT_STRING_ID = "default_txn"
+)
+
+var (
+	txnCollectionParentKey = Common.CollectionParentKeyGetFnGenerator(TXN_KIND, TXN_PARENT_STRING_ID, 0)
+	txnIntIDToKeyInt64 = Common.IntIDToKeyInt64(TXN_KIND, txnCollectionParentKey)
 )
 
 type TransactionMsgDTO struct {
+	Key              string
 	IpnMessages      []string //History of IpnMessages
 	StatusResp       string
 
 	PaymentDate      time.Time
 	TxnId            string
 	parsedIpnMessage url.Values `datastore:"-"`
+}
+
+func (txDto *TransactionMsgDTO) hasKey() bool {
+	return len(txDto.Key) > 0
+}
+
+func (txDto *TransactionMsgDTO) GetDataStoreKey(ctx appengine.Context) *datastore.Key {
+	return StringToKey(ctx, txDto.Key)
+}
+
+func(txDto *TransactionMsgDTO) setKey(key *datastore.Key) *TransactionMsgDTO {
+	txDto.Key = strconv.FormatInt(key.IntID(), 10)
+	return txDto
+}
+
+func StringToKey(ctx appengine.Context, key string) *datastore.Key {
+	return txnIntIDToKeyInt64(ctx, key)
 }
 
 func (txDto *TransactionMsgDTO) parseMessage() *url.Values {
