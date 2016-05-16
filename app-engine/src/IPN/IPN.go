@@ -109,7 +109,7 @@ func ipnDoResponseTaskHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error{
-	var transaction TransActionDao.TransactionMsgDTO
+	var transaction TransactionDao.TransactionMsgDTO
 
 	content, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -119,8 +119,8 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error{
 	if err != nil {
 		return err
 	}
-	testIpnField := body.Get(TransActionDao.FIELD_TEST_IPN)
-	email := body.Get(TransActionDao.FIELD_CUSTOM) //The custom field should contain the email
+	testIpnField := body.Get(TransactionDao.FIELD_TEST_IPN)
+	email := body.Get(TransactionDao.FIELD_CUSTOM) //The custom field should contain the email
 	respBody, err := sendVerificationMassageToPaypal(ctx, string(content), testIpnField)
 	if err != nil {
 		return err
@@ -131,7 +131,7 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error{
 
 	//message is now verified and should be persisted
 
-	savedTransaction, err := TransActionDao.GetTransaction(ctx, transaction.GetTxnId())
+	savedTransaction, err := TransactionDao.GetTransaction(ctx, transaction.GetTxnId())
 	if  err != nil {
 		return err
 	}
@@ -169,11 +169,11 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error{
 		//Verify that the IPN is not a duplicate. To do this, save the transaction ID and last payment status in each IPN message in a database and verify that the current IPN's values for these fields are not already in this database.
 		//Duplicate txnMsg
 		//Persist anyway?, with status duplicate?
-		return TransActionDao.TxnDuplicateTxnMsg
+		return TransactionDao.TxnDuplicateTxnMsg
 	}
 
 
-	if err := TransActionDao.PersistIpnMessage(ctx, &transaction, user.Key); err != nil {
+	if err := TransactionDao.PersistIpnMessage(ctx, &transaction, user.Key); err != nil {
 		return err
 	}
 

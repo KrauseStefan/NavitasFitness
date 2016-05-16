@@ -1,4 +1,4 @@
-package TransActionDao
+package TransactionDao
 
 import (
 	"appengine/datastore"

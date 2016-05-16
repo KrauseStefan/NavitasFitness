@@ -95,7 +95,7 @@ func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	transactions, err := TransActionDao.GetTransactionsByUser(ctx, user.GetDataStoreKey(ctx))
+	transactions, err := TransactionDao.GetTransactionsByUser(ctx, user.GetDataStoreKey(ctx))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -120,7 +120,7 @@ type TransactionMsgClientDTO struct {
 	Status      string    `json:"status"`
 }
 
-func newTransactionMsgClientDTO(source *TransActionDao.TransactionMsgDTO) *TransactionMsgClientDTO {
+func newTransactionMsgClientDTO(source *TransactionDao.TransactionMsgDTO) *TransactionMsgClientDTO {
 
 	txClient := TransactionMsgClientDTO{
 		Amount: source.GetAmount(),
