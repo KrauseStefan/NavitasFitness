@@ -51,14 +51,14 @@ func (txDto *TransactionMsgDTO) parseMessage() *url.Values {
 		parsedIpnMessage, _ := url.ParseQuery(txDto.GetLatestIPNMessage())
 		txDto.parsedIpnMessage = parsedIpnMessage
 		txDto.PaymentDate = txDto.GetPaymentDate()
-		txDto.TxnId = txDto.GetTxnId()
+		txDto.TxnId = txDto.GetField(FIELD_TXN_ID)
 	}
 
 	return &txDto.parsedIpnMessage
 }
 
-func (txDto *TransactionMsgDTO) GetTxnId() string {
-	return txDto.parseMessage().Get(FIELD_TXN_ID)
+func (txDto *TransactionMsgDTO) GetField(field string) string {
+	return txDto.parseMessage().Get(field)
 }
 
 func (txDto *TransactionMsgDTO) GetLatestIPNMessage() string {

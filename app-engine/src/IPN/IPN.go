@@ -10,7 +10,6 @@ import (
 	"appengine/urlfetch"
 	"appengine/taskqueue"
 	"src/IPN/Transaction"
-	"net/url"
 	"src/User/Dao"
 	"errors"
 	"fmt"
@@ -108,19 +107,16 @@ func ipnDoResponseTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error{
+func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 	var transaction TransactionDao.TransactionMsgDTO
 
 	content, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return err
 	}
-	body, err := url.ParseQuery(string(content))
-	if err != nil {
-		return err
-	}
-	testIpnField := body.Get(TransactionDao.FIELD_TEST_IPN)
-	email := body.Get(TransactionDao.FIELD_CUSTOM) //The custom field should contain the email
+	transaction.AddNewIpnMessage(string(content))
+	testIpnField := transaction.GetField(TransactionDao.FIELD_TEST_IPN)
+	email := transaction.GetField(TransactionDao.FIELD_CUSTOM) //The custom field should contain the email
 	respBody, err := sendVerificationMassageToPaypal(ctx, string(content), testIpnField)
 	if err != nil {
 		return err
@@ -131,50 +127,54 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error{
 
 	//message is now verified and should be persisted
 
-	savedTransaction, err := TransactionDao.GetTransaction(ctx, transaction.GetTxnId())
-	if  err != nil {
+	savedTransaction, err := TransactionDao.GetTransaction(ctx, transaction.GetField(TransactionDao.FIELD_TXN_ID))
+	if err != nil {
 		return err
 	}
 	if savedTransaction != nil {
 		savedTransaction.AddNewIpnMessage(string(content))
 		savedTransaction.StatusResp = string(respBody)
-	} else {
-		ctx.Infof(fmt.Sprintf("Txn not found: %q", transaction.GetTxnId()))
 
-		if email == "" { // TODO: handle bad request in a way other then discarding, save without a parent user
+		if transaction.GetPaymentStatus() == savedTransaction.GetPaymentStatus() {
+			//Verify that the IPN is not a duplicate. To do this, save the transaction ID and last payment status in each IPN message in a database and verify that the current IPN's values for these fields are not already in this database.
+			//Duplicate txnMsg
+			//Persist anyway?, with status duplicate?
+			return TransactionDao.TxnDuplicateTxnMsg
+		}
+
+		if err := TransactionDao.UpdateIpnMessage(ctx, savedTransaction); err != nil {
+			return err
+		}
+	} else {
+		ctx.Infof(fmt.Sprintf("TxnId not found: %q", transaction.GetField(TransactionDao.FIELD_TXN_ID)))
+
+		if email == "" {
+			// TODO: handle bad request in a way other then discarding, save without a parent user
 			//http.Error(w, "No email received", http.StatusBadRequest)
+			ctx.Infof(fmt.Sprintf("TxnId nor email found in msg: %q", string(respBody)))
 			return errors.New("Neither transaction ID nor email could be used to lookup user")
 		}
 
 		transaction.AddNewIpnMessage(string(content))
 		transaction.StatusResp = string(respBody)
-	}
 
-	ctx.Infof(fmt.Sprintf("Recived transaction from: %q", email))
-	user, err := UserDao.GetUserByEmail(ctx, email)
-	if err != nil {
-		return err
-	}
-	if user == nil && savedTransaction == nil{
-		//http.Error(w, "User does not exist", http.StatusBadRequest)
-		return errors.New("User does not exist")
-	}
+		ctx.Infof(fmt.Sprintf("Recived transaction from: %q", email))
+		user, err := UserDao.GetUserByEmail(ctx, email)
+		if err != nil {
+			return err
+		}
+		if user == nil && savedTransaction == nil {
+			//http.Error(w, "User does not exist", http.StatusBadRequest)
+			return errors.New("User does not exist")
+		}
 
+		if (user != nil) {
+			ctx.Infof(fmt.Sprintf("User key: %q", user.Key))
+		}
 
-	if (user != nil) {
-		ctx.Infof(fmt.Sprintf("User key: %q", user.Key))
-	}
-
-	if savedTransaction != nil && transaction.GetPaymentStatus() == savedTransaction.GetPaymentStatus() {
-		//Verify that the IPN is not a duplicate. To do this, save the transaction ID and last payment status in each IPN message in a database and verify that the current IPN's values for these fields are not already in this database.
-		//Duplicate txnMsg
-		//Persist anyway?, with status duplicate?
-		return TransactionDao.TxnDuplicateTxnMsg
-	}
-
-
-	if err := TransactionDao.PersistIpnMessage(ctx, &transaction, user.Key); err != nil {
-		return err
+		if err := TransactionDao.PersistNewIpnMessage(ctx, &transaction, user.Key); err != nil {
+			return err
+		}
 	}
 
 	return nil

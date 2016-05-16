@@ -12,19 +12,33 @@ var (
 	//txnUnableToVerify = errors.New("Unable to verify message")
 )
 
-func PersistIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO, userKey string) error {
+func UpdateIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO) error {
+
+	key := ipnTxn.GetDataStoreKey(ctx);
+
+	ipnTxn.PaymentDate = ipnTxn.GetPaymentDate();
+
+	if _, err := datastore.Put(ctx, key, ipnTxn); err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func PersistNewIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO, userKey string) error {
 
 	var newKey *datastore.Key
 
 	if !ipnTxn.hasKey() {
-		if userKey == "" {
-			newKey = datastore.NewIncompleteKey(ctx, TXN_KIND, txnCollectionParentKey(ctx))
-			//todo log an error here, this is not a normal scenario
-		} else {
-			newKey = datastore.NewIncompleteKey(ctx, TXN_KIND, UserDao.StringToKey(ctx, userKey))
-		}
+		return errors.New("ipnTxn has already been persisted, use update function ínstead")
+	}
+
+	if userKey == "" {
+		newKey = datastore.NewIncompleteKey(ctx, TXN_KIND, txnCollectionParentKey(ctx))
+		//todo log an error here, this is not a normal scenario
 	} else {
-		newKey = ipnTxn.GetDataStoreKey(ctx)
+		newKey = datastore.NewIncompleteKey(ctx, TXN_KIND, UserDao.StringToKey(ctx, userKey))
 	}
 
 	ipnTxn.PaymentDate = ipnTxn.GetPaymentDate()
