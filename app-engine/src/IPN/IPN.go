@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"src/User/Dao"
 	"errors"
+	"fmt"
 )
 
 const (
@@ -130,7 +131,7 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error{
 
 	//message is now verified and should be persisted
 
-	savedTransaction, err := TransActionDao.GetTransaction(ctx, transaction.TxnId)
+	savedTransaction, err := TransActionDao.GetTransaction(ctx, transaction.GetTxnId())
 	if  err != nil {
 		return err
 	}
@@ -138,16 +139,18 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error{
 		savedTransaction.AddNewIpnMessage(string(content))
 		savedTransaction.StatusResp = string(respBody)
 	} else {
+		ctx.Infof(fmt.Sprintf("Txn not found: %q", transaction.GetTxnId()))
+
 		if email == "" { // TODO: handle bad request in a way other then discarding, save without a parent user
 			//http.Error(w, "No email received", http.StatusBadRequest)
-			return errors.New("No email recived")
+			return errors.New("Neither transaction ID nor email could be used to lookup user")
 		}
 
 		transaction.AddNewIpnMessage(string(content))
 		transaction.StatusResp = string(respBody)
 	}
 
-	ctx.Infof("Recived transaction from: " + email)
+	ctx.Infof(fmt.Sprintf("Recived transaction from: %q", email))
 	user, err := UserDao.GetUserByEmail(ctx, email)
 	if err != nil {
 		return err
@@ -157,8 +160,9 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error{
 		return errors.New("User does not exist")
 	}
 
+
 	if (user != nil) {
-		ctx.Infof("id: " + user.Key)
+		ctx.Infof(fmt.Sprintf("User key: %q", user.Key))
 	}
 
 	if savedTransaction != nil && transaction.GetPaymentStatus() == savedTransaction.GetPaymentStatus() {
