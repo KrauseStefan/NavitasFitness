@@ -13,6 +13,7 @@ import (
 	"src/User/Dao"
 	"errors"
 	"fmt"
+	"encoding/json"
 )
 
 const (
@@ -108,12 +109,13 @@ func ipnDoResponseTaskHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
-	var transaction TransactionDao.TransactionMsgDTO
 
 	content, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return err
 	}
+
+	transaction := TransactionDao.NewTransactionMsgDTO()
 	transaction.AddNewIpnMessage(string(content))
 	testIpnField := transaction.GetField(TransactionDao.FIELD_TEST_IPN)
 	email := transaction.GetField(TransactionDao.FIELD_CUSTOM) //The custom field should contain the email
@@ -127,20 +129,28 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 
 	//message is now verified and should be persisted
 
+	ctx.Debugf(fmt.Sprintf("%s: %q", TransactionDao.FIELD_PAYMENT_STATUS, transaction.GetField(TransactionDao.FIELD_PAYMENT_STATUS)))
+
 	savedTransaction, err := TransactionDao.GetTransaction(ctx, transaction.GetField(TransactionDao.FIELD_TXN_ID))
 	if err != nil {
 		return err
 	}
 	if savedTransaction != nil {
-		savedTransaction.AddNewIpnMessage(string(content))
-		savedTransaction.StatusResp = string(respBody)
-
 		if transaction.GetPaymentStatus() == savedTransaction.GetPaymentStatus() {
 			//Verify that the IPN is not a duplicate. To do this, save the transaction ID and last payment status in each IPN message in a database and verify that the current IPN's values for these fields are not already in this database.
 			//Duplicate txnMsg
 			//Persist anyway?, with status duplicate?
+
 			return TransactionDao.TxnDuplicateTxnMsg
 		}
+		savedTransaction.AddNewIpnMessage(string(content))
+		savedTransaction.StatusResp = string(respBody)
+
+		ctx.Debugf("IpnData: %q", respBody)
+
+		js, _ := json.Marshal(savedTransaction)
+		ctx.Debugf("IpnSaved: %q", js)
+
 
 		if err := TransactionDao.UpdateIpnMessage(ctx, savedTransaction); err != nil {
 			return err
@@ -155,7 +165,6 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 			return errors.New("Neither transaction ID nor email could be used to lookup user")
 		}
 
-		transaction.AddNewIpnMessage(string(content))
 		transaction.StatusResp = string(respBody)
 
 		ctx.Infof(fmt.Sprintf("Recived transaction from: %q", email))
@@ -168,11 +177,16 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 			return errors.New("User does not exist")
 		}
 
-		if (user != nil) {
+		if user != nil {
 			ctx.Infof(fmt.Sprintf("User key: %q", user.Key))
 		}
 
-		if err := TransactionDao.PersistNewIpnMessage(ctx, &transaction, user.Key); err != nil {
+		ctx.Debugf("IpnData: %q", respBody)
+
+		js, _ := json.Marshal(transaction)
+		ctx.Debugf("IpnSaved: %q", js)
+
+		if err := TransactionDao.PersistNewIpnMessage(ctx, transaction, user.Key); err != nil {
 			return err
 		}
 	}

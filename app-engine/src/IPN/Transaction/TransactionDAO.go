@@ -23,14 +23,13 @@ func UpdateIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO) error {
 	}
 
 	return nil
-
 }
 
 func PersistNewIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO, userKey string) error {
 
 	var newKey *datastore.Key
 
-	if !ipnTxn.hasKey() {
+	if ipnTxn.hasKey() {
 		return errors.New("ipnTxn has already been persisted, use update function ínstead")
 	}
 
@@ -65,15 +64,15 @@ func GetTransaction(ctx appengine.Context, txnId string) (*TransactionMsgDTO, er
 		return nil, nil
 	}
 
-	txnDtoList[0].setKey(keys[0])
+	txnDtoList[0].key = keys[0]
 	return &txnDtoList[0], nil
 }
 
 func GetTransactionsByUser(ctx appengine.Context, parentUserKey *datastore.Key) ([]TransactionMsgDTO, error) {
 
 	q := datastore.NewQuery(TXN_KIND).
-		Ancestor(parentUserKey).
-		Order("PaymentDate")
+	Ancestor(parentUserKey).
+	Order("PaymentDate")
 
 	entryCount, err := q.Count(ctx);
 	if err != nil {
@@ -88,7 +87,8 @@ func GetTransactionsByUser(ctx appengine.Context, parentUserKey *datastore.Key) 
 	}
 
 	for i, key := range keys {
-		txnDtoList[i].setKey(key)
+		txnDtoList[i].parsedIpnMessage = nil
+		txnDtoList[i].key = key
 	}
 
 	return txnDtoList, nil

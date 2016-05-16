@@ -19,36 +19,34 @@ var (
 	txnIntIDToKeyInt64 = Common.IntIDToKeyInt64(TXN_KIND, txnCollectionParentKey)
 )
 
+func NewTransactionMsgDTO() *TransactionMsgDTO {
+	t := new(TransactionMsgDTO)
+	t.key = nil
+	return t
+}
+
 type TransactionMsgDTO struct {
-	Key              string
 	IpnMessages      []string //History of IpnMessages
 	StatusResp       string
 
 	PaymentDate      time.Time
 	TxnId            string
+
+	key              *datastore.Key `datastore:"-"`
 	parsedIpnMessage url.Values `datastore:"-"`
 }
 
 func (txDto *TransactionMsgDTO) hasKey() bool {
-	return len(txDto.Key) > 0
+	return txDto.key != nil
 }
 
 func (txDto *TransactionMsgDTO) GetDataStoreKey(ctx appengine.Context) *datastore.Key {
-	return StringToKey(ctx, txDto.Key)
-}
-
-func(txDto *TransactionMsgDTO) setKey(key *datastore.Key) *TransactionMsgDTO {
-	txDto.Key = strconv.FormatInt(key.IntID(), 10)
-	return txDto
-}
-
-func StringToKey(ctx appengine.Context, key string) *datastore.Key {
-	return txnIntIDToKeyInt64(ctx, key)
+	return txDto.key
 }
 
 func (txDto *TransactionMsgDTO) parseMessage() *url.Values {
 	if txDto.parsedIpnMessage == nil {
-		parsedIpnMessage, _ := url.ParseQuery(txDto.GetLatestIPNMessage())
+		parsedIpnMessage, _ := url.ParseQuery(txDto.getLatestIPNMessage())
 		txDto.parsedIpnMessage = parsedIpnMessage
 		txDto.PaymentDate = txDto.GetPaymentDate()
 		txDto.TxnId = txDto.GetField(FIELD_TXN_ID)
@@ -61,7 +59,7 @@ func (txDto *TransactionMsgDTO) GetField(field string) string {
 	return txDto.parseMessage().Get(field)
 }
 
-func (txDto *TransactionMsgDTO) GetLatestIPNMessage() string {
+func (txDto *TransactionMsgDTO) getLatestIPNMessage() string {
 	if len(txDto.IpnMessages) > 0 {
 		return txDto.IpnMessages[0]
 	} else {

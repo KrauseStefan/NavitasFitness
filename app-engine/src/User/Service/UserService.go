@@ -118,6 +118,7 @@ type TransactionMsgClientDTO struct {
 	Currency    string    `json:"currency"`
 	PaymentDate time.Time `json:"paymentDate"`
 	Status      string    `json:"status"`
+	IpnMessages      []string //History of IpnMessages
 }
 
 func newTransactionMsgClientDTO(source *TransactionDao.TransactionMsgDTO) *TransactionMsgClientDTO {
@@ -127,6 +128,7 @@ func newTransactionMsgClientDTO(source *TransactionDao.TransactionMsgDTO) *Trans
 		Currency: source.GetCurrency(),
 		PaymentDate: source.GetPaymentDate(),
 		Status: source.GetPaymentStatus(),
+		IpnMessages: source.IpnMessages,
 	}
 
 	return &txClient
