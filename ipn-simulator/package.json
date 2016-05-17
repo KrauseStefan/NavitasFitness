@@ -12,6 +12,11 @@
     "typescript": "^1.9.0-dev.20160325"
   },
   "scripts": {
-    "prestart": "tsc"
+    "prestart": "tsc",
+    "start": "node server.js",
+    "install": "typings install"
+  },
+  "devDependencies": {
+    "typings": "^1.0.4"
   }
 }
