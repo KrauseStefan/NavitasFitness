@@ -8,6 +8,7 @@ import (
 	"src/IPN"
 
 	"github.com/gorilla/mux"
+	"src/Export/Service"
 )
 
 // http://blog.golang.org/context
@@ -20,6 +21,8 @@ func init() {
 	UserService.IntegrateRoutes(router)
 	AuthService.IntegrateRoutes(router)
 	IPN.IntegrateRoutes(router)
+	ExportService.IntegrateRoutes(router)
+
 
 	http.Handle("/", router)
 	//	http.HandleFunc("/rest/", root)
