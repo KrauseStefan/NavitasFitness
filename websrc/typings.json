@@ -1,10 +1,10 @@
 {
-  "ambientDependencies": {
-    "angular": "github:DefinitelyTyped/DefinitelyTyped/angularjs/angular.d.ts#17ef40452039d19e06dc2a3815ea898c505860fa",
-    "angular-cookies": "github:DefinitelyTyped/DefinitelyTyped/angularjs/angular-cookies.d.ts#ccd32787a2aed5f876693b2c8d7100d1daba4782",
-    "angular-material": "github:DefinitelyTyped/DefinitelyTyped/angular-material/angular-material.d.ts#2d0a1b1502610025bd55ce8eaa48069da8a16c82",
-    "angular-ui-router": "github:DefinitelyTyped/DefinitelyTyped/angular-ui-router/angular-ui-router.d.ts#655f8c1bf3c71b0e1ba415b36309604f79326ac8",
-    "ckeditor": "github:DefinitelyTyped/DefinitelyTyped/ckeditor/ckeditor.d.ts#ce46a8ebbc73ef1d3b5d5449ffe097c23ac5e53d",
-    "jquery": "github:DefinitelyTyped/DefinitelyTyped/jquery/jquery.d.ts#fab0b336b0414fac23963bde83f7d7077f6cf14c"
+  "globalDependencies": {
+    "angular": "registry:dt/angular#1.5.0+20160517064839",
+    "angular-cookies": "registry:dt/angular-cookies#1.4.0+20160317120654",
+    "angular-material": "registry:dt/angular-material#1.0.0-rc5.0+20160412154003",
+    "angular-ui-router": "registry:dt/angular-ui-router#1.1.5+20160514162931",
+    "ckeditor": "registry:dt/ckeditor#0.0.0+20160317120654",
+    "jquery": "registry:dt/jquery#1.10.0+20160417213236"
   }
 }

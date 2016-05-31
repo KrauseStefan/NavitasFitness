@@ -14,7 +14,7 @@
     "forceConsistentCasingInFileNames": true
   },
   "files": [
-    "typings/main.d.ts",
+    "typings/index.d.ts",
     "./app/boot.ts"
   ]
 }
