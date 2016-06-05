@@ -10,13 +10,13 @@ import (
 	"src/Common"
 	"time"
 
-	"golang.org/x/crypto/bcrypt"
 	"crypto/rand"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
-	USER_KIND 						= "User"
-	USER_PARENT_STRING_ID	= "default_user"
+	USER_KIND             = "User"
+	USER_PARENT_STRING_ID = "default_user"
 )
 
 const (
@@ -24,29 +24,29 @@ const (
 )
 
 var (
-	userHasIdError					= errors.New("Cannot create new user, key must be nil")
-	userHasNoIdError				= errors.New("Cannot create new user, key must be defined")
-	userAlreadyExistsError	= errors.New("Cannot update an already existing user")
-	userNotFoundError				= errors.New("User does not exist in datastore")
-	invalidSessionError			= errors.New("Invalid user session")
-	passwordCanNotBeEmpty		= errors.New("Can not set update password when password is blank")
+	userHasIdError         = errors.New("Cannot create new user, key must be nil")
+	userHasNoIdError       = errors.New("Cannot create new user, key must be defined")
+	userAlreadyExistsError = errors.New("Cannot update an already existing user")
+	userNotFoundError      = errors.New("User does not exist in datastore")
+	invalidSessionError    = errors.New("Invalid user session")
+	passwordCanNotBeEmpty  = errors.New("Can not set update password when password is blank")
 )
 
 var (
-	userCollectionParentKey	= Common.CollectionParentKeyGetFnGenerator(USER_KIND, USER_PARENT_STRING_ID, 0)
-	userIntIDToKeyInt64			= Common.IntIDToKeyInt64(USER_KIND, userCollectionParentKey)
+	userCollectionParentKey = Common.CollectionParentKeyGetFnGenerator(USER_KIND, USER_PARENT_STRING_ID, 0)
+	userIntIDToKeyInt64     = Common.IntIDToKeyInt64(USER_KIND, userCollectionParentKey)
 )
 
 type UserDTO struct {
-	Key									string 		`json:"key",datastore:"-"`
-	Email								string 		`json:"email"`
-	Password						string		`json:"password,omitempty",datastore:",noindex"`
-	PasswordHash				[]byte 		`json:"-",datastore:",noindex"`
-	PasswordSalt				[]byte		`json:"-",datastore:",noindex"`
-	NavitasId						string 		`json:"navitasId"`
-	CreatedDate					time.Time	`json:"createdDate"`
-	CurrentSessionUUID	string 		`json:"currentSessionKey"`
-	IsAdmin							bool			`json:"isAdmin,omitempty"`
+	Key                string    `json:"key",datastore:"-"`
+	Email              string    `json:"email"`
+	Password           string    `json:"password,omitempty",datastore:",noindex"`
+	PasswordHash       []byte    `json:"-",datastore:",noindex"`
+	PasswordSalt       []byte    `json:"-",datastore:",noindex"`
+	NavitasId          string    `json:"navitasId"`
+	CreatedDate        time.Time `json:"createdDate"`
+	CurrentSessionUUID string    `json:"currentSessionKey"`
+	IsAdmin            bool      `json:"isAdmin,omitempty"`
 }
 
 func (user *UserDTO) hasKey() bool {
@@ -57,7 +57,7 @@ func (user *UserDTO) GetDataStoreKey(ctx appengine.Context) *datastore.Key {
 	return StringToKey(ctx, user.Key)
 }
 
-func(user *UserDTO) setKey(key *datastore.Key) *UserDTO {
+func (user *UserDTO) setKey(key *datastore.Key) *UserDTO {
 	user.Key = strconv.FormatInt(key.IntID(), 10)
 	return user
 }
@@ -75,7 +75,7 @@ func (user *UserDTO) UpdatePasswordHash(password []byte) error {
 		password = []byte(user.Password)
 	}
 	if password == nil {
-		return passwordCanNotBeEmpty;
+		return passwordCanNotBeEmpty
 	}
 	// https://crackstation.net/hashing-security.htm
 	user.PasswordSalt = make([]byte, PW_SALT_BYTES)
@@ -118,6 +118,27 @@ func GetUserByEmail(ctx appengine.Context, email string) (*UserDTO, error) {
 	return &userDtoList[0], nil
 }
 
+func GetAllUsers(ctx appengine.Context) ([]*datastore.Key, []UserDTO, error) {
+	query := datastore.NewQuery(USER_KIND).
+		Ancestor(userCollectionParentKey(ctx))
+
+	count, err := query.Count(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	if count <= 0 {
+		return nil, nil, nil
+	}
+
+	users := make([]UserDTO, 0, count)
+	keys, err := query.GetAll(ctx, &users)
+	if err != nil {
+		ctx.Criticalf("error in txn 2")
+		return nil, nil, err
+	}
+
+	return keys, users, nil
+}
 
 func CreateUser(ctx appengine.Context, user *UserDTO) error {
 
@@ -125,7 +146,7 @@ func CreateUser(ctx appengine.Context, user *UserDTO) error {
 		return userHasIdError
 	}
 
-	if user, _ := GetUserByEmail(ctx, user.Email); user != nil{
+	if user, _ := GetUserByEmail(ctx, user.Email); user != nil {
 		return userAlreadyExistsError
 	}
 
@@ -135,7 +156,7 @@ func CreateUser(ctx appengine.Context, user *UserDTO) error {
 
 	key := datastore.NewIncompleteKey(ctx, USER_KIND, userCollectionParentKey(ctx))
 	newKey, err := datastore.Put(ctx, key, user)
-	if  err != nil {
+	if err != nil {
 		return err
 	}
 
@@ -168,7 +189,7 @@ func SetSessionUUID(ctx appengine.Context, user *UserDTO, uuid string) error {
 	return saveUser(ctx, user)
 }
 
-func GetUserFromSessionUUID(ctx appengine.Context, uuid string) (*UserDTO, error){
+func GetUserFromSessionUUID(ctx appengine.Context, uuid string) (*UserDTO, error) {
 
 	users := make([]UserDTO, 0, 2)
 
@@ -178,7 +199,7 @@ func GetUserFromSessionUUID(ctx appengine.Context, uuid string) (*UserDTO, error
 		Limit(2).
 		GetAll(ctx, &users)
 
-	if(err != nil) {
+	if err != nil {
 		return nil, err
 	} else if len(keys) != 1 {
 		return nil, errors.New(invalidSessionError.Error() + " - uuid: " + uuid)

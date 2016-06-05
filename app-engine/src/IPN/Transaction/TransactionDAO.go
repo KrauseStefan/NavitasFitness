@@ -1,9 +1,10 @@
 package TransactionDao
 
 import (
-	"appengine/datastore"
 	"appengine"
+	"appengine/datastore"
 	"errors"
+	"fmt"
 	"src/User/Dao"
 )
 
@@ -14,9 +15,9 @@ var (
 
 func UpdateIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO) error {
 
-	key := ipnTxn.GetDataStoreKey(ctx);
+	key := ipnTxn.GetDataStoreKey(ctx)
 
-	ipnTxn.PaymentDate = ipnTxn.GetPaymentDate();
+	ipnTxn.PaymentDate = ipnTxn.GetPaymentDate()
 
 	if _, err := datastore.Put(ctx, key, ipnTxn); err != nil {
 		return err
@@ -50,8 +51,8 @@ func PersistNewIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO, user
 
 func GetTransaction(ctx appengine.Context, txnId string) (*TransactionMsgDTO, error) {
 	q := datastore.NewQuery(TXN_KIND).
-	Filter("TxnId=", txnId).
-	Limit(1)
+		Filter("TxnId=", txnId).
+		Limit(1)
 
 	txnDtoList := make([]TransactionMsgDTO, 0, 1)
 
@@ -71,10 +72,10 @@ func GetTransaction(ctx appengine.Context, txnId string) (*TransactionMsgDTO, er
 func GetTransactionsByUser(ctx appengine.Context, parentUserKey *datastore.Key) ([]TransactionMsgDTO, error) {
 
 	q := datastore.NewQuery(TXN_KIND).
-	Ancestor(parentUserKey).
-	Order("PaymentDate")
+		Ancestor(parentUserKey).
+		Order("PaymentDate")
 
-	entryCount, err := q.Count(ctx);
+	entryCount, err := q.Count(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -92,4 +93,22 @@ func GetTransactionsByUser(ctx appengine.Context, parentUserKey *datastore.Key) 
 	}
 
 	return txnDtoList, nil
+}
+
+//TODO finish this function with the popper search parameters
+func UserHasActiveSubscription(ctx appengine.Context, userKey *datastore.Key) (bool, error) {
+
+	count, err := datastore.NewQuery(TXN_KIND).
+		Ancestor(userKey).
+		Count(ctx)
+
+	if err != nil {
+		return false, err
+	}
+
+	if count > 1 {
+		ctx.Criticalf(fmt.Sprintf("User has multiple (%d) active subscriptions, key: %s", count, userKey.String()))
+	}
+
+	return count > 0, nil
 }
