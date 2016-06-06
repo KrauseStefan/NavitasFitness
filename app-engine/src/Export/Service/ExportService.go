@@ -44,7 +44,7 @@ func getTransactionList(ctx appengine.Context) ([]UserDao.UserDTO, error) {
 }
 
 func configureHeaderForFileDownload(header *http.Header, filename string) {
-	header.Add("Content-Disposition", "attachment; filename=" + filename)
+	header.Add("Content-Disposition", "attachment; filename="+filename)
 	header.Add("Content-Type", "application/vnd.ms-excel")
 	header.Add("Cache-Control", "no-cache, no-store, must-revalidate")
 	header.Add("Pragma", "no-cache")

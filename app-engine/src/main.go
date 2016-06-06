@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"src/Auth"
 	"src/BlogPost"
-	"src/User/Service"
 	"src/IPN"
+	"src/User/Service"
 
 	"github.com/gorilla/mux"
 	"src/Export/Service"
@@ -22,7 +22,6 @@ func init() {
 	AuthService.IntegrateRoutes(router)
 	IPN.IntegrateRoutes(router)
 	ExportService.IntegrateRoutes(router)
-
 
 	http.Handle("/", router)
 	//	http.HandleFunc("/rest/", root)

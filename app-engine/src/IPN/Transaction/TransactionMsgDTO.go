@@ -1,39 +1,71 @@
 package TransactionDao
 
 import (
-	"time"
-	"net/url"
-	"strconv"
 	"appengine"
 	"appengine/datastore"
+	"net/url"
 	"src/Common"
+	"strconv"
+	"time"
 )
 
 const (
-	TXN_KIND = "txn"
+	TXN_KIND             = "txn"
 	TXN_PARENT_STRING_ID = "default_txn"
 )
 
 var (
 	txnCollectionParentKey = Common.CollectionParentKeyGetFnGenerator(TXN_KIND, TXN_PARENT_STRING_ID, 0)
-	txnIntIDToKeyInt64 = Common.IntIDToKeyInt64(TXN_KIND, txnCollectionParentKey)
+	txnIntIDToKeyInt64     = Common.IntIDToKeyInt64(TXN_KIND, txnCollectionParentKey)
 )
 
-func NewTransactionMsgDTO() *TransactionMsgDTO {
-	t := new(TransactionMsgDTO)
-	t.key = nil
-	return t
+func NewTransactionMsgDTOFromIpn(ipnMessage string) *TransactionMsgDTO {
+	t := TransactionMsgDTO{
+		key:   nil,
+		dsDto: *new(transactionMsgDsDTO),
+	}
+
+	t.AddNewIpnMessage(ipnMessage)
+
+	return &t
+}
+
+func NewTransactionMsgDTOFromDs(dto transactionMsgDsDTO, key *datastore.Key) *TransactionMsgDTO {
+	t := TransactionMsgDTO{
+		key:   key,
+		dsDto: dto,
+	}
+	t.parseMessage()
+	return &t
+}
+
+func NewTransactionMsgDTOList(dtos []transactionMsgDsDTO, keys []*datastore.Key) []*TransactionMsgDTO {
+	txnDtoList := make([]*TransactionMsgDTO, len(dtos))
+
+	for i, dto := range dtos {
+		var key *datastore.Key = nil
+		if len(keys) > i && keys[i] != nil {
+			key = keys[i]
+		}
+		txnDtoList[i] = NewTransactionMsgDTOFromDs(dto, key)
+	}
+
+	return txnDtoList
+}
+
+type transactionMsgDsDTO struct {
+	IpnMessages []string //History of IpnMessages
+
+	PaymentDate                time.Time
+	SubscriptionActivationDate time.Time
+	TxnId                      string
 }
 
 type TransactionMsgDTO struct {
-	IpnMessages      []string //History of IpnMessages
-	StatusResp       string
+	dsDto transactionMsgDsDTO
+	key   *datastore.Key
 
-	PaymentDate      time.Time
-	TxnId            string
-
-	key              *datastore.Key `datastore:"-"`
-	parsedIpnMessage url.Values `datastore:"-"`
+	parsedIpnMessage url.Values
 }
 
 func (txDto *TransactionMsgDTO) hasKey() bool {
@@ -48,8 +80,8 @@ func (txDto *TransactionMsgDTO) parseMessage() *url.Values {
 	if txDto.parsedIpnMessage == nil {
 		parsedIpnMessage, _ := url.ParseQuery(txDto.getLatestIPNMessage())
 		txDto.parsedIpnMessage = parsedIpnMessage
-		txDto.PaymentDate = txDto.GetPaymentDate()
-		txDto.TxnId = txDto.GetField(FIELD_TXN_ID)
+		txDto.dsDto.PaymentDate = txDto.GetPaymentDate()
+		txDto.dsDto.TxnId = txDto.GetField(FIELD_TXN_ID)
 	}
 
 	return &txDto.parsedIpnMessage
@@ -60,15 +92,15 @@ func (txDto *TransactionMsgDTO) GetField(field string) string {
 }
 
 func (txDto *TransactionMsgDTO) getLatestIPNMessage() string {
-	if len(txDto.IpnMessages) > 0 {
-		return txDto.IpnMessages[0]
+	if len(txDto.dsDto.IpnMessages) > 0 {
+		return txDto.dsDto.IpnMessages[0]
 	} else {
 		return ""
 	}
 }
 
 func (txDto *TransactionMsgDTO) AddNewIpnMessage(ipnMessage string) *TransactionMsgDTO {
-	txDto.IpnMessages = append([]string{ipnMessage}, txDto.IpnMessages...)
+	txDto.dsDto.IpnMessages = append([]string{ipnMessage}, txDto.dsDto.IpnMessages...)
 	txDto.parsedIpnMessage = nil
 	txDto.parseMessage()
 	return txDto
@@ -94,10 +126,6 @@ func (txDto *TransactionMsgDTO) GetCurrency() string {
 	return txDto.parseMessage().Get(FIELD_MC_CURRENCY)
 }
 
-func (txDto *TransactionMsgDTO) IsVerified() bool {
-	return txDto.StatusResp == "VERIFIED" // other option is "INVALID"
-}
-
 func (txDto *TransactionMsgDTO) PaymentIsComplected() bool {
-	return txDto.IsVerified() && txDto.GetPaymentStatus() == STATUS_COMPLEATED && txDto.GetAmount() == 200
+	return txDto.GetPaymentStatus() == STATUS_COMPLEATED && txDto.GetAmount() == 200
 }

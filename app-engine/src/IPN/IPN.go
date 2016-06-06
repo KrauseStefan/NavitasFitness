@@ -1,30 +1,30 @@
 package IPN
 
 import (
-	"github.com/gorilla/mux"
-	"net/http"
 	"bytes"
+	"github.com/gorilla/mux"
 	"io/ioutil"
+	"net/http"
 
 	"appengine"
-	"appengine/urlfetch"
 	"appengine/taskqueue"
-	"src/IPN/Transaction"
-	"src/User/Dao"
+	"appengine/urlfetch"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"encoding/json"
+	"src/IPN/Transaction"
+	"src/User/Dao"
 )
 
 const (
-	localIpn = "http://localhost:8081/cgi-bin/webscr" //(Will behave like a live IPN)
-	PaypalIpn = "https://www.paypal.com/cgi-bin/webscr" //(for live IPNs)
+	localIpn         = "http://localhost:8081/cgi-bin/webscr"          //(Will behave like a live IPN)
+	PaypalIpn        = "https://www.paypal.com/cgi-bin/webscr"         //(for live IPNs)
 	PaypalIpnSandBox = "https://www.sandbox.paypal.com/cgi-bin/webscr" // (for Sandbox IPNs)
 
 	IpnQueueName = "paypalIpn"
 
-	basePath = "/rest/paypal"
-	ipnUrl = basePath + "/ipn"
+	basePath          = "/rest/paypal"
+	ipnUrl            = basePath + "/ipn"
 	ipnRespondTaskUrl = basePath + "/ipnDoRespone"
 
 	FromEncodedContentType = "application/x-www-form-urlencoded"
@@ -32,19 +32,23 @@ const (
 	ReceiverEmail = "stefan.krausekjaer@gmail.com" //TODO Verify that you are the intended recipient of the IPN message. To do this, check the email address in the message. This check prevents another merchant from accidentally or intentionally using your listener.
 )
 
+var (
+	IpnMessageCouldNotBeValidated = errors.New("Ipn message was not vallidated by paypal")
+)
+
 func IntegrateRoutes(router *mux.Router) {
 
 	router.
-	Methods("POST").
-	Path(ipnUrl).
-	Name("ipn notification").
-	HandlerFunc(processIPN)
+		Methods("POST").
+		Path(ipnUrl).
+		Name("ipn notification").
+		HandlerFunc(processIPN)
 
 	router.
-	Methods("POST").
-	Path(ipnRespondTaskUrl).
-	Name("ipn notification responder task").
-	HandlerFunc(ipnDoResponseTaskHandler)
+		Methods("POST").
+		Path(ipnRespondTaskUrl).
+		Name("ipn notification responder task").
+		HandlerFunc(ipnDoResponseTaskHandler)
 
 }
 
@@ -70,7 +74,7 @@ func processIPN(w http.ResponseWriter, r *http.Request) {
 	// Persist transaction details in unconfirmed state (processing?)
 }
 
-func sendVerificationMassageToPaypal(ctx appengine.Context, content string, testIpnField string) (string, error) {
+func verifyMassageWithPaypal(ctx appengine.Context, content string, testIpnField string) error {
 
 	paypalIpnUrl := PaypalIpn
 	if testIpnField != "" {
@@ -86,13 +90,19 @@ func sendVerificationMassageToPaypal(ctx appengine.Context, content string, test
 	client := urlfetch.Client(ctx)
 	resp, err := client.Post(paypalIpnUrl, FromEncodedContentType, bytes.NewBuffer(append(extraData, content...)))
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	respBody, err := ioutil.ReadAll(resp.Body)
-
 	resp.Body.Close()
-	return string(respBody), err
+
+	ctx.Debugf("Ipn Validation response " + string(respBody))
+
+	if err == nil && string(respBody) != "VERIFIED" {
+		return IpnMessageCouldNotBeValidated
+	}
+
+	return err
 }
 
 // Send message for verification with cmd=_notify-validate prepended
@@ -115,16 +125,12 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 		return err
 	}
 
-	transaction := TransactionDao.NewTransactionMsgDTO()
-	transaction.AddNewIpnMessage(string(content))
+	transaction := TransactionDao.NewTransactionMsgDTOFromIpn(string(content))
 	testIpnField := transaction.GetField(TransactionDao.FIELD_TEST_IPN)
 	email := transaction.GetField(TransactionDao.FIELD_CUSTOM) //The custom field should contain the email
-	respBody, err := sendVerificationMassageToPaypal(ctx, string(content), testIpnField)
-	if err != nil {
+
+	if err := verifyMassageWithPaypal(ctx, string(content), testIpnField); err != nil {
 		return err
-	}
-	if string(respBody) != "VERIFIED" {
-		return errors.New("Message was not verified by paypal, either a fake message or program error, msg: " + string(respBody))
 	}
 
 	//message is now verified and should be persisted
@@ -144,13 +150,9 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 			return TransactionDao.TxnDuplicateTxnMsg
 		}
 		savedTransaction.AddNewIpnMessage(string(content))
-		savedTransaction.StatusResp = string(respBody)
-
-		ctx.Debugf("IpnData: %q", respBody)
 
 		js, _ := json.Marshal(savedTransaction)
 		ctx.Debugf("IpnSaved: %q", js)
-
 
 		if err := TransactionDao.UpdateIpnMessage(ctx, savedTransaction); err != nil {
 			return err
@@ -159,13 +161,11 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 		ctx.Infof(fmt.Sprintf("TxnId not found: %q", transaction.GetField(TransactionDao.FIELD_TXN_ID)))
 
 		if email == "" {
-			// TODO: handle bad request in a way other then discarding, save without a parent user
+			// TODO: handle bad request in a way other then discarding, save without a parent user?
 			//http.Error(w, "No email received", http.StatusBadRequest)
-			ctx.Infof(fmt.Sprintf("TxnId nor email found in msg: %q", string(respBody)))
+			ctx.Infof("TxnId nor email found in")
 			return errors.New("Neither transaction ID nor email could be used to lookup user")
 		}
-
-		transaction.StatusResp = string(respBody)
 
 		ctx.Infof(fmt.Sprintf("Recived transaction from: %q", email))
 		user, err := UserDao.GetUserByEmail(ctx, email)
@@ -181,8 +181,6 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 			ctx.Infof(fmt.Sprintf("User key: %q", user.Key))
 		}
 
-		ctx.Debugf("IpnData: %q", respBody)
-
 		js, _ := json.Marshal(transaction)
 		ctx.Debugf("IpnSaved: %q", js)
 
@@ -192,14 +190,6 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 	}
 
 	return nil
-	//if(string(respBody) == "VERIFIED") {
-	//	// register ipn message
-	//	// Verify amount is correct
-	//} else if(string(respBody) == "INVALID") {
-	//	// Log Invalid payment
-	//} else {
-	//	// Log Severe error (We are properly being hacked at this point) How to make sure this could never happen
-	//}
 }
 
 func newTask(path string, data []byte) *taskqueue.Task {

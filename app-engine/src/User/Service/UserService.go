@@ -7,12 +7,12 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"src/Common"
 	"encoding/json"
 	"src/Auth"
+	"src/Common"
 
-	"src/User/Dao"
 	"src/IPN/Transaction"
+	"src/User/Dao"
 	"time"
 )
 
@@ -39,7 +39,7 @@ func IntegrateRoutes(router *mux.Router) {
 
 }
 
-func getUserFromSession(ctx appengine.Context, r *http.Request) (*UserDao.UserDTO, error){
+func getUserFromSession(ctx appengine.Context, r *http.Request) (*UserDao.UserDTO, error) {
 	uuid, err := AuthService.GetSessionUUID(r)
 
 	if err != nil {
@@ -104,7 +104,7 @@ func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request) {
 	txnClientDtoList := make([]*TransactionMsgClientDTO, len(transactions))
 
 	for i, txn := range transactions {
-		txnClientDtoList[i] = newTransactionMsgClientDTO(&txn)
+		txnClientDtoList[i] = newTransactionMsgClientDTO(txn)
 	}
 
 	if _, err := Common.WriteJSON(w, txnClientDtoList); err != nil {
@@ -124,10 +124,10 @@ type TransactionMsgClientDTO struct {
 func newTransactionMsgClientDTO(source *TransactionDao.TransactionMsgDTO) *TransactionMsgClientDTO {
 
 	txClient := TransactionMsgClientDTO{
-		Amount: source.GetAmount(),
-		Currency: source.GetCurrency(),
+		Amount:      source.GetAmount(),
+		Currency:    source.GetCurrency(),
 		PaymentDate: source.GetPaymentDate(),
-		Status: source.GetPaymentStatus(),
+		Status:      source.GetPaymentStatus(),
 		//IpnMessages: source.IpnMessages,
 	}
 

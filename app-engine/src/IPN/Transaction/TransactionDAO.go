@@ -17,9 +17,10 @@ func UpdateIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO) error {
 
 	key := ipnTxn.GetDataStoreKey(ctx)
 
-	ipnTxn.PaymentDate = ipnTxn.GetPaymentDate()
+	//Make sure indexed fields are updated
+	ipnTxn.parseMessage()
 
-	if _, err := datastore.Put(ctx, key, ipnTxn); err != nil {
+	if _, err := datastore.Put(ctx, key, ipnTxn.dsDto); err != nil {
 		return err
 	}
 
@@ -41,8 +42,9 @@ func PersistNewIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO, user
 		newKey = datastore.NewIncompleteKey(ctx, TXN_KIND, UserDao.StringToKey(ctx, userKey))
 	}
 
-	ipnTxn.PaymentDate = ipnTxn.GetPaymentDate()
-	if _, err := datastore.Put(ctx, newKey, ipnTxn); err != nil {
+	//Make sure indexed fields are updated
+	ipnTxn.parseMessage()
+	if _, err := datastore.Put(ctx, newKey, ipnTxn.dsDto); err != nil {
 		return err
 	}
 
@@ -54,7 +56,7 @@ func GetTransaction(ctx appengine.Context, txnId string) (*TransactionMsgDTO, er
 		Filter("TxnId=", txnId).
 		Limit(1)
 
-	txnDtoList := make([]TransactionMsgDTO, 0, 1)
+	txnDtoList := make([]transactionMsgDsDTO, 0, 1)
 
 	keys, err := q.GetAll(ctx, &txnDtoList)
 	if err != nil {
@@ -65,11 +67,10 @@ func GetTransaction(ctx appengine.Context, txnId string) (*TransactionMsgDTO, er
 		return nil, nil
 	}
 
-	txnDtoList[0].key = keys[0]
-	return &txnDtoList[0], nil
+	return NewTransactionMsgDTOFromDs(txnDtoList[0], keys[0]), nil
 }
 
-func GetTransactionsByUser(ctx appengine.Context, parentUserKey *datastore.Key) ([]TransactionMsgDTO, error) {
+func GetTransactionsByUser(ctx appengine.Context, parentUserKey *datastore.Key) ([]*TransactionMsgDTO, error) {
 
 	q := datastore.NewQuery(TXN_KIND).
 		Ancestor(parentUserKey).
@@ -80,19 +81,14 @@ func GetTransactionsByUser(ctx appengine.Context, parentUserKey *datastore.Key) 
 		return nil, err
 	}
 
-	txnDtoList := make([]TransactionMsgDTO, 0, entryCount)
+	txnDsDtoList := make([]transactionMsgDsDTO, 0, entryCount)
 
-	keys, err := q.GetAll(ctx, &txnDtoList)
+	keys, err := q.GetAll(ctx, &txnDsDtoList)
 	if err != nil {
 		return nil, err
 	}
 
-	for i, key := range keys {
-		txnDtoList[i].parsedIpnMessage = nil
-		txnDtoList[i].key = key
-	}
-
-	return txnDtoList, nil
+	return NewTransactionMsgDTOList(txnDsDtoList, keys), nil
 }
 
 //TODO finish this function with the popper search parameters
