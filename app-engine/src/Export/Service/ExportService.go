@@ -14,7 +14,7 @@ func IntegrateRoutes(router *mux.Router) {
 
 	router.
 		Methods("GET").
-		Path(path + "/ActiveSubscriptions.xlsx").
+		Path(path + "/xlsx").
 		Name("export").
 		HandlerFunc(exportXsltHandler)
 
@@ -41,6 +41,14 @@ func getTransactionList(ctx appengine.Context) ([]UserDao.UserDTO, error) {
 	}
 
 	return usersWithActiveSubscription, nil
+}
+
+func configureHeaderForFileDownload(header *http.Header, filename string) {
+	header.Add("Content-Disposition", "attachment; filename=" + filename)
+	header.Add("Content-Type", "application/vnd.ms-excel")
+	header.Add("Cache-Control", "no-cache, no-store, must-revalidate")
+	header.Add("Pragma", "no-cache")
+	header.Add("Expires", "0")
 }
 
 func exportXsltHandler(w http.ResponseWriter, r *http.Request) {
@@ -70,9 +78,8 @@ func exportXsltHandler(w http.ResponseWriter, r *http.Request) {
 		cell.Value = user.Email
 	}
 
-	w.Header().Add("Content-Disposition", "attachment")
-	w.Header().Add("filename", "name_of_excel_file.xls")
-	w.Header().Add("Content-Type", "application/vnd.ms-excel")
+	httpHeader := w.Header()
+	configureHeaderForFileDownload(&httpHeader, "ActiveSubscriptions.xlsx")
 
 	err = file.Write(w)
 	if err != nil {
