@@ -51,6 +51,15 @@ func configureHeaderForFileDownload(header *http.Header, filename string) {
 	header.Add("Expires", "0")
 }
 
+func addRow(sheet *xlsx.Sheet, headers ...string)  {
+	row := sheet.AddRow()
+
+	for _, header := range headers {
+		cell := row.AddCell()
+		cell.Value = header
+	}
+}
+
 func exportXsltHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := appengine.NewContext(r)
@@ -68,14 +77,10 @@ func exportXsltHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	header := sheet.AddRow()
-	nameCell := header.AddCell()
-	nameCell.Value = "email"
+	addRow(sheet, "email")
 
 	for _, user := range users {
-		row := sheet.AddRow()
-		cell := row.AddCell()
-		cell.Value = user.Email
+		addRow(sheet, user.Email)
 	}
 
 	httpHeader := w.Header()
