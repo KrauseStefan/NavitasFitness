@@ -56,6 +56,7 @@ func NewTransactionMsgDTOList(dtos []transactionMsgDsDTO, keys []*datastore.Key)
 type transactionMsgDsDTO struct {
 	IpnMessages []string //History of IpnMessages
 
+	PaymentActivationDate      time.Time
 	PaymentDate                time.Time
 	SubscriptionActivationDate time.Time
 	TxnId                      string
@@ -74,6 +75,10 @@ func (txDto *TransactionMsgDTO) hasKey() bool {
 
 func (txDto *TransactionMsgDTO) GetDataStoreKey(ctx appengine.Context) *datastore.Key {
 	return txDto.key
+}
+
+func (txDto *TransactionMsgDTO) ActivatePayment() {
+	txDto.dsDto.PaymentActivationDate = time.Now()
 }
 
 func (txDto *TransactionMsgDTO) parseMessage() *url.Values {

@@ -159,32 +159,28 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 		}
 	} else {
 		ctx.Infof(fmt.Sprintf("TxnId not found: %q", transaction.GetField(TransactionDao.FIELD_TXN_ID)))
-
-		if email == "" {
-			// TODO: handle bad request in a way other then discarding, save without a parent user?
-			//http.Error(w, "No email received", http.StatusBadRequest)
-			ctx.Infof("TxnId nor email found in")
-			return errors.New("Neither transaction ID nor email could be used to lookup user")
-		}
-
 		ctx.Infof(fmt.Sprintf("Recived transaction from: %q", email))
+
 		user, err := UserDao.GetUserByEmail(ctx, email)
 		if err != nil {
 			return err
 		}
 		if user == nil && savedTransaction == nil {
-			//http.Error(w, "User does not exist", http.StatusBadRequest)
 			return errors.New("User does not exist")
 		}
 
+		var userKey string = ""
 		if user != nil {
-			ctx.Infof(fmt.Sprintf("User key: %q", user.Key))
+			ctx.Debugf(fmt.Sprintf("User key: %q", user.Key))
+			userKey = user.Key
+		} else {
+			ctx.Errorf("Recived paypal IPN message for unknown user")
 		}
 
 		js, _ := json.Marshal(transaction)
 		ctx.Debugf("IpnSaved: %q", js)
 
-		if err := TransactionDao.PersistNewIpnMessage(ctx, transaction, user.Key); err != nil {
+		if err := TransactionDao.PersistNewIpnMessage(ctx, transaction, userKey); err != nil {
 			return err
 		}
 	}

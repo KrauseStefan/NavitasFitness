@@ -18,4 +18,9 @@ indexes:
 - kind: txn
   ancestor: yes
   properties:
+  - name: PaymentActivationDate
+
+- kind: txn
+  ancestor: yes
+  properties:
   - name: PaymentDate

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"src/User/Dao"
+	"time"
 )
 
 var (
@@ -37,14 +38,13 @@ func PersistNewIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO, user
 
 	if userKey == "" {
 		newKey = datastore.NewIncompleteKey(ctx, TXN_KIND, txnCollectionParentKey(ctx))
-		//todo log an error here, this is not a normal scenario
 	} else {
 		newKey = datastore.NewIncompleteKey(ctx, TXN_KIND, UserDao.StringToKey(ctx, userKey))
 	}
 
 	//Make sure indexed fields are updated
 	ipnTxn.parseMessage()
-	if _, err := datastore.Put(ctx, newKey, ipnTxn.dsDto); err != nil {
+	if _, err := datastore.Put(ctx, newKey, &ipnTxn.dsDto); err != nil {
 		return err
 	}
 
@@ -94,8 +94,16 @@ func GetTransactionsByUser(ctx appengine.Context, parentUserKey *datastore.Key) 
 //TODO finish this function with the popper search parameters
 func UserHasActiveSubscription(ctx appengine.Context, userKey *datastore.Key) (bool, error) {
 
+	const (
+		hoursDay        = 24
+		DaysPrMonth     = 31 // avarage(Jul, Aug, Sep, Oct, Nov, Dec) == 30,667
+		nMonth          = 6
+		sixMonthInHours = hoursDay * DaysPrMonth * nMonth
+	)
+
 	count, err := datastore.NewQuery(TXN_KIND).
 		Ancestor(userKey).
+		Filter("PaymentActivationDate>=", time.Now().Add(time.Duration(-sixMonthInHours)*time.Hour)).
 		Count(ctx)
 
 	if err != nil {
