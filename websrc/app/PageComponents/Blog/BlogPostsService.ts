@@ -28,8 +28,6 @@ export class BlogPostsService {
   }
 }
 
-angular.module('NavitasFitness').service('blogPostsService', BlogPostsService);
-
 export class BlogEntryDTO {
   author: String
   content: String

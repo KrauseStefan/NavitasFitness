@@ -4,16 +4,21 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 cd ${DIR}
 
-./node_modules/.bin/gulp clean
 
+cd websrc
 
-gnome-terminal -e "./node_modules/.bin/gulp buildAndWatch" &
+#npm install
+npm run clean
 
-gnome-terminal -e "goapp serve ./app-engine/" &
+gnome-terminal -e "npm run watch" &
+
+cd -
 
 cd ipn-simulator
 
 gnome-terminal -e "npm start" &
 
-
 cd -
+
+gnome-terminal -e "goapp serve ./app-engine/" &
+

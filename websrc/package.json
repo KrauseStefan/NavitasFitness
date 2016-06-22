@@ -1,17 +1,30 @@
 {
-  "name": "webapp",
+  "name": "navitas-fitnes",
   "version": "1.0.0",
   "description": "none",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm-run-all clean --parallel build:**",
+    "watch": "npm-run-all clean --parallel build:scss webserver 'build:* -- --watch'",
+    "build:jade": "jade app -o ../webapp/ --pretty --hierarchy",
+    "build:ts": "tsc",
+    "build:scss": "node-sass styles/main.scss ../webapp/main.css --source-map true",
+    "clean": "rimraf ../webapp/",
+    "webserver": "node buildenv/connect.server.js",
     "install": "bower install && typings install && tsc"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "bower": "^1.7.9",
-    "typescript": "^1.9.0-dev.20160424",
+    "connect": "^3.4.1",
+    "connect-modrewrite": "^0.8.2",
+    "fs-extra": "^0.24.0",
+    "jade": "^1.11.0",
+    "node-sass": "^3.8.0",
+    "npm-run-all": "^2.2.0",
+    "serve-static": "^1.11.1",
+    "typescript": "^1.9.0-dev.20160426",
     "typings": "^1.0.4"
   },
   "dependencies": {
@@ -28,7 +41,7 @@
     "es6-promise": "^3.1.2",
     "es6-shim": "^0.34.4",
     "material-design-icons": "^2.2.3",
-    "rxjs": "^5.0.0-beta.6"
-  },
-  "repository": {}
+    "rxjs": "^5.0.0-beta.6",
+    "systemjs": "^0.19.31"
+  }
 }

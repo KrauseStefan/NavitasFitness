@@ -23,12 +23,25 @@ html
 
     script(src="/libs/ckeditor/ckeditor.js")
 
+    script(src="libs/systemjs/dist/system.src.js")
     script(src="/app.js")
+    script.
+      // set our baseURL reference path
+      System.config({
+        baseURL: '/',
+        //- map: {
+        //-   'app': 'app.js'
+        //- }
+      });
+
+      // loads /app/main.js
+      System.import('NavitasFitnessModule');
+
 
     link(href="https://fonts.googleapis.com/icon?family=Material+Icons", rel="stylesheet")
     
     link(rel="stylesheet" href="/libs/angular-material/angular-material.min.css")
-    link(rel="stylesheet" href="/styles/main.css")
+    link(rel="stylesheet" href="/main.css")
 
     style(type="text/css").
         /**

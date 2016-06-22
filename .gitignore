@@ -7,8 +7,9 @@ bower_components
 #Other
 .idea
 *.iml
+*.log
 
-/app-engine/webapp
+/webapp
 
 typings
 

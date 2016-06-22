@@ -40,7 +40,7 @@ export class CkEditorComponent {
   }
 
   getEditordiv() {
-    return <HTMLDivElement> this.$element[0].querySelector('.editorContent');
+    return <HTMLDivElement>this.$element[0].querySelector('.editorContent');
   }
 
   updateContent(content: string) {
@@ -52,12 +52,12 @@ export class CkEditorComponent {
   }
 
 }
-angular.module('NavitasFitness')
-  .component('ckEditor', {
-    template: '<div class="editorContent"></div>',
-    controller: CkEditorComponent,
-    bindings: {
-      content: '=',
-      isEditable: '='
-    }
-  });
+
+export const CkEditor = {
+  template: '<div class="editorContent"></div>',
+  controller: CkEditorComponent,
+  bindings: {
+    content: '=',
+    isEditable: '='
+  }
+};

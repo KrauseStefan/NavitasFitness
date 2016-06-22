@@ -55,8 +55,6 @@ export class UserService {
   }
 }
 
-angular.module('NavitasFitness').service('userService', UserService);
-
 export interface BaseUserDTO {
   email: string;
   password: string;

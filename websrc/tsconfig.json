@@ -1,20 +1,20 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "module": "commonjs",
+    "module": "system",
     "moduleResolution": "node",
     "sourceMap": true,
     "removeComments": false,
     "noImplicitAny": true,
     "noLib": false,
     "listFiles": true,
-    "rootDir": "./",
-    "outDir": "../webapp/app",
+    "rootDir": "./app/",
+    "outFile": "../webapp/app.js",
     "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true
   },
   "files": [
     "typings/index.d.ts",
-    "./app/boot.ts"
+    "./app/NavitasFitnessModule.ts"
   ]
 }

@@ -1,6 +1,4 @@
-
 import {BlogPostsService, BlogEntryDTO} from '../Blog/BlogPostsService';
-import '../../Components/CkEditor/CkEditor';
 
 export class MainPage {
 
@@ -22,11 +20,10 @@ export class MainPage {
   }
 }
 
-angular.module('NavitasFitness')
-  .component('mainPage', {
-    templateUrl: '/PageComponents/MainPage/MainPage.html',
-    controller: MainPage
-  });
+export const MainPageComponent = {
+  templateUrl: '/PageComponents/MainPage/MainPage.html',
+  controller: MainPage
+};
 
 export class BlogEntry {
 

@@ -1,9 +1,8 @@
-
 import { UserService } from '../UserService';
 
 import IHttpService = angular.IHttpService;
 
-export class UserStatus {
+class UserStatus {
 
   model: UserStatusModel;
 
@@ -48,8 +47,7 @@ class TransactionEntry {
   status: string;
 }
 
-angular.module('NavitasFitness')
-  .component('userStatus', {
-    templateUrl: '/PageComponents/UserStatus/UserStatus.html',
-    controller: UserStatus
-  });
+export const UserStatusComponent = {
+  templateUrl: '/PageComponents/UserStatus/UserStatus.html',
+  controller: UserStatus
+};

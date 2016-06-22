@@ -35,7 +35,7 @@ export class Blog {
         this.entries.splice(index, 1);
       })
   }
-  
+
   isAdmin() {
     return this.userService.isAdmin();
   }
@@ -51,8 +51,7 @@ export class BlogEntry {
   }
 }
 
-angular.module('NavitasFitness')
-  .component('blog', {
-    templateUrl: '/PageComponents/Blog/Blog.html',
-    controller: Blog
-  });
+export const BlogComponent = {
+  templateUrl: '/PageComponents/Blog/Blog.html',
+  controller: Blog
+};
