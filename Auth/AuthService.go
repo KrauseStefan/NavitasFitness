@@ -5,13 +5,13 @@ import (
 
 	"net/http"
 
-	"src/User/Dao"
+	"Common"
+	"User/Dao"
 	"appengine"
-	"errors"
-	"encoding/json"
-	"src/Common"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
+	"errors"
 )
 
 const sessionCookieName = "Session-Key"
@@ -46,16 +46,16 @@ func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/auth"
 
 	router.
-	Methods("POST").
-	Path(path + "/login").
-	Name("loginUser").
-	HandlerFunc(doLogin)
+		Methods("POST").
+		Path(path + "/login").
+		Name("loginUser").
+		HandlerFunc(doLogin)
 
 	router.
-	Methods("POST").
-	Path(path + "/logout").
-	Name("logoutUser").
-	HandlerFunc(doLogout)
+		Methods("POST").
+		Path(path + "/logout").
+		Name("logoutUser").
+		HandlerFunc(doLogout)
 
 }
 
@@ -63,25 +63,25 @@ func setSessionCookie(w http.ResponseWriter, uuid string) error {
 	const MaxAgeDeleteNow = -1
 	const MaxAgeDefault = 0
 	var (
-		err error
+		err     error
 		encoded string
-		maxAge int = MaxAgeDefault
+		maxAge  int = MaxAgeDefault
 	)
 	s := GetSecureCookieInst()
 
-	if (uuid != "") {
+	if uuid != "" {
 		encoded, err = s.Encode(sessionCookieName, uuid)
 		if err != nil {
 			return err
 		}
 	} else {
-		maxAge = MaxAgeDeleteNow;
+		maxAge = MaxAgeDeleteNow
 	}
 
 	cookie := &http.Cookie{
-		Name:  sessionCookieName,
-		Value: encoded,
-		Path:  "/",
+		Name:   sessionCookieName,
+		Value:  encoded,
+		Path:   "/",
 		MaxAge: maxAge,
 	}
 	http.SetCookie(w, cookie)
@@ -100,9 +100,9 @@ func doLogout(w http.ResponseWriter, r *http.Request) {
 func doLogin(w http.ResponseWriter, r *http.Request) {
 
 	var (
-		user  *UserDao.UserDTO
+		user *UserDao.UserDTO
 		uuid string
-		err error
+		err  error
 	)
 
 	ctx := appengine.NewContext(r)

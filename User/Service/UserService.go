@@ -1,18 +1,17 @@
 package UserService
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"appengine"
 
 	"github.com/gorilla/mux"
 
-	"encoding/json"
-	"src/Auth"
-	"src/Common"
-
-	"src/IPN/Transaction"
-	"src/User/Dao"
+	"Auth"
+	"Common"
+	"IPN/Transaction"
+	"User/Dao"
 	"time"
 )
 

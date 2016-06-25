@@ -8,23 +8,24 @@ import (
 	"appengine"
 	"appengine/datastore"
 
+	"Common"
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"src/Common"
 	"strconv"
 	"time"
 )
 
 type BlogEntry struct {
-	Key			string 		`json:"key",datastore:"-"`
-	Author	string 		`json:"author"`
-	Content	string 		`json:"content",datastore:",noindex"`
-	Date		time.Time	`json:"date"`
+	Key     string    `json:"key",datastore:"-"`
+	Author  string    `json:"author"`
+	Content string    `json:"content",datastore:",noindex"`
+	Date    time.Time `json:"date"`
 }
 
 func (blogPost BlogEntry) hasId() bool {
 	return len(blogPost.Key) > 0
 }
+
 const BLOG_KIND = "BlogEntry"
 const BLOG_PARENT_STRING_ID = "default_blogentry"
 

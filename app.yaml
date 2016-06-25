@@ -25,6 +25,7 @@ handlers:
   upload: webapp/index.html
 
 skip_files:
+- ^\websrc/.*$
 - ^\.idea/.*$
 - ^\.vscode/.*$
 - ^.*.gitignore$

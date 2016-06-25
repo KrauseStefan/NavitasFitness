@@ -1,17 +1,16 @@
 package UserDao
 
 import (
+	"crypto/rand"
+	"errors"
+	"golang.org/x/crypto/bcrypt"
 	"strconv"
+	"time"
 
 	"appengine"
 	"appengine/datastore"
 
-	"errors"
-	"src/Common"
-	"time"
-
-	"crypto/rand"
-	"golang.org/x/crypto/bcrypt"
+	"Common"
 )
 
 const (
