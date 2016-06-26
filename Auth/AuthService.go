@@ -3,15 +3,16 @@ package AuthService
 import (
 	"github.com/gorilla/mux"
 
-	"net/http"
-
-	"Common"
-	"User/Dao"
-	"appengine"
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"net/http"
+
+	"appengine"
+
+	"../Common"
+	"../User/Dao"
 )
 
 const sessionCookieName = "Session-Key"

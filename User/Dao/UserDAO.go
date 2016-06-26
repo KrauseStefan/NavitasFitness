@@ -10,7 +10,7 @@ import (
 	"appengine"
 	"appengine/datastore"
 
-	"Common"
+	"../../Common"
 )
 
 const (

@@ -1,18 +1,18 @@
 package BlogPostService
 
 import (
+	"encoding/json"
 	"fmt"
-
 	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/gorilla/mux"
 
 	"appengine"
 	"appengine/datastore"
 
-	"Common"
-	"encoding/json"
-	"github.com/gorilla/mux"
-	"strconv"
-	"time"
+	"../Common"
 )
 
 type BlogEntry struct {

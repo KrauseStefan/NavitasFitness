@@ -3,16 +3,16 @@ package UserService
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"appengine"
 
 	"github.com/gorilla/mux"
 
-	"Auth"
-	"Common"
-	"IPN/Transaction"
-	"User/Dao"
-	"time"
+	"../../Auth"
+	"../../Common"
+	"../../IPN/Transaction"
+	"../Dao"
 )
 
 func IntegrateRoutes(router *mux.Router) {

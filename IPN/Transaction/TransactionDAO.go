@@ -1,12 +1,14 @@
 package TransactionDao
 
 import (
-	"User/Dao"
-	"appengine"
-	"appengine/datastore"
 	"errors"
 	"fmt"
 	"time"
+
+	"appengine"
+	"appengine/datastore"
+
+	"../../User/Dao"
 )
 
 var (

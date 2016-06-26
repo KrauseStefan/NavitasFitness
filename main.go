@@ -2,13 +2,14 @@ package main
 
 import (
 	"net/http"
-	"Auth"
-	"BlogPost"
-	"IPN"
-	"User/Service"
-	"Export/Service"
 
 	"github.com/gorilla/mux"
+
+	"./Auth"
+	"./BlogPost"
+	"./Export/Service"
+	"./IPN"
+	"./User/Service"
 )
 
 // http://blog.golang.org/context
