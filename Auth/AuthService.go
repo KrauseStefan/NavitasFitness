@@ -11,8 +11,8 @@ import (
 
 	"appengine"
 
-	"../Common"
-	"../User/Dao"
+	"NavitasFitness/AppEngineHelper"
+	"NavitasFitness/User/Dao"
 )
 
 const sessionCookieName = "Session-Key"
@@ -150,7 +150,7 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := Common.WriteJSON(w, user); err != nil {
+	if _, err := AppEngineHelper.WriteJSON(w, user); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

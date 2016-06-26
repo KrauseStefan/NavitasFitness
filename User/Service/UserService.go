@@ -9,10 +9,10 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"../../Auth"
-	"../../Common"
-	"../../IPN/Transaction"
-	"../Dao"
+	"NavitasFitness/AppEngineHelper"
+	"NavitasFitness/Auth"
+	"NavitasFitness/IPN/Transaction"
+	"NavitasFitness/User/Dao"
 )
 
 func IntegrateRoutes(router *mux.Router) {
@@ -57,7 +57,7 @@ func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := Common.WriteJSON(w, user); err != nil {
+	if _, err := AppEngineHelper.WriteJSON(w, user); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -79,7 +79,7 @@ func userPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := Common.WriteJSON(w, user); err != nil {
+	if _, err := AppEngineHelper.WriteJSON(w, user); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -106,7 +106,7 @@ func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request) {
 		txnClientDtoList[i] = newTransactionMsgClientDTO(txn)
 	}
 
-	if _, err := Common.WriteJSON(w, txnClientDtoList); err != nil {
+	if _, err := AppEngineHelper.WriteJSON(w, txnClientDtoList); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

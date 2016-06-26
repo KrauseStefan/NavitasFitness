@@ -8,7 +8,7 @@ import (
 	"appengine"
 	"appengine/datastore"
 
-	"../../Common"
+	"NavitasFitness/AppEngineHelper"
 )
 
 const (
@@ -17,8 +17,8 @@ const (
 )
 
 var (
-	txnCollectionParentKey = Common.CollectionParentKeyGetFnGenerator(TXN_KIND, TXN_PARENT_STRING_ID, 0)
-	txnIntIDToKeyInt64     = Common.IntIDToKeyInt64(TXN_KIND, txnCollectionParentKey)
+	txnCollectionParentKey = AppEngineHelper.CollectionParentKeyGetFnGenerator(TXN_KIND, TXN_PARENT_STRING_ID, 0)
+	txnIntIDToKeyInt64     = AppEngineHelper.IntIDToKeyInt64(TXN_KIND, txnCollectionParentKey)
 )
 
 func NewTransactionMsgDTOFromIpn(ipnMessage string) *TransactionMsgDTO {

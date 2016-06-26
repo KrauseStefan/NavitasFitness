@@ -8,7 +8,7 @@ import (
 	"appengine"
 	"appengine/datastore"
 
-	"../../User/Dao"
+	"NavitasFitness/User/Dao"
 )
 
 var (

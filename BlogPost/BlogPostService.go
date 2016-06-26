@@ -12,7 +12,7 @@ import (
 	"appengine"
 	"appengine/datastore"
 
-	"../Common"
+	"NavitasFitness/AppEngineHelper"
 )
 
 type BlogEntry struct {
@@ -29,8 +29,8 @@ func (blogPost BlogEntry) hasId() bool {
 const BLOG_KIND = "BlogEntry"
 const BLOG_PARENT_STRING_ID = "default_blogentry"
 
-var blogCollectionParentKey = Common.CollectionParentKeyGetFnGenerator(BLOG_KIND, BLOG_PARENT_STRING_ID, 0)
-var blogIntIDToKeyInt64 = Common.IntIDToKeyInt64(BLOG_KIND, blogCollectionParentKey)
+var blogCollectionParentKey = AppEngineHelper.CollectionParentKeyGetFnGenerator(BLOG_KIND, BLOG_PARENT_STRING_ID, 0)
+var blogIntIDToKeyInt64 = AppEngineHelper.IntIDToKeyInt64(BLOG_KIND, blogCollectionParentKey)
 
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/blogEntry"
@@ -71,7 +71,7 @@ func blogEntryGet(w http.ResponseWriter, r *http.Request) {
 		blogEntries[i].Key = strconv.FormatInt(key.IntID(), 10)
 	}
 
-	if _, err := Common.WriteJSON(w, blogEntries); err != nil {
+	if _, err := AppEngineHelper.WriteJSON(w, blogEntries); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -105,7 +105,7 @@ func blogEntryPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := Common.WriteJSON(w, blog); err != nil {
+	if _, err := AppEngineHelper.WriteJSON(w, blog); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

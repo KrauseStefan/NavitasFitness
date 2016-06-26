@@ -8,8 +8,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/tealeg/xlsx"
 
-	"../../IPN/Transaction"
-	"../../User/Dao"
+	"NavitasFitness/IPN/Transaction"
+	"NavitasFitness/User/Dao"
 )
 
 func IntegrateRoutes(router *mux.Router) {
@@ -64,20 +64,30 @@ func addRow(sheet *xlsx.Sheet, headers ...string) {
 }
 
 func exportXsltHandler(w http.ResponseWriter, r *http.Request) {
-
 	ctx := appengine.NewContext(r)
+
+	httpHeader := w.Header()
+	configureHeaderForFileDownload(&httpHeader, "ActiveSubscriptions.xlsx")
+
+	file, err := exportXslt(ctx)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	err = file.Write(w)
+}
+
+func exportXslt(ctx appengine.Context) (*xlsx.File, error) {
 
 	users, err := getTransactionList(ctx)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
 	file := xlsx.NewFile()
 	sheet, err := file.AddSheet("Sheet1")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
 	addRow(sheet, "email")
@@ -86,12 +96,9 @@ func exportXsltHandler(w http.ResponseWriter, r *http.Request) {
 		addRow(sheet, user.Email)
 	}
 
-	httpHeader := w.Header()
-	configureHeaderForFileDownload(&httpHeader, "ActiveSubscriptions.xlsx")
-
-	err = file.Write(w)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
+
+	return file, nil
 }

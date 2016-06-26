@@ -10,7 +10,7 @@ import (
 	"appengine"
 	"appengine/datastore"
 
-	"../../Common"
+	"NavitasFitness/AppEngineHelper"
 )
 
 const (
@@ -32,8 +32,8 @@ var (
 )
 
 var (
-	userCollectionParentKey = Common.CollectionParentKeyGetFnGenerator(USER_KIND, USER_PARENT_STRING_ID, 0)
-	userIntIDToKeyInt64     = Common.IntIDToKeyInt64(USER_KIND, userCollectionParentKey)
+	userCollectionParentKey = AppEngineHelper.CollectionParentKeyGetFnGenerator(USER_KIND, USER_PARENT_STRING_ID, 0)
+	userIntIDToKeyInt64     = AppEngineHelper.IntIDToKeyInt64(USER_KIND, userCollectionParentKey)
 )
 
 type UserDTO struct {

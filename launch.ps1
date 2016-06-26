@@ -8,7 +8,7 @@ Start-Process "npm" "run watch"
 
 cd ..
 
-Start-Process "goapp" "serve"
+Start-Process "goapp" "serve ./app-engine/"
 
 cd ipn-simulator
 Start-Process "npm start"

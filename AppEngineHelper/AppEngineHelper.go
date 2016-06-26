@@ -1,12 +1,14 @@
-package Common
+package AppEngineHelper
 
 import (
-	"appengine"
-	"appengine/datastore"
 	"encoding/json"
-	"github.com/gorilla/schema"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/schema"
+
+	"appengine"
+	"appengine/datastore"
 )
 
 var formDataDecoder = schema.NewDecoder()
