@@ -12,6 +12,10 @@ import (
 	"NavitasFitness/User/Dao"
 )
 
+var (
+userDao_GetAllUsers = UserDao.GetAllUsers
+)
+
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/export"
 
@@ -25,7 +29,7 @@ func IntegrateRoutes(router *mux.Router) {
 
 func getTransactionList(ctx appengine.Context) ([]UserDao.UserDTO, error) {
 
-	userKeys, users, err := UserDao.GetAllUsers(ctx)
+	userKeys, users, err := userDao_GetAllUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
