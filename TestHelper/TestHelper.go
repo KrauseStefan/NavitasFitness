@@ -4,6 +4,7 @@ import (
 	"appengine_internal"
 
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"runtime/debug"
@@ -34,9 +35,7 @@ func prependToArgumentSlice(argSlice []interface{}, item interface{}) []interfac
 }
 
 func (s *Spy) RegisterArg1(arg1 interface{}) {
-	println(len(s.argument_1))
 	s.argument_1 = prependToArgumentSlice(s.argument_1, arg1)
-	println(len(s.argument_1))
 }
 
 func (s *Spy) RegisterArg2(arg1 interface{}, arg2 interface{}) {
@@ -56,12 +55,16 @@ func (s *Spy) GetLatestArg1() interface{} {
 	return nil
 }
 
-type ContextMock struct{}
+type ContextMock struct {
+	OptionalId int
+	//req  *http.Request
+	//done chan struct{} // Closed when the context has expired.
+}
 
-func (c *ContextMock) Debugf(format string, args ...interface{}) {}
-func (c *ContextMock) Infof(format string, args ...interface{}) {}
-func (c *ContextMock) Warningf(format string, args ...interface{}) {}
-func (c *ContextMock) Errorf(format string, args ...interface{}) {}
+func (c *ContextMock) Debugf(format string, args ...interface{})    {}
+func (c *ContextMock) Infof(format string, args ...interface{})     {}
+func (c *ContextMock) Warningf(format string, args ...interface{})  {}
+func (c *ContextMock) Errorf(format string, args ...interface{})    {}
 func (c *ContextMock) Criticalf(format string, args ...interface{}) {}
 func (c *ContextMock) Call(service, method string, in, out appengine_internal.ProtoMessage, opts *appengine_internal.CallOptions) error {
 	return nil
@@ -108,8 +111,11 @@ func (a *AssertObj) Equals(rightSide interface{}) {
 
 	if leftSide != nil && rightSide != nil && !reflect.DeepEqual(leftSide, rightSide) {
 		logError(a.t, fmt.Sprintln("Fail:", leftSide, "did not equal", rightSide))
-		logError(a.t, "Type of leftside: " + reflect.TypeOf(leftSide).String())
-		logError(a.t, "Type of rightside: " + reflect.TypeOf(rightSide).String())
+		logError(a.t, "Type of leftside: "+reflect.TypeOf(leftSide).String())
+		logError(a.t, "Type of rightside: "+reflect.TypeOf(rightSide).String())
+		//} else {
+		//	a.t.Log("Type of leftside: " + reflect.TypeOf(leftSide).String())
+		//	a.t.Log("Type of rightside: " + reflect.TypeOf(rightSide).String())
 	}
 
 	if a.t.Failed() {
@@ -133,4 +139,9 @@ func Assert(t *testing.T, leftSide interface{}) *AssertObj {
 	assertObj.t = t
 	assertObj.leftSide = leftSide
 	return assertObj
+}
+
+func LogObject(obj interface{}, message string) {
+	json, _ := json.Marshal(obj)
+	fmt.Println(message, string(json))
 }

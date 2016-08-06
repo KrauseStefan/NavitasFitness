@@ -13,7 +13,7 @@ import (
 )
 
 var (
-userDao_GetAllUsers = UserDao.GetAllUsers
+	userDao_GetAllUsers = UserDao.GetAllUsers
 )
 
 func IntegrateRoutes(router *mux.Router) {

@@ -16,9 +16,8 @@ var assert = TestHelper.Assert
 func mockoutGetAllUsers(keys []*datastore.Key, users []UserDao.UserDTO, e error) *TestHelper.Spy {
 	spy := new(TestHelper.Spy)
 	userDao_GetAllUsers = func(ctx appengine.Context) ([]*datastore.Key, []UserDao.UserDTO, error) {
-		_ctx := &ctx
 		spy.RegisterCall()
-		spy.RegisterArg1(_ctx)
+		spy.RegisterArg1(ctx)
 		return keys, users, e
 	}
 	return spy
@@ -41,16 +40,16 @@ func TestShouldConfigureHeaderForNoCache(t *testing.T) {
 	assert(t, header.Get("Expires") == "0")
 }
 
-//func TestShouldGetTransactionsFromDataStore(t *testing.T) {
-//	ctx := new(TestHelper.ContextMock)
-//
-//	spy := mockoutGetAllUsers(make([]*datastore.Key, 0, 0), make([]UserDao.UserDTO, 0, 0), nil)
-//
-//	getTransactionList(ctx)
-//
-//	assert(t, spy.CallCount()).Equals(1)
-//	assert(t, spy.GetLatestArg1()).Equals(ctx)
-//}
+func TestShouldGetTransactionsFromDataStore(t *testing.T) {
+	ctx := &TestHelper.ContextMock{OptionalId:99}
+
+	spy := mockoutGetAllUsers(make([]*datastore.Key, 0, 0), make([]UserDao.UserDTO, 0, 0), nil)
+
+	getTransactionList(ctx)
+
+	assert(t, spy.CallCount()).Equals(1)
+	assert(t, spy.GetLatestArg1()).Equals(ctx)
+}
 
 func TestExportXsltHandler(t *testing.T) {
 
