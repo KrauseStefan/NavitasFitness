@@ -101,11 +101,11 @@ func printLineAndFunction(t *testing.T) {
 
 func (a *AssertObj) Equals(rightSide interface{}) {
 	leftSide := a.leftSide
-	//leftValue := reflect.ValueOf(leftSide)
-	if leftSide == nil {
+
+	if leftSide == nil && rightSide != nil {
 		logError(a.t, "leftside was nil")
 	}
-	if rightSide == nil {
+	if rightSide == nil && leftSide != nil {
 		logError(a.t, "rightside was nil")
 	}
 

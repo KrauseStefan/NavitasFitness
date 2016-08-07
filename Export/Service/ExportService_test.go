@@ -41,14 +41,16 @@ func TestShouldConfigureHeaderForNoCache(t *testing.T) {
 }
 
 func TestShouldGetTransactionsFromDataStore(t *testing.T) {
-	ctx := &TestHelper.ContextMock{OptionalId:99}
+	ctx := &TestHelper.ContextMock{OptionalId: 99}
 
 	spy := mockoutGetAllUsers(make([]*datastore.Key, 0, 0), make([]UserDao.UserDTO, 0, 0), nil)
 
-	getTransactionList(ctx)
+	usersWithActiveSubscription, err := getTransactionList(ctx)
 
 	assert(t, spy.CallCount()).Equals(1)
 	assert(t, spy.GetLatestArg1()).Equals(ctx)
+	assert(t, len(usersWithActiveSubscription)).Equals(0)
+	assert(t, err).Equals(nil)
 }
 
 func TestExportXsltHandler(t *testing.T) {
