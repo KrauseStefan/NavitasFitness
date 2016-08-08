@@ -13,7 +13,8 @@ import (
 )
 
 var (
-	userDao_GetAllUsers = UserDao.GetAllUsers
+	userDao_GetAllUsers                      = UserDao.GetAllUsers
+	transactionDao_UserHasActiveSubscription = TransactionDao.UserHasActiveSubscription
 )
 
 func IntegrateRoutes(router *mux.Router) {
@@ -37,7 +38,7 @@ func getTransactionList(ctx appengine.Context) ([]UserDao.UserDTO, error) {
 	usersWithActiveSubscription := make([]UserDao.UserDTO, 0, len(userKeys))
 
 	for i, userKey := range userKeys {
-		userHasActiveSubscription, err := TransactionDao.UserHasActiveSubscription(ctx, userKey)
+		userHasActiveSubscription, err := transactionDao_UserHasActiveSubscription(ctx, userKey)
 		if err != nil {
 			return nil, err
 		}

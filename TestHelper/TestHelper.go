@@ -102,20 +102,22 @@ func printLineAndFunction(t *testing.T) {
 func (a *AssertObj) Equals(rightSide interface{}) {
 	leftSide := a.leftSide
 
-	if leftSide == nil && rightSide != nil {
-		logError(a.t, "leftside was nil")
-	}
-	if rightSide == nil && leftSide != nil {
-		logError(a.t, "rightside was nil")
-	}
-
-	if leftSide != nil && rightSide != nil && !reflect.DeepEqual(leftSide, rightSide) {
+	// nil does not equal nil (nil == nil) => false
+	if !reflect.DeepEqual(leftSide, rightSide ) && (leftSide != nil && rightSide != nil) {
 		logError(a.t, fmt.Sprintln("Fail:", leftSide, "did not equal", rightSide))
-		logError(a.t, "Type of leftside: "+reflect.TypeOf(leftSide).String())
-		logError(a.t, "Type of rightside: "+reflect.TypeOf(rightSide).String())
-		//} else {
-		//	a.t.Log("Type of leftside: " + reflect.TypeOf(leftSide).String())
-		//	a.t.Log("Type of rightside: " + reflect.TypeOf(rightSide).String())
+
+		if leftSide != nil && rightSide != nil {
+			typeLeft := reflect.TypeOf(leftSide).String()
+			typeRight := reflect.TypeOf(rightSide).String()
+
+			if typeLeft != typeRight {
+				logError(a.t, "Type of leftside: "+typeLeft)
+				logError(a.t, "Type of rightside: "+typeRight)
+			}
+			//} else {
+			//	a.t.Log("Type of leftside: " + reflect.TypeOf(leftSide).String())
+			//	a.t.Log("Type of rightside: " + reflect.TypeOf(rightSide).String())
+		}
 	}
 
 	if a.t.Failed() {
