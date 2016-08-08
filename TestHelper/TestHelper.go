@@ -103,7 +103,7 @@ func (a *AssertObj) Equals(rightSide interface{}) {
 	leftSide := a.leftSide
 
 	// nil does not equal nil (nil == nil) => false
-	if !reflect.DeepEqual(leftSide, rightSide ) && (leftSide != nil && rightSide != nil) {
+	if !reflect.DeepEqual(leftSide, rightSide) && (leftSide != nil && rightSide != nil) {
 		logError(a.t, fmt.Sprintln("Fail:", leftSide, "did not equal", rightSide))
 
 		if leftSide != nil && rightSide != nil {

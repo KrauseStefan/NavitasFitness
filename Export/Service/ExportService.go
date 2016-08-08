@@ -68,20 +68,6 @@ func addRow(sheet *xlsx.Sheet, headers ...string) {
 	}
 }
 
-func exportXsltHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
-
-	httpHeader := w.Header()
-	configureHeaderForFileDownload(&httpHeader, "ActiveSubscriptions.xlsx")
-
-	file, err := exportXslt(ctx)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	err = file.Write(w)
-}
-
 func exportXslt(ctx appengine.Context) (*xlsx.File, error) {
 
 	users, err := getTransactionList(ctx)
@@ -101,9 +87,19 @@ func exportXslt(ctx appengine.Context) (*xlsx.File, error) {
 		addRow(sheet, user.Email)
 	}
 
+	return file, nil
+}
+
+func exportXsltHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := appengine.NewContext(r)
+
+	httpHeader := w.Header()
+	configureHeaderForFileDownload(&httpHeader, "ActiveSubscriptions.xlsx")
+
+	file, err := exportXslt(ctx)
 	if err != nil {
-		return nil, err
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	return file, nil
+	err = file.Write(w)
 }

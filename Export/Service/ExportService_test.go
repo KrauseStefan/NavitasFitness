@@ -10,6 +10,7 @@ import (
 	"NavitasFitness/TestHelper"
 	"NavitasFitness/User/Dao"
 	"errors"
+	"github.com/tealeg/xlsx"
 )
 
 var assert = TestHelper.Assert
@@ -117,10 +118,42 @@ func TestShouldPassOnErrorsFromDataStore_HasSubscription(t *testing.T) {
 	assert(t, err).Equals(testError)
 }
 
+func TestShouldAddHeadderRowBasedOnPassedArgumentsToAddRow(t *testing.T) {
+	col1 := "test1"
+	col2 := "test2"
+	sheet := xlsx.Sheet{}
+
+	addRow(&sheet, col1, col2)
+
+	assert(t, len(sheet.Rows)).Equals(1)
+	assert(t, sheet.Rows[0].Cells[0].Value).Equals(col1)
+	assert(t, sheet.Rows[0].Cells[1].Value).Equals(col2)
+}
+
+func TestShouldCreateXsltSheetWithAllUserHavingActiveSubscription(t *testing.T) {
+	ctx := &TestHelper.ContextMock{}
+
+	keys := []*datastore.Key{&datastore.Key{}}
+	users := []UserDao.UserDTO{UserDao.UserDTO{Email: "testMail"}}
+
+	mockoutGetAllUsers(keys, users, nil)
+	mockoutUserHasActiveSubscription([]bool{true}, []error{nil})
+
+	file, error := exportXslt(ctx)
+
+	assert(t, file.Sheets[0].Rows[0].Cells[0].Value).Equals("email")
+	assert(t, file.Sheets[0].Rows[1].Cells[0].Value).Equals(users[0].Email)
+	assert(t, error).Equals(nil)
+}
+
 func TestExportXsltHandler(t *testing.T) {
-
 	ctx := new(TestHelper.ContextMock)
+	testError := errors.New("test error")
 
-	exportXslt(ctx)
+	mockoutGetAllUsers(nil, nil, testError)
 
+	file, err := exportXslt(ctx)
+
+	assert(t, file).Equals(nil)
+	assert(t, err).Equals(testError)
 }
