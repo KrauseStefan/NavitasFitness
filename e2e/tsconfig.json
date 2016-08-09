@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "allowUnreachableCode": false,
+        "allowSyntheticDefaultImports": false,
+        "allowUnusedLabels": false,
+        "forceConsistentCasingInFileNames": true,
+        "inlineSourceMap": true,
+        "listEmittedFiles": true,
+        "module": "commonjs",
+        "watch": true,
+        "moduleResolution": "node",
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "pretty": true,
+        "strictNullChecks": true,
+        "target": "es6"
+    }
+}
