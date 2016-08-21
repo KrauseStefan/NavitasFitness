@@ -4,10 +4,10 @@
         "allowSyntheticDefaultImports": false,
         "allowUnusedLabels": false,
         "forceConsistentCasingInFileNames": true,
-        "inlineSourceMap": true,
+        "sourceMap": true,
         "listEmittedFiles": true,
         "module": "commonjs",
-        "watch": true,
+        // "watch": true,
         "moduleResolution": "node",
         "noFallthroughCasesInSwitch": true,
         "noImplicitReturns": true,
@@ -16,5 +16,9 @@
         "pretty": true,
         "strictNullChecks": true,
         "target": "es6"
-    }
+    },
+
+    "exclude": [
+        "node_modules"
+    ]
 }
