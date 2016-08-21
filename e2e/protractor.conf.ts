@@ -1,15 +1,12 @@
-
-
-
-import {Config} from 'protractor';
+import { Config } from 'protractor';
 
 export const config: Config = {
   framework: 'jasmine',
   baseUrl: 'http://localhost:9000',
   capabilities: {
     browserName: 'chrome'
-  // }, {
-  //   browserName: 'firefox'
+    // }, {
+    //   browserName: 'firefox'
   },
-  specs: [ 'specs/*.js' ]
+  specs: ['specs/*.js']
 };
