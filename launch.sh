@@ -7,7 +7,7 @@ cd ${DIR}
 
 cd websrc
 
-#npm install
+npm install
 npm run clean
 
 gnome-terminal -e "npm run watch" &
