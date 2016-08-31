@@ -41,6 +41,10 @@ func IntegrateRoutes(router *mux.Router) {
 func getUserFromSession(ctx appengine.Context, r *http.Request) (*UserDao.UserDTO, error) {
 	uuid, err := AuthService.GetSessionUUID(r)
 
+	if uuid == "" && err == nil {
+		return nil, nil
+	}
+
 	if err != nil {
 		return nil, err
 	}

@@ -170,7 +170,8 @@ func GetSessionUUID(r *http.Request) (string, error) {
 	uuid := ""
 
 	if err := GetSecureCookieInst().Decode(sessionCookieName, cookie.Value, &uuid); err != nil {
-		return "", err
+		appengine.NewContext(r).Errorf("Coockie decode error: " + err.Error())
+		return "", nil
 	}
 
 	return uuid, nil
