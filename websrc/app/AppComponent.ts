@@ -1,5 +1,5 @@
-import { RegistrationForm } from './PageComponents/RegistrationForm/RegistrationForm';
 import { LoginForm } from './PageComponents/LoginForm/LoginForm';
+import { RegistrationForm } from './PageComponents/RegistrationForm/RegistrationForm';
 import { UserService } from './PageComponents/UserService';
 
 import IDialogService = angular.material.IDialogService;
@@ -13,45 +13,45 @@ class AppComponentController {
     private userService: UserService) {
   }
 
-  openRegistrationDialog(event: MouseEvent) {
+  public openRegistrationDialog(event: MouseEvent) {
 
     this.$mdDialog.show({
-      templateUrl: '/PageComponents/RegistrationForm/RegistrationForm.html',
-      targetEvent: event,
+      clickOutsideToClose: true,
       controller: RegistrationForm,
+      fullscreen: false,
       parent: angular.element(document.body),
-      clickOutsideToClose: true,
-      fullscreen: false
+      targetEvent: event,
+      templateUrl: '/PageComponents/RegistrationForm/RegistrationForm.html',
     });
 
   }
 
-  openLoginDialog(event: MouseEvent) {
+  public openLoginDialog(event: MouseEvent) {
 
     this.$mdDialog.show({
-      templateUrl: '/PageComponents/LoginForm/LoginForm.html',
-      targetEvent: event,
-      controller: LoginForm,
-      parent: angular.element(document.body),
       clickOutsideToClose: true,
-      fullscreen: false
+      controller: LoginForm,
+      fullscreen: false,
+      parent: angular.element(document.body),
+      targetEvent: event,
+      templateUrl: '/PageComponents/LoginForm/LoginForm.html',
     });
 
   }
 
-  logout() {
+  public logout() {
     this.userService.logout().then(() => {
-      //TODO display a message
+      // TODO display a message
     });
   }
 
-  isLoggedIn() {
+  public isLoggedIn() {
     return angular.isObject(this.userService.getLoggedinUser());
   }
 
 }
 
 export const AppComponent = {
+  controller: AppComponentController,
   templateUrl: './AppComponent.html',
-  controller: AppComponentController
 };

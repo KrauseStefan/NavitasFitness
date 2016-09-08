@@ -1,5 +1,5 @@
-import { UserService } from './PageComponents/UserService';
 import { BlogPostsService } from './PageComponents/Blog/BlogPostsService';
+import { UserService } from './PageComponents/UserService';
 
 import { AppComponent } from './AppComponent';
 import { CkEditor } from './Components/CkEditor/CkEditor';
@@ -12,9 +12,8 @@ import IUrlRouterProvider = angular.ui.IUrlRouterProvider;
 import ILocationProvider = angular.ILocationProvider;
 import IThemingProvider = angular.material.IThemingProvider;
 
-
 export const NavitasFitnessModule = angular.module('NavitasFitness', ['ngMaterial', 'ui.router', 'ngCookies'])
-  .config(function ($mdThemingProvider: IThemingProvider) {
+  .config(($mdThemingProvider: IThemingProvider) => {
     $mdThemingProvider.theme('default')
       .primaryPalette('blue')
       .accentPalette('orange');
@@ -29,16 +28,16 @@ export const NavitasFitnessModule = angular.module('NavitasFitness', ['ngMateria
 
     $stateProvider
       .state('MainPage', {
-        url: "/main-page",
         template: "<main-page></main-page>",
+        url: "/main-page",
       })
       .state('Blog', {
-        url: "/blog",
         template: "<blog></blog>",
+        url: "/blog",
       })
       .state('Status', {
-        url: "/status",
         template: "<user-status></user-status>",
+        url: "/status",
       });
   })
   .service('userService', UserService)

@@ -4,15 +4,15 @@ import IHttpService = angular.IHttpService;
 
 class UserStatus {
 
-  model: UserStatusModel;
+  public model: IUserStatusModel;
 
   constructor(private userService: UserService, private $http: IHttpService) {
     this.model = {
-      statusMsg: 'test status msg',
-      validUntill: '19/05-2016',
       extendWithAmountKr: 200,
+      statusMsg: 'test status msg',
       transactionHistory: [],
-    }
+      validUntill: '19/05-2016',
+    };
     this.getTransactionsUpdate();
   }
 
@@ -24,23 +24,21 @@ class UserStatus {
     }
   }
 
-  getTransactionsUpdate() {
-    this.$http.get('/rest/user/transactions').then(
-      (res) => {
-        this.model.transactionHistory = <TransactionEntry[]>res.data;
-      }
-    )
+  public getTransactionsUpdate() {
+    this.$http.get('/rest/user/transactions').then((res) => {
+      this.model.transactionHistory = <ITransactionEntry[]> res.data;
+    });
   }
 }
 
-class UserStatusModel {
-  statusMsg: string;
-  validUntill: string;
-  transactionHistory: Array<TransactionEntry>;
+interface IUserStatusModel {
   extendWithAmountKr: number;
+  statusMsg: string;
+  transactionHistory: Array<ITransactionEntry>;
+  validUntill: string;
 }
 
-class TransactionEntry {
+interface ITransactionEntry {
   amount: number;
   currency: string;
   paymentDate: string;
@@ -48,6 +46,6 @@ class TransactionEntry {
 }
 
 export const UserStatusComponent = {
+  controller: UserStatus,
   templateUrl: '/PageComponents/UserStatus/UserStatus.html',
-  controller: UserStatus
 };

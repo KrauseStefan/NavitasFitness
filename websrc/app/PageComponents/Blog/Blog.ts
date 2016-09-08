@@ -1,6 +1,5 @@
-import {CkEditorComponent} from '../../Components/CkEditor/CkEditor';
-import {BlogPostsService, BlogEntryDTO} from './BlogPostsService';
 import {UserService} from '../UserService';
+import {BlogEntryDTO, BlogPostsService} from './BlogPostsService';
 
 export class Blog {
 
@@ -17,26 +16,26 @@ export class Blog {
       });
   }
 
-  createBlogPost() {
+  public createBlogPost() {
     let entry = new BlogEntry();
     entry.enabled = true;
     this.entries.push(entry);
   }
 
-  saveEntry(entry: BlogEntry) {
+  public saveEntry(entry: BlogEntry) {
     this.blogPostsService.saveBlogEntry(entry.blogEntry)
-      .then(() => entry.enabled = false)
+      .then(() => entry.enabled = false);
   }
 
-  deleteEntry(entry: BlogEntry) {
+  public deleteEntry(entry: BlogEntry) {
     this.blogPostsService.deleteBlogEntry(entry.blogEntry)
       .then(() => {
         const index = this.entries.indexOf(entry);
         this.entries.splice(index, 1);
-      })
+      });
   }
 
-  isAdmin() {
+  public isAdmin() {
     return this.userService.isAdmin();
   }
 }
@@ -47,11 +46,11 @@ export class BlogEntry {
   public enabled = false;
 
   constructor(blogEntry: BlogEntryDTO = new BlogEntryDTO()) {
-    this.blogEntry = blogEntry
+    this.blogEntry = blogEntry;
   }
 }
 
 export const BlogComponent = {
+  controller: Blog,
   templateUrl: '/PageComponents/Blog/Blog.html',
-  controller: Blog
 };

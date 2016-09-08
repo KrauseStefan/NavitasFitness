@@ -1,4 +1,4 @@
-import {BlogPostsService, BlogEntryDTO} from '../Blog/BlogPostsService';
+import {BlogEntryDTO, BlogPostsService} from '../Blog/BlogPostsService';
 
 export class MainPage {
 
@@ -6,7 +6,7 @@ export class MainPage {
     author: '',
     content: '',
     date: '',
-    key: null
+    key: null,
   });
 
   constructor(public blogPostsService: BlogPostsService) {
@@ -14,15 +14,15 @@ export class MainPage {
       .then(blogEntries => this.entry = new BlogEntry(blogEntries[0]));
   }
 
-  saveEntry(entry: BlogEntry) {
+  public saveEntry(entry: BlogEntry) {
     this.blogPostsService.saveBlogEntry(entry.blogEntry)
       .then(() => entry.enabled = false);
   }
 }
 
 export const MainPageComponent = {
+  controller: MainPage,
   templateUrl: '/PageComponents/MainPage/MainPage.html',
-  controller: MainPage
 };
 
 export class BlogEntry {

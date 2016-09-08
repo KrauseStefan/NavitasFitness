@@ -7,8 +7,7 @@ export class UserService {
   private userServiceUrl = 'rest/user';
   private authServiceUrl = 'rest/auth';
 
-  private currentUser: UserDTO = null;
-
+  private currentUser: IUserDTO = null;
 
   constructor(
     private $http: IHttpService,
@@ -18,49 +17,48 @@ export class UserService {
     const sessionKey = $cookies.get(cookieName);
     if (angular.isDefined(sessionKey)) {
       this.getUserFromSessionData();
-    };
-
+    }
   }
 
-  createUser(user: UserDTO): IPromise<UserDTO> {
+  public createUser(user: IUserDTO): IPromise<IUserDTO> {
     return this.$http.post(this.userServiceUrl, user)
-      .then((res) => (<UserDTO>res.data));
+      .then((res) => (<IUserDTO> res.data));
   }
 
-  createUserSession(user: BaseUserDTO) {
+  public createUserSession(user: IBaseUserDTO) {
     return this.$http.post(`${this.authServiceUrl}/login`, user)
       .then((res) => {
-        this.currentUser = <UserDTO>res.data
-        return (this.currentUser)
+        this.currentUser = <IUserDTO> res.data;
+        return (this.currentUser);
       });
   }
 
-  getUserFromSessionData() {
+  public getUserFromSessionData() {
     this.$http.get(this.userServiceUrl)
       .then((res) => {
-        this.currentUser = <UserDTO>res.data;
+        this.currentUser = <IUserDTO> res.data;
       });
   }
 
-  logout() {
+  public logout() {
     return this.$http.post(`${this.authServiceUrl}/logout`, undefined);
   }
 
-  getLoggedinUser() {
+  public getLoggedinUser() {
     return this.currentUser;
   }
 
-  isAdmin() {
+  public isAdmin() {
     return angular.isObject(this.currentUser) && !!this.currentUser.isAdmin;
   }
 }
 
-export interface BaseUserDTO {
+export interface IBaseUserDTO {
   email: string;
   password: string;
 }
 
-export interface UserDTO extends BaseUserDTO {
+export interface IUserDTO extends IBaseUserDTO {
   navitasId: string;
   isAdmin?: boolean;
 }
