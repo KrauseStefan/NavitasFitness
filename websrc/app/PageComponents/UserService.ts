@@ -13,14 +13,14 @@ export class UserService {
   constructor(
     private $http: IHttpService,
     private $cookies: ICookiesService) {
-    
-      const cookieName = 'Session-Key';
-      const sessionKey = $cookies.get(cookieName);
-      if(angular.isDefined(sessionKey)) {
-        this.getUserFromSessionData();
-      };
-      
-    }
+
+    const cookieName = 'Session-Key';
+    const sessionKey = $cookies.get(cookieName);
+    if (angular.isDefined(sessionKey)) {
+      this.getUserFromSessionData();
+    };
+
+  }
 
   createUser(user: UserDTO): IPromise<UserDTO> {
     return this.$http.post(this.userServiceUrl, user)
@@ -30,7 +30,7 @@ export class UserService {
   createUserSession(user: BaseUserDTO) {
     return this.$http.post(`${this.authServiceUrl}/login`, user)
       .then((res) => {
-        this.currentUser = <UserDTO>res.data 
+        this.currentUser = <UserDTO>res.data
         return (this.currentUser)
       });
   }
@@ -38,18 +38,18 @@ export class UserService {
   getUserFromSessionData() {
     this.$http.get(this.userServiceUrl)
       .then((res) => {
-        this.currentUser = <UserDTO>res.data; 
+        this.currentUser = <UserDTO>res.data;
       });
   }
-  
+
   logout() {
     return this.$http.post(`${this.authServiceUrl}/logout`, undefined);
   }
-  
+
   getLoggedinUser() {
     return this.currentUser;
   }
-  
+
   isAdmin() {
     return angular.isObject(this.currentUser) && !!this.currentUser.isAdmin;
   }
@@ -60,7 +60,7 @@ export interface BaseUserDTO {
   password: string;
 }
 
-export interface UserDTO extends BaseUserDTO{
+export interface UserDTO extends BaseUserDTO {
   navitasId: string;
-  isAdmin ?: boolean;
+  isAdmin?: boolean;
 }

@@ -6,18 +6,15 @@
   "scripts": {
     "build": "npm-run-all clean --parallel copy:* build:**",
     "watch": "npm-run-all clean --parallel build:scss webserver copy:* 'build:* -- --watch'",
-
     "build:jade": "jade app -o ../webapp/ --pretty --hierarchy",
     "build:ts": "tsc",
     "build:scss": "node-sass styles/main.scss ../webapp/main.css --source-map true",
-
     "copy:favicon": "cp favicon.ico ../webapp/favicon.ico",
-
     "clean": "rimraf ../webapp/*",
     "webserver": "node buildenv/connect.server.js",
     "install": "bower install && typings install && tsc"
   },
-  "author": "",
+  "author": "Stefan Krause-Kjær",
   "license": "ISC",
   "devDependencies": {
     "bower": "^1.7.9",

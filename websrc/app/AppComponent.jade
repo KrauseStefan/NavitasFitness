@@ -22,15 +22,18 @@
               span Logout
 
     md-tabs(md-stretch-tabs="always")
-      md-tab(ui-sref="MainPage") 
-        md-icon home
-        span Forside
-      md-tab(ui-sref="Blog")
-        md-icon subject
-        span Blog
-      md-tab(ui-sref="Status")
-        md-icon perm_identity
-        span Min status
+      md-tab
+        div(ui-sref="MainPage")
+          md-icon home
+          span Forside
+      md-tab
+        div(ui-sref="Blog")
+          md-icon subject
+          span Blog
+      md-tab
+        div(ui-sref="Status")
+          md-icon perm_identity
+          span Min status
 
   md-content(flex, layout-padding)
     ui-view

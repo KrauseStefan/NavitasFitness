@@ -94,7 +94,7 @@ func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := getUserFromSession(ctx, r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		// User is not authorised sending back an empty response
 		return
 	}
 

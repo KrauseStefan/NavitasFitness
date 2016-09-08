@@ -19,7 +19,7 @@ describe('Navigation tests', () => {
   afterEach(() => {
     (<any>browser).manage().logs().get('browser').then((browserLogs: BrowserLog[]) => {
       if (browserLogs.length > 0) {
-        throw "Error was thrown doring test execution: " + browserLogs[0].message
+        throw `Error was thrown doring test execution: [${browserLogs[0].level.name}] ${browserLogs[0].message}`
       }
     });
   });
