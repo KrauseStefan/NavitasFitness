@@ -15,7 +15,7 @@
         "noUnusedLocals": true,
         "pretty": true,
         "strictNullChecks": true,
-        "target": "es6"
+        "target": "es5"
     },
 
     "exclude": [
