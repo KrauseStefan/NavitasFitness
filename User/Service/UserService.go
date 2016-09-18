@@ -9,10 +9,10 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"NavitasFitness/AppEngineHelper"
-	"NavitasFitness/Auth"
-	"NavitasFitness/IPN/Transaction"
-	"NavitasFitness/User/Dao"
+	"AppEngineHelper"
+	"Auth"
+	"IPN/Transaction"
+	"User/Dao"
 )
 
 func IntegrateRoutes(router *mux.Router) {

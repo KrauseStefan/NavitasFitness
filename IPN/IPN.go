@@ -14,8 +14,8 @@ import (
 	"appengine/taskqueue"
 	"appengine/urlfetch"
 
-	"NavitasFitness/IPN/Transaction"
-	"NavitasFitness/User/Dao"
+	"IPN/Transaction"
+	"User/Dao"
 )
 
 const (

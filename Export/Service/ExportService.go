@@ -8,8 +8,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/tealeg/xlsx"
 
-	"NavitasFitness/IPN/Transaction"
-	"NavitasFitness/User/Dao"
+	"IPN/Transaction"
+	"User/Dao"
 )
 
 var (

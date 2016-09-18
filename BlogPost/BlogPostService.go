@@ -12,7 +12,7 @@ import (
 	"appengine"
 	"appengine/datastore"
 
-	"NavitasFitness/AppEngineHelper"
+	"AppEngineHelper"
 )
 
 type BlogEntry struct {

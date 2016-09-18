@@ -11,8 +11,8 @@ import (
 
 	"appengine"
 
-	"NavitasFitness/AppEngineHelper"
-	"NavitasFitness/User/Dao"
+	"AppEngineHelper"
+	"User/Dao"
 )
 
 const sessionCookieName = "Session-Key"

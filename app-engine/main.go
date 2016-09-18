@@ -5,11 +5,11 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"NavitasFitness/Auth"
-	"NavitasFitness/BlogPost"
-	"NavitasFitness/Export/Service"
-	"NavitasFitness/IPN"
-	"NavitasFitness/User/Service"
+	"Auth"
+	"BlogPost"
+	"Export/Service"
+	"IPN"
+	"User/Service"
 )
 
 // http://blog.golang.org/context

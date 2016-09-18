@@ -8,7 +8,7 @@ import (
 	"appengine"
 	"appengine/datastore"
 
-	"NavitasFitness/AppEngineHelper"
+	"AppEngineHelper"
 )
 
 const (

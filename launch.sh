@@ -20,5 +20,6 @@ gnome-terminal -e "npm start" &
 
 cd -
 
-gnome-terminal -e "goapp serve ./app-engine" &
+goapp get -v ./...
+gnome-terminal -e "goapp serve ." &
 

@@ -7,8 +7,8 @@ import (
 	"appengine"
 	"appengine/datastore"
 
-	"NavitasFitness/TestHelper"
-	"NavitasFitness/User/Dao"
+	"TestHelper"
+	"User/Dao"
 	"errors"
 	"github.com/tealeg/xlsx"
 )
