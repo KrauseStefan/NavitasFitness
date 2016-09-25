@@ -5,8 +5,8 @@ import { AppComponent } from './AppComponent';
 import { CkEditor } from './Components/CkEditor/CkEditor';
 import { BlogComponent } from './PageComponents/Blog/Blog';
 import { MainPageComponent } from './PageComponents/MainPage/MainPage';
-import { UserStatusComponent } from './PageComponents/UserStatus/UserStatus';
 import { nfResetOnChange } from './PageComponents/RegistrationForm/nfEmailAvailable';
+import { UserStatusComponent } from './PageComponents/UserStatus/UserStatus';
 
 import IStateProvider = angular.ui.IStateProvider;
 import IUrlRouterProvider = angular.ui.IUrlRouterProvider;
