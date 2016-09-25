@@ -74,16 +74,24 @@ func userPost(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(user)
 	if err != nil {
+		ctx.Errorf(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	if err := UserDao.CreateUser(ctx, user); err != nil {
+		if err == UserDao.EmailAlreadyExistsError {
+			http.Error(w, err.Error(), http.StatusConflict)
+			ctx.Infof(err.Error())
+			return
+		}
+		ctx.Errorf(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	if _, err := AppEngineHelper.WriteJSON(w, user); err != nil {
+		ctx.Errorf(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

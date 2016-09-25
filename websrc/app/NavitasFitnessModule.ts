@@ -6,13 +6,18 @@ import { CkEditor } from './Components/CkEditor/CkEditor';
 import { BlogComponent } from './PageComponents/Blog/Blog';
 import { MainPageComponent } from './PageComponents/MainPage/MainPage';
 import { UserStatusComponent } from './PageComponents/UserStatus/UserStatus';
+import { nfResetOnChange } from './PageComponents/RegistrationForm/nfEmailAvailable';
 
 import IStateProvider = angular.ui.IStateProvider;
 import IUrlRouterProvider = angular.ui.IUrlRouterProvider;
+
 import ILocationProvider = angular.ILocationProvider;
+
 import IThemingProvider = angular.material.IThemingProvider;
 
-export const NavitasFitnessModule = angular.module('NavitasFitness', ['ngMaterial', 'ui.router', 'ngCookies'])
+export const NavitasFitnessModule = angular.module('NavitasFitness', [
+  'ngMaterial', 'ui.router', 'ngCookies', 'ngMessages',
+  ])
   .config(($mdThemingProvider: IThemingProvider) => {
     $mdThemingProvider.theme('default')
       .primaryPalette('blue')
@@ -47,4 +52,6 @@ export const NavitasFitnessModule = angular.module('NavitasFitness', ['ngMateria
   .component('blog', BlogComponent)
   .component('mainPage', MainPageComponent)
   .component('userStatus', UserStatusComponent)
-  .component('appComponent', AppComponent);
+  .component('appComponent', AppComponent)
+
+  .directive(nfResetOnChange.name, nfResetOnChange.factory);

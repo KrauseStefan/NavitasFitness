@@ -1,36 +1,36 @@
 md-dialog
-  md-toolbar.md-toolbar-tools
-    h2.md-display-2 Create User
-    span(flex)
-    md-button.md-icon-button(ng-click="cancel()")
-      md-icon(aria-label="Close dialog") close
-  md-dialog-content.md-dialog-content
-    div
+  form(name="RegistrationForm", novalidate)
+    md-toolbar.md-toolbar-tools
+      h2.md-display-2 Create User
+      span(flex)
+      md-button.md-icon-button(ng-click="cancel()")
+        md-icon(aria-label="Close dialog") close
+
+    md-content.md-dialog-content
       md-input-container
         label E-Mail
-        input(type="email", ng-model="model.email")
+        md-icon email
+        input(name="email", type="email", ng-model="model.email", required, nf-reset-on-change="emailAvailable")
+        div(ng-messages="RegistrationForm.email.$error", md-auto-hide="true")
+          div(ng-message="emailAvailable").
+            This e-mail address is already registred
 
-    div
-      md-input-container
-        label Repeat E-Mail
-        input(type="email", ng-model="model.emailRepeat")
-
-    div
       md-input-container
         label Password
-        input(type="password", ng-model="model.password")
+        md-icon lock_outline
+        input(type="password", ng-model="model.password", required)
 
-    div
       md-input-container
         label Repeat Password
-        input(type="password", ng-model="model.passwordRepeat")
+        md-icon lock_outline
+        input(type="password", ng-model="model.passwordRepeat", required)
 
-    div
       md-input-container
         label Student Id/Other Id
-        input(ng-model="model.navitasId")
+        md-icon perm_identity
+        input(name="studentId", ng-model="model.navitasId", required)
 
-  md-dialog-actions
-    md-button(ng-click="cancel()") Cancel
-    md-button.md-primary(ng-click="submit()") Create
+    md-dialog-actions
+      md-button(ng-click="cancel()") Cancel
+      md-button.md-primary(type="submit", ng-click="submit()") Create
 

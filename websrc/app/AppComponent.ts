@@ -1,5 +1,5 @@
 import { LoginForm } from './PageComponents/LoginForm/LoginForm';
-import { RegistrationForm } from './PageComponents/RegistrationForm/RegistrationForm';
+import { RegistrationForm } from './PageComponents/RegistrationForm/RegistrationFormCtrl';
 import { UserService } from './PageComponents/UserService';
 
 import IDialogService = angular.material.IDialogService;

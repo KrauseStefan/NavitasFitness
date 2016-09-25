@@ -1,10 +1,15 @@
 import { IUserDTO, UserService } from '../UserService';
 
 import IDialogService = angular.material.IDialogService;
+import IToastService = angular.material.IToastService;
+import IHttpPromiseCallbackArg = angular.IHttpPromiseCallbackArg;
+import INgModelController = angular.INgModelController;
+import IScope = angular.IScope;
+
+const HttpConflict = 409;
 
 export class RegistrationFormModel implements IUserDTO {
   public email: string = '';
-  public emailRepeat: string = '';
   public password: string = '';
   public passwordRepeat: string = '';
   public navitasId: string = '';
@@ -21,9 +26,18 @@ export class RegistrationFormModel implements IUserDTO {
 export class RegistrationForm {
 
   constructor(
-    private $scope: any,
+    private $scope: {
+      submit: () => void,
+      cancel: () => void,
+      model: RegistrationFormModel,
+      errorMsg: any,
+      RegistrationForm: {
+        email: INgModelController
+      }
+    } & IScope,
     private userService: UserService,
-    private $mdDialog: IDialogService) {
+    private $mdDialog: IDialogService,
+    private $mdToast: IToastService) {
 
     $scope.submit = () => this.submit();
     $scope.cancel = () => this.cancel();
@@ -34,6 +48,10 @@ export class RegistrationForm {
     this.userService.createUser(this.$scope.model.toUserDTO()).then(() => {
       this.$scope.model = new RegistrationFormModel();
       this.$mdDialog.hide();
+    }, (errorResponse: IHttpPromiseCallbackArg<string>) => {
+      if (errorResponse.status === HttpConflict) {
+        this.$scope.RegistrationForm.email.$setValidity('emailAvailable', false);
+      }
     });
   }
 

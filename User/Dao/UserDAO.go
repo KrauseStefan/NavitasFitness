@@ -23,12 +23,12 @@ const (
 )
 
 var (
-	userHasIdError         = errors.New("Cannot create new user, key must be nil")
-	userHasNoIdError       = errors.New("Cannot create new user, key must be defined")
-	userAlreadyExistsError = errors.New("Cannot update an already existing user")
-	userNotFoundError      = errors.New("User does not exist in datastore")
-	invalidSessionError    = errors.New("Invalid user session")
-	passwordCanNotBeEmpty  = errors.New("Can not set update password when password is blank")
+	userHasIdError          = errors.New("Cannot create new user, key must be nil")
+	userHasNoIdError        = errors.New("Cannot create new user, key must be defined")
+	EmailAlreadyExistsError = errors.New("Cannot create user, email already in use")
+	userNotFoundError       = errors.New("User does not exist in datastore")
+	invalidSessionError     = errors.New("Invalid user session")
+	passwordCanNotBeEmpty   = errors.New("Can not set update password when password is blank")
 )
 
 var (
@@ -146,7 +146,7 @@ func CreateUser(ctx appengine.Context, user *UserDTO) error {
 	}
 
 	if user, _ := GetUserByEmail(ctx, user.Email); user != nil {
-		return userAlreadyExistsError
+		return EmailAlreadyExistsError
 	}
 
 	if err := user.UpdatePasswordHash(nil); err != nil {

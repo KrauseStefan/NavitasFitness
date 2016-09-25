@@ -12,7 +12,8 @@
      */
     "quotemark": [
       "single"
-    ]
+    ],
+    "no-string-literal": false
   },
   "rulesDirectory": [
     /*
