@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-GOPATH="$HOME/TEST-GOPATH"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd ${DIR}
+
+export GOPATH="$HOME/TEST-GOPATH"
 
 rm $GOPATH -rf
 
@@ -13,9 +16,13 @@ for dir in $(ls -d */); do
     fi;
 done
 
-goapp get -v ./...
-
-#ln -s "$GOPATH/src" "."
-
-
+goapp fmt ./...
+goapp get -d -v ./...
 goapp test -v ./...
+
+cd websrc
+npm test
+
+cd -
+cd e2e
+npm test
