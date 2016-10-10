@@ -26,7 +26,7 @@ var (
 	userHasIdError          = errors.New("Cannot create new user, key must be nil")
 	userHasNoIdError        = errors.New("Cannot create new user, key must be defined")
 	EmailAlreadyExistsError = errors.New("Cannot create user, email already in use")
-	userNotFoundError       = errors.New("User does not exist in datastore")
+	UserNotFoundError       = errors.New("User does not exist in datastore")
 	invalidSessionError     = errors.New("Invalid user session")
 	passwordCanNotBeEmpty   = errors.New("Can not set update password when password is blank")
 )
@@ -109,7 +109,7 @@ func GetUserByEmail(ctx appengine.Context, email string) (*UserDTO, error) {
 	}
 
 	if len(keys) == 0 {
-		return nil, userNotFoundError
+		return nil, UserNotFoundError
 	}
 
 	userDtoList[0].Key = strconv.FormatInt(keys[0].IntID(), 10)

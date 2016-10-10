@@ -5,7 +5,7 @@ import { AppComponent } from './AppComponent';
 import { CkEditor } from './Components/CkEditor/CkEditor';
 import { BlogComponent } from './PageComponents/Blog/Blog';
 import { MainPageComponent } from './PageComponents/MainPage/MainPage';
-import { nfResetOnChange } from './PageComponents/RegistrationForm/nfEmailAvailable';
+import { nfResetOnChange } from './PageComponents/RegistrationForm/nfResetOnChange';
 import { UserStatusComponent } from './PageComponents/UserStatus/UserStatus';
 
 import IStateProvider = angular.ui.IStateProvider;
@@ -29,20 +29,20 @@ export const NavitasFitnessModule = angular.module('NavitasFitness', [
     $locationProvider: ILocationProvider
   ) => {
     $locationProvider.html5Mode(true);
-    $urlRouterProvider.otherwise("/");
+    $urlRouterProvider.otherwise('/');
 
     $stateProvider
       .state('MainPage', {
-        template: "<main-page></main-page>",
-        url: "/main-page",
+        template: '<main-page></main-page>',
+        url: '/main-page',
       })
       .state('Blog', {
-        template: "<blog></blog>",
-        url: "/blog",
+        template: '<blog></blog>',
+        url: '/blog',
       })
       .state('Status', {
-        template: "<user-status></user-status>",
-        url: "/status",
+        template: '<user-status></user-status>',
+        url: '/status',
       });
   })
   .service('userService', UserService)

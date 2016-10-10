@@ -122,6 +122,10 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err = UserDao.GetUserByEmail(ctx, loginRequestUser.Email)
+	if err == UserDao.UserNotFoundError {
+		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		return
+	}
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -134,7 +138,7 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 
 	uuid, err = generateUUID()
 	if err != nil {
-		http.Error(w, "Error Generating UUID", http.StatusUnauthorized)
+		http.Error(w, "Error Generating UUID", http.StatusInternalServerError)
 		return
 	}
 

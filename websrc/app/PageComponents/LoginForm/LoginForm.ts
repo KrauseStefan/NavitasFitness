@@ -1,6 +1,9 @@
 import { IBaseUserDTO, UserService } from '../UserService';
 
 import IDialogService = angular.material.IDialogService;
+import IHttpPromiseCallbackArg = angular.IHttpPromiseCallbackArg;
+
+const HttpUnauthorized = 401;
 
 export class LoginForm {
 
@@ -26,6 +29,11 @@ export class LoginForm {
     this.userService.createUserSession(this.$scope.model).then(() => {
       this.resetForm();
       this.$mdDialog.hide();
+    }, (errorResponse: IHttpPromiseCallbackArg<string>) => {
+      if (errorResponse.status === HttpUnauthorized) {
+        this.$scope.LoginForm.password.$setValidity('loginSuccessful', false);
+      }
+
     });
   }
 
