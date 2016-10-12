@@ -1,4 +1,4 @@
-import { browser } from 'protractor/globals';
+import { browser } from 'protractor';
 
 export interface BrowserLog {
   level: {

@@ -1,4 +1,4 @@
-import { browser } from 'protractor/globals';
+import { browser } from 'protractor';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
 import { verifyBrowserLog } from '../utility'
 

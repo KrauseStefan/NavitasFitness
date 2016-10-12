@@ -91,8 +91,8 @@ func (user *UserDTO) UpdatePasswordHash(password []byte) error {
 	return nil
 }
 
-func (user *UserDTO) VerifyPassword(password string) bool {
-	return bcrypt.CompareHashAndPassword(user.PasswordHash, user.getPasswordWithSalt([]byte(password))) == nil
+func (user *UserDTO) VerifyPassword(password string) error {
+	return bcrypt.CompareHashAndPassword(user.PasswordHash, user.getPasswordWithSalt([]byte(password)))
 }
 
 func GetUserByEmail(ctx appengine.Context, email string) (*UserDTO, error) {

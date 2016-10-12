@@ -1,4 +1,4 @@
-import { by, element } from 'protractor/globals';
+import { by, element } from 'protractor';
 
 export class NavigationPageObject {
   static allTabs = element(by.tagName('md-tabs'));

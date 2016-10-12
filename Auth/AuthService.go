@@ -122,7 +122,8 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err = UserDao.GetUserByEmail(ctx, loginRequestUser.Email)
-	if err == UserDao.UserNotFoundError {
+	if user == nil || err == UserDao.UserNotFoundError {
+		ctx.Errorf("Failed to login, %s does not exist in DB", loginRequestUser.Email)
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}
@@ -131,7 +132,9 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user == nil || user.VerifyPassword(loginRequestUser.Password) {
+	if err := user.VerifyPassword(loginRequestUser.Password); err != nil {
+		ctx.Errorf("Failed to login, %s Invalid password", loginRequestUser.Email)
+		ctx.Errorf(err.Error())
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}

@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "protractor": "^4.0.8",
+    "protractor": "^4.0.9",
     "typescript": "^2.0.2"
   }
 }
