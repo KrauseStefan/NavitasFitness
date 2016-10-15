@@ -1,10 +1,10 @@
-import { verifyBrowserLog } from '../utility'
-import { NavigationPageObject, RegistrationDialogPageObject, LoginDialogPageObject } from '../PageObjects/NavigationPageObject';
-// import { browser } from 'protractor'
-// import { promise as wdPromise } from 'selenium-webdriver'
+import { verifyBrowserLog } from '../utility';
+import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
+import { RegistrationDialogPageObject } from '../PageObjects/RegistrationDialogPageObject';
+import { LoginDialogPageObject } from '../PageObjects/LoginDialogPageObject';
 
 const userInfo = {
-  email: '9-email@domain.com',
+  email: '13-email@domain.com',
   password: 'Password123',
   navitasId: '1234509876'
 }
