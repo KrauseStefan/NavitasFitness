@@ -41,7 +41,9 @@ export class UserService {
   }
 
   public logout() {
-    return this.$http.post(`${this.authServiceUrl}/logout`, undefined);
+    return this.$http.post(`${this.authServiceUrl}/logout`, undefined).then(() => {
+      this.currentUser = null;
+    });
   }
 
   public getLoggedinUser() {

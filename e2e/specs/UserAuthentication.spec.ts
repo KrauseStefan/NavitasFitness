@@ -5,7 +5,7 @@ import { verifyBrowserLog } from '../utility';
 // import { browser } from 'protractor';
 
 const userInfo = {
-  email: '20-email@domain.com',
+  email: '22-email@domain.com',
   navitasId: '1234509876',
   password: 'Password123',
 };
@@ -101,6 +101,12 @@ describe('User Autentication', () => {
     expect(NavigationPageObject.menuRegister.isDisplayed()).toBe(false);
 
     NavigationPageObject.menuLogout.click();
+
+    NavigationPageObject.menuButton.click();
+
+    expect(NavigationPageObject.menuLogin.isDisplayed()).toBe(true);
+    expect(NavigationPageObject.menuRegister.isDisplayed()).toBe(true);
+    expect(NavigationPageObject.menuLogout.isDisplayed()).toBe(false);
   });
 
 });

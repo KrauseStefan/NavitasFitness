@@ -40,9 +40,7 @@ class AppComponentController {
   }
 
   public logout() {
-    this.userService.logout().then(() => {
-      // TODO display a message
-    });
+    this.userService.logout();
   }
 
   public isLoggedIn() {
