@@ -1,13 +1,14 @@
-import { verifyBrowserLog } from '../utility';
+import { LoginDialogPageObject } from '../PageObjects/LoginDialogPageObject';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
 import { RegistrationDialogPageObject } from '../PageObjects/RegistrationDialogPageObject';
-import { LoginDialogPageObject } from '../PageObjects/LoginDialogPageObject';
+import { verifyBrowserLog } from '../utility';
+// import { browser } from 'protractor';
 
 const userInfo = {
   email: '20-email@domain.com',
+  navitasId: '1234509876',
   password: 'Password123',
-  navitasId: '1234509876'
-}
+};
 
 describe('User Autentication', () => {
 
@@ -20,7 +21,7 @@ describe('User Autentication', () => {
 
     loginDialog.fillForm({
       email: userInfo.email,
-      password: userInfo.password
+      password: userInfo.password,
     });
 
     loginDialog.loginButton.click();
@@ -38,9 +39,9 @@ describe('User Autentication', () => {
 
     regDialog.fillForm({
       email: userInfo.email,
+      navitasId: userInfo.navitasId,
       password: userInfo.password,
       passwordRepeat: userInfo.password,
-      navitasId: userInfo.navitasId
     });
     regDialog.buttonRegister.click();
 
@@ -56,16 +57,20 @@ describe('User Autentication', () => {
 
     regDialog.fillForm({
       email: userInfo.email,
+      navitasId: userInfo.navitasId,
       password: userInfo.password,
       passwordRepeat: userInfo.password,
-      navitasId: userInfo.navitasId
     });
 
     regDialog.buttonRegister.click();
 
     expect(regDialog.formContainer.isDisplayed()).toBe(true);
     expect(regDialog.errorEmailUnavailable.isDisplayed()).toBe(true);
-    verifyBrowserLog(['http://localhost:8080/rest/user 0:0 Failed to load resource: the server responded with a status of 409 (Conflict)']);
+    verifyBrowserLog([[
+      'http://localhost:8080/rest/user',
+      '0:0',
+      'Failed to load resource: the server responded with a status of 409 (Conflict)',
+    ].join(' ')]);
 
     regDialog.safeClick(regDialog.cancelButton);
   });
@@ -79,7 +84,7 @@ describe('User Autentication', () => {
 
     loginDialog.fillForm({
       email: userInfo.email,
-      password: userInfo.password
+      password: userInfo.password,
     });
 
     loginDialog.loginButton.click();

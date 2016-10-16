@@ -1,5 +1,5 @@
-import { promise as wdpromise } from 'selenium-webdriver';
 import { $, ElementFinder } from 'protractor';
+import { promise as wdpromise } from 'selenium-webdriver';
 
 export type formNameValuesMap = { [name: string]: string }
 
@@ -17,6 +17,6 @@ export class DialogPageObject {
     const resolved = wdpromise.fullyResolved(null);
     return element.isDisplayed().then<any>((isDisplayed) => {
       return !isDisplayed ? resolved : element.click();
-    }, () => {});
+    }, () => {/* */});
   }
 }

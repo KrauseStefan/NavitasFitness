@@ -1,9 +1,9 @@
-import { browser } from 'protractor';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
-import { verifyBrowserLog } from '../utility'
+import { verifyBrowserLog } from '../utility';
+import { browser } from 'protractor';
 
 describe('Navigation tests', () => {
-  browser.get('/')
+  browser.get('/');
 
   afterEach(() => verifyBrowserLog());
 
@@ -21,6 +21,4 @@ describe('Navigation tests', () => {
   // it('should respond to the basic "/" address', () => {
   //   browser.get('/')
   // });
-
-
 });

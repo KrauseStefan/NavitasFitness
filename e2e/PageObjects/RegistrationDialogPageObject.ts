@@ -1,4 +1,4 @@
-import { DialogPageObject } from './DialogPageObject'
+import { DialogPageObject } from './DialogPageObject';
 
 export class RegistrationDialogPageObject extends DialogPageObject {
   public buttonRegister = this.formContainer.$('button[ng-click="submit()"]');
