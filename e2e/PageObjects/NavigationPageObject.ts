@@ -12,4 +12,5 @@ export class NavigationPageObject {
 
   static menuRegister = NavigationPageObject.menuContent.$('[ng-click="$ctrl.openRegistrationDialog($event)"]');
   static menuLogin = NavigationPageObject.menuContent.$('[ng-click="$ctrl.openLoginDialog($event)"]');
+  static menuLogout = NavigationPageObject.menuContent.$('[ng-click="$ctrl.logout($event)"]');
 }

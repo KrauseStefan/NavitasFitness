@@ -1,13 +1,12 @@
-import { $ } from 'protractor';
+import { DialogPageObject } from './DialogPageObject';
 
-export class LoginDialogPageObject {
-  public formContainer = $('md-dialog');
+export class LoginDialogPageObject extends DialogPageObject {
 
-  public fieldEmail = this.formContainer.$('input[ng-model="model.email"]');
-  public fieldPassword = this.formContainer.$('input[ng-model="model.password"]');
+  public loginButton = this.formContainer.$('button[ng-click="submit()"]');
 
-  public buttonLogin = this.formContainer.$('button[ng-click="submit()"]');
-  public buttonCancel = this.formContainer.$('button[ng-click="cancel()"]');
+  public closeButton = this.formContainer.$('.md-toolbar-tools button[ng-click="cancel()"]');
+  public cancelButton = this.formContainer.$('md-dialog-actions button[ng-click="cancel()"]');
 
   public errorLoginSuccessful = this.formContainer.$('[ng-message="loginSuccessful"]');
+
 }

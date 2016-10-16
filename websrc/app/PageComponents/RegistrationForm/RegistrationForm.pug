@@ -18,17 +18,17 @@ md-dialog
       md-input-container
         label Password
         md-icon lock_outline
-        input(type="password", ng-model="model.password", required)
+        input(name="password", type="password", ng-model="model.password", required)
 
       md-input-container
         label Repeat Password
         md-icon lock_outline
-        input(type="password", ng-model="model.passwordRepeat", required)
+        input(name="passwordRepeat", type="password", ng-model="model.passwordRepeat", required)
 
       md-input-container
         label Student Id/Other Id
         md-icon perm_identity
-        input(name="studentId", ng-model="model.navitasId", required)
+        input(name="navitasId", ng-model="model.navitasId", required)
 
     md-dialog-actions
       md-button(ng-click="cancel()") Cancel
