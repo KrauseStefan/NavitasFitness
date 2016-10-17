@@ -23,7 +23,10 @@ md-dialog
       md-input-container
         label Repeat Password
         md-icon lock_outline
-        input(name="passwordRepeat", type="password", ng-model="model.passwordRepeat", required)
+        input(name="passwordRepeat", type="password", ng-model="model.passwordRepeat", required, nf-should-equal="model.password")
+        div(ng-messages="RegistrationForm.passwordRepeat.$error", md-auto-hide="true")
+          div(ng-message="nfShouldEqual").
+            The two passwords do not match
 
       md-input-container
         label Student Id/Other Id
@@ -32,4 +35,4 @@ md-dialog
 
     md-dialog-actions
       md-button(ng-click="cancel()") Cancel
-      md-button.md-primary(type="submit", ng-click="submit()") Create
+      md-button.md-primary(ng-disabled="RegistrationForm.$invalid", type="submit", ng-click="submit()") Create

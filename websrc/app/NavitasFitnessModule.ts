@@ -6,6 +6,7 @@ import { CkEditor } from './Components/CkEditor/CkEditor';
 import { BlogComponent } from './PageComponents/Blog/Blog';
 import { MainPageComponent } from './PageComponents/MainPage/MainPage';
 import { nfResetOnChange } from './PageComponents/RegistrationForm/nfResetOnChange';
+import { nfShouldEqual } from './PageComponents/RegistrationForm/nfShouldEqual';
 import { UserStatusComponent } from './PageComponents/UserStatus/UserStatus';
 
 import IStateProvider = angular.ui.IStateProvider;
@@ -54,4 +55,5 @@ export const NavitasFitnessModule = angular.module('NavitasFitness', [
   .component('userStatus', UserStatusComponent)
   .component('appComponent', AppComponent)
 
-  .directive(nfResetOnChange.name, nfResetOnChange.factory);
+  .directive(nfResetOnChange.name, nfResetOnChange.factory)
+  .directive(nfShouldEqual.name, nfShouldEqual.factory);

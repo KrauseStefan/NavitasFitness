@@ -7,4 +7,5 @@ export class RegistrationDialogPageObject extends DialogPageObject {
   public cancelButton = this.formContainer.$('md-dialog-actions button[ng-click="cancel()"]');
 
   public errorEmailUnavailable = this.formContainer.$('[ng-message="emailAvailable"]');
+  public errorPasswordDifferent = this.formContainer.$('[ng-message="nfShouldEqual"]');
 }

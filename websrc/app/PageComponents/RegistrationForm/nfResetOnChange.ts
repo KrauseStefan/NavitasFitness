@@ -4,12 +4,12 @@ import IJQuery = angular.IAugmentedJQuery;
 import IDirectiveFactory = angular.IDirectiveFactory;
 import INgModelController = angular.INgModelController;
 
-const nfResetOnChangeDirectiveName = 'nfResetOnChange';
+const directiveName = 'nfResetOnChange';
 
 const directiveFactoryFn: IDirectiveFactory = () => {
   return {
     link: (scope: IScope, iElement: IJQuery, iAttrs: {[att: string]: string}, ngModel: INgModelController) => {
-      const errorToReset = iAttrs[nfResetOnChangeDirectiveName];
+      const errorToReset = iAttrs[directiveName];
       ngModel.$validators[errorToReset] = (modelValue: string, viewValue: string) => {
         return true;
       };
@@ -20,5 +20,5 @@ const directiveFactoryFn: IDirectiveFactory = () => {
 
 export const nfResetOnChange = {
   factory: directiveFactoryFn,
-  name: nfResetOnChangeDirectiveName,
+  name: directiveName,
 };

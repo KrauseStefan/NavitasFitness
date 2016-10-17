@@ -9,6 +9,7 @@ export class DialogPageObject {
   public fillForm(formValues: formNameValuesMap) {
     Object.keys(formValues).forEach(name => {
       const field = this.formContainer.$(`input[name="${name}"]`);
+      field.clear();
       field.sendKeys(formValues[name]);
     });
   }

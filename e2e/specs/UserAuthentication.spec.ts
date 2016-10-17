@@ -1,11 +1,9 @@
-import { LoginDialogPageObject } from '../PageObjects/LoginDialogPageObject';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
-import { RegistrationDialogPageObject } from '../PageObjects/RegistrationDialogPageObject';
 import { verifyBrowserLog } from '../utility';
 // import { browser } from 'protractor';
 
 const userInfo = {
-  email: '22-email@domain.com',
+  email: '24-email@domain.com',
   navitasId: '1234509876',
   password: 'Password123',
 };
@@ -15,9 +13,7 @@ describe('User Autentication', () => {
   afterEach(() => verifyBrowserLog());
 
   it('should not be able to login before user has been created', () => {
-    NavigationPageObject.menuButton.click();
-    NavigationPageObject.menuLogin.click();
-    const loginDialog = new LoginDialogPageObject();
+    const loginDialog = NavigationPageObject.openLoginDialog();
 
     loginDialog.fillForm({
       email: userInfo.email,
@@ -33,9 +29,7 @@ describe('User Autentication', () => {
   });
 
   it('should be able to create a user', () => {
-    NavigationPageObject.menuButton.click();
-    NavigationPageObject.menuRegister.click();
-    const regDialog = new RegistrationDialogPageObject();
+    const regDialog = NavigationPageObject.openRegistrationDialog();
 
     regDialog.fillForm({
       email: userInfo.email,
@@ -51,9 +45,7 @@ describe('User Autentication', () => {
   });
 
   it('should not be able to create a user that already exists', () => {
-    NavigationPageObject.menuButton.click();
-    NavigationPageObject.menuRegister.click();
-    const regDialog = new RegistrationDialogPageObject();
+    const regDialog = NavigationPageObject.openRegistrationDialog();
 
     regDialog.fillForm({
       email: userInfo.email,
@@ -75,12 +67,57 @@ describe('User Autentication', () => {
     regDialog.safeClick(regDialog.cancelButton);
   });
 
-  it('should be able to login a user', () => {
-    NavigationPageObject.menuButton.click();
-    NavigationPageObject.menuLogin.click();
-    expect(NavigationPageObject.menuLogout.isDisplayed()).toBe(false);
+  fit('should validate user input', () => {
+    const regDialog = NavigationPageObject.openRegistrationDialog();
+    expect(regDialog.buttonRegister.isEnabled()).toBe(false);
+    expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
 
-    const loginDialog = new LoginDialogPageObject();
+    regDialog.fillForm({
+      email: userInfo.email,
+      navitasId: userInfo.navitasId,
+      password: userInfo.password,
+      passwordRepeat: userInfo.password,
+    });
+    expect(regDialog.buttonRegister.isEnabled()).toBe(true);
+    expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
+
+    regDialog.fillForm({password: 'bad'});
+    expect(regDialog.buttonRegister.isEnabled()).toBe(false);
+    expect(regDialog.errorPasswordDifferent.isPresent()).toBe(true);
+
+    regDialog.fillForm({passwordRepeat: 'bad'});
+    expect(regDialog.buttonRegister.isEnabled()).toBe(true);
+    expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
+
+    regDialog.fillForm({passwordRepeat: userInfo.password});
+    expect(regDialog.buttonRegister.isEnabled()).toBe(false);
+    expect(regDialog.errorPasswordDifferent.isPresent()).toBe(true);
+
+    regDialog.fillForm({password: userInfo.password});
+    expect(regDialog.buttonRegister.isEnabled()).toBe(true);
+    // browser.pause();
+    expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false); // error
+
+    regDialog.fillForm({email: 'ab'});
+    expect(regDialog.buttonRegister.isEnabled()).toBe(false); // error
+
+    regDialog.fillForm({email: ''});
+    expect(regDialog.buttonRegister.isEnabled()).toBe(false); // error
+
+    regDialog.fillForm({email: userInfo.email});
+    expect(regDialog.buttonRegister.isEnabled()).toBe(true); // error
+
+    regDialog.fillForm({navitasId: ''});
+    expect(regDialog.buttonRegister.isEnabled()).toBe(false);
+
+    regDialog.fillForm({navitasId: userInfo.navitasId});
+    expect(regDialog.buttonRegister.isEnabled()).toBe(true); // error
+
+    regDialog.safeClick(regDialog.cancelButton);
+  });
+
+  it('should be able to login a user', () => {
+    const loginDialog = NavigationPageObject.openLoginDialog();
 
     loginDialog.fillForm({
       email: userInfo.email,

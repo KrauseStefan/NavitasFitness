@@ -1,3 +1,5 @@
+import { LoginDialogPageObject } from './LoginDialogPageObject';
+import { RegistrationDialogPageObject } from './RegistrationDialogPageObject';
 import { $ } from 'protractor';
 
 export class NavigationPageObject {
@@ -13,4 +15,16 @@ export class NavigationPageObject {
   public static menuRegister = NavigationPageObject.menuContent.$('[ng-click="$ctrl.openRegistrationDialog($event)"]');
   public static menuLogin = NavigationPageObject.menuContent.$('[ng-click="$ctrl.openLoginDialog($event)"]');
   public static menuLogout = NavigationPageObject.menuContent.$('[ng-click="$ctrl.logout($event)"]');
+
+  public static openLoginDialog(): LoginDialogPageObject {
+    NavigationPageObject.menuButton.click();
+    NavigationPageObject.menuLogin.click();
+    return new LoginDialogPageObject();
+  }
+
+  public static openRegistrationDialog(): RegistrationDialogPageObject {
+    NavigationPageObject.menuButton.click();
+    NavigationPageObject.menuRegister.click();
+    return new RegistrationDialogPageObject();
+  }
 }
