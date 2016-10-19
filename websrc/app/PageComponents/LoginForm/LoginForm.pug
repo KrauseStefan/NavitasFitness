@@ -22,4 +22,4 @@ md-dialog
 
     md-dialog-actions
       md-button(ng-click="cancel()") Cancel
-      md-button.md-primary(type="submit", ng-click="submit()") Login
+      md-button.md-primary(ng-disabled="LoginForm.$invalid", type="submit", ng-click="submit()") Login

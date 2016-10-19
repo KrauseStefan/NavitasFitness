@@ -10,9 +10,9 @@ const directiveFactoryFn: IDirectiveFactory = ($parse: angular.IParseService) =>
   return {
     link: (scope: IScope, iElement: IJQuery, attr: {[att: string]: string}, ngModel: INgModelController) => {
       const otherValue = attr[directiveName];
-      const fn = $parse(otherValue);
+      const parsedExp = $parse(otherValue);
       ngModel.$validators[directiveName] = (modelValue: string, viewValue: string) => {
-          return modelValue === fn(scope);
+          return modelValue === parsedExp(scope);
       };
 
       scope.$watch(otherValue, () => {
