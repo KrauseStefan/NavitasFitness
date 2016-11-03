@@ -27,4 +27,8 @@ export class NavigationPageObject {
     NavigationPageObject.menuRegister.click();
     return new RegistrationDialogPageObject();
   }
+
+  public static closeMenu() {
+    $('.md-menu-backdrop').click();
+  }
 }

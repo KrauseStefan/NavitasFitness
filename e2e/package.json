@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "install": "webdriver-manager update",
     "test": "npm-run-all test:*",
     "test:e2e": "npm run clean && tsc && protractor",
     "test:tslint": "tslint --project .",

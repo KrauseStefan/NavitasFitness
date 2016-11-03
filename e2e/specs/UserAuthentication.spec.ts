@@ -1,9 +1,8 @@
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
 import { verifyBrowserLog } from '../utility';
-// import { browser } from 'protractor';
 
 const userInfo = {
-  email: '24-email@domain.com',
+  email: 'email@domain.com',
   navitasId: '1234509876',
   password: 'Password123',
 };
@@ -67,7 +66,7 @@ describe('User Autentication', () => {
     regDialog.safeClick(regDialog.cancelButton);
   });
 
-  fit('should validate user input', () => {
+  it('should validate user input', () => {
     const regDialog = NavigationPageObject.openRegistrationDialog();
     expect(regDialog.buttonRegister.isEnabled()).toBe(false);
     expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
@@ -144,6 +143,8 @@ describe('User Autentication', () => {
     expect(NavigationPageObject.menuLogin.isDisplayed()).toBe(true);
     expect(NavigationPageObject.menuRegister.isDisplayed()).toBe(true);
     expect(NavigationPageObject.menuLogout.isDisplayed()).toBe(false);
+
+    NavigationPageObject.closeMenu();
   });
 
 });

@@ -9,15 +9,15 @@
           md-icon menu
         md-menu-content
           md-menu-item(ng-hide="$ctrl.isLoggedIn()")
-            md-button(ng-click="$ctrl.openRegistrationDialog($event)") 
+            md-button(ng-click="$ctrl.openRegistrationDialog($event)")
               md-icon assignment_ind
               span Registrer
           md-menu-item(ng-hide="$ctrl.isLoggedIn()")
-            md-button(ng-click="$ctrl.openLoginDialog($event)") 
+            md-button(ng-click="$ctrl.openLoginDialog($event)")
               md-icon lock_outline
               span Login
           md-menu-item(ng-show="$ctrl.isLoggedIn()")
-            md-button(ng-click="$ctrl.logout($event)") 
+            md-button(ng-click="$ctrl.logout($event)")
               md-icon lock_outline
               span Logout
 
