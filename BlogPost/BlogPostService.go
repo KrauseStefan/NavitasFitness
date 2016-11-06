@@ -2,7 +2,6 @@ package BlogPostService
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -13,13 +12,16 @@ import (
 	"appengine/datastore"
 
 	"AppEngineHelper"
+	"User/Dao"
+	"User/Service"
 )
 
 type BlogEntry struct {
-	Key     string    `json:"key",datastore:"-"`
-	Author  string    `json:"author"`
-	Content string    `json:"content",datastore:",noindex"`
-	Date    time.Time `json:"date"`
+	Key          string    `json:"key",datastore:"-"`
+	Author       string    `json:"author"`
+	LastEditedBy string    `json:"lastEditedBy"`
+	Content      string    `json:"content",datastore:",noindex"`
+	Date         time.Time `json:"date"`
 }
 
 func (blogPost BlogEntry) hasId() bool {
@@ -45,13 +47,13 @@ func IntegrateRoutes(router *mux.Router) {
 		Methods("PUT").
 		Path(path).
 		Name("PersistBlogPost").
-		HandlerFunc(blogEntryPut)
+		HandlerFunc(UserService.AsAdmin(blogEntryPut))
 
 	router.
 		Methods("DELETE").
 		Path(path).
 		Name("DeleteBlogPost").
-		HandlerFunc(blogEntryDelete)
+		HandlerFunc(UserService.AsAdmin(blogEntryDelete))
 
 }
 
@@ -77,12 +79,10 @@ func blogEntryGet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func blogEntryPut(w http.ResponseWriter, r *http.Request) {
+func blogEntryPut(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
 	ctx := appengine.NewContext(r)
 	var blog BlogEntry
 	var key *datastore.Key
-
-	fmt.Print("content: ", r.Body)
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&blog)
@@ -95,9 +95,10 @@ func blogEntryPut(w http.ResponseWriter, r *http.Request) {
 		key = blogIntIDToKeyInt64(ctx, blog.Key)
 	} else {
 		key = datastore.NewIncompleteKey(ctx, BLOG_KIND, blogCollectionParentKey(ctx))
+		blog.Author = user.Email
 	}
 	blog.Date = time.Now()
-	blog.Author = "skk" //TODO remove static user
+	blog.LastEditedBy = user.Email
 
 	key, err = datastore.Put(ctx, key, &blog)
 	if err != nil {
@@ -111,7 +112,7 @@ func blogEntryPut(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func blogEntryDelete(w http.ResponseWriter, r *http.Request) {
+func blogEntryDelete(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
 	c := appengine.NewContext(r)
 
 	intIdStr := r.URL.Query().Get("id")

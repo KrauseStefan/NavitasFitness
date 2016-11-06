@@ -38,6 +38,30 @@ func IntegrateRoutes(router *mux.Router) {
 
 }
 
+func AsAdmin(f func(http.ResponseWriter, *http.Request, *UserDao.UserDTO)) func(http.ResponseWriter, *http.Request) {
+	return AsUser(func(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
+		if(!user.IsAdmin) {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		f(w, r, user)
+	})
+}
+
+func AsUser(f func(http.ResponseWriter, *http.Request, *UserDao.UserDTO)) func(http.ResponseWriter, *http.Request){
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := appengine.NewContext(r)
+
+		user, err := getUserFromSession(ctx, r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		f(w, r, user)
+	}
+}
+
 func getUserFromSession(ctx appengine.Context, r *http.Request) (*UserDao.UserDTO, error) {
 	uuid, err := AuthService.GetSessionUUID(r)
 

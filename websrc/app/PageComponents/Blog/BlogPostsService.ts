@@ -1,15 +1,12 @@
 import '../../Components/CkEditor/CkEditor';
 
-import IHttpService = angular.IHttpService;
-import IPromise = angular.IPromise;
-
 export class BlogPostsService {
 
   private serviceUrl = 'rest/blogEntry';
 
-  constructor(private $http: IHttpService) { }
+  constructor(private $http: ng.IHttpService) { }
 
-  public getBlogEntries(): IPromise<BlogEntryDTO[]> {
+  public getBlogEntries(): ng.IPromise<BlogEntryDTO[]> {
     return this.$http
       .get(this.serviceUrl)
       .then((res: any) => {
@@ -33,4 +30,5 @@ export class BlogEntryDTO {
   public content: String;
   public date: String;
   public key: String;
+  public lastEditedBy: String;
 }
