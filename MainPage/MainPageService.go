@@ -66,6 +66,10 @@ func getMainPage(w http.ResponseWriter, r *http.Request) {
 		frontPageEntries[i].Key = strconv.FormatInt(key.IntID(), 10)
 	}
 
+	if len(keys) == 0 {
+		frontPageEntries = append(frontPageEntries, MainPageEntry{})
+	}
+
 	if _, err := AppEngineHelper.WriteJSON(w, frontPageEntries[0]); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
