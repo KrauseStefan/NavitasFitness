@@ -15,7 +15,6 @@
     "forceConsistentCasingInFileNames": true
   },
   "files": [
-    "typings/index.d.ts",
     "./app/NavitasFitnessModule.ts"
   ]
 }

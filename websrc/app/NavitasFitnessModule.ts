@@ -1,3 +1,5 @@
+import { module } from 'angular'
+
 import { BlogPostsService } from './PageComponents/Blog/BlogPostsService';
 import { UserService } from './PageComponents/UserService';
 
@@ -9,25 +11,18 @@ import { nfResetOnChange } from './PageComponents/RegistrationForm/nfResetOnChan
 import { nfShouldEqual } from './PageComponents/RegistrationForm/nfShouldEqual';
 import { UserStatusComponent } from './PageComponents/UserStatus/UserStatus';
 
-import IStateProvider = angular.ui.IStateProvider;
-import IUrlRouterProvider = angular.ui.IUrlRouterProvider;
-
-import ILocationProvider = angular.ILocationProvider;
-
-import IThemingProvider = angular.material.IThemingProvider;
-
-export const NavitasFitnessModule = angular.module('NavitasFitness', [
+export const NavitasFitnessModule = module('NavitasFitness', [
   'ngMaterial', 'ui.router', 'ngCookies', 'ngMessages',
   ])
-  .config(($mdThemingProvider: IThemingProvider) => {
+  .config(($mdThemingProvider: ng.material.IThemingProvider) => {
     $mdThemingProvider.theme('default')
       .primaryPalette('blue')
       .accentPalette('orange');
   })
   .config((
-    $stateProvider: IStateProvider,
-    $urlRouterProvider: IUrlRouterProvider,
-    $locationProvider: ILocationProvider
+    $stateProvider: ng.ui.IStateProvider,
+    $urlRouterProvider: ng.ui.IUrlRouterProvider,
+    $locationProvider: ng.ILocationProvider
   ) => {
     $locationProvider.html5Mode(true);
     $urlRouterProvider.otherwise('/');

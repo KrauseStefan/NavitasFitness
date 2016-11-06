@@ -12,28 +12,39 @@ html
 
     script(src="/libs/es6-shim/es6-shim.min.js")
 
-    script(src="/libs/angular/angular.js")
-    script(src="/libs/angular-cookies/angular-cookies.js")
-    script(src="/libs/angular-aria/angular-aria.js")
-    script(src="/libs/angular-animate/angular-animate.js")
-    script(src="/libs/angular-messages/angular-messages.js")
-    script(src="/libs/angular-material/angular-material.js")
-    script(src="/libs/angular-ui-router/release/angular-ui-router.js")
-
-    script(src="/libs/ckeditor/ckeditor.js")
-
     script(src="libs/systemjs/dist/system.src.js")
     script(src="/app.js")
     script.
       // set our baseURL reference path
-      System.config({
+      const angularModules = ['angular-cookies', 'angular-aria', 'angular-animate', 'angular-messages', 'angular-material']
+      window.CKEDITOR_BASEPATH = '/libs/ckeditor/';
+      let systemjsConfig = {
+        meta: {
+          'angular': { format: 'global', exports: 'angular' },
+          'angular-ui-router': { format: 'global', exports: 'angular', deps: [ 'angular' ] },
+        },
         baseURL: '/',
-        //- map: {
-        //-   'app': 'app.js'
-        //- }
+        map: {
+          'angular': '/libs/angular/angular.js',
+          'angular-ui-router': '/libs/angular-ui-router/release/angular-ui-router.js',
+          'ckeditor': CKEDITOR_BASEPATH +'ckeditor.js',
+        }
+      };
+
+      angularModules.forEach(function(module) {
+          systemjsConfig.meta[module] = { format: 'global', exports: 'angular', deps: [ 'angular' ] };
+          systemjsConfig.map[module] = '/libs/' + module + '/' + module + '.js';
+        });
+
+      System.config(systemjsConfig);
+
+      angularModules.forEach(function(module) {
+        System.import(module);
       });
 
-      // loads /app/main.js
+      System.import('angular-ui-router');
+      System.import('ckeditor');
+
       System.import('NavitasFitnessModule');
 
 

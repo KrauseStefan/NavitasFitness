@@ -1,15 +1,13 @@
 import { LoginForm } from './PageComponents/LoginForm/LoginForm';
 import { RegistrationForm } from './PageComponents/RegistrationForm/RegistrationFormCtrl';
 import { UserService } from './PageComponents/UserService';
-
-import IDialogService = angular.material.IDialogService;
-import IMedia = angular.material.IMedia;
+import { element, isObject } from 'angular';
 
 class AppComponentController {
 
   constructor(
-    private $mdDialog: IDialogService,
-    private $mdMedia: IMedia,
+    private $mdDialog: ng.material.IDialogService,
+    private $mdMedia: ng.material.IMedia,
     private userService: UserService) {
   }
 
@@ -19,7 +17,7 @@ class AppComponentController {
       clickOutsideToClose: true,
       controller: RegistrationForm,
       fullscreen: false,
-      parent: angular.element(document.body),
+      parent: element(document.body),
       targetEvent: event,
       templateUrl: '/PageComponents/RegistrationForm/RegistrationForm.html',
     });
@@ -32,7 +30,7 @@ class AppComponentController {
       clickOutsideToClose: true,
       controller: LoginForm,
       fullscreen: false,
-      parent: angular.element(document.body),
+      parent: element(document.body),
       targetEvent: event,
       templateUrl: '/PageComponents/LoginForm/LoginForm.html',
     });
@@ -44,7 +42,7 @@ class AppComponentController {
   }
 
   public isLoggedIn() {
-    return angular.isObject(this.userService.getLoggedinUser());
+    return isObject(this.userService.getLoggedinUser());
   }
 
 }

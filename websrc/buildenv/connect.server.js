@@ -11,8 +11,7 @@ const serverFolder = __dirname + '/../../webapp';
 const outputLibs = serverFolder + libPath;
 
 const libaryFolders = [
-  '/node_modules',
-  '/bower_components'
+  '/node_modules'
 ].map((lib) => __dirname + '/..' + lib);
 
 connect()

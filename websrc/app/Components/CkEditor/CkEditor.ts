@@ -1,27 +1,25 @@
-import IScope = angular.IScope;
-import IAugmentedJQuery = angular.IAugmentedJQuery;
+import { noop } from 'angular';
 
 export class CkEditorComponent {
 
   public content: string;
   public isEditable: boolean = false;
-  public unsubscribe: Function = angular.noop;
+  public unsubscribe: Function = noop;
   public editor: CKEDITOR.editor = null;
 
-  constructor(private $scope: IScope, private $element: IAugmentedJQuery) {
+  constructor(private $scope: ng.IScope, private $element: ng.IAugmentedJQuery) {
     this.$scope.$watch('$ctrl.isEditable', () => {
       this.isEditable ? this.enableEditor() : this.disableEditor();
     });
   }
 
   public enableEditor() {
-    // this.editor = CKEDITOR.replace(<any>this.getEditordiv());
     this.unsubscribe();
-    this.unsubscribe = angular.noop;
+    this.unsubscribe = noop;
 
     this.getEditordiv().contentEditable = 'true';
 
-    this.editor = CKEDITOR.inline(<any> this.getEditordiv());
+    this.editor = CKEDITOR.inline(<any> this.getEditordiv(), {customConfig: ''});
     this.editor.on('change', (event) => {
       this.$scope.$apply(() => this.content = event.editor.getData());
     });

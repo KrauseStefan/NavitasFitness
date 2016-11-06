@@ -1,6 +1,4 @@
-import IHttpService = angular.IHttpService;
-import IPromise = angular.IPromise;
-import ICookiesService = angular.cookies.ICookiesService;
+import { isDefined, isObject } from 'angular';
 
 export class UserService {
 
@@ -10,17 +8,17 @@ export class UserService {
   private currentUser: IUserDTO = null;
 
   constructor(
-    private $http: IHttpService,
-    private $cookies: ICookiesService) {
+    private $http: ng.IHttpService,
+    private $cookies: ng.cookies.ICookiesService) {
 
     const cookieName = 'Session-Key';
     const sessionKey = $cookies.get(cookieName);
-    if (angular.isDefined(sessionKey)) {
+    if (isDefined(sessionKey)) {
       this.getUserFromSessionData();
     }
   }
 
-  public createUser(user: IUserDTO): IPromise<IUserDTO> {
+  public createUser(user: IUserDTO): ng.IPromise<IUserDTO> {
     return this.$http.post(this.userServiceUrl, user)
       .then((res) => (<IUserDTO> res.data));
   }
@@ -51,7 +49,7 @@ export class UserService {
   }
 
   public isAdmin() {
-    return angular.isObject(this.currentUser) && !!this.currentUser.isAdmin;
+    return isObject(this.currentUser) && !!this.currentUser.isAdmin;
   }
 }
 
