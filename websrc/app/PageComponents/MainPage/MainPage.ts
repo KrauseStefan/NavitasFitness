@@ -1,23 +1,29 @@
-import {BlogEntryDTO, BlogPostsService} from '../Blog/BlogPostsService';
+import {UserService} from '../UserService';
+import {MainPageDTO, MainPageService} from './MainPageService';
 
 export class MainPage {
 
-  public entry: BlogEntry = new BlogEntry({
-    author: '',
+  public entry: MainPageEntry = new MainPageEntry({
     content: '',
     date: '',
     key: null,
+    lastEditedBy: '',
   });
 
-  constructor(public blogPostsService: BlogPostsService) {
-    blogPostsService.getBlogEntries()
-      .then(blogEntries => this.entry = new BlogEntry(blogEntries[0]));
+  constructor(public mainPageService: MainPageService, private userService: UserService) {
+    mainPageService.getMainPage()
+      .then(mainPage => this.entry = new MainPageEntry(mainPage));
   }
 
-  public saveEntry(entry: BlogEntry) {
-    this.blogPostsService.saveBlogEntry(entry.blogEntry)
+  public saveEntry(entry: MainPageEntry) {
+    this.mainPageService.saveMainPage(entry.mainPage)
       .then(() => entry.enabled = false);
   }
+
+  public isAdmin() {
+    return this.userService.isAdmin();
+  }
+
 }
 
 export const MainPageComponent = {
@@ -25,12 +31,12 @@ export const MainPageComponent = {
   templateUrl: '/PageComponents/MainPage/MainPage.html',
 };
 
-export class BlogEntry {
+export class MainPageEntry {
 
-  public blogEntry: BlogEntryDTO;
+  public mainPage: MainPageDTO;
   public enabled = false;
 
-  constructor(blogEntry: BlogEntryDTO = new BlogEntryDTO()) {
-    this.blogEntry = blogEntry;
+  constructor(mainPage: MainPageDTO = new MainPageDTO()) {
+    this.mainPage = mainPage;
   }
 }

@@ -10,6 +10,7 @@ import (
 	"Export/Service"
 	"IPN"
 	"User/Service"
+	"MainPage"
 )
 
 // http://blog.golang.org/context
@@ -18,6 +19,7 @@ import (
 func init() {
 
 	router := mux.NewRouter().StrictSlash(true)
+	MainPageService.IntegrateRoutes(router)
 	BlogPostService.IntegrateRoutes(router)
 	UserService.IntegrateRoutes(router)
 	AuthService.IntegrateRoutes(router)

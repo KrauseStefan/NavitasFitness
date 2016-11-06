@@ -1,6 +1,7 @@
 import { module } from 'angular'
 
 import { BlogPostsService } from './PageComponents/Blog/BlogPostsService';
+import { MainPageService } from './PageComponents/MainPage/MainPageService';
 import { UserService } from './PageComponents/UserService';
 
 import { AppComponent } from './AppComponent';
@@ -43,6 +44,7 @@ export const NavitasFitnessModule = module('NavitasFitness', [
   })
   .service('userService', UserService)
   .service('blogPostsService', BlogPostsService)
+  .service('mainPageService', MainPageService)
 
   .component('ckEditor', CkEditor)
   .component('blog', BlogComponent)
