@@ -12,8 +12,8 @@ import (
 	"appengine/datastore"
 
 	"AppEngineHelper"
-	"User/Service"
 	"User/Dao"
+	"User/Service"
 )
 
 type MainPageEntry struct {

@@ -40,7 +40,7 @@ func IntegrateRoutes(router *mux.Router) {
 
 func AsAdmin(f func(http.ResponseWriter, *http.Request, *UserDao.UserDTO)) func(http.ResponseWriter, *http.Request) {
 	return AsUser(func(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
-		if(!user.IsAdmin) {
+		if !user.IsAdmin {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
@@ -48,7 +48,7 @@ func AsAdmin(f func(http.ResponseWriter, *http.Request, *UserDao.UserDTO)) func(
 	})
 }
 
-func AsUser(f func(http.ResponseWriter, *http.Request, *UserDao.UserDTO)) func(http.ResponseWriter, *http.Request){
+func AsUser(f func(http.ResponseWriter, *http.Request, *UserDao.UserDTO)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := appengine.NewContext(r)
 

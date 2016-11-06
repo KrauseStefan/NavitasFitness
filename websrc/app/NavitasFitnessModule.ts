@@ -1,4 +1,4 @@
-import { module } from 'angular'
+import { module } from 'angular';
 
 import { BlogPostsService } from './PageComponents/Blog/BlogPostsService';
 import { MainPageService } from './PageComponents/MainPage/MainPageService';
