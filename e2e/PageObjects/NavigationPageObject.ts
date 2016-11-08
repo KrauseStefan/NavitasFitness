@@ -1,16 +1,17 @@
 import { LoginDialogPageObject } from './LoginDialogPageObject';
 import { RegistrationDialogPageObject } from './RegistrationDialogPageObject';
-import { $ } from 'protractor';
+import { $, by, element } from 'protractor';
 
 export class NavigationPageObject {
+
   public static allTabs = $('md-tabs');
   public static menuContent = $('md-menu-content');
 
   public static menuButton = $('.md-button[ng-click="$mdOpenMenu()"]');
 
-  public static mainPageTab = NavigationPageObject.allTabs.$('md-tab-item [ui-sref="MainPage"]');
-  public static blogPageTab = NavigationPageObject.allTabs.$('md-tab-item [ui-sref="Blog"]');
-  public static statusPageTab = NavigationPageObject.allTabs.$('md-tab-item [ui-sref="Status"]');
+  public static mainPageTab = element((<any> by).linkUiSref('MainPage'));
+  public static blogPageTab = element((<any> by).linkUiSref('Blog'));
+  public static statusPageTab = element((<any> by).linkUiSref('Status'));
 
   public static menuRegister = NavigationPageObject.menuContent.$('[ng-click="$ctrl.openRegistrationDialog($event)"]');
   public static menuLogin = NavigationPageObject.menuContent.$('[ng-click="$ctrl.openLoginDialog($event)"]');
