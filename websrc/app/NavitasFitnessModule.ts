@@ -26,7 +26,7 @@ export const NavitasFitnessModule = module('NavitasFitness', [
     $locationProvider: ng.ILocationProvider
   ) => {
     $locationProvider.html5Mode(true);
-    $urlRouterProvider.otherwise('/');
+    $urlRouterProvider.otherwise('/main-page');
 
     $stateProvider
       .state('MainPage', {
