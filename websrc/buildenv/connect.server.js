@@ -16,10 +16,10 @@ const libaryFolders = [
 
 connect()
   .use((req, res, next) => {
-    if(req.url.startsWith('/rest')){
+    if (req.url.startsWith('/rest')) {
       modRewrite(['^/(.*)$ http://localhost:8080/$1 [P]'])(req, res, next);
-    } else if(req.url.match(/\./) === null)  {
-      console.log('redirecting ' +  req.url + ' to /')
+    } else if (req.url.match(/\./) === null && req.url !== '') {
+      console.log('redirecting ${req.url} to /')
       req.url = '/'
       next();
     } else {
