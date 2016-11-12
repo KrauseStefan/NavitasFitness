@@ -7,10 +7,13 @@ const filters = [
     'angular-mocks',
     'angular-sanitize',
     'material-design-icons', // not used
-    'rxjs' // imported through typescript bundlin
+    'rxjs', // imported through typescript bundling
+    'angular-ui-router',
 ];
 
-Object.keys(require('../package.json').dependencies)
+const nodeDependencies = Object.keys(require('../package.json').dependencies)
+const other = ['angular-ui-router/release']
+nodeDependencies.concat(other)
     .filter(module => !module.startsWith('@types') && filters.indexOf(module) === -1)
     .forEach(module => {
         const source = fse.realpathSync(`${nodeModulesPath}/${module}`);

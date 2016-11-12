@@ -19,7 +19,7 @@ connect()
     if (req.url.startsWith('/rest')) {
       modRewrite(['^/(.*)$ http://localhost:8080/$1 [P]'])(req, res, next);
     } else if (req.url.match(/\./) === null && req.url !== '') {
-      console.log('redirecting ${req.url} to /')
+      console.log(`redirecting ${req.url} to /`)
       req.url = '/'
       next();
     } else {
