@@ -1,6 +1,6 @@
 md-card
   md-content
     ck-editor(content="$ctrl.entry.mainPage.content", is-editable="$ctrl.entry.enabled")
-  md-card-actions(ng-if="$ctrl.isAdmin()")
+  md-card-actions(ng-if="$ctrl.isAdmin")
     md-button(ng-click="$ctrl.entry.enabled = !$ctrl.entry.enabled", ng-if="!$ctrl.entry.enabled") edit
     md-button(ng-click="$ctrl.saveEntry($ctrl.entry)", ng-if="$ctrl.entry.enabled") save

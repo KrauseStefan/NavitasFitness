@@ -1,10 +1,10 @@
 div(layout="column")
   div
-    md-button(ng-click="$ctrl.createBlogPost()", ng-if="$ctrl.isAdmin()") create new
+    md-button(ng-click="$ctrl.createBlogPost()", ng-if="$ctrl.isAdmin") create new
   md-card(ng-repeat="entry in $ctrl.entries")
     md-content
       ck-editor(content="entry.blogEntry.content", is-editable="entry.enabled")
-    md-card-actions(ng-if="$ctrl.isAdmin()")
+    md-card-actions(ng-if="$ctrl.isAdmin")
       md-button(ng-click="entry.enabled = !entry.enabled", ng-if="!entry.enabled") edit
       md-button(ng-click="$ctrl.saveEntry(entry)", ng-if="entry.enabled") save
       md-button(ng-click="$ctrl.deleteEntry(entry)") delete

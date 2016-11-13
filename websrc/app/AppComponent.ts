@@ -1,14 +1,21 @@
 import { LoginForm } from './PageComponents/LoginForm/LoginForm';
 import { RegistrationForm } from './PageComponents/RegistrationForm/RegistrationFormCtrl';
-import { UserService } from './PageComponents/UserService';
+import { IUserDTO, UserService } from './PageComponents/UserService';
 import { element, isObject } from 'angular';
 
 class AppComponentController {
+
+  private loggedInUser: IUserDTO;
 
   constructor(
     private $mdDialog: ng.material.IDialogService,
     private $mdMedia: ng.material.IMedia,
     private userService: UserService) {
+
+    userService.getLoggedinUser$().subscribe((user: IUserDTO) => {
+      this.loggedInUser = user;
+    });
+
   }
 
   public openRegistrationDialog(event: MouseEvent) {
@@ -42,7 +49,7 @@ class AppComponentController {
   }
 
   public isLoggedIn() {
-    return isObject(this.userService.getLoggedinUser());
+    return isObject(this.loggedInUser);
   }
 
 }

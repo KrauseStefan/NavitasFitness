@@ -1,11 +1,12 @@
-import { isDefined, isObject } from 'angular';
+import { isDefined } from 'angular';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 export class UserService {
 
   private userServiceUrl = 'rest/user';
   private authServiceUrl = 'rest/auth';
 
-  private currentUser: IUserDTO = null;
+  private currentUserSubject = new BehaviorSubject<IUserDTO>(null);
 
   constructor(
     private $http: ng.IHttpService,
@@ -19,37 +20,36 @@ export class UserService {
   }
 
   public createUser(user: IUserDTO): ng.IPromise<IUserDTO> {
-    return this.$http.post(this.userServiceUrl, user)
-      .then((res) => (<IUserDTO> res.data));
+    return this.$http.post<IUserDTO>(this.userServiceUrl, user)
+      .then((res) => res.data);
   }
 
-  public createUserSession(user: IBaseUserDTO) {
-    return this.$http.post(`${this.authServiceUrl}/login`, user)
+  public createUserSession(user: IBaseUserDTO): ng.IPromise<IUserDTO> {
+    return this.$http.post<IUserDTO>(`${this.authServiceUrl}/login`, user)
       .then((res) => {
-        this.currentUser = <IUserDTO> res.data;
-        return (this.currentUser);
+        const currentUser = res.data;
+        this.currentUserSubject.next(currentUser);
+        return (currentUser);
       });
   }
 
-  public getUserFromSessionData() {
-    this.$http.get(this.userServiceUrl)
-      .then((res) => {
-        this.currentUser = <IUserDTO> res.data;
-      });
-  }
-
-  public logout() {
+  public logout(): ng.IPromise<void> {
     return this.$http.post(`${this.authServiceUrl}/logout`, undefined).then(() => {
-      this.currentUser = null;
+      this.currentUserSubject.next(null);
     });
   }
 
-  public getLoggedinUser() {
-    return this.currentUser;
+  public getLoggedinUser$(): Observable<IUserDTO> {
+    return this.currentUserSubject.asObservable();
   }
 
-  public isAdmin() {
-    return isObject(this.currentUser) && !!this.currentUser.isAdmin;
+  private getUserFromSessionData(): ng.IPromise<IUserDTO> {
+    return this.$http.get(this.userServiceUrl)
+      .then((res) => {
+        const currentUser = <IUserDTO> res.data;
+        this.currentUserSubject.next(currentUser);
+        return currentUser;
+      });
   }
 }
 

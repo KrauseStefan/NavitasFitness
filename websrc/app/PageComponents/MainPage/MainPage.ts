@@ -1,4 +1,4 @@
-import {UserService} from '../UserService';
+import {IUserDTO, UserService} from '../UserService';
 import {MainPageDTO, MainPageService} from './MainPageService';
 
 export class MainPage {
@@ -10,7 +10,16 @@ export class MainPage {
     lastEditedBy: '',
   });
 
-  constructor(public mainPageService: MainPageService, private userService: UserService) {
+  public isAdmin = false;
+
+  constructor(
+    public mainPageService: MainPageService,
+    private userService: UserService) {
+
+    userService.getLoggedinUser$().subscribe((user: IUserDTO) => {
+      this.isAdmin = user && user.isAdmin;
+    });
+
     mainPageService.getMainPage()
       .then(mainPage => this.entry = new MainPageEntry(mainPage));
   }
@@ -19,11 +28,6 @@ export class MainPage {
     this.mainPageService.saveMainPage(entry.mainPage)
       .then(() => entry.enabled = false);
   }
-
-  public isAdmin() {
-    return this.userService.isAdmin();
-  }
-
 }
 
 export const MainPageComponent = {

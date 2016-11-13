@@ -1,13 +1,20 @@
-import {UserService} from '../UserService';
+import {IUserDTO, UserService} from '../UserService';
 import {BlogEntryDTO, BlogPostsService} from './BlogPostsService';
 
 export class Blog {
 
   public entries: BlogEntry[] = [];
 
+  public isAdmin = false;
+
   constructor(
     private blogPostsService: BlogPostsService,
     private userService: UserService) {
+
+    userService.getLoggedinUser$().subscribe((user: IUserDTO) => {
+      this.isAdmin = user && user.isAdmin;
+    });
+
     blogPostsService.getBlogEntries()
       .then(blogEntries => {
         this.entries = blogEntries.map(blogEntry => {
@@ -35,9 +42,6 @@ export class Blog {
       });
   }
 
-  public isAdmin() {
-    return this.userService.isAdmin();
-  }
 }
 
 export class BlogEntry {
