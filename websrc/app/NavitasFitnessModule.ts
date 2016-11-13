@@ -10,7 +10,7 @@ import { BlogComponent } from './PageComponents/Blog/Blog';
 import { MainPageComponent } from './PageComponents/MainPage/MainPage';
 import { nfResetOnChange } from './PageComponents/RegistrationForm/nfResetOnChange';
 import { nfShouldEqual } from './PageComponents/RegistrationForm/nfShouldEqual';
-import { UserStatusComponent } from './PageComponents/UserStatus/UserStatus';
+import { UserStatusComponent, statusRouterState } from './PageComponents/UserStatus/UserStatus';
 
 export const NavitasFitnessModule = module('NavitasFitness', [
   'ngMaterial', 'ui.router', 'ngCookies', 'ngMessages',
@@ -37,10 +37,7 @@ export const NavitasFitnessModule = module('NavitasFitness', [
         template: '<blog></blog>',
         url: '/blog',
       })
-      .state('Status', {
-        template: '<user-status></user-status>',
-        url: '/status',
-      });
+      .state('Status', statusRouterState);
   })
   .service('userService', UserService)
   .service('blogPostsService', BlogPostsService)

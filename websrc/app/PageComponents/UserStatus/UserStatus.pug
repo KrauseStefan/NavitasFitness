@@ -10,34 +10,37 @@
 
   p
     span 6 month membership 200 kr.
-  //- b Below payment button are for test purposes and will not work with a real paypal account
-  //- b This button is for simulating paypal IPN on localhost, this does not work anywhere else
-  //- form(action="http://localhost:8081/processPayment", method="post", target="_top")
-  //-   input(type="hidden", name="cmd", value="_s-xclick")
-  //-   input(type="hidden", name="hosted_button_id", value="KE6ZXLGBP6TRQ")
-  //-   input(type="hidden", name="custom", value="{{$ctrl.getUserEmail()}}")
-  //-   input(type="image", src="https://www.sandbox.paypal.com/en_US/DK/i/btn/btn_paynowCC_LG.gif", border="0", name="submit")
-  //-   img(alt="", border="0", src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif", width="1", height="1")
+  div(ng-if="$ctrl.isLocalhost()")
+    b Below payment button are for test purposes and will not work with a real paypal account
+    b This button is for simulating paypal IPN on localhost, this does not work anywhere else
+    form(action="http://localhost:8081/processPayment", method="post", target="_top")
+      input(type="hidden", name="cmd", value="_s-xclick")
+      input(type="hidden", name="hosted_button_id", value="KE6ZXLGBP6TRQ")
+      input(type="hidden", name="custom", value="{{$ctrl.model.userEmail}}")
+      input(type="image", src="https://www.sandbox.paypal.com/en_US/DK/i/btn/btn_paynowCC_LG.gif", border="0", name="submit")
+      img(alt="", border="0", src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif", width="1", height="1")
 
-  b This button targets paypals sandbox API, only simulated payments can be made with special test accounts.
-  form(action="https://www.sandbox.paypal.com/cgi-bin/webscr", method="post", target="_top")
-    input(type="hidden", name="cmd", value="_s-xclick")
-    input(type="hidden", name="hosted_button_id", value="KE6ZXLGBP6TRQ")
-    input(type="hidden", name="custom", value="{{$ctrl.getUserEmail()}}")
-    input(type="image", src="https://www.sandbox.paypal.com/en_US/DK/i/btn/btn_paynowCC_LG.gif", border="0", name="submit")
-    img(alt="", border="0", src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif", width="1", height="1")
+  div
+    b This button targets paypals sandbox API, only simulated payments can be made with special test accounts.
+    form(action="https://www.sandbox.paypal.com/cgi-bin/webscr", method="post", target="_top")
+      input(type="hidden", name="cmd", value="_s-xclick")
+      input(type="hidden", name="hosted_button_id", value="KE6ZXLGBP6TRQ")
+      input(type="hidden", name="custom", value="{{$ctrl.model.userEmail}}")
+      input(type="image", src="https://www.sandbox.paypal.com/en_US/DK/i/btn/btn_paynowCC_LG.gif", border="0", name="submit")
+      img(alt="", border="0", src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif", width="1", height="1")
 
-  //- form(action="https://www.paypal.com/cgi-bin/webscr", method="post", target="_top")
-    input(type="hidden", name="cmd", value="_s-xclick")
-    input(type="hidden", name="hosted_button_id", value="BV35VE4U7RYSW")
+  div(ng-if="$ctrl.isLocalhost()")
+    form(action="https://www.paypal.com/cgi-bin/webscr", method="post", target="_top")
+      input(type="hidden", name="cmd", value="_s-xclick")
+      input(type="hidden", name="hosted_button_id", value="BV35VE4U7RYSW")
 
-    span 6 month membership 200 kr.
-    input(type="image", src="https://www.paypalobjects.com/en_US/i/btn/btn_paynow_SM.gif", border="0", name="submit")
+      span 6 month membership 200 kr.
+      input(type="image", src="https://www.paypalobjects.com/en_US/i/btn/btn_paynow_SM.gif", border="0", name="submit")
 
-    span Extend membership with:
-    md-input-container
-      label Amount
-      input(ng-model="$ctrl.model.extendWithAmountKr", type="number")
+      span Extend membership with:
+      md-input-container
+        label Amount
+        input(ng-model="$ctrl.model.extendWithAmountKr", type="number")
 
   div
     h1 Transaction history
