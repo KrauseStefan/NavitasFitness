@@ -11,8 +11,8 @@ const filters = [
     'angular-ui-router',
 ];
 
-const nodeDependencies = Object.keys(require('../package.json').dependencies)
-const other = ['angular-ui-router/release']
+const nodeDependencies = Object.keys(require('../package.json').dependencies);
+const other = ['angular-ui-router/release', 'rxjs/bundles'];
 nodeDependencies.concat(other)
     .filter(module => !module.startsWith('@types') && filters.indexOf(module) === -1)
     .forEach(module => {

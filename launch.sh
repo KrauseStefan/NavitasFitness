@@ -8,7 +8,7 @@ cd websrc
 npm install
 npm run clean
 
-gnome-terminal -e "npm run watch" &
+gnome-terminal -e "npm start" &
 
 #cd -
 

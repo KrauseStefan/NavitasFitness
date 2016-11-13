@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npm-run-all clean --parallel copy:* build:**",
-    "watch": "npm-run-all clean --parallel build:scss webserver copy:* 'build:* -- --watch'",
+    "start": "npm-run-all clean --parallel build:scss webserver copy:* 'build:* -- --watch'",
     "build:pug": "pug app -o ../webapp/ --pretty --hierarchy",
     "build:ts": "tsc",
     "build:scss": "node-sass styles/main.scss ../webapp/main.css --source-map true",
@@ -36,6 +36,7 @@
     "@types/angular-material": "^1.1.40",
     "@types/angular-ui-router": "^1.1.34",
     "@types/ckeditor": "0.0.34",
+    "@types/es6-shim": "^0.31.32",
     "angular": "^1.5.8",
     "angular-animate": "^1.5.8",
     "angular-aria": "^1.5.8",
@@ -48,7 +49,7 @@
     "ckeditor": "^4.5.11",
     "es6-shim": "^0.35.1",
     "material-design-icons": "^2.2.3",
-    "rxjs": "^5.0.0-beta.12",
+    "rxjs": "5.0.0-beta.12",
     "systemjs": "^0.19.38"
   }
 }
