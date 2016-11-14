@@ -81,10 +81,28 @@ func exportXslt(ctx appengine.Context) (*xlsx.File, error) {
 		return nil, err
 	}
 
-	addRow(sheet, "Medarbejder nr i ADK", "Aktiveringsdato", "Nr.", "Fra dato", "Til dato", "Tidsskema", "Bemærkninger")
+	addRow(
+		sheet,
+		"Medarbejder nr i ADK",
+		"Aktiveringsdato",
+		"Nr.",
+		"Fra dato",
+		"Til dato",
+		"Tidsskema",
+		"Bemærkninger",
+	)
 
 	for _, user := range users {
-		addRow(sheet, user.NavitasId, "TODO", user.NavitasId, "TODO", "TODO", "24 Timers", "")
+		addRow(
+			sheet,
+			user.NavitasId,
+			"TODO",
+			user.NavitasId,
+			"TODO",
+			"TODO",
+			"24 Timers",
+			"",
+		)
 	}
 
 	// "Medarbejder nr i ADK" : "N0416"
