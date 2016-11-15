@@ -135,3 +135,12 @@ func (txDto *TransactionMsgDTO) GetCurrency() string {
 func (txDto *TransactionMsgDTO) PaymentIsComplected() bool {
 	return txDto.GetPaymentStatus() == STATUS_COMPLEATED && txDto.GetAmount() == 200
 }
+
+func (txDto *TransactionMsgDTO) GetPaymentActivationDate() time.Time {
+	return txDto.dsDto.PaymentActivationDate
+}
+
+func (txDto *TransactionMsgDTO) IsActive() bool {
+	endTime := txDto.GetPaymentActivationDate().AddDate(0, 6, 0)
+	return txDto.GetPaymentActivationDate().Before(time.Now()) && time.Now().Before(endTime)
+}

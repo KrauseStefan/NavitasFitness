@@ -149,20 +149,24 @@ func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type TransactionMsgClientDTO struct {
-	Amount      float64   `json:"amount"`
-	Currency    string    `json:"currency"`
-	PaymentDate time.Time `json:"paymentDate"`
-	Status      string    `json:"status"`
+	Amount                float64   `json:"amount"`
+	Currency              string    `json:"currency"`
+	PaymentDate           time.Time `json:"paymentDate"`
+	Status                string    `json:"status"`
+	PaymentActivationDate time.Time `json:"paymentActivationDate"`
+	IsActive              bool      `json:"isActive"`
 	//IpnMessages      []string //History of IpnMessages
 }
 
 func newTransactionMsgClientDTO(source *TransactionDao.TransactionMsgDTO) *TransactionMsgClientDTO {
 
 	txClient := TransactionMsgClientDTO{
-		Amount:      source.GetAmount(),
-		Currency:    source.GetCurrency(),
-		PaymentDate: source.GetPaymentDate(),
-		Status:      source.GetPaymentStatus(),
+		Amount:                source.GetAmount(),
+		Currency:              source.GetCurrency(),
+		PaymentDate:           source.GetPaymentDate(),
+		Status:                source.GetPaymentStatus(),
+		PaymentActivationDate: source.GetPaymentActivationDate(),
+		IsActive:              source.IsActive(),
 		//IpnMessages: source.IpnMessages,
 	}
 

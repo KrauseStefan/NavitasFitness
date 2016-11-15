@@ -96,16 +96,9 @@ func GetTransactionsByUser(ctx appengine.Context, parentUserKey *datastore.Key) 
 //TODO finish this function with the popper search parameters
 func UserHasActiveSubscription(ctx appengine.Context, userKey *datastore.Key) (bool, error) {
 
-	const (
-		hoursDay        = 24
-		DaysPrMonth     = 31 // avarage(Jul, Aug, Sep, Oct, Nov, Dec) == 30,667
-		nMonth          = 6
-		sixMonthInHours = hoursDay * DaysPrMonth * nMonth
-	)
-
 	count, err := datastore.NewQuery(TXN_KIND).
 		Ancestor(userKey).
-		Filter("PaymentActivationDate>=", time.Now().Add(time.Duration(-sixMonthInHours)*time.Hour)).
+		Filter("PaymentActivationDate>=", time.Now().AddDate(0, 6, 0)).
 		Count(ctx)
 
 	if err != nil {
