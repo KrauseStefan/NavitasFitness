@@ -58,9 +58,9 @@ func NewTransactionMsgDTOList(dtos []transactionMsgDsDTO, keys []*datastore.Key)
 type transactionMsgDsDTO struct {
 	IpnMessages []string //History of IpnMessages
 
-	PaymentActivationDate      time.Time // not used
+	PaymentActivationDate      time.Time // not used ?
 	PaymentDate                time.Time
-	SubscriptionActivationDate time.Time // not used
+	SubscriptionActivationDate time.Time // Decides if the subscription is active
 	TxnId                      string
 }
 
@@ -85,6 +85,9 @@ func (txDto *TransactionMsgDTO) parseMessage() *url.Values {
 		txDto.parsedIpnMessage = parsedIpnMessage
 		txDto.dsDto.PaymentDate = txDto.GetPaymentDate()
 		txDto.dsDto.TxnId = txDto.GetField(FIELD_TXN_ID)
+		if txDto.PaymentIsComplected() && txDto.dsDto.PaymentActivationDate.IsZero() {
+			txDto.dsDto.PaymentActivationDate = time.Now()
+		}
 	}
 
 	return &txDto.parsedIpnMessage
