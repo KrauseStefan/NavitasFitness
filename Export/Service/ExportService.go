@@ -10,6 +10,7 @@ import (
 
 	"IPN/Transaction"
 	"User/Dao"
+	"User/Service"
 )
 
 var (
@@ -24,7 +25,7 @@ func IntegrateRoutes(router *mux.Router) {
 		Methods("GET").
 		Path(path + "/xlsx").
 		Name("export").
-		HandlerFunc(exportXsltHandler)
+		HandlerFunc(UserService.AsAdmin(exportXlsxHandler))
 
 }
 
@@ -116,7 +117,7 @@ func exportXslt(ctx appengine.Context) (*xlsx.File, error) {
 	return file, nil
 }
 
-func exportXsltHandler(w http.ResponseWriter, r *http.Request) {
+func exportXlsxHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
 	ctx := appengine.NewContext(r)
 
 	httpHeader := w.Header()
