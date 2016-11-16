@@ -1,4 +1,10 @@
 import { IUserDTO, UserService } from '../UserService';
+import * as moment from 'moment';
+
+const _moment: (
+  inp?: moment.MomentInput, format?: moment.MomentFormatSpecification,
+  language?: string, strict?: boolean
+  ) => moment.Moment = (<any> moment).default;
 
 export const statusRouterState = {
   template: '<user-status></user-status>',
@@ -9,6 +15,8 @@ class UserStatus {
 
   public model: IUserStatusModel;
 
+  private dateFormat = 'MM/DD/YYYY';
+
   constructor(
     private userService: UserService,
     private $http: ng.IHttpService,
@@ -18,10 +26,10 @@ class UserStatus {
 
     this.model = {
       extendWithAmountKr: 200,
-      statusMsg: 'test status msg',
+      statusMsg: 'No Active Subscription',
       transactionHistory: [],
       userEmail: '',
-      validUntill: '19/05-2016',
+      validUntill: '-',
     };
     this.getTransactionsUpdate();
     this.moniterUserCredentials();
@@ -33,7 +41,19 @@ class UserStatus {
 
   public getTransactionsUpdate() {
     this.$http.get<ITransactionEntry[]>('/rest/user/transactions').then((res) => {
-      this.model.transactionHistory = res.data;
+      this.model.transactionHistory = res.data.map( txn => {
+        txn.paymentDateParsed = _moment(txn.paymentDate).format(this.dateFormat);
+        return txn;
+      });
+      const validTxn = this.model.transactionHistory
+        .find(txn => _moment(txn.paymentDate).diff(_moment(), 'months') <= 6 )
+
+      if (!!validTxn) {
+        this.model.validUntill = _moment(validTxn.paymentDate)
+          .add(6, 'months')
+          .format(this.dateFormat);
+        this.model.statusMsg = 'Subscription Active';
+      }
     });
   }
 
@@ -61,6 +81,7 @@ interface ITransactionEntry {
   amount: number;
   currency: string;
   paymentDate: string;
+  paymentDateParsed: string;
   status: string;
 }
 

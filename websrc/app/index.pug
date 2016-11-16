@@ -27,14 +27,15 @@ html(ng-app="NavitasFitness")
       let systemjsConfig = {
         meta: {
           'angular': { format: 'global', exports: 'angular' },
-          'rxjs': { format: 'global', exports: 'Rx' },
           'angular-ui-router': { format: 'global', exports: 'angular', deps: [ 'angular' ] },
+          'rxjs': { format: 'global', exports: 'Rx' },
         },
         baseURL: '/',
         map: {
           'angular': '/libs/angular/angular.js',
           'angular-ui-router': '/libs/angular-ui-router/release/angular-ui-router.js',
           'rxjs': '/libs/rxjs/bundles/Rx.js',
+          'moment': '/libs/moment/min/moment.min.js',
           'ckeditor': CKEDITOR_BASEPATH +'ckeditor.js',
         }
       };
