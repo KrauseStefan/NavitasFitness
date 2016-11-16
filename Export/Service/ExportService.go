@@ -106,6 +106,7 @@ func exportXslt(ctx appengine.Context) (*xlsx.File, error) {
 		)
 	}
 
+	// Example:
 	// "Medarbejder nr i ADK" : "N0416"
 	// "Aktiveringsdato" 			: "30.06.2015"
 	// "Nr."									: "N0416"

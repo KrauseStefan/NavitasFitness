@@ -10,11 +10,11 @@ npm run clean
 
 gnome-terminal -e "npm start" &
 
-#cd -
+cd -
 
-#cd ipn-simulator
+cd ipn-simulator
 
-#gnome-terminal -e "npm start" &
+gnome-terminal -e "npm start" &
 
 cd -
 
