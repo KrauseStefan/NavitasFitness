@@ -1,12 +1,12 @@
 import { isDefined } from 'angular';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 export class UserService {
 
   private userServiceUrl = 'rest/user';
   private authServiceUrl = 'rest/auth';
 
-  private currentUserSubject = new BehaviorSubject<IUserDTO>(null);
+  private currentUserSubject = new Subject<IUserDTO>();
 
   constructor(
     private $http: ng.IHttpService,
