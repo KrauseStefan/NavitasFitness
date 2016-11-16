@@ -142,6 +142,12 @@ function sendIpnDataMessage(clientReq: IncomingMessage, serverRes: ServerRespons
         return _.merge(prev, cur);
       }, {});
 
+      if(ipnBody['custom'].length <= 0) {
+        const error = "error: no custom field in paypal request, cannot simulate the ipn message"
+        reject(error)
+        return;
+      }
+
       const ipnBodyEncoded = encodePostData(ipnBody);
 
       const options: RequestOptions = {
