@@ -1,7 +1,7 @@
 .user-status
   md-card
-    md-content
-      h3 Current status
+    md-content(layout-padding)
+      h3.md-title Current status
       div
         md-input-container
           label Subscription status
@@ -12,8 +12,8 @@
           input(ng-model="$ctrl.model.validUntill", disabled="disabled")
 
   md-card
-    md-content
-      h3
+    md-content(layout-padding)
+      h3.md-title
         span 6 month membership 200 kr.
 
       div
@@ -28,7 +28,7 @@
           img(alt="", border="0", src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif", width="1", height="1")
 
   md-card(ng-if="$ctrl.isLocalhost()")
-    md-content
+    md-content(layout-padding)
       b Below payment button are for test purposes and will not work with a real paypal account
       b This button is for simulating paypal IPN on localhost, this does not work anywhere else
       form(action="http://localhost:8081/processPayment", method="post", target="_top")
@@ -39,7 +39,7 @@
         img(alt="", border="0", src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif", width="1", height="1")
 
   md-card(ng-if="$ctrl.isLocalhost()")
-    md-content
+    md-content(layout-padding)
       form(action="https://www.paypal.com/cgi-bin/webscr", method="post", target="_top")
         input(type="hidden", name="cmd", value="_s-xclick")
         input(type="hidden", name="hosted_button_id", value="BV35VE4U7RYSW")
@@ -53,10 +53,10 @@
           input(ng-model="$ctrl.model.extendWithAmountKr", type="number")
 
   md-card(ng-if="$ctrl.model.transactionHistory.length > 0")
-    md-content
-      h1 Transaction history
+    md-content(layout-padding)
+      h3.md-title Transaction history
 
-      table
+      table.md-whiteframe-2dp(style="padding: 0")
         thead
           th Amount
           th Payment Date
