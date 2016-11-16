@@ -1,12 +1,12 @@
 import { isDefined } from 'angular';
-import { Observable, Subject } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 
 export class UserService {
 
   private userServiceUrl = 'rest/user';
   private authServiceUrl = 'rest/auth';
 
-  private currentUserSubject = new Subject<IUserDTO>();
+  private currentUserSubject = new ReplaySubject<IUserDTO>();
 
   constructor(
     private $http: ng.IHttpService,

@@ -31,7 +31,6 @@ class UserStatus {
       userEmail: '',
       validUntill: '-',
     };
-    this.getTransactionsUpdate();
     this.moniterUserCredentials();
   }
 
@@ -61,6 +60,7 @@ class UserStatus {
     this.userService.getLoggedinUser$().subscribe((user: IUserDTO) => {
       if (user) {
         this.model.userEmail = user.email;
+        this.getTransactionsUpdate();
       } else if (this.$state.is(statusRouterState)) {
         this.$state.go('MainPage');
       }
