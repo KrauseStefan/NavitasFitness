@@ -16,7 +16,7 @@ html(ng-app="NavitasFitness")
     script(src="/app.js")
     script.
       // set our baseURL reference path
-      const angularModules = [
+      var angularModules = [
         'angular-cookies',
         'angular-aria',
         'angular-animate',
@@ -24,7 +24,7 @@ html(ng-app="NavitasFitness")
         'angular-material'
       ];
       window.CKEDITOR_BASEPATH = '/libs/ckeditor/';
-      let systemjsConfig = {
+      var systemjsConfig = {
         meta: {
           'angular': { format: 'global', exports: 'angular' },
           'angular-ui-router': { format: 'global', exports: 'angular', deps: [ 'angular' ] },
