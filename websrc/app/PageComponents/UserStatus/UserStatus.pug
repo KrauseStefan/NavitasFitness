@@ -1,56 +1,68 @@
 .user-status
-  div
-    md-input-container
-      label Current status
-      input(ng-model="$ctrl.model.statusMsg", disabled="disabled")
-  div
-    md-input-container
-      label Membership valid untill
-      input(ng-model="$ctrl.model.validUntill", disabled="disabled")
+  md-card
+    md-content
+      h3 Current status
+      div
+        md-input-container
+          label Subscription status
+          input(ng-model="$ctrl.model.statusMsg", disabled="disabled")
+      div
+        md-input-container
+          label Membership valid untill
+          input(ng-model="$ctrl.model.validUntill", disabled="disabled")
 
-  p
-    span 6 month membership 200 kr.
-  div(ng-if="$ctrl.isLocalhost()")
-    b Below payment button are for test purposes and will not work with a real paypal account
-    b This button is for simulating paypal IPN on localhost, this does not work anywhere else
-    form(action="http://localhost:8081/processPayment", method="post", target="_top")
-      input(type="hidden", name="cmd", value="_s-xclick")
-      input(type="hidden", name="hosted_button_id", value="KE6ZXLGBP6TRQ")
-      input(type="hidden", name="custom", value="{{$ctrl.model.userEmail}}")
-      input(type="image", src="https://www.sandbox.paypal.com/en_US/DK/i/btn/btn_paynowCC_LG.gif", border="0", name="submit")
-      img(alt="", border="0", src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif", width="1", height="1")
-    br
-    br
+  md-card
+    md-content
+      h3
+        span 6 month membership 200 kr.
 
-  div
-    b This button targets paypals sandbox API, only simulated payments can be made with special test accounts.
-    form(action="https://www.sandbox.paypal.com/cgi-bin/webscr", method="post", target="_top")
-      input(type="hidden", name="cmd", value="_s-xclick")
-      //- old paypal test button
-      //- input(type="hidden", name="hosted_button_id", value="KE6ZXLGBP6TRQ")
-      input(type="hidden", name="hosted_button_id", value="QBGG5JT5UJD62")
-      input(type="hidden", name="custom", value="{{$ctrl.model.userEmail}}")
-      input(type="image", src="https://www.sandbox.paypal.com/en_US/DK/i/btn/btn_paynowCC_LG.gif", border="0", name="submit")
-      img(alt="", border="0", src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif", width="1", height="1")
+      div
+        b This button targets paypals sandbox API, only simulated payments can be made with special test accounts.
+        form(action="https://www.sandbox.paypal.com/cgi-bin/webscr", method="post", target="_top")
+          input(type="hidden", name="cmd", value="_s-xclick")
+          //- old paypal test button
+          //- input(type="hidden", name="hosted_button_id", value="KE6ZXLGBP6TRQ")
+          input(type="hidden", name="hosted_button_id", value="QBGG5JT5UJD62")
+          input(type="hidden", name="custom", value="{{$ctrl.model.userEmail}}")
+          input(type="image", src="https://www.sandbox.paypal.com/en_US/DK/i/btn/btn_paynowCC_LG.gif", border="0", name="submit")
+          img(alt="", border="0", src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif", width="1", height="1")
 
-  div(ng-if="$ctrl.isLocalhost()")
-    br
-    br
-    form(action="https://www.paypal.com/cgi-bin/webscr", method="post", target="_top")
-      input(type="hidden", name="cmd", value="_s-xclick")
-      input(type="hidden", name="hosted_button_id", value="BV35VE4U7RYSW")
+  md-card(ng-if="$ctrl.isLocalhost()")
+    md-content
+      b Below payment button are for test purposes and will not work with a real paypal account
+      b This button is for simulating paypal IPN on localhost, this does not work anywhere else
+      form(action="http://localhost:8081/processPayment", method="post", target="_top")
+        input(type="hidden", name="cmd", value="_s-xclick")
+        input(type="hidden", name="hosted_button_id", value="KE6ZXLGBP6TRQ")
+        input(type="hidden", name="custom", value="{{$ctrl.model.userEmail}}")
+        input(type="image", src="https://www.sandbox.paypal.com/en_US/DK/i/btn/btn_paynowCC_LG.gif", border="0", name="submit")
+        img(alt="", border="0", src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif", width="1", height="1")
 
-      span 6 month membership 200 kr.
-      input(type="image", src="https://www.paypalobjects.com/en_US/i/btn/btn_paynow_SM.gif", border="0", name="submit")
+  md-card(ng-if="$ctrl.isLocalhost()")
+    md-content
+      form(action="https://www.paypal.com/cgi-bin/webscr", method="post", target="_top")
+        input(type="hidden", name="cmd", value="_s-xclick")
+        input(type="hidden", name="hosted_button_id", value="BV35VE4U7RYSW")
 
-      span Extend membership with:
-      md-input-container
-        label Amount
-        input(ng-model="$ctrl.model.extendWithAmountKr", type="number")
+        span 6 month membership 200 kr.
+        input(type="image", src="https://www.paypalobjects.com/en_US/i/btn/btn_paynow_SM.gif", border="0", name="submit")
 
-  div
-    h1 Transaction history
+        span Extend membership with:
+        md-input-container
+          label Amount
+          input(ng-model="$ctrl.model.extendWithAmountKr", type="number")
 
-    md-card(ng-repeat="trx in $ctrl.model.transactionHistory")
-      md-content Amount transfered: {{ trx.amount }} {{trx.currency}}. - {{trx.paymentDateParsed}} - {{trx.status}}
+  md-card(ng-if="$ctrl.model.transactionHistory.length > 0")
+    md-content
+      h1 Transaction history
 
+      table
+        thead
+          th Amount
+          th Payment Date
+          th Status
+        tbody
+          tr(ng-repeat="trx in $ctrl.model.transactionHistory")
+            td {{ trx.amount }} {{ trx.currency }}
+            td {{ trx.paymentDateParsed }}
+            td {{ trx.status }}
