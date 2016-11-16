@@ -98,7 +98,7 @@ func UserHasActiveSubscription(ctx appengine.Context, userKey *datastore.Key) (b
 
 	count, err := datastore.NewQuery(TXN_KIND).
 		Ancestor(userKey).
-		Filter("PaymentActivationDate>=", time.Now().AddDate(0, 6, 0)).
+		Filter("PaymentActivationDate>=", time.Now().AddDate(0, -6, 0)).
 		Count(ctx)
 
 	if err != nil {
