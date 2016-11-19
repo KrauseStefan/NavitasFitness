@@ -141,8 +141,19 @@ func TestShouldCreateXsltSheetWithAllUserHavingActiveSubscription(t *testing.T) 
 
 	file, error := exportXslt(ctx)
 
-	assert(t, file.Sheets[0].Rows[0].Cells[0].Value).Equals("email")
-	assert(t, file.Sheets[0].Rows[1].Cells[0].Value).Equals(users[0].Email)
+	headerCells := file.Sheets[0].Rows[0].Cells
+	firstRowCells := file.Sheets[0].Rows[1].Cells
+
+	assert(t, len(headerCells)).Equals(7)
+	assert(t, len(firstRowCells)).Equals(7)
+
+	assert(t, firstRowCells[0].Value).Equals(users[0].NavitasId)
+	//assert(t, firstRowCells[1].Value).Equals("TODO")
+	assert(t, firstRowCells[2].Value).Equals(users[0].NavitasId)
+	//assert(t, firstRowCells[3].Value).Equals("TODO")
+	//assert(t, firstRowCells[4].Value).Equals("TODO")
+	assert(t, firstRowCells[5].Value).Equals("24 Timers")
+	assert(t, firstRowCells[6].Value).Equals(users[0].Email)
 	assert(t, error).Equals(nil)
 }
 

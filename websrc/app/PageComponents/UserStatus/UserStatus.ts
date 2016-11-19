@@ -1,7 +1,7 @@
 import { IUserDTO, UserService } from '../UserService';
 import * as moment from 'moment';
 
-const _moment: (
+const momentFn: (
   inp?: moment.MomentInput, format?: moment.MomentFormatSpecification,
   language?: string, strict?: boolean
   ) => moment.Moment = (<any> moment).default;
@@ -41,14 +41,14 @@ class UserStatus {
   public getTransactionsUpdate() {
     this.$http.get<ITransactionEntry[]>('/rest/user/transactions').then((res) => {
       this.model.transactionHistory = res.data.map( txn => {
-        txn.paymentDateParsed = _moment(txn.paymentDate).format(this.dateFormat);
+        txn.paymentDateParsed = momentFn(txn.paymentDate).format(this.dateFormat);
         return txn;
       });
       const validTxn = this.model.transactionHistory
-        .find(txn => _moment(txn.paymentDate).diff(_moment(), 'months') <= 6 )
+        .find(txn => momentFn(txn.paymentDate).diff(momentFn(), 'months') <= 6 );
 
       if (!!validTxn) {
-        this.model.validUntill = _moment(validTxn.paymentDate)
+        this.model.validUntill = momentFn(validTxn.paymentDate)
           .add(6, 'months')
           .format(this.dateFormat);
         this.model.statusMsg = 'Subscription Active';
