@@ -8,9 +8,6 @@ describe('Navigation tests', () => {
   afterEach(() => verifyBrowserLog());
 
   it('should respond to the basic "/" address', () => {
-    NavigationPageObject.blogPageTab.click();
-    expect(browser.getLocationAbsUrl()).toBe('/blog');
-
     // NavigationPageObject.statusPageTab.click();
     // expect(browser.getLocationAbsUrl()).toBe('/status');
 

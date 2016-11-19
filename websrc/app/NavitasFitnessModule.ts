@@ -1,13 +1,11 @@
 import { module } from 'angular';
 
-import { BlogPostsService } from './PageComponents/Blog/BlogPostsService';
 import { MainPageService } from './PageComponents/MainPage/MainPageService';
 import { UserService } from './PageComponents/UserService';
 
 import { AppComponent } from './AppComponent';
 import { CkEditor } from './Components/CkEditor/CkEditor';
-import { BlogComponent } from './PageComponents/Blog/Blog';
-import { MainPageComponent } from './PageComponents/MainPage/MainPage';
+import { MainPageComponent, mainPageRouterState } from './PageComponents/MainPage/MainPage';
 import { nfResetOnChange } from './PageComponents/RegistrationForm/nfResetOnChange';
 import { nfShouldEqual } from './PageComponents/RegistrationForm/nfShouldEqual';
 import { UserStatusComponent, statusRouterState } from './PageComponents/UserStatus/UserStatus';
@@ -29,22 +27,13 @@ export const NavitasFitnessModule = module('NavitasFitness', [
     $urlRouterProvider.otherwise('/main-page');
 
     $stateProvider
-      .state('MainPage', {
-        template: '<main-page></main-page>',
-        url: '/main-page',
-      })
-      .state('Blog', {
-        template: '<blog></blog>',
-        url: '/blog',
-      })
+      .state('MainPage', mainPageRouterState)
       .state('Status', statusRouterState);
   })
   .service('userService', UserService)
-  .service('blogPostsService', BlogPostsService)
   .service('mainPageService', MainPageService)
 
   .component('ckEditor', CkEditor)
-  .component('blog', BlogComponent)
   .component('mainPage', MainPageComponent)
   .component('userStatus', UserStatusComponent)
   .component('appComponent', AppComponent)

@@ -1,5 +1,10 @@
-import {IUserDTO, UserService} from '../UserService';
-import {MainPageDTO, MainPageService} from './MainPageService';
+import { IUserDTO, UserService } from '../UserService';
+import { MainPageDTO, MainPageService } from './MainPageService';
+
+export const mainPageRouterState = {
+  template: '<main-page></main-page>',
+  url: '/main-page',
+};
 
 export class MainPage {
 

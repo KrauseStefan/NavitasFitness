@@ -6,7 +6,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"Auth"
-	"BlogPost"
 	"Export/Service"
 	"IPN"
 	"MainPage"
@@ -20,7 +19,6 @@ func init() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	MainPageService.IntegrateRoutes(router)
-	BlogPostService.IntegrateRoutes(router)
 	UserService.IntegrateRoutes(router)
 	AuthService.IntegrateRoutes(router)
 	IPN.IntegrateRoutes(router)

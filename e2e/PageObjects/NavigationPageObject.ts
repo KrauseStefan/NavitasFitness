@@ -10,7 +10,6 @@ export class NavigationPageObject {
   public static menuButton = $('.md-button[ng-click="$mdOpenMenu()"]');
 
   public static mainPageTab = element((<any> by).linkUiSref('MainPage'));
-  public static blogPageTab = element((<any> by).linkUiSref('Blog'));
   public static statusPageTab = element((<any> by).linkUiSref('Status'));
 
   public static menuRegister = NavigationPageObject.menuContent.$('[ng-click="$ctrl.openRegistrationDialog($event)"]');
