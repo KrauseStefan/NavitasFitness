@@ -29,9 +29,19 @@ md-dialog
             The two passwords do not match
 
       md-input-container
-        label Student Id/Other Id
+        md-tooltip.unrestrict-height(md-direction="Bottom")
+          span Some long text describing how this ID should be types input
+          br
+          span This message kan be on multipe lines
+        label
+          span Access ID
+          md-icon(style="font-size: 16px;") info_outline
+
         md-icon perm_identity
         input(name="navitasId", ng-model="model.navitasId", required)
+
+      md-input-container
+        md-checkbox(name="termsAccepted", ng-model="termsAccepted", ng-required="true") You must accept the terms
 
     md-dialog-actions
       md-button(ng-click="cancel()") Cancel

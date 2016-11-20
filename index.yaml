@@ -10,16 +10,6 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-- kind: BlogEntry
-  ancestor: yes
-  properties:
-  - name: Date
-
-- kind: txn
-  ancestor: yes
-  properties:
-  - name: PaymentActivationDate
-
 - kind: txn
   ancestor: yes
   properties:

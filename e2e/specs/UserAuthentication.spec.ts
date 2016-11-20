@@ -36,6 +36,7 @@ describe('User Autentication', () => {
       password: userInfo.password,
       passwordRepeat: userInfo.password,
     });
+    regDialog.termsAcceptedChkBx.click();
     regDialog.buttonRegister.click();
 
     expect(regDialog.formContainer.isPresent()).toBe(false);
@@ -52,6 +53,7 @@ describe('User Autentication', () => {
       password: userInfo.password,
       passwordRepeat: userInfo.password,
     });
+    regDialog.termsAcceptedChkBx.click();
 
     regDialog.buttonRegister.click();
 
@@ -77,6 +79,8 @@ describe('User Autentication', () => {
       password: userInfo.password,
       passwordRepeat: userInfo.password,
     });
+    regDialog.termsAcceptedChkBx.click();
+
     expect(regDialog.buttonRegister.isEnabled()).toBe(true);
     expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
 
@@ -94,23 +98,29 @@ describe('User Autentication', () => {
 
     regDialog.fillForm({password: userInfo.password});
     expect(regDialog.buttonRegister.isEnabled()).toBe(true);
-    // browser.pause();
-    expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false); // error
+
+    expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
 
     regDialog.fillForm({email: 'ab'});
-    expect(regDialog.buttonRegister.isEnabled()).toBe(false); // error
+    expect(regDialog.buttonRegister.isEnabled()).toBe(false);
 
     regDialog.fillForm({email: ''});
-    expect(regDialog.buttonRegister.isEnabled()).toBe(false); // error
+    expect(regDialog.buttonRegister.isEnabled()).toBe(false);
 
     regDialog.fillForm({email: userInfo.email});
-    expect(regDialog.buttonRegister.isEnabled()).toBe(true); // error
+    expect(regDialog.buttonRegister.isEnabled()).toBe(true);
 
     regDialog.fillForm({navitasId: ''});
     expect(regDialog.buttonRegister.isEnabled()).toBe(false);
 
     regDialog.fillForm({navitasId: userInfo.navitasId});
-    expect(regDialog.buttonRegister.isEnabled()).toBe(true); // error
+    expect(regDialog.buttonRegister.isEnabled()).toBe(true);
+
+    regDialog.termsAcceptedChkBx.click();
+    expect(regDialog.buttonRegister.isEnabled()).toBe(false);
+
+    regDialog.termsAcceptedChkBx.click();
+    expect(regDialog.buttonRegister.isEnabled()).toBe(true);
 
     regDialog.safeClick(regDialog.cancelButton);
   });

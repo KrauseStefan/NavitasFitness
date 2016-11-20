@@ -1,6 +1,8 @@
 import { DialogPageObject } from './DialogPageObject';
 
 export class RegistrationDialogPageObject extends DialogPageObject {
+  public termsAcceptedChkBx = this.formContainer.$('[name="termsAccepted"]');
+
   public buttonRegister = this.formContainer.$('button[ng-click="submit()"]');
 
   public closeButton = this.formContainer.$('.md-toolbar-tools button[ng-click="cancel()"]');
