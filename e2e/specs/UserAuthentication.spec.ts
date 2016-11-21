@@ -1,3 +1,4 @@
+import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
 import { verifyBrowserLog } from '../utility';
 
@@ -10,6 +11,12 @@ const userInfo = {
 describe('User Autentication', () => {
 
   afterEach(() => verifyBrowserLog());
+
+  it('ensure test user does not exist', () => {
+      const dataStoreManipulator = new DataStoreManipulator();
+      dataStoreManipulator.removeUser(userInfo.email);
+      dataStoreManipulator.destroy();
+  });
 
   it('should not be able to login before user has been created', () => {
     const loginDialog = NavigationPageObject.openLoginDialog();
