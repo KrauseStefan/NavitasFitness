@@ -1,6 +1,7 @@
 import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
 import { verifyBrowserLog } from '../utility';
+import { browser } from 'protractor';
 
 const userInfo = {
   email: 'email@domain.com',
@@ -13,6 +14,8 @@ describe('User Autentication', () => {
   afterEach(() => verifyBrowserLog());
 
   it('ensure test user does not exist', () => {
+      browser.get('/');
+
       const dataStoreManipulator = new DataStoreManipulator();
       dataStoreManipulator.removeUser(userInfo.email);
       dataStoreManipulator.destroy();
