@@ -5,16 +5,16 @@ import { verifyBrowserLog } from '../utility';
 import { Key, browser } from 'protractor';
 
 const userInfo = {
-  email: 'test-admin@domain.com',
+  email: 'frontpage-test-admin@domain.com',
   navitasId: '1234509876',
   password: 'Password123',
 };
 
-fdescribe('Navigation tests', () => {
+describe('Navigation tests', () => {
 
   afterEach(() => verifyBrowserLog());
 
-  it('should create an admin user', () => {
+  it('[META] create user', () => {
     new DataStoreManipulator().removeUser(userInfo.email).destroy();
     browser.get('/');
 
@@ -28,8 +28,13 @@ fdescribe('Navigation tests', () => {
     });
     regDialog.termsAcceptedChkBx.click();
     regDialog.buttonRegister.click();
-    new DataStoreManipulator().makeUserAdmin(userInfo.email).destroy();
+  });
 
+  it('should not be able to click edit before being logged in', () => {
+    expect(FrontPageObject.adminEditBtn.isPresent()).toBe(false);
+  });
+
+  it('[META] login user', () => {
     const loginDialog = NavigationPageObject.openLoginDialog();
 
     loginDialog.fillForm({
@@ -40,7 +45,16 @@ fdescribe('Navigation tests', () => {
     loginDialog.loginButton.click();
   });
 
-  it('should be able to enter edit mode', () => {
+  it('should not be able to click edit if logged in with a normal user', () => {
+    expect(FrontPageObject.adminEditBtn.isPresent()).toBe(false);
+  });
+
+  it('[META] user admin', () => {
+    new DataStoreManipulator().makeUserAdmin(userInfo.email).destroy();
+    browser.refresh();
+  });
+
+  it('should be able to enter edit mode as admin', () => {
     const testText = 'This is a test message';
     const textPromise = FrontPageObject.editableArea.getText();
 
@@ -56,6 +70,11 @@ fdescribe('Navigation tests', () => {
     FrontPageObject.adminSaveBtn.click();
 
     expect(FrontPageObject.editableArea.getText()).toEqual(testText);
+  });
+
+  it('[META] user admin', () => {
+    NavigationPageObject.menuButton.click();
+    NavigationPageObject.menuLogout.click();
   });
 
 });
