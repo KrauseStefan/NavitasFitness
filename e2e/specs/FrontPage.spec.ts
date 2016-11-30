@@ -5,18 +5,21 @@ import { verifyBrowserLog } from '../utility';
 import { Key, browser } from 'protractor';
 
 const userInfo = {
-  email: 'frontpage-test-admin@domain.com',
+  email: 't-frontpage-admin@domain.com',
   navitasId: '1234509876',
   password: 'Password123',
 };
 
-describe('Navigation tests', () => {
+describe('Frontpage tests', () => {
 
   afterEach(() => verifyBrowserLog());
 
+  it('[META] load page', () => {
+    browser.get('/');
+  });
+
   it('[META] create user', () => {
     new DataStoreManipulator().removeUser(userInfo.email).destroy();
-    browser.get('/');
 
     const regDialog = NavigationPageObject.openRegistrationDialog();
 
@@ -49,7 +52,7 @@ describe('Navigation tests', () => {
     expect(FrontPageObject.adminEditBtn.isPresent()).toBe(false);
   });
 
-  it('[META] user admin', () => {
+  it('[META] make user admin', () => {
     new DataStoreManipulator().makeUserAdmin(userInfo.email).destroy();
     browser.refresh();
   });

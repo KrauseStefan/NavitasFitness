@@ -1,30 +1,33 @@
-import { ProtractorBrowser, browser } from 'protractor';
+import { ProtractorBrowser, browser as mainBrowser, by } from 'protractor';
+import { promise as wdpromise } from 'selenium-webdriver';
+
+let browser: ProtractorBrowser;
 
 export class DataStoreManipulator {
 
-  private browserHandle: ProtractorBrowser;
-
   constructor() {
-    this.browserHandle = browser.forkNewDriverInstance(false, false);
-    this.browserHandle.ignoreSynchronization = true;
-    this.browserHandle.driver.get('http://localhost:8000/datastore');
+    browser = mainBrowser.forkNewDriverInstance(false, false);
+    browser.ignoreSynchronization = true;
+    browser.driver.get('http://localhost:8000/datastore?kind=User');
   }
 
   public destroy() {
-    this.browserHandle.quit();
+    browser.sleep(1000);
+    browser.quit();
   }
 
   public removeUser(email: string) {
     this.selecteItem(7, email);
 
-    this.browserHandle.$('#delete_button').isDisplayed().then(displayed => {
+    browser.$('#delete_button').isEnabled().then(displayed => {
       if (displayed) {
-        this.browserHandle.$('#delete_button').click();
-        this.browserHandle.switchTo().alert().accept();
+        browser.$('#delete_button').click();
+        return browser.switchTo().alert().accept();
+      } else {
+        return wdpromise.fullyResolved<void>({});
       }
-    }, () => {
-      // do nothing
     });
+
     return this;
   }
 
@@ -32,32 +35,38 @@ export class DataStoreManipulator {
     this.openItem(7, email);
 
     const selectAdmin = `document.querySelector('select[name="bool|IsAdmin"]').value = 1;`;
-    this.browserHandle.driver.executeScript(selectAdmin);
-    this.browserHandle.$('input[value="Save Changes"]').click();
+    browser.driver.executeScript(selectAdmin);
+    browser.$('input[value="Save Changes"]').click();
     return this;
   }
 
   private openItem(column: number, value: string) {
-    const getLink = `
-      var row = $('.ae-table.ae-settings-block tr')
+    const clientSideScript = `
+      const row = $('.ae-table.ae-settings-block tr')
         .slice(1)
         .filter((_, elm) => $(elm).find('td:nth(${column})').text() === '${value}');
 
-      row.find('a')[0].click();
-   `;
-
-    return this.browserHandle.driver.executeScript(getLink);
+      return row.find('a')[0];
+    `;
+    const itemLink = browser.element(by.js(clientSideScript));
+    return itemLink.click().then(undefined, () => {
+      // tslint:disable-next-line
+      console.log('openItem, could not find: ', value);
+    });
   }
 
   private selecteItem(column: number, value: string) {
-    const getLink = `
-      var row = $('.ae-table.ae-settings-block tr')
+    const clientSideScript = `
+      const row = $('.ae-table.ae-settings-block tr')
         .slice(1)
         .filter((_, elm) => $(elm).find('td:nth(${column})').text() === '${value}');
 
-      row.find('input[type="checkbox"]').click();
-   `;
-
-    return this.browserHandle.driver.executeScript(getLink);
+      return row.find('input[type="checkbox"]');
+    `;
+    const itemChkBox = browser.element(by.js(clientSideScript));
+    return itemChkBox.click().then(undefined, () => {
+      // tslint:disable-next-line
+      console.log('selecteItem, could not find: ', value);
+    });
   }
 }

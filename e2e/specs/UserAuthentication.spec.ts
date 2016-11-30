@@ -1,7 +1,7 @@
 import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
 import { verifyBrowserLog } from '../utility';
-import { browser } from 'protractor';
+import { browser, protractor } from 'protractor';
 
 const userInfo = {
   email: 'email@domain.com',
@@ -13,12 +13,21 @@ describe('User Autentication', () => {
 
   afterEach(() => verifyBrowserLog());
 
-  it('ensure test user does not exist', () => {
-      browser.get('/');
+  it('[META] ensure test user does not exist', () => {
+    browser.get('/');
+    new DataStoreManipulator().removeUser(userInfo.email).destroy();
+  });
 
-      const dataStoreManipulator = new DataStoreManipulator();
-      dataStoreManipulator.removeUser(userInfo.email);
-      dataStoreManipulator.destroy();
+  it('[META] ensure user is not logged in', () => {
+    NavigationPageObject.menuButton.click();
+    NavigationPageObject.menuLogout.isDisplayed().then((isDisplayed) => {
+      if (isDisplayed) {
+        NavigationPageObject.menuLogout.click();
+      } else {
+        browser.actions().sendKeys(protractor.Key.ESCAPE).perform();
+      }
+    });
+
   });
 
   it('should not be able to login before user has been created', () => {
@@ -94,36 +103,36 @@ describe('User Autentication', () => {
     expect(regDialog.buttonRegister.isEnabled()).toBe(true);
     expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
 
-    regDialog.fillForm({password: 'bad'});
+    regDialog.fillForm({ password: 'bad' });
     expect(regDialog.buttonRegister.isEnabled()).toBe(false);
     expect(regDialog.errorPasswordDifferent.isPresent()).toBe(true);
 
-    regDialog.fillForm({passwordRepeat: 'bad'});
+    regDialog.fillForm({ passwordRepeat: 'bad' });
     expect(regDialog.buttonRegister.isEnabled()).toBe(true);
     expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
 
-    regDialog.fillForm({passwordRepeat: userInfo.password});
+    regDialog.fillForm({ passwordRepeat: userInfo.password });
     expect(regDialog.buttonRegister.isEnabled()).toBe(false);
     expect(regDialog.errorPasswordDifferent.isPresent()).toBe(true);
 
-    regDialog.fillForm({password: userInfo.password});
+    regDialog.fillForm({ password: userInfo.password });
     expect(regDialog.buttonRegister.isEnabled()).toBe(true);
 
     expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
 
-    regDialog.fillForm({email: 'ab'});
+    regDialog.fillForm({ email: 'ab' });
     expect(regDialog.buttonRegister.isEnabled()).toBe(false);
 
-    regDialog.fillForm({email: ''});
+    regDialog.fillForm({ email: '' });
     expect(regDialog.buttonRegister.isEnabled()).toBe(false);
 
-    regDialog.fillForm({email: userInfo.email});
+    regDialog.fillForm({ email: userInfo.email });
     expect(regDialog.buttonRegister.isEnabled()).toBe(true);
 
-    regDialog.fillForm({navitasId: ''});
+    regDialog.fillForm({ navitasId: '' });
     expect(regDialog.buttonRegister.isEnabled()).toBe(false);
 
-    regDialog.fillForm({navitasId: userInfo.navitasId});
+    regDialog.fillForm({ navitasId: userInfo.navitasId });
     expect(regDialog.buttonRegister.isEnabled()).toBe(true);
 
     regDialog.termsAcceptedChkBx.click();
