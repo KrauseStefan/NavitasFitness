@@ -1,7 +1,8 @@
 import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
+import { StatusPageObject } from '../PageObjects/StatusPageObject';
 import { verifyBrowserLog } from '../utility';
-import { browser } from 'protractor';
+import { $, browser } from 'protractor';
 
 describe('StatusPage tests', () => {
 
@@ -47,6 +48,17 @@ describe('StatusPage tests', () => {
 
   it('should be able to click status when logged in', () => {
     NavigationPageObject.statusPageTab.click();
+    expect(browser.getCurrentUrl()).toContain('status');
+  });
+
+  it('should be able to process a payment', () => {
+    StatusPageObject.waitForPaypalSimBtn();
+
+    StatusPageObject.triggerPaypalPayment();
+
+    NavigationPageObject.statusPageTab.click();
+
+    expect($('tr td:nth-child(3)').getText()).toBe('Completed');
   });
 
 });
