@@ -53,7 +53,6 @@ describe('StatusPage tests', () => {
 
   it('should be able to process a payment', () => {
     StatusPageObject.waitForPaypalSimBtn();
-
     StatusPageObject.triggerPaypalPayment();
 
     NavigationPageObject.statusPageTab.click();

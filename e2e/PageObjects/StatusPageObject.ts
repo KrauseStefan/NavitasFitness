@@ -15,7 +15,9 @@ export class StatusPageObject {
     browser.ignoreSynchronization = true;
     StatusPageObject.paypalSimBtn.click();
     $('a').click();
-    browser.sleep(500);
+
+    browser.wait(browser.executeScript(() => document.readyState), 1000, 'Page did not load');
+
     browser.ignoreSynchronization = false;
   }
 
