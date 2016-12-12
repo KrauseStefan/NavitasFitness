@@ -1,14 +1,18 @@
-import { ProtractorBrowser, browser as mainBrowser, by } from 'protractor';
+import { ElementFinder, ProtractorBrowser, browser as mainBrowser, by } from 'protractor';
 import { promise as wdpromise } from 'selenium-webdriver';
 
 let browser: ProtractorBrowser;
 
 export class DataStoreManipulator {
 
+  private deleteBtn: ElementFinder;
+
   constructor() {
     browser = mainBrowser.forkNewDriverInstance(false, false);
     browser.ignoreSynchronization = true;
     browser.driver.get('http://localhost:8000/datastore?kind=User');
+
+    this.deleteBtn = browser.$('#delete_button');
   }
 
   public destroy() {
@@ -19,14 +23,16 @@ export class DataStoreManipulator {
   public removeUser(email: string) {
     this.selecteItem(7, email);
 
-    browser.$('#delete_button').isEnabled().then(displayed => {
-      if (displayed) {
-        browser.$('#delete_button').click();
-        return browser.switchTo().alert().accept();
-      } else {
-        return wdpromise.fullyResolved<void>({});
-      }
-    });
+    this.deleteBtn.isPresent()
+      .then(isPresent => isPresent ? this.deleteBtn.isEnabled() : wdpromise.fullyResolved<boolean>(false))
+      .then(isEnabled => {
+        if (isEnabled) {
+          this.deleteBtn.click();
+          return browser.switchTo().alert().accept();
+        } else {
+          return wdpromise.fullyResolved<void>({});
+        }
+      });
 
     return this;
   }
@@ -49,9 +55,12 @@ export class DataStoreManipulator {
       return row.find('a')[0];
     `;
     const itemLink = browser.element(by.js(clientSideScript));
-    return itemLink.click().then(undefined, () => {
-      // tslint:disable-next-line
-      console.log('openItem, could not find: ', value);
+    return itemLink.isPresent().then(isPresent => {
+      if (isPresent) {
+        return itemLink.click();
+      }
+
+      return wdpromise.fullyResolved<void>({});
     });
   }
 
@@ -64,9 +73,12 @@ export class DataStoreManipulator {
       return row.find('input[type="checkbox"]');
     `;
     const itemChkBox = browser.element(by.js(clientSideScript));
-    return itemChkBox.click().then(undefined, () => {
-      // tslint:disable-next-line
-      console.log('selecteItem, could not find: ', value);
+    return itemChkBox.isPresent().then(isPresent => {
+      if (isPresent) {
+        return itemChkBox.click();
+      }
+
+      return wdpromise.fullyResolved<void>({});
     });
   }
 }
