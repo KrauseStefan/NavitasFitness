@@ -4,6 +4,7 @@
     "module": "system",
     "moduleResolution": "node",
     "sourceMap": true,
+    "sourceRoot": "http://localhost:9000/src",
     "removeComments": false,
     "noImplicitAny": true,
     "noLib": false,
