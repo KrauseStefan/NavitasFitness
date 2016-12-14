@@ -1,8 +1,32 @@
 import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
-import { StatusPageObject } from '../PageObjects/StatusPageObject';
+import { StatusPageObject as pageObject } from '../PageObjects/StatusPageObject';
 import { verifyBrowserLog } from '../utility';
-import { $, browser } from 'protractor';
+import { browser } from 'protractor';
+import { promise as wdpromise } from 'selenium-webdriver';
+
+function dataParts(date: string): { day: number, month: number, year: number } {
+  // format 'DD-MM-YYYY'
+  const parts = date
+    .split('-')
+    .map((i) => parseInt(i, 10));
+
+  return {
+    day: parts[0],
+    month: parts[1],
+    year: parts[2],
+  };
+}
+
+function diffMonth(data) {
+  const [start, end] = data;
+  if (start.year === end.year) {
+    return end.month - start.month;
+  } else if (start.year + 1 === end.year) {
+    return (end.month + 12) - start.month;
+  }
+  throw 'Date invalid';
+}
 
 describe('StatusPage tests', () => {
 
@@ -51,13 +75,27 @@ describe('StatusPage tests', () => {
     expect(browser.getCurrentUrl()).toContain('status');
   });
 
+  it('should report an inactive subscription when no payment is made', () => {
+    expect(pageObject.statusMsgField.evaluate('$ctrl.model.statusMsgKey')).toEqual('inActive');
+    expect(pageObject.subscriptionEndField.evaluate('$ctrl.model.validUntill')).toEqual('-');
+  });
+
   it('should be able to process a payment', () => {
-    StatusPageObject.waitForPaypalSimBtn();
-    StatusPageObject.triggerPaypalPayment();
+    pageObject.waitForPaypalSimBtn();
+    pageObject.triggerPaypalPayment();
 
     NavigationPageObject.statusPageTab.click();
 
-    expect($('tr td:nth-child(3)').getText()).toBe('Completed');
+    expect(pageObject.getFirstRowCell(3).getText()).toBe('Completed');
+  });
+
+  it('should show subscription active when show subscription end date when subscribed', () => {
+    const startP = pageObject.getFirstRowCell(2).getText().then(dataParts);
+    const endP = pageObject.subscriptionEndField.evaluate('$ctrl.model.validUntill').then(dataParts);
+    const monthDiffP = wdpromise.all([startP, endP]).then(diffMonth);
+
+    expect(pageObject.statusMsgField.evaluate('$ctrl.model.statusMsgKey')).toEqual('active');
+    expect(monthDiffP).toEqual(6);
   });
 
 });
