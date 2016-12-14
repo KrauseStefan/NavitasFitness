@@ -5,7 +5,7 @@
       div
         md-input-container
           label Subscription status
-          input(ng-model="$ctrl.model.statusMsg", disabled="disabled")
+          input(ng-model="$ctrl.statusMessages[$ctrl.model.statusMsgKey]", disabled="disabled")
       div
         md-input-container
           label Membership valid untill
@@ -37,20 +37,6 @@
         input(type="hidden", name="custom", value="{{$ctrl.model.userEmail}}")
         input(type="image", src="https://www.sandbox.paypal.com/en_US/DK/i/btn/btn_paynowCC_LG.gif", border="0", name="submit")
         img(alt="", border="0", src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif", width="1", height="1")
-
-  //- md-card(ng-if="$ctrl.isLocalhost()")
-  //-   md-content(layout-padding)
-  //-     form(action="https://www.paypal.com/cgi-bin/webscr", method="post", target="_top")
-  //-       input(type="hidden", name="cmd", value="_s-xclick")
-  //-       input(type="hidden", name="hosted_button_id", value="BV35VE4U7RYSW")
-
-  //-       span 6 month membership 200 kr.
-  //-       input(type="image", src="https://www.paypalobjects.com/en_US/i/btn/btn_paynow_SM.gif", border="0", name="submit")
-
-  //-       span Extend membership with:
-  //-       md-input-container
-  //-         label Amount
-  //-         input(ng-model="$ctrl.model.extendWithAmountKr", type="number")
 
   md-card(ng-if="$ctrl.model.transactionHistory.length > 0")
     md-content(layout-padding)

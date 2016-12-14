@@ -15,7 +15,12 @@ class UserStatus {
 
   public model: IUserStatusModel;
 
-  private dateFormat = 'MM/DD/YYYY';
+  public statusMessages: { [key: string]: string } = {
+    active: 'Subscription Active',
+    inActive: 'No Active Subscription',
+  };
+
+  private dateFormat = 'DD-MM-YYYY';
 
   constructor(
     private userService: UserService,
@@ -25,8 +30,7 @@ class UserStatus {
     private $q: ng.IQService) {
 
     this.model = {
-      extendWithAmountKr: 200,
-      statusMsg: 'No Active Subscription',
+      statusMsgKey: 'inActive',
       transactionHistory: [],
       userEmail: '',
       validUntill: '-',
@@ -40,18 +44,18 @@ class UserStatus {
 
   public getTransactionsUpdate() {
     this.$http.get<ITransactionEntry[]>('/rest/user/transactions').then((res) => {
-      this.model.transactionHistory = res.data.map( txn => {
+      this.model.transactionHistory = res.data.map(txn => {
         txn.paymentDateParsed = momentFn(txn.paymentDate).format(this.dateFormat);
         return txn;
       });
       const validTxn = this.model.transactionHistory
-        .find(txn => momentFn(txn.paymentDate).diff(momentFn(), 'months') <= 6 );
+        .find(txn => momentFn(txn.paymentDate).diff(momentFn(), 'months') <= 6);
 
       if (!!validTxn) {
         this.model.validUntill = momentFn(validTxn.paymentDate)
           .add(6, 'months')
           .format(this.dateFormat);
-        this.model.statusMsg = 'Subscription Active';
+        this.model.statusMsgKey = 'active';
       }
     });
   }
@@ -71,8 +75,7 @@ class UserStatus {
 
 interface IUserStatusModel {
   userEmail: string;
-  extendWithAmountKr: number;
-  statusMsg: string;
+  statusMsgKey: string;
   transactionHistory: Array<ITransactionEntry>;
   validUntill: string;
 }
