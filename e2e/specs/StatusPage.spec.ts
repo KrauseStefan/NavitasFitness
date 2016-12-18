@@ -1,3 +1,5 @@
+import * as http from 'http';
+
 import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
 import { StatusPageObject as pageObject } from '../PageObjects/StatusPageObject';
@@ -7,14 +9,14 @@ import { promise as wdpromise } from 'selenium-webdriver';
 
 function dataParts(date: string): { day: number, month: number, year: number } {
   // format 'DD-MM-YYYY'
-  const parts = date
+  const [day, month, year] = date
     .split('-')
     .map((i) => parseInt(i, 10));
 
   return {
-    day: parts[0],
-    month: parts[1],
-    year: parts[2],
+    day,
+    month,
+    year,
   };
 }
 
@@ -26,6 +28,45 @@ function diffMonth(data) {
     return (end.month + 12) - start.month;
   }
   throw 'Date invalid';
+}
+
+const sessionCoockieKey = 'Session-Key';
+
+function getSessionCookie(): wdpromise.Promise<string> {
+  return browser
+    .manage()
+    .getCookie(sessionCoockieKey)
+    .then((cookie) => {
+      return `${sessionCoockieKey}=${cookie.value}`;
+    });
+}
+
+function sendRequstWithCookie(url: string, Cookie?: string) {
+  const [protocol, host, port, path] = (<Array<string>>url.match(/([A-z]*:)\/\/([A-z]*):(\d*)([\/|\w]*)/)).slice(1);
+
+  const options: http.RequestOptions = {
+    headers: Cookie ? { Cookie } : {},
+    host,
+    method: 'get',
+    path,
+    port: parseInt(port, 10),
+    protocol,
+  };
+
+  return new wdpromise.Promise((resolve, reject) => {
+    const req = http.request(options, resolve);
+    req.end();
+  });
+}
+
+function makeRequest(url: string, useSession: boolean = false): wdpromise.Promise<http.ServerResponse> {
+  if (useSession) {
+    return getSessionCookie().then((cookie) => {
+      return sendRequstWithCookie(url, cookie);
+    });
+  } else {
+    return sendRequstWithCookie(url);
+  }
 }
 
 describe('StatusPage tests', () => {
@@ -98,4 +139,30 @@ describe('StatusPage tests', () => {
     expect(monthDiffP).toEqual(6);
   });
 
+  it('should return 401 if not logged to export data', () => {
+    const statusCodeP = makeRequest('http://localhost:8080/rest/export/xlsx', false).then((resp) => {
+      return resp.statusCode;
+    });
+
+    expect(statusCodeP).toBe(401);
+  });
+
+  it('should return 401 if user does not have admin rights', () => {
+    const statusCodeP = makeRequest('http://localhost:8080/rest/export/xlsx', true).then((resp) => {
+      return resp.statusCode;
+    });
+
+    expect(statusCodeP).toBe(401);
+  });
+
+  it('should be possible to download an xslt with active subscriptions', () => {
+
+    new DataStoreManipulator().makeUserAdmin(userInfo.email).destroy();
+
+    const statusCodeP = makeRequest('http://localhost:8080/rest/export/xlsx', true).then((resp) => {
+      return resp.statusCode;
+    });
+
+    expect(statusCodeP).toBe(200);
+  });
 });

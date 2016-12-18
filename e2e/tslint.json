@@ -13,7 +13,15 @@
     "quotemark": [
       "single"
     ],
-    "no-string-literal": false
+    "no-string-literal": false,
+    "whitespace": [
+      true,
+      "check-branch",
+      "check-decl",
+      "check-operator",
+      "check-separator",
+      "check-type"
+    ]
   },
   "rulesDirectory": [
     /*
