@@ -15,8 +15,8 @@
   "license": "ISC",
   "dependencies": {
     "npm-run-all": "^3.1.1",
-    "protractor": "^4.0.11",
+    "protractor": "^4.0.13",
     "tslint": "^3.15.1",
-    "typescript": "^2.0.3"
+    "typescript": "^2.1.4"
   }
 }

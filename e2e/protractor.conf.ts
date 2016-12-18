@@ -13,13 +13,13 @@ export const config: Config = {
     jasmineNodeOpts: { defaultTimeoutInterval: timeoutMils },
     multiCapabilities: [{
         browserName: 'chrome',
-        maxInstances: 3,
+        maxInstances: 5,
         // shardTestFiles: true,
         // }, {
         // browserName: 'firefox',
         // marionette: true,
         // // maxInstances: 3,
-        // // shardTestFiles: true,
+        shardTestFiles: true,
     }],
     onPrepare: () => {
         by.addLocator('linkUiSref', (toState: string, optParentElement: HTMLElement) => {
