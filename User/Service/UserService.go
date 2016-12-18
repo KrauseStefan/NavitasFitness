@@ -54,7 +54,7 @@ func AsUser(f func(http.ResponseWriter, *http.Request, *UserDao.UserDTO)) func(h
 
 		user, err := getUserFromSession(ctx, r)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 
