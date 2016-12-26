@@ -155,7 +155,7 @@ type TransactionMsgClientDTO struct {
 	Status                string    `json:"status"`
 	PaymentActivationDate time.Time `json:"paymentActivationDate"`
 	IsActive              bool      `json:"isActive"`
-	//IpnMessages      []string //History of IpnMessages
+	// IpnMessages           []string  `json:"ipnMessages"` // History of IpnMessages
 }
 
 func newTransactionMsgClientDTO(source *TransactionDao.TransactionMsgDTO) *TransactionMsgClientDTO {
@@ -167,7 +167,7 @@ func newTransactionMsgClientDTO(source *TransactionDao.TransactionMsgDTO) *Trans
 		Status:                source.GetPaymentStatus(),
 		PaymentActivationDate: source.GetPaymentActivationDate(),
 		IsActive:              source.IsActive(),
-		//IpnMessages: source.IpnMessages,
+		// IpnMessages:           source.GetIpnMessages(),
 	}
 
 	return &txClient

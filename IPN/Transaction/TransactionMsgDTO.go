@@ -1,6 +1,8 @@
 package TransactionDao
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/url"
 	"strconv"
 	"time"
@@ -56,12 +58,12 @@ func NewTransactionMsgDTOList(dtos []transactionMsgDsDTO, keys []*datastore.Key)
 }
 
 type transactionMsgDsDTO struct {
-	IpnMessages []string //History of IpnMessages
+	IpnMessages []string `json:"ipn_messages"` //History of IpnMessages
 
-	PaymentActivationDate      time.Time // not used ?
-	PaymentDate                time.Time
-	SubscriptionActivationDate time.Time // Decides if the subscription is active
-	TxnId                      string
+	PaymentActivationDate      time.Time `json:"payment_activation_date"` // not used ?
+	PaymentDate                time.Time `json:"payment_date"`
+	SubscriptionActivationDate time.Time `json:"subscription_activation_date"` // Decides if the subscription is active
+	TxnId                      string    `json:"txn_id"`
 }
 
 type TransactionMsgDTO struct {
@@ -85,9 +87,6 @@ func (txDto *TransactionMsgDTO) parseMessage() *url.Values {
 		txDto.parsedIpnMessage = parsedIpnMessage
 		txDto.dsDto.PaymentDate = txDto.GetPaymentDate()
 		txDto.dsDto.TxnId = txDto.GetField(FIELD_TXN_ID)
-		if txDto.PaymentIsComplected() && txDto.dsDto.PaymentActivationDate.IsZero() {
-			txDto.dsDto.PaymentActivationDate = time.Now()
-		}
 	}
 
 	return &txDto.parsedIpnMessage
@@ -144,6 +143,23 @@ func (txDto *TransactionMsgDTO) PaymentIsCompleted() bool {
 
 func (txDto *TransactionMsgDTO) GetPaymentActivationDate() time.Time {
 	return txDto.dsDto.PaymentActivationDate
+}
+
+func (txDto *TransactionMsgDTO) GetIpnMessages() []string {
+	return txDto.dsDto.IpnMessages
+}
+
+func (txDto TransactionMsgDTO) String() string {
+
+	dsDto := fmt.Sprintf("dsDto: %s\n", txDto.dsDto.String())
+	json, _ := json.MarshalIndent(txDto.parsedIpnMessage, "", "  ")
+
+	return dsDto + string(json)
+}
+
+func (txDto transactionMsgDsDTO) String() string {
+	js, _ := json.MarshalIndent(txDto, "", "  ")
+	return string(js)
 }
 
 func (txDto *TransactionMsgDTO) IsActive() bool {
