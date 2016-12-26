@@ -121,6 +121,7 @@ func ipnDoResponseTaskHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
+	const expectedAmount = 300 // kr
 
 	content, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -156,6 +157,15 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 		js, _ := json.Marshal(savedTransaction)
 		ctx.Debugf("IpnSaved: %q", js)
 
+		if savedTransaction.PaymentIsCompleted() {
+			if savedTransaction.GetAmount() >= expectedAmount {
+				savedTransaction.SetActivationDate()
+			}
+			if savedTransaction.GetAmount() != expectedAmount {
+				ctx.Warningf("The amount for the transaction was wrong, recived %f expected %f", savedTransaction.GetAmount(), expectedAmount)
+			}
+		}
+
 		if err := TransactionDao.UpdateIpnMessage(ctx, savedTransaction); err != nil {
 			return err
 		}
@@ -181,6 +191,15 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 
 		js, _ := json.Marshal(transaction)
 		ctx.Debugf("IpnSaved: %q", js)
+
+		if transaction.PaymentIsCompleted() {
+			if transaction.GetAmount() >= expectedAmount {
+				transaction.SetActivationDate()
+			}
+			if transaction.GetAmount() != expectedAmount {
+				ctx.Warningf("The amount for the transaction was wrong, recived %f expected %f", transaction.GetAmount(), expectedAmount)
+			}
+		}
 
 		if err := TransactionDao.PersistNewIpnMessage(ctx, transaction, userKey); err != nil {
 			return err

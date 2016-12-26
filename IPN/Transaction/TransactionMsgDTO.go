@@ -93,6 +93,12 @@ func (txDto *TransactionMsgDTO) parseMessage() *url.Values {
 	return &txDto.parsedIpnMessage
 }
 
+func (txDto *TransactionMsgDTO) SetActivationDate() {
+	if txDto.dsDto.PaymentActivationDate.IsZero() {
+		txDto.dsDto.PaymentActivationDate = time.Now()
+	}
+}
+
 func (txDto *TransactionMsgDTO) GetField(field string) string {
 	return txDto.parseMessage().Get(field)
 }
@@ -132,8 +138,8 @@ func (txDto *TransactionMsgDTO) GetCurrency() string {
 	return txDto.parseMessage().Get(FIELD_MC_CURRENCY)
 }
 
-func (txDto *TransactionMsgDTO) PaymentIsComplected() bool {
-	return txDto.GetPaymentStatus() == STATUS_COMPLEATED && txDto.GetAmount() == 200
+func (txDto *TransactionMsgDTO) PaymentIsCompleted() bool {
+	return txDto.GetPaymentStatus() == STATUS_COMPLEATED
 }
 
 func (txDto *TransactionMsgDTO) GetPaymentActivationDate() time.Time {

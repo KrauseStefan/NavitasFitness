@@ -12,7 +12,7 @@ import IncomingMessage = http.IncomingMessage;
 
 
 interface IMoment extends momentOrg.Moment {
-  tz(ofset: string|number): IMoment;
+  tz(ofset: string | number): IMoment;
 }
 
 /**
@@ -142,7 +142,7 @@ function sendIpnDataMessage(clientReq: IncomingMessage, serverRes: ServerRespons
         return _.merge(prev, cur);
       }, {});
 
-      if(ipnBody['custom'].length <= 0) {
+      if (ipnBody['custom'].length <= 0) {
         const error = "error: no custom field in paypal request, cannot simulate the ipn message"
         reject(error)
         return;
@@ -194,7 +194,7 @@ function sendIpnDataMessage(clientReq: IncomingMessage, serverRes: ServerRespons
 
 
 const paypalSampleIpnMsg = {
-  "mc_gross": "19.95",
+  "mc_gross": "300.00",
   "protection_eligibility": "Eligible",
   "address_status": "confirmed",
   "payer_id": "LPLWNMTBWMFAY",
