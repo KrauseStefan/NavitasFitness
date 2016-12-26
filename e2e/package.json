@@ -15,6 +15,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "exceljs": "^0.2.37",
     "npm-run-all": "^3.1.1",
     "protractor": "^4.0.13",
     "tslint": "^3.15.1",

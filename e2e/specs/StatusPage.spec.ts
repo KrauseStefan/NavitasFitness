@@ -1,3 +1,6 @@
+import { excel } from './exceljs';
+
+import * as Excel from 'exceljs';
 import * as http from 'http';
 
 import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
@@ -6,6 +9,10 @@ import { StatusPageObject as pageObject } from '../PageObjects/StatusPageObject'
 import { verifyBrowserLog } from '../utility';
 import { browser } from 'protractor';
 import { promise as wdpromise } from 'selenium-webdriver';
+
+declare const Excel: {
+  Workbook: excel.IWorkbook;
+};
 
 function dataParts(date: string): { day: number, month: number, year: number } {
   // format 'DD-MM-YYYY'
@@ -53,13 +60,13 @@ function sendRequstWithCookie(url: string, Cookie?: string) {
     protocol,
   };
 
-  return new wdpromise.Promise((resolve, reject) => {
+  return new wdpromise.Promise<http.IncomingMessage>((resolve, reject) => {
     const req = http.request(options, resolve);
     req.end();
   });
 }
 
-function makeRequest(url: string, useSession: boolean = false): wdpromise.Promise<http.ServerResponse> {
+function makeRequest(url: string, useSession: boolean = false): wdpromise.Promise<http.IncomingMessage> {
   if (useSession) {
     return getSessionCookie().then((cookie) => {
       return sendRequstWithCookie(url, cookie);
@@ -159,8 +166,45 @@ describe('StatusPage tests', () => {
 
     new DataStoreManipulator().makeUserAdmin(userInfo.email).destroy();
 
-    const statusCodeP = makeRequest('http://localhost:8080/rest/export/xlsx', true).then((resp) => {
+    const respP = makeRequest('http://localhost:8080/rest/export/xlsx', true);
+
+    const workbookP = respP.then((resp) => {
+      const workbook = new Excel.Workbook();
+
+      const inputStream = workbook.xlsx.createInputStream();
+      resp.pipe(inputStream);
+      return new wdpromise.Promise<excel.IWorkbook>((resolve, reject) => {
+        inputStream.on('done', (listener) => {
+          resolve(workbook);
+        });
+      });
+    });
+
+    const statusCodeP = respP.then((resp) => {
       return resp.statusCode;
+    });
+
+    workbookP.then((workbook) => {
+
+      enum columns {
+        "SysID" = 1,
+        "DateActivation",
+        "SysID2",
+        "DateStart",
+        "DateEnd",
+        "TimeScheme",
+        "Comments",
+      }
+
+      const worksheet = workbook.getWorksheet(1);
+      const userRows = worksheet.getSheetValues().filter(i => i[columns.Comments] === userInfo.email);
+      expect(userRows.length).toBe(1);
+
+      const userRow = userRows[0];
+      expect(userRow[columns.SysID]).toBe(userInfo.navitasId);
+      expect(userRow[columns.SysID2]).toBe(userInfo.navitasId);
+      expect(userRow[columns.Comments]).toBe(userInfo.email);
+
     });
 
     expect(statusCodeP).toBe(200);
