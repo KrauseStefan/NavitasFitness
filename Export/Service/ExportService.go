@@ -11,6 +11,7 @@ import (
 	"IPN/Transaction"
 	"User/Dao"
 	"User/Service"
+	"appengine/datastore"
 	"time"
 )
 
@@ -18,13 +19,26 @@ const xlsxDateFormat = "02.01.2006"
 
 var (
 	userDao_GetAllUsers                        = UserDao.GetAllUsers
-	transactionDao_GetCurrentTransactionsAfter = TransactionDao.GetCurrentTransactionsAfter
+	transactionDao_GetCurrentTransactionsAfter = func(ctx appengine.Context, userKey *datastore.Key, date time.Time) (time.Time, time.Time, error) {
+		activeSubscriptions, err := TransactionDao.GetCurrentTransactionsAfter(ctx, userKey, date)
+		if err != nil {
+			return time.Time{}, time.Time{}, err
+		}
+
+		if len(activeSubscriptions) >= 1 {
+			firstTxn, lastTxn := getExtrema(activeSubscriptions)
+
+			return firstTxn.GetPaymentActivationDate(), lastTxn.GetPaymentActivationDate(), nil
+		}
+
+		return time.Time{}, time.Time{}, nil
+	}
 )
 
 type UserTxnTuple struct {
-	user     UserDao.UserDTO
-	firstTxn *TransactionDao.TransactionMsgDTO
-	lastTxn  *TransactionDao.TransactionMsgDTO
+	user      UserDao.UserDTO
+	firstDate time.Time
+	lastDate  time.Time
 }
 
 func IntegrateRoutes(router *mux.Router) {
@@ -64,18 +78,17 @@ func getActiveTransactionList(ctx appengine.Context) ([]UserTxnTuple, error) {
 	usersWithActiveSubscription := make([]UserTxnTuple, 0, len(userKeys))
 
 	for i, userKey := range userKeys {
-		activeSubscriptions, err := transactionDao_GetCurrentTransactionsAfter(ctx, userKey, time.Now().AddDate(0, -6, 0))
+		firstDate, lastDate, err := transactionDao_GetCurrentTransactionsAfter(ctx, userKey, time.Now().AddDate(0, -6, 0))
 		if err != nil {
 			return nil, err
 		}
 
-		if len(activeSubscriptions) >= 1 {
-			firstTxn, lastTxn := getExtrema(activeSubscriptions)
+		if !firstDate.IsZero() && !lastDate.IsZero() {
 
 			tuple := UserTxnTuple{
-				user:     users[i],
-				firstTxn: firstTxn,
-				lastTxn:  lastTxn,
+				user:      users[i],
+				firstDate: firstDate,
+				lastDate:  lastDate,
 			}
 			usersWithActiveSubscription = append(usersWithActiveSubscription, tuple)
 		}
@@ -129,10 +142,10 @@ func createXlsxFile(ctx appengine.Context) (*xlsx.File, error) {
 		addRow(
 			sheet,
 			user.user.NavitasId,
-			user.firstTxn.GetPaymentActivationDate().Format(xlsxDateFormat),
+			user.firstDate.Format(xlsxDateFormat),
 			user.user.NavitasId,
-			user.firstTxn.GetPaymentActivationDate().Format(xlsxDateFormat),
-			user.lastTxn.GetPaymentActivationDate().AddDate(0, 6, 0).Format(xlsxDateFormat),
+			user.firstDate.Format(xlsxDateFormat),
+			user.lastDate.AddDate(0, 6, 0).Format(xlsxDateFormat),
 			"24 Timers",
 			user.user.Email,
 		)

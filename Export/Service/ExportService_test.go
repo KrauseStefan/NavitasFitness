@@ -11,6 +11,7 @@ import (
 	"User/Dao"
 	"errors"
 	"github.com/tealeg/xlsx"
+	"time"
 )
 
 var assert = TestHelper.Assert
@@ -25,21 +26,24 @@ func mockoutGetAllUsers(keys []*datastore.Key, users []UserDao.UserDTO, err erro
 	return spy
 }
 
-func mockoutUserHasActiveSubscription(isActive []bool, err []error) *TestHelper.Spy {
+func mockoutUserHasActiveSubscription(firstDate []time.Time, lastDate []time.Time, err []error) *TestHelper.Spy {
 	spy := new(TestHelper.Spy)
-	transactionDao_GetCurrentTransactionsAfter = func(ctx appengine.Context, userKey *datastore.Key) (bool, error) {
+	transactionDao_GetCurrentTransactionsAfter = func(ctx appengine.Context, userKey *datastore.Key, date time.Time) (time.Time, time.Time, error) {
 		spy.RegisterCall()
-		spy.RegisterArg1(ctx)
-		spy.RegisterArg1(userKey)
-		_isActive := isActive[0]
+		spy.RegisterArg3(ctx, userKey, date)
+		_firstDate := firstDate[0]
+		_lastDate := lastDate[0]
 		_err := err[0]
-		if len(isActive) > 1 {
-			isActive = isActive[1:]
+		if len(firstDate) > 1 {
+			firstDate = firstDate[1:]
+		}
+		if len(lastDate) > 1 {
+			lastDate = lastDate[1:]
 		}
 		if len(err) > 1 {
 			err = err[1:]
 		}
-		return _isActive, _err
+		return _firstDate, _lastDate, _err
 	}
 	return spy
 }
@@ -65,23 +69,25 @@ func TestShouldGetTransactionsFromDataStore(t *testing.T) {
 	ctx := &TestHelper.ContextMock{}
 
 	keys := []*datastore.Key{
-		&datastore.Key{},
-		&datastore.Key{},
+		{},
+		{},
 	}
 	users := []UserDao.UserDTO{
-		UserDao.UserDTO{Email: "NO_Subscription"},
-		UserDao.UserDTO{Email: "hasSubscription"},
+		{Email: "NO_Subscription"},
+		{Email: "hasSubscription"},
 	}
 
+	now := time.Now()
+	invalid := time.Time{}
 	spy := mockoutGetAllUsers(keys, users, nil)
-	spyHasActiveSub := mockoutUserHasActiveSubscription([]bool{false, true, true}, []error{nil, nil, nil})
+	spyHasActiveSub := mockoutUserHasActiveSubscription([]time.Time{invalid, now, now}, []time.Time{invalid, now, now}, []error{nil, nil, nil})
 
-	usersWithActiveSubscription, err := getActiveTransactionList(ctx)
+	userTxnTuple, err := getActiveTransactionList(ctx)
 
 	assert(t, spy.CallCount()).Equals(1)
 	assert(t, spy.GetLatestArg1()).Equals(ctx)
-	assert(t, len(usersWithActiveSubscription)).Equals(1)
-	assert(t, usersWithActiveSubscription[0]).Equals(users[1])
+	assert(t, len(userTxnTuple)).Equals(1)
+	assert(t, userTxnTuple[0].user).Equals(users[1])
 	assert(t, err).Equals(nil)
 
 	assert(t, spyHasActiveSub.CallCount()).Equals(2)
@@ -94,11 +100,11 @@ func TestShouldPassOnErrorsFromDataStore_GetAllUsers(t *testing.T) {
 
 	getAllUsersSpy := mockoutGetAllUsers(nil, nil, testError)
 
-	usersWithActiveSubscription, err := getActiveTransactionList(ctx)
+	userTxnTuple, err := getActiveTransactionList(ctx)
 
 	assert(t, getAllUsersSpy.CallCount()).Equals(1)
 	assert(t, getAllUsersSpy.GetLatestArg1()).Equals(ctx)
-	assert(t, usersWithActiveSubscription).Equals(nil)
+	assert(t, userTxnTuple).Equals(nil)
 	assert(t, err).Equals(testError)
 }
 
@@ -109,12 +115,14 @@ func TestShouldPassOnErrorsFromDataStore_HasSubscription(t *testing.T) {
 	keys := []*datastore.Key{&datastore.Key{}}
 	users := []UserDao.UserDTO{UserDao.UserDTO{}}
 
+	now := time.Now()
+
 	mockoutGetAllUsers(keys, users, nil)
-	mockoutUserHasActiveSubscription([]bool{false}, []error{testError})
+	mockoutUserHasActiveSubscription([]time.Time{now}, []time.Time{now}, []error{testError})
 
-	usersWithActiveSubscription, err := getActiveTransactionList(ctx)
+	userTxnTuple, err := getActiveTransactionList(ctx)
 
-	assert(t, usersWithActiveSubscription).Equals(nil)
+	assert(t, userTxnTuple).Equals(nil)
 	assert(t, err).Equals(testError)
 }
 
@@ -133,11 +141,13 @@ func TestShouldAddHeaderRowBasedOnPassedArgumentsToAddRow(t *testing.T) {
 func TestShouldCreateXlsxSheetWithAllUserHavingActiveSubscription(t *testing.T) {
 	ctx := &TestHelper.ContextMock{}
 
-	keys := []*datastore.Key{&datastore.Key{}}
-	users := []UserDao.UserDTO{UserDao.UserDTO{Email: "testMail"}}
+	keys := []*datastore.Key{{}}
+	users := []UserDao.UserDTO{{Email: "testMail"}}
+
+	now := time.Now()
 
 	mockoutGetAllUsers(keys, users, nil)
-	mockoutUserHasActiveSubscription([]bool{true}, []error{nil})
+	mockoutUserHasActiveSubscription([]time.Time{now}, []time.Time{now}, []error{nil})
 
 	file, error := createXlsxFile(ctx)
 
@@ -148,10 +158,10 @@ func TestShouldCreateXlsxSheetWithAllUserHavingActiveSubscription(t *testing.T) 
 	assert(t, len(firstRowCells)).Equals(7)
 
 	assert(t, firstRowCells[0].Value).Equals(users[0].NavitasId)
-	//assert(t, firstRowCells[1].Value).Equals("TODO")
+	assert(t, firstRowCells[1].Value).Equals(now.Format(xlsxDateFormat))
 	assert(t, firstRowCells[2].Value).Equals(users[0].NavitasId)
-	//assert(t, firstRowCells[3].Value).Equals("TODO")
-	//assert(t, firstRowCells[4].Value).Equals("TODO")
+	assert(t, firstRowCells[3].Value).Equals(now.Format(xlsxDateFormat))
+	assert(t, firstRowCells[4].Value).Equals(now.AddDate(0, 6, 0).Format(xlsxDateFormat))
 	assert(t, firstRowCells[5].Value).Equals("24 Timers")
 	assert(t, firstRowCells[6].Value).Equals(users[0].Email)
 	assert(t, error).Equals(nil)
