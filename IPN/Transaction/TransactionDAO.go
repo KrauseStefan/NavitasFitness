@@ -78,12 +78,12 @@ func GetTransactionsByUser(ctx appengine.Context, parentUserKey *datastore.Key) 
 		Ancestor(parentUserKey).
 		Order("PaymentDate")
 
-	entryCount, err := q.Count(ctx)
+	count, err := q.Count(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	txnDsDtoList := make([]transactionMsgDsDTO, 0, entryCount)
+	txnDsDtoList := make([]transactionMsgDsDTO, 0, count)
 
 	keys, err := q.GetAll(ctx, &txnDsDtoList)
 	if err != nil {
@@ -93,21 +93,27 @@ func GetTransactionsByUser(ctx appengine.Context, parentUserKey *datastore.Key) 
 	return NewTransactionMsgDTOList(txnDsDtoList, keys), nil
 }
 
-//TODO finish this function with the popper search parameters
-func UserHasActiveSubscription(ctx appengine.Context, userKey *datastore.Key) (bool, error) {
+func GetCurrentTransactionsAfter(ctx appengine.Context, userKey *datastore.Key, date time.Time) ([]*TransactionMsgDTO, error) {
 
-	count, err := datastore.NewQuery(TXN_KIND).
+	q := datastore.NewQuery(TXN_KIND).
 		Ancestor(userKey).
-		Filter("PaymentActivationDate>=", time.Now().AddDate(0, -6, 0)).
-		Count(ctx)
+		Filter("PaymentActivationDate>=", date)
 
+	count, err := q.Count(ctx)
 	if err != nil {
-		return false, err
+		return nil, err
+	}
+
+	txnDsDtoList := make([]transactionMsgDsDTO, 0, count)
+
+	keys, err := q.GetAll(ctx, &txnDsDtoList)
+	if err != nil {
+		return nil, err
 	}
 
 	if count > 1 {
 		ctx.Criticalf(fmt.Sprintf("User has multiple (%d) active subscriptions, key: %s", count, userKey.String()))
 	}
 
-	return count > 0, nil
+	return NewTransactionMsgDTOList(txnDsDtoList, keys), nil
 }

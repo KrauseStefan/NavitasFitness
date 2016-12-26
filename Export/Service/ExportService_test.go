@@ -27,7 +27,7 @@ func mockoutGetAllUsers(keys []*datastore.Key, users []UserDao.UserDTO, err erro
 
 func mockoutUserHasActiveSubscription(isActive []bool, err []error) *TestHelper.Spy {
 	spy := new(TestHelper.Spy)
-	transactionDao_UserHasActiveSubscription = func(ctx appengine.Context, userKey *datastore.Key) (bool, error) {
+	transactionDao_GetCurrentTransactionsAfter = func(ctx appengine.Context, userKey *datastore.Key) (bool, error) {
 		spy.RegisterCall()
 		spy.RegisterArg1(ctx)
 		spy.RegisterArg1(userKey)
@@ -76,7 +76,7 @@ func TestShouldGetTransactionsFromDataStore(t *testing.T) {
 	spy := mockoutGetAllUsers(keys, users, nil)
 	spyHasActiveSub := mockoutUserHasActiveSubscription([]bool{false, true, true}, []error{nil, nil, nil})
 
-	usersWithActiveSubscription, err := getTransactionList(ctx)
+	usersWithActiveSubscription, err := getActiveTransactionList(ctx)
 
 	assert(t, spy.CallCount()).Equals(1)
 	assert(t, spy.GetLatestArg1()).Equals(ctx)
@@ -94,7 +94,7 @@ func TestShouldPassOnErrorsFromDataStore_GetAllUsers(t *testing.T) {
 
 	getAllUsersSpy := mockoutGetAllUsers(nil, nil, testError)
 
-	usersWithActiveSubscription, err := getTransactionList(ctx)
+	usersWithActiveSubscription, err := getActiveTransactionList(ctx)
 
 	assert(t, getAllUsersSpy.CallCount()).Equals(1)
 	assert(t, getAllUsersSpy.GetLatestArg1()).Equals(ctx)
@@ -112,13 +112,13 @@ func TestShouldPassOnErrorsFromDataStore_HasSubscription(t *testing.T) {
 	mockoutGetAllUsers(keys, users, nil)
 	mockoutUserHasActiveSubscription([]bool{false}, []error{testError})
 
-	usersWithActiveSubscription, err := getTransactionList(ctx)
+	usersWithActiveSubscription, err := getActiveTransactionList(ctx)
 
 	assert(t, usersWithActiveSubscription).Equals(nil)
 	assert(t, err).Equals(testError)
 }
 
-func TestShouldAddHeadderRowBasedOnPassedArgumentsToAddRow(t *testing.T) {
+func TestShouldAddHeaderRowBasedOnPassedArgumentsToAddRow(t *testing.T) {
 	col1 := "test1"
 	col2 := "test2"
 	sheet := xlsx.Sheet{}
@@ -130,7 +130,7 @@ func TestShouldAddHeadderRowBasedOnPassedArgumentsToAddRow(t *testing.T) {
 	assert(t, sheet.Rows[0].Cells[1].Value).Equals(col2)
 }
 
-func TestShouldCreateXsltSheetWithAllUserHavingActiveSubscription(t *testing.T) {
+func TestShouldCreateXlsxSheetWithAllUserHavingActiveSubscription(t *testing.T) {
 	ctx := &TestHelper.ContextMock{}
 
 	keys := []*datastore.Key{&datastore.Key{}}
@@ -139,7 +139,7 @@ func TestShouldCreateXsltSheetWithAllUserHavingActiveSubscription(t *testing.T) 
 	mockoutGetAllUsers(keys, users, nil)
 	mockoutUserHasActiveSubscription([]bool{true}, []error{nil})
 
-	file, error := exportXslt(ctx)
+	file, error := createXlsxFile(ctx)
 
 	headerCells := file.Sheets[0].Rows[0].Cells
 	firstRowCells := file.Sheets[0].Rows[1].Cells
@@ -157,13 +157,13 @@ func TestShouldCreateXsltSheetWithAllUserHavingActiveSubscription(t *testing.T) 
 	assert(t, error).Equals(nil)
 }
 
-func TestExportXsltHandler(t *testing.T) {
+func TestExportXlsxHandler(t *testing.T) {
 	ctx := new(TestHelper.ContextMock)
 	testError := errors.New("test error")
 
 	mockoutGetAllUsers(nil, nil, testError)
 
-	file, err := exportXslt(ctx)
+	file, err := createXlsxFile(ctx)
 
 	assert(t, file).Equals(nil)
 	assert(t, err).Equals(testError)

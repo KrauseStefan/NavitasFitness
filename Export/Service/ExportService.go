@@ -11,12 +11,21 @@ import (
 	"IPN/Transaction"
 	"User/Dao"
 	"User/Service"
+	"time"
 )
 
+const xlsxDateFormat = "02.01.2006"
+
 var (
-	userDao_GetAllUsers                      = UserDao.GetAllUsers
-	transactionDao_UserHasActiveSubscription = TransactionDao.UserHasActiveSubscription
+	userDao_GetAllUsers                        = UserDao.GetAllUsers
+	transactionDao_GetCurrentTransactionsAfter = TransactionDao.GetCurrentTransactionsAfter
 )
+
+type UserTxnTuple struct {
+	user     UserDao.UserDTO
+	firstTxn *TransactionDao.TransactionMsgDTO
+	lastTxn  *TransactionDao.TransactionMsgDTO
+}
 
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/export"
@@ -26,26 +35,49 @@ func IntegrateRoutes(router *mux.Router) {
 		Path(path + "/xlsx").
 		Name("export").
 		HandlerFunc(UserService.AsAdmin(exportXlsxHandler))
-
 }
 
-func getTransactionList(ctx appengine.Context) ([]UserDao.UserDTO, error) {
+func getExtrema(txns []*TransactionDao.TransactionMsgDTO) (*TransactionDao.TransactionMsgDTO, *TransactionDao.TransactionMsgDTO) {
+	firstTxn := txns[0]
+	lastTxn := txns[0]
+
+	for _, txn := range txns {
+		if txn.GetPaymentActivationDate().Before(firstTxn.GetPaymentActivationDate()) {
+			firstTxn = txn
+		}
+
+		if txn.GetPaymentActivationDate().After(lastTxn.GetPaymentActivationDate()) {
+			lastTxn = txn
+		}
+	}
+
+	return firstTxn, lastTxn
+}
+
+func getActiveTransactionList(ctx appengine.Context) ([]UserTxnTuple, error) {
 
 	userKeys, users, err := userDao_GetAllUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	usersWithActiveSubscription := make([]UserDao.UserDTO, 0, len(userKeys))
+	usersWithActiveSubscription := make([]UserTxnTuple, 0, len(userKeys))
 
 	for i, userKey := range userKeys {
-		userHasActiveSubscription, err := transactionDao_UserHasActiveSubscription(ctx, userKey)
+		activeSubscriptions, err := transactionDao_GetCurrentTransactionsAfter(ctx, userKey, time.Now().AddDate(0, -6, 0))
 		if err != nil {
 			return nil, err
 		}
 
-		if userHasActiveSubscription {
-			usersWithActiveSubscription = append(usersWithActiveSubscription, users[i])
+		if len(activeSubscriptions) >= 1 {
+			firstTxn, lastTxn := getExtrema(activeSubscriptions)
+
+			tuple := UserTxnTuple{
+				user:     users[i],
+				firstTxn: firstTxn,
+				lastTxn:  lastTxn,
+			}
+			usersWithActiveSubscription = append(usersWithActiveSubscription, tuple)
 		}
 	}
 
@@ -60,18 +92,18 @@ func configureHeaderForFileDownload(header *http.Header, filename string) {
 	header.Add("Expires", "0")
 }
 
-func addRow(sheet *xlsx.Sheet, headers ...string) {
+func addRow(sheet *xlsx.Sheet, values ...string) {
 	row := sheet.AddRow()
 
-	for _, header := range headers {
+	for _, value := range values {
 		cell := row.AddCell()
-		cell.Value = header
+		cell.Value = value
 	}
 }
 
-func exportXslt(ctx appengine.Context) (*xlsx.File, error) {
+func createXlsxFile(ctx appengine.Context) (*xlsx.File, error) {
 
-	users, err := getTransactionList(ctx)
+	userTxnTuple, err := getActiveTransactionList(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -93,20 +125,20 @@ func exportXslt(ctx appengine.Context) (*xlsx.File, error) {
 		"Bemærkninger",
 	)
 
-	for _, user := range users {
+	for _, user := range userTxnTuple {
 		addRow(
 			sheet,
-			user.NavitasId,
-			"TODO",
-			user.NavitasId,
-			"TODO",
-			"TODO",
+			user.user.NavitasId,
+			user.firstTxn.GetPaymentActivationDate().Format(xlsxDateFormat),
+			user.user.NavitasId,
+			user.firstTxn.GetPaymentActivationDate().Format(xlsxDateFormat),
+			user.lastTxn.GetPaymentActivationDate().AddDate(0, 6, 0).Format(xlsxDateFormat),
 			"24 Timers",
-			user.Email,
+			user.user.Email,
 		)
 	}
 
-	// Example:
+	// Example Data:
 	// "Medarbejder nr i ADK" : "N0416"
 	// "Aktiveringsdato" 			: "30.06.2015"
 	// "Nr."									: "N0416"
@@ -124,7 +156,7 @@ func exportXlsxHandler(w http.ResponseWriter, r *http.Request, user *UserDao.Use
 	httpHeader := w.Header()
 	configureHeaderForFileDownload(&httpHeader, "ActiveSubscriptions.xlsx")
 
-	file, err := exportXslt(ctx)
+	file, err := createXlsxFile(ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
