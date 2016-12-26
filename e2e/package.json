@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
     "install": "webdriver-manager update",
     "test": "npm-run-all test:*",
-    "test:e2e": "npm run clean && tsc && protractor",
+    "test:e2e": "npm run clean && npm run build && protractor",
     "test:tslint": "tslint --project .",
     "clean": "rimraf PageObjects/*.js && rimraf specs/*.js && rimraf *.js"
   },
