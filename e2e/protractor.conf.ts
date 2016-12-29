@@ -14,12 +14,12 @@ export const config: Config = {
     multiCapabilities: [{
         browserName: 'chrome',
         maxInstances: 5,
-        // shardTestFiles: true,
+        shardTestFiles: true,
         // }, {
         // browserName: 'firefox',
         // marionette: true,
         // // maxInstances: 3,
-        shardTestFiles: true,
+        // shardTestFiles: true,
     }],
     onPrepare: () => {
         by.addLocator('linkUiSref', (toState: string, optParentElement: HTMLElement) => {

@@ -28,6 +28,15 @@ function parseXlsxDocument(resp: http.IncomingMessage): wdp.Promise<excel.IWorkb
   });
 }
 
+interface IParsedDate { day: number; month: number; year: number; }
+function dateParts(date: string, seperator: string): IParsedDate {
+  // format 'DD-MM-YYYY'
+  const [day, month, year] = date
+    .split(seperator)
+    .map((i) => parseInt(i, 10));
+  return { day, month, year };
+}
+
 describe('Payments', () => {
 
   const userInfo = {
@@ -92,14 +101,6 @@ describe('Payments', () => {
     });
 
     it('should show subscription active when show subscription end date when subscribed', () => {
-      interface IParsedDate { day: number; month: number; year: number; }
-      function dateParts(date: string): IParsedDate {
-        // format 'DD-MM-YYYY'
-        const [day, month, year] = date
-          .split('-')
-          .map((i) => parseInt(i, 10));
-        return { day, month, year };
-      }
 
       function diffMonth(start: IParsedDate, end: IParsedDate): number {
         if (start.year === end.year) {
@@ -110,9 +111,12 @@ describe('Payments', () => {
         throw 'Date invalid';
       }
 
-      const startP = pageObject.getFirstRowCell(2).getText().then(dateParts);
-      const endP = pageObject.subscriptionEndField.evaluate('$ctrl.model.validUntill').then(dateParts);
-      const monthDiffP = wdp.all([startP, endP]).then((dates) => diffMonth(dates[0], dates[1]));
+      const transactionDateP = pageObject.getFirstRowCell(2).getText()
+        .then(dateStr => dateParts(dateStr, '-'));
+      const validUntilP = pageObject.subscriptionEndField.evaluate('$ctrl.model.validUntill')
+        .then(dateStr => dateParts(dateStr, '-'));
+      const monthDiffP = wdp.all([transactionDateP, validUntilP])
+        .then((dates) => diffMonth(dates[0], dates[1]));
 
       expect(pageObject.statusMsgField.evaluate('$ctrl.model.statusMsgKey')).toEqual('active');
       expect(monthDiffP).toEqual(6);
@@ -139,22 +143,34 @@ describe('Payments', () => {
       expect(statusCodeP).toBe(401);
     });
 
-    it('should be possible to download an xslt with active subscriptions', () => {
-
+    it('should be possible to download an xlsx with active subscriptions', () => {
       new DataStoreManipulator().makeUserAdmin(userInfo.email).destroy();
 
       const respP = makeRequest(exportServiceUrl, true);
       const workbookP = respP.then(parseXlsxDocument);
       const statusCodeP = respP.then((resp) => resp.statusCode);
 
-      workbookP.then((workbook) => {
+      const transactionDateP = pageObject.getFirstRowCell(2).getText()
+        .then(dateStr => dateParts(dateStr, '-'));
+      const validUntilP = pageObject.subscriptionEndField.evaluate('$ctrl.model.validUntill')
+        .then(dateStr => dateParts(dateStr, '-'));
+
+      wdp.all([<any>workbookP, <any>transactionDateP, <any>validUntilP]).then((args) => {
+        const workbook: excel.IWorkbook = args[0];
+        const transactionDate: IParsedDate = args[1];
+        const validUntil: IParsedDate = args[2];
+
         const worksheet = workbook.getWorksheet(1);
         const userRows = worksheet.getSheetValues().filter(i => i[columns.Comments] === userInfo.email);
         expect(userRows.length).toBe(1);
 
-        const userRow = userRows[0];
+        const userRow = <string[]>userRows[0];
         expect(userRow[columns.SysID]).toBe(userInfo.navitasId);
+        expect(dateParts(userRow[columns.DateActivation], '.')).toEqual(transactionDate);
         expect(userRow[columns.SysID2]).toBe(userInfo.navitasId);
+        expect(dateParts(userRow[columns.DateStart], '.')).toEqual(transactionDate);
+        expect(dateParts(userRow[columns.DateEnd], '.')).toEqual(validUntil);
+        expect(userRow[columns.TimeScheme]).toBe("24 Timers");
         expect(userRow[columns.Comments]).toBe(userInfo.email);
       });
 
