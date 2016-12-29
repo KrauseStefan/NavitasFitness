@@ -121,18 +121,20 @@ describe('Payments', () => {
 
   describe('xlsx export', () => {
 
+    const exportServiceUrl = 'http://localhost:8080/rest/export/xlsx';
+
     it('should return 401 if not logged to export data', () => {
-      const statusCodeP = makeRequest('http://localhost:8080/rest/export/xlsx', false).then((resp) => {
-        return resp.statusCode;
-      });
+      const includeLoginSession = false;
+      const statusCodeP = makeRequest(exportServiceUrl, includeLoginSession)
+        .then((resp) => resp.statusCode);
 
       expect(statusCodeP).toBe(401);
     });
 
     it('should return 401 if user does not have admin rights', () => {
-      const statusCodeP = makeRequest('http://localhost:8080/rest/export/xlsx', true).then((resp) => {
-        return resp.statusCode;
-      });
+      const includeLoginSession = true;
+      const statusCodeP = makeRequest(exportServiceUrl, includeLoginSession)
+        .then((resp) => resp.statusCode);
 
       expect(statusCodeP).toBe(401);
     });
@@ -141,7 +143,7 @@ describe('Payments', () => {
 
       new DataStoreManipulator().makeUserAdmin(userInfo.email).destroy();
 
-      const respP = makeRequest('http://localhost:8080/rest/export/xlsx', true);
+      const respP = makeRequest(exportServiceUrl, true);
       const workbookP = respP.then(parseXlsxDocument);
       const statusCodeP = respP.then((resp) => resp.statusCode);
 
