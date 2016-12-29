@@ -6,9 +6,9 @@ import * as http from 'http';
 import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
 import { StatusPageObject as pageObject } from '../PageObjects/StatusPageObject';
-import { verifyBrowserLog } from '../utility';
+import { makeRequest, verifyBrowserLog } from '../utility';
 import { browser } from 'protractor';
-import { promise as wdpromise } from 'selenium-webdriver';
+import { promise as wdp } from 'selenium-webdriver';
 
 declare const Excel: {
   Workbook: excel.IWorkbook;
@@ -37,43 +37,9 @@ function diffMonth(data) {
   throw 'Date invalid';
 }
 
-const sessionCoockieKey = 'Session-Key';
 
-function getSessionCookie(): wdpromise.Promise<string> {
-  return browser
-    .manage()
-    .getCookie(sessionCoockieKey)
-    .then((cookie) => {
-      return `${sessionCoockieKey}=${cookie.value}`;
     });
-}
-
-function sendRequstWithCookie(url: string, Cookie?: string) {
-  const [protocol, host, port, path] = (<Array<string>>url.match(/([A-z]*:)\/\/([A-z]*):(\d*)([\/|\w]*)/)).slice(1);
-
-  const options: http.RequestOptions = {
-    headers: Cookie ? { Cookie } : {},
-    host,
-    method: 'get',
-    path,
-    port: parseInt(port, 10),
-    protocol,
-  };
-
-  return new wdpromise.Promise<http.IncomingMessage>((resolve, reject) => {
-    const req = http.request(options, resolve);
-    req.end();
   });
-}
-
-function makeRequest(url: string, useSession: boolean = false): wdpromise.Promise<http.IncomingMessage> {
-  if (useSession) {
-    return getSessionCookie().then((cookie) => {
-      return sendRequstWithCookie(url, cookie);
-    });
-  } else {
-    return sendRequstWithCookie(url);
-  }
 }
 
 describe('StatusPage tests', () => {
