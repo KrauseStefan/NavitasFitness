@@ -1,4 +1,4 @@
-import { excel } from './exceljs';
+import { excel } from '../Typings/exceljs';
 
 import * as Excel from 'exceljs';
 import * as http from 'http';
