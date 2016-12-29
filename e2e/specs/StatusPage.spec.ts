@@ -6,15 +6,17 @@ import * as http from 'http';
 import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
 import { StatusPageObject as pageObject } from '../PageObjects/StatusPageObject';
-import { makeRequest, verifyBrowserLog } from '../utility';
+import { verifyBrowserLog } from '../utility';
 import { browser } from 'protractor';
 import { promise as wdp } from 'selenium-webdriver';
+
+import { columns, makeRequest } from '../PageObjects/ExportServieHelper';
 
 declare const Excel: {
   Workbook: excel.IWorkbook;
 };
 
-function parseXlsxDocument(resp: http.IncomingMessage): wdp.Promise<Excel.Workbook> {
+function parseXlsxDocument(resp: http.IncomingMessage): wdp.Promise<excel.IWorkbook> {
   const workbook = new Excel.Workbook();
 
   const inputStream = workbook.xlsx.createInputStream();
@@ -144,17 +146,6 @@ describe('Payments', () => {
       const statusCodeP = respP.then((resp) => resp.statusCode);
 
       workbookP.then((workbook) => {
-
-        enum columns {
-          "SysID" = 1,
-          "DateActivation",
-          "SysID2",
-          "DateStart",
-          "DateEnd",
-          "TimeScheme",
-          "Comments",
-        }
-
         const worksheet = workbook.getWorksheet(1);
         const userRows = worksheet.getSheetValues().filter(i => i[columns.Comments] === userInfo.email);
         expect(userRows.length).toBe(1);
