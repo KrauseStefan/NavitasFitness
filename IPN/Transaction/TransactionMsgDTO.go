@@ -11,6 +11,7 @@ import (
 	"appengine/datastore"
 
 	"AppEngineHelper"
+	"strings"
 )
 
 const (
@@ -122,10 +123,23 @@ func (txDto *TransactionMsgDTO) GetPaymentStatus() string {
 }
 
 func (txDto *TransactionMsgDTO) GetPaymentDate() time.Time {
-	value := txDto.parseMessage().Get(FIELD_PAYMENT_DATE)
-	const layout = "15:04:05 Jan 02, 2006 MST" //Reference time Mon Jan 2 15:04:05 -0700 MST 2006
-	t, _ := time.Parse(layout, value)
-	return t
+	const layout = "15:04:05 Jan 02, 2006 MST"
+	fieldValue := txDto.parseMessage().Get(FIELD_PAYMENT_DATE)
+	splitPoint := strings.LastIndex(fieldValue, " ") + 1
+	timeZone := fieldValue[splitPoint:]
+
+	loc, err := AppEngineHelper.LoadLocation(timeZone)
+	if err != nil {
+		panic(err)
+	}
+
+	t, _ := time.ParseInLocation(layout, fieldValue, loc)
+	locCET, err := time.LoadLocation("CET")
+	if err != nil {
+		panic(err)
+	}
+
+	return t.In(locCET)
 }
 
 func (txDto *TransactionMsgDTO) GetAmount() float64 {
