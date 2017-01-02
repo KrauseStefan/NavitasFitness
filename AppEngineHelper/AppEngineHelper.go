@@ -45,7 +45,9 @@ func WriteJSON(w http.ResponseWriter, data interface{}) ([]byte, error) {
 
 	js, err := json.Marshal(data)
 
-	w.Write(js)
+	if err == nil {
+		w.Write(js)
+	}
 
 	return js, err
 }
