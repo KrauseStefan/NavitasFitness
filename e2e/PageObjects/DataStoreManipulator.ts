@@ -1,5 +1,6 @@
+import { retryCall } from '../utility';
 import { ElementFinder, ProtractorBrowser, browser as mainBrowser, by } from 'protractor';
-import { promise as wdpromise } from 'selenium-webdriver';
+import { promise as wdp } from 'selenium-webdriver';
 
 let browser: ProtractorBrowser;
 
@@ -16,7 +17,7 @@ export class DataStoreManipulator {
   }
 
   public destroy() {
-    browser.sleep(1000);
+    browser.sleep(200);
     browser.quit();
   }
 
@@ -24,13 +25,13 @@ export class DataStoreManipulator {
     this.selecteItem(7, email);
 
     this.deleteBtn.isPresent()
-      .then(isPresent => isPresent ? this.deleteBtn.isEnabled() : wdpromise.fullyResolved<boolean>(false))
+      .then(isPresent => isPresent ? this.deleteBtn.isEnabled() : wdp.fullyResolved<boolean>(false))
       .then(isEnabled => {
         if (isEnabled) {
           this.deleteBtn.click();
-          return browser.switchTo().alert().accept();
+          return retryCall(() => browser.switchTo().alert().accept(), 10);
         } else {
-          return wdpromise.fullyResolved<void>({});
+          return wdp.fullyResolved<void>({});
         }
       });
 
@@ -60,7 +61,7 @@ export class DataStoreManipulator {
         return itemLink.click();
       }
 
-      return wdpromise.fullyResolved<void>({});
+      return wdp.fullyResolved<void>({});
     });
   }
 
@@ -78,7 +79,7 @@ export class DataStoreManipulator {
         return itemChkBox.click();
       }
 
-      return wdpromise.fullyResolved<void>({});
+      return wdp.fullyResolved<void>({});
     });
   }
 }
