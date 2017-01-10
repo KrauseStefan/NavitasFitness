@@ -4,7 +4,7 @@ import * as moment from 'moment';
 const momentFn: (
   inp?: moment.MomentInput, format?: moment.MomentFormatSpecification,
   language?: string, strict?: boolean
-  ) => moment.Moment = (<any> moment).default;
+) => moment.Moment = (<any>moment).default;
 
 export const statusRouterState = {
   template: '<user-status></user-status>',
@@ -20,7 +20,7 @@ class UserStatus {
     inActive: 'No Active Subscription',
   };
 
-  private dateFormat = 'DD-MM-YYYY';
+  private dateFormat = 'DD.MM.YYYY';
 
   constructor(
     private userService: UserService,
@@ -49,7 +49,8 @@ class UserStatus {
         return txn;
       });
       const validTxn = this.model.transactionHistory
-        .find(txn => momentFn(txn.paymentDate).diff(momentFn(), 'months') <= 6);
+        .filter((i) => momentFn(i.paymentDate).add({ month: 6 }).isSameOrAfter(momentFn()))
+        .sort((a, b) => momentFn(a).unix())[0];
 
       if (!!validTxn) {
         this.model.validUntill = momentFn(validTxn.paymentDate)
