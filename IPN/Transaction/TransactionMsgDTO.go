@@ -61,7 +61,6 @@ func NewTransactionMsgDTOList(dtos []transactionMsgDsDTO, keys []*datastore.Key)
 type transactionMsgDsDTO struct {
 	IpnMessages []string `json:"ipn_messages"` //History of IpnMessages
 
-	PaymentActivationDate      time.Time `json:"payment_activation_date"` // not used ?
 	PaymentDate                time.Time `json:"payment_date"`
 	SubscriptionActivationDate time.Time `json:"subscription_activation_date"` // Decides if the subscription is active
 	TxnId                      string    `json:"txn_id"`
@@ -91,12 +90,6 @@ func (txDto *TransactionMsgDTO) parseMessage() *url.Values {
 	}
 
 	return &txDto.parsedIpnMessage
-}
-
-func (txDto *TransactionMsgDTO) SetActivationDate() {
-	if txDto.dsDto.PaymentActivationDate.IsZero() {
-		txDto.dsDto.PaymentActivationDate = time.Now()
-	}
 }
 
 func (txDto *TransactionMsgDTO) GetField(field string) string {
@@ -155,10 +148,6 @@ func (txDto *TransactionMsgDTO) PaymentIsCompleted() bool {
 	return txDto.GetPaymentStatus() == STATUS_COMPLEATED
 }
 
-func (txDto *TransactionMsgDTO) GetPaymentActivationDate() time.Time {
-	return txDto.dsDto.PaymentActivationDate
-}
-
 func (txDto *TransactionMsgDTO) GetIpnMessages() []string {
 	return txDto.dsDto.IpnMessages
 }
@@ -177,6 +166,6 @@ func (txDto transactionMsgDsDTO) String() string {
 }
 
 func (txDto *TransactionMsgDTO) IsActive() bool {
-	endTime := txDto.GetPaymentActivationDate().AddDate(0, 6, 0)
-	return txDto.GetPaymentActivationDate().Before(time.Now()) && time.Now().Before(endTime)
+	endTime := txDto.GetPaymentDate().AddDate(0, 6, 0)
+	return txDto.GetPaymentDate().Before(time.Now()) && time.Now().Before(endTime)
 }

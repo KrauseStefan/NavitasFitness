@@ -97,7 +97,7 @@ func GetCurrentTransactionsAfter(ctx appengine.Context, userKey *datastore.Key, 
 
 	q := datastore.NewQuery(TXN_KIND).
 		Ancestor(userKey).
-		Filter("PaymentActivationDate>=", date)
+		Filter("PaymentDate>=", date)
 
 	count, err := q.Count(ctx)
 	if err != nil {

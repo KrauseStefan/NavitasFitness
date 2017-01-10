@@ -28,7 +28,7 @@ var (
 		if len(activeSubscriptions) >= 1 {
 			firstTxn, lastTxn := getExtrema(activeSubscriptions)
 
-			return firstTxn.GetPaymentActivationDate(), lastTxn.GetPaymentActivationDate(), nil
+			return firstTxn.GetPaymentDate(), lastTxn.GetPaymentDate(), nil
 		}
 
 		return time.Time{}, time.Time{}, nil
@@ -56,11 +56,11 @@ func getExtrema(txns []*TransactionDao.TransactionMsgDTO) (*TransactionDao.Trans
 	lastTxn := txns[0]
 
 	for _, txn := range txns {
-		if txn.GetPaymentActivationDate().Before(firstTxn.GetPaymentActivationDate()) {
+		if txn.GetPaymentDate().Before(firstTxn.GetPaymentDate()) {
 			firstTxn = txn
 		}
 
-		if txn.GetPaymentActivationDate().After(lastTxn.GetPaymentActivationDate()) {
+		if txn.GetPaymentDate().After(lastTxn.GetPaymentDate()) {
 			lastTxn = txn
 		}
 	}

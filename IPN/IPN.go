@@ -158,9 +158,6 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 		ctx.Debugf("IpnSaved: %q", js)
 
 		if savedTransaction.PaymentIsCompleted() {
-			if savedTransaction.GetAmount() >= expectedAmount {
-				savedTransaction.SetActivationDate()
-			}
 			if savedTransaction.GetAmount() != expectedAmount {
 				ctx.Warningf("The amount for the transaction was wrong, recived %f expected %f", savedTransaction.GetAmount(), expectedAmount)
 			}
@@ -193,9 +190,6 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 		ctx.Debugf("IpnSaved: %q", js)
 
 		if transaction.PaymentIsCompleted() {
-			if transaction.GetAmount() >= expectedAmount {
-				transaction.SetActivationDate()
-			}
 			if transaction.GetAmount() != expectedAmount {
 				ctx.Warningf("The amount for the transaction was wrong, recived %f expected %f", transaction.GetAmount(), expectedAmount)
 			}
