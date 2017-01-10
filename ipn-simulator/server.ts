@@ -138,7 +138,7 @@ function sendIpnDataMessage(clientReq: IncomingMessage, serverRes: ServerRespons
       const formQueryObj = qs.parse(body)
       const queryObj = url.parse(clientReq.url, true).query;
 
-      const ipnBody = [paypalSampleIpnMsg, queryObj, formQueryObj, dynamicFields].reduce((prev, cur) => {
+      const ipnBody = [paypalSampleIpnMsg, queryObj, dynamicFields, formQueryObj].reduce((prev, cur) => {
         return _.merge(prev, cur);
       }, {});
 
