@@ -22,7 +22,8 @@
       "check-separator",
       "check-type"
       // "check-typecast"
-    ]
+    ],
+    "object-literal-sort-keys": false
   },
   "rulesDirectory": [
     /*
