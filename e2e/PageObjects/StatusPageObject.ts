@@ -1,18 +1,58 @@
-import { $, ElementFinder, browser, by, element } from 'protractor';
+import { waitForPageToLoad } from '../utility';
+import { $, browser, by, element } from 'protractor';
+import { promise as wdp } from 'selenium-webdriver';
+
+export enum TransactionTableCells {
+  Amount = 1,
+  PaymentDate,
+  Status,
+}
+
+export interface IParsedDate { day: number; month: number; year: number; }
+
+export function dateParts(date: string): IParsedDate {
+  const seperator = '.';
+  // format 'DD-MM-YYYY'
+  const [day, month, year] = date
+    .split(seperator)
+    .map((i) => parseInt(i, 10));
+  return { day, month, year };
+}
 
 function byModel(model: string) {
   return element(by.model(model));
 }
 
+function getModelValue(model: string): wdp.Promise<string> {
+  return <any>byModel(model).evaluate(model);
+}
+
 export class StatusPageObject {
 
-  public static statusMsgField = byModel('$ctrl.statusMessages[$ctrl.model.statusMsgKey]');
-  public static subscriptionEndField = byModel('$ctrl.model.validUntill');
   public static paypalSimBtn = $('form[action="http://localhost:8081/processPayment"] input[name="submit"]');
-  public static paymentHistoryCompleatedEntry = $('tr td:nth-child(3)');
 
-  public static getFirstRowCell(index: number): ElementFinder {
-    return $(`tr td:nth-child(${index})`);
+  public static getStatusMsgFieldValue(): wdp.Promise<string> {
+    return <any>byModel('$ctrl.statusMessages[$ctrl.model.statusMsgKey]')
+      .evaluate('$ctrl.model.statusMsgKey');
+  }
+
+  public static getValidUntilFieldValue(): wdp.Promise<string> {
+    return getModelValue(this.subscriptionEndFieldModel);
+  }
+
+  public static getTableCellText(row: number, cell: TransactionTableCells): wdp.Promise<string> {
+    if (row === 0) {
+      throw "0 is an invalid index";
+    }
+    if (row > 0) {
+      return $(`tr:nth-child(${row}) td:nth-child(${cell})`).getText();
+    } else {
+      return $(`tr:nth-last-child(${row * -1}) td:nth-child(${cell})`).getText();
+    }
+  }
+
+  public static getFirstTransactionDate(): wdp.Promise<string> {
+    return this.getTableCellText(1, TransactionTableCells.PaymentDate);
   }
 
   public static waitForPaypalSimBtn() {
@@ -23,11 +63,27 @@ export class StatusPageObject {
   public static triggerPaypalPayment() {
     browser.ignoreSynchronization = true;
     StatusPageObject.paypalSimBtn.click();
+
+    waitForPageToLoad();
     $('a').click();
 
-    browser.wait(browser.executeScript(() => document.readyState), 1000, 'Page did not load');
-
+    waitForPageToLoad();
     browser.ignoreSynchronization = false;
   }
 
+  public static getPageDates() {
+    return wdp.all([
+      this.getFirstTransactionDate(),
+      this.getValidUntilFieldValue(),
+    ]).then((values: string[]) => {
+      const [firstTrxDate, validUntil] = values.map(dateParts);
+
+      return {
+        firstTrxDate,
+        validUntil,
+      };
+    });
+  }
+
+  private static subscriptionEndFieldModel = '$ctrl.model.validUntill';
 }

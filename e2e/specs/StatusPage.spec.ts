@@ -1,48 +1,38 @@
-import { excel } from '../Typings/exceljs';
-
-import * as Excel from 'exceljs';
-import * as http from 'http';
-
 import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
-import { StatusPageObject as pageObject } from '../PageObjects/StatusPageObject';
 import { verifyBrowserLog } from '../utility';
 import { browser } from 'protractor';
 import { promise as wdp } from 'selenium-webdriver';
 
-import { columns, makeRequest } from '../PageObjects/ExportServieHelper';
+import {
+  IExcelRow, downloadXsltTransactionExport, exportServiceUrl, makeRequest, sendPayment,
+} from '../PageObjects/ExportServieHelper';
+import {
+  IParsedDate,
+  StatusPageObject as pageObject,
+  TransactionTableCells,
+} from '../PageObjects/StatusPageObject';
 
-declare const Excel: {
-  Workbook: excel.IWorkbook;
-};
-
-function parseXlsxDocument(resp: http.IncomingMessage): wdp.Promise<excel.IWorkbook> {
-  const workbook = new Excel.Workbook();
-
-  const inputStream = workbook.xlsx.createInputStream();
-  resp.pipe(inputStream);
-  return new wdp.Promise<excel.IWorkbook>((resolve, reject) => {
-    inputStream.on('done', (listener) => {
-      resolve(workbook);
-    });
+export function getPageDatesAsExportedRow(id: string, email: string): wdp.Promise<IExcelRow> {
+  return pageObject.getPageDates().then((dates) => {
+    return <IExcelRow>{
+      SysID: id,
+      DateActivation: dates.firstTrxDate,
+      SysID2: id,
+      DateStart: dates.firstTrxDate,
+      DateEnd: dates.validUntil,
+      TimeScheme: "24 Timers",
+      Comments: email,
+    };
   });
 }
 
-interface IParsedDate { day: number; month: number; year: number; }
-function dateParts(date: string, seperator: string): IParsedDate {
-  // format 'DD-MM-YYYY'
-  const [day, month, year] = date
-    .split(seperator)
-    .map((i) => parseInt(i, 10));
-  return { day, month, year };
-}
-
-describe('Payments', () => {
+fdescribe('Payments', () => {
 
   const userInfo = {
     email: 'status-test@domain.com',
     navitasId: '1234509876',
-    password: 'Password123',
+    password: 'Password1',
   };
 
   afterEach(() => verifyBrowserLog());
@@ -87,21 +77,19 @@ describe('Payments', () => {
     });
 
     it('should report an inactive subscription when no payment is made', () => {
-      expect(pageObject.statusMsgField.evaluate('$ctrl.model.statusMsgKey')).toEqual('inActive');
-      expect(pageObject.subscriptionEndField.evaluate('$ctrl.model.validUntill')).toEqual('-');
+      expect(pageObject.getStatusMsgFieldValue()).toEqual('inActive');
+      expect(pageObject.getValidUntilFieldValue()).toEqual('-');
     });
 
     it('should be able to process a payment', () => {
       pageObject.waitForPaypalSimBtn();
       pageObject.triggerPaypalPayment();
-
       NavigationPageObject.statusPageTab.click();
 
-      expect(pageObject.getFirstRowCell(3).getText()).toBe('Completed');
+      expect(pageObject.getTableCellText(1, TransactionTableCells.Status)).toBe('Completed');
     });
 
     it('should show subscription active when show subscription end date when subscribed', () => {
-
       function diffMonth(start: IParsedDate, end: IParsedDate): number {
         if (start.year === end.year) {
           return end.month - start.month;
@@ -111,21 +99,15 @@ describe('Payments', () => {
         throw 'Date invalid';
       }
 
-      const transactionDateP = pageObject.getFirstRowCell(2).getText()
-        .then(dateStr => dateParts(dateStr, '-'));
-      const validUntilP = pageObject.subscriptionEndField.evaluate('$ctrl.model.validUntill')
-        .then(dateStr => dateParts(dateStr, '-'));
-      const monthDiffP = wdp.all([transactionDateP, validUntilP])
-        .then((dates) => diffMonth(dates[0], dates[1]));
+      const monthDiffP = pageObject.getPageDates()
+        .then(dates => diffMonth(dates.firstTrxDate, dates.validUntil));
 
-      expect(pageObject.statusMsgField.evaluate('$ctrl.model.statusMsgKey')).toEqual('active');
+      expect(pageObject.getStatusMsgFieldValue()).toEqual('active');
       expect(monthDiffP).toEqual(6);
     });
   });
 
   describe('xlsx export', () => {
-
-    const exportServiceUrl = 'http://localhost:8080/rest/export/xlsx';
 
     it('should return 401 if not logged to export data', () => {
       const includeLoginSession = false;
@@ -146,35 +128,29 @@ describe('Payments', () => {
     it('should be possible to download an xlsx with active subscriptions', () => {
       new DataStoreManipulator().makeUserAdmin(userInfo.email).destroy();
 
-      const respP = makeRequest(exportServiceUrl, true);
-      const workbookP = respP.then(parseXlsxDocument);
-      const statusCodeP = respP.then((resp) => resp.statusCode);
+      const pageDatesP = getPageDatesAsExportedRow(userInfo.navitasId, userInfo.email);
+      const userRowsP = downloadXsltTransactionExport()
+        .then(rows => rows.filter(row => row.Comments === userInfo.email));
+      const userRowP = userRowsP.then(u => u[0]);
 
-      const transactionDateP = pageObject.getFirstRowCell(2).getText()
-        .then(dateStr => dateParts(dateStr, '-'));
-      const validUntilP = pageObject.subscriptionEndField.evaluate('$ctrl.model.validUntill')
-        .then(dateStr => dateParts(dateStr, '-'));
+      expect(userRowsP.then(u => u.length)).toBe(1);
+      expect(pageDatesP).toEqual(userRowP);
+    });
 
-      wdp.all([<any>workbookP, <any>transactionDateP, <any>validUntilP]).then((args) => {
-        const workbook: excel.IWorkbook = args[0];
-        const transactionDate: IParsedDate = args[1];
-        const validUntil: IParsedDate = args[2];
+    it('test', () => {
+      // payment_date: '00:40:46 Jan 01, 2018 CET',
+      sendPayment(userInfo.email, '15:40:46 Dec 31, 2017 PST');
 
-        const worksheet = workbook.getWorksheet(1);
-        const userRows = worksheet.getSheetValues().filter(i => i[columns.Comments] === userInfo.email);
-        expect(userRows.length).toBe(1);
+      NavigationPageObject.mainPageTab.click();
+      NavigationPageObject.statusPageTab.click();
 
-        const userRow = <string[]>userRows[0];
-        expect(userRow[columns.SysID]).toBe(userInfo.navitasId);
-        expect(dateParts(userRow[columns.DateActivation], '.')).toEqual(transactionDate);
-        expect(userRow[columns.SysID2]).toBe(userInfo.navitasId);
-        expect(dateParts(userRow[columns.DateStart], '.')).toEqual(transactionDate);
-        expect(dateParts(userRow[columns.DateEnd], '.')).toEqual(validUntil);
-        expect(userRow[columns.TimeScheme]).toBe("24 Timers");
-        expect(userRow[columns.Comments]).toBe(userInfo.email);
-      });
+      const pageDatesP = getPageDatesAsExportedRow(userInfo.navitasId, userInfo.email);
+      const userRowsP = downloadXsltTransactionExport()
+        .then(rows => rows.filter(row => row.Comments === userInfo.email));
+      const userRowP = userRowsP.then(u => u[0]);
 
-      expect(statusCodeP).toBe(200);
+      expect(userRowsP.then(u => u.length)).toBe(1);
+      expect(pageDatesP).toEqual(userRowP);
     });
   });
 });
