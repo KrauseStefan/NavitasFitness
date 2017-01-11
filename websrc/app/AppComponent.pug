@@ -24,10 +24,10 @@
     md-tabs(md-stretch-tabs="always")
       md-tab(ui-sref="MainPage")
           md-icon home
-          span Forside
+          span Home
       md-tab(ui-sref="Status", ng-disabled="!$ctrl.isLoggedIn()")
           md-icon perm_identity
-          span Min status
+          span Payment Status
 
   md-content(flex, layout-padding)
     ui-view
