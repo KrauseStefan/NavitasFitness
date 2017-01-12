@@ -9,13 +9,15 @@ import IScope = angular.IScope;
 const HttpConflict = 409;
 
 export class RegistrationFormModel implements IUserDTO {
-  public email: string = '';
-  public password: string = '';
-  public passwordRepeat: string = '';
-  public navitasId: string = '';
+  public name = '';
+  public email = '';
+  public password = '';
+  public passwordRepeat = '';
+  public navitasId = '';
 
   public toUserDTO(): IUserDTO {
     return {
+      name: this.name,
       email: this.email,
       navitasId: this.navitasId,
       password: this.password,

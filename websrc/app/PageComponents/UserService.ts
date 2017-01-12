@@ -46,7 +46,7 @@ export class UserService {
   private getUserFromSessionData(): ng.IPromise<IUserDTO> {
     return this.$http.get(this.userServiceUrl)
       .then((res) => {
-        const currentUser = <IUserDTO> res.data;
+        const currentUser = <IUserDTO>res.data;
         this.currentUserSubject.next(currentUser);
         return currentUser;
       });
@@ -59,6 +59,7 @@ export interface IBaseUserDTO {
 }
 
 export interface IUserDTO extends IBaseUserDTO {
+  name: string;
   navitasId: string;
   isAdmin?: boolean;
 }

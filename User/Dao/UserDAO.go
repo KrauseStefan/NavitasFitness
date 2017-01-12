@@ -11,6 +11,7 @@ import (
 	"appengine/datastore"
 
 	"AppEngineHelper"
+	"gopkg.in/validator.v2"
 )
 
 const (
@@ -37,15 +38,20 @@ var (
 )
 
 type UserDTO struct {
-	Key                string    `json:"key",datastore:"-"`
-	Email              string    `json:"email"`
-	Password           string    `json:"password,omitempty",datastore:",noindex"`
+	Name               string    `json:"name",datastore:",noindex",validate:"min=2"`
+	Email              string    `json:"email",validate:"email"`
+	NavitasId          string    `json:"navitasId",validate:"min=2"`
+	Password           string    `json:"password,omitempty",datastore:",noindex",validate:"min=2"`
 	PasswordHash       []byte    `json:"-",datastore:",noindex"`
 	PasswordSalt       []byte    `json:"-",datastore:",noindex"`
-	NavitasId          string    `json:"navitasId"`
-	CreatedDate        time.Time `json:"createdDate"`
-	CurrentSessionUUID string    `json:"currentSessionKey"`
-	IsAdmin            bool      `json:"isAdmin,omitempty"`
+	Key                string    `json:"-",datastore:"-"`
+	CreatedDate        time.Time `json:"-"`
+	CurrentSessionUUID string    `json:"-"`
+	IsAdmin bool `json:"-"`
+}
+
+func (user *UserDTO) ValidateUser() error {
+	return validator.Validate(user)
 }
 
 func (user *UserDTO) hasKey() bool {

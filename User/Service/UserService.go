@@ -103,6 +103,12 @@ func userPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := user.ValidateUser(); err != nil {
+		ctx.Errorf(err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	if err := UserDao.CreateUser(ctx, user); err != nil {
 		if err == UserDao.EmailAlreadyExistsError {
 			http.Error(w, err.Error(), http.StatusConflict)

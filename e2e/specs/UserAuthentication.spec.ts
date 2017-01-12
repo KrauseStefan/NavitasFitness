@@ -4,6 +4,7 @@ import { verifyBrowserLog } from '../utility';
 import { browser, protractor } from 'protractor';
 
 const userInfo = {
+  name: 'test',
   email: 'email@domain.com',
   navitasId: '1234509876',
   password: 'Password123',
@@ -50,6 +51,7 @@ describe('User Autentication', () => {
     const regDialog = NavigationPageObject.openRegistrationDialog();
 
     regDialog.fillForm({
+      name: userInfo.name,
       email: userInfo.email,
       navitasId: userInfo.navitasId,
       password: userInfo.password,
@@ -67,6 +69,7 @@ describe('User Autentication', () => {
     const regDialog = NavigationPageObject.openRegistrationDialog();
 
     regDialog.fillForm({
+      name: userInfo.name,
       email: userInfo.email,
       navitasId: userInfo.navitasId,
       password: userInfo.password,
@@ -93,6 +96,7 @@ describe('User Autentication', () => {
     expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
 
     regDialog.fillForm({
+      name: userInfo.name,
       email: userInfo.email,
       navitasId: userInfo.navitasId,
       password: userInfo.password,
@@ -102,6 +106,12 @@ describe('User Autentication', () => {
 
     expect(regDialog.buttonRegister.isEnabled()).toBe(true);
     expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
+
+    regDialog.fillForm({ name: '' });
+    expect(regDialog.buttonRegister.isEnabled()).toBe(false);
+
+    regDialog.fillForm({ name: userInfo.name });
+    expect(regDialog.buttonRegister.isEnabled()).toBe(true);
 
     regDialog.fillForm({ password: 'bad' });
     expect(regDialog.buttonRegister.isEnabled()).toBe(false);

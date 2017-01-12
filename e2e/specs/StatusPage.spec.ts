@@ -27,9 +27,10 @@ export function getPageDatesAsExportedRow(id: string, email: string): wdp.Promis
   });
 }
 
-fdescribe('Payments', () => {
+describe('Payments', () => {
 
   const userInfo = {
+    name: 'test',
     email: 'status-test@domain.com',
     navitasId: '1234509876',
     password: 'Password1',
@@ -46,6 +47,7 @@ fdescribe('Payments', () => {
       const regDialog = NavigationPageObject.openRegistrationDialog();
 
       regDialog.fillForm({
+        name: userInfo.name,
         email: userInfo.email,
         navitasId: userInfo.navitasId,
         password: userInfo.password,

@@ -8,6 +8,11 @@ md-dialog
 
     md-content.md-dialog-content
       md-input-container
+        label Name
+        md-icon perm_identity
+        input(name="name", type="text", ng-model="model.name", required)
+
+      md-input-container
         label E-Mail
         md-icon email
         input(name="email", type="email", ng-model="model.email", required, nf-reset-on-change="emailAvailable")

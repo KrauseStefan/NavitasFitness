@@ -5,6 +5,7 @@ import { verifyBrowserLog } from '../utility';
 import { Key, browser } from 'protractor';
 
 const userInfo = {
+  name: 'test',
   email: 't-frontpage-admin@domain.com',
   navitasId: '1234509876',
   password: 'Password123',
@@ -24,6 +25,7 @@ describe('Frontpage tests', () => {
     const regDialog = NavigationPageObject.openRegistrationDialog();
 
     regDialog.fillForm({
+      name: userInfo.name,
       email: userInfo.email,
       navitasId: userInfo.navitasId,
       password: userInfo.password,

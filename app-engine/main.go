@@ -4,13 +4,34 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"gopkg.in/validator.v2"
 
 	"Auth"
 	"Export/Service"
 	"IPN"
 	"MainPage"
 	"User/Service"
+	"errors"
+	"reflect"
+
+	"regexp"
 )
+
+const emailRegStr = `^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$`
+
+var emailReg = regexp.MustCompile(emailRegStr)
+
+func validateEmail(v interface{}, param string) error {
+	st := reflect.ValueOf(v)
+	if st.Kind() != reflect.String {
+		return validator.ErrUnsupported
+	}
+	if !emailReg.MatchString(st.String()) {
+		return errors.New("Invalid email")
+	}
+
+	return nil
+}
 
 // http://blog.golang.org/context
 // http://blog.golang.org/go-videos-from-google-io-2012
@@ -26,6 +47,8 @@ func init() {
 
 	http.Handle("/", router)
 	//	http.HandleFunc("/rest/", root)
+
+	validator.SetValidationFunc("email", validateEmail)
 }
 
 //func root(w http.ResponseWriter, r *http.Request) {
