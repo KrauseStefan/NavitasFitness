@@ -60,6 +60,6 @@ export interface IBaseUserDTO {
 
 export interface IUserDTO extends IBaseUserDTO {
   name: string;
-  navitasId: string;
+  accessId: string;
   isAdmin?: boolean;
 }

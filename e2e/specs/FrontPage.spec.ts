@@ -7,7 +7,7 @@ import { Key, browser } from 'protractor';
 const userInfo = {
   name: 'test',
   email: 't-frontpage-admin@domain.com',
-  navitasId: '1234509876',
+  accessId: '1234509876',
   password: 'Password123',
 };
 
@@ -27,7 +27,7 @@ describe('Frontpage tests', () => {
     regDialog.fillForm({
       name: userInfo.name,
       email: userInfo.email,
-      navitasId: userInfo.navitasId,
+      accessId: userInfo.accessId,
       password: userInfo.password,
       passwordRepeat: userInfo.password,
     });

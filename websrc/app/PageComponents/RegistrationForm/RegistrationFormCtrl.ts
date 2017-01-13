@@ -13,13 +13,13 @@ export class RegistrationFormModel implements IUserDTO {
   public email = '';
   public password = '';
   public passwordRepeat = '';
-  public navitasId = '';
+  public accessId = '';
 
   public toUserDTO(): IUserDTO {
     return {
       name: this.name,
       email: this.email,
-      navitasId: this.navitasId,
+      accessId: this.accessId,
       password: this.password,
     };
   }

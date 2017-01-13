@@ -32,7 +32,7 @@ describe('Payments', () => {
   const userInfo = {
     name: 'test',
     email: 'status-test@domain.com',
-    navitasId: '1234509876',
+    accessId: '1234509876',
     password: 'Password1',
   };
 
@@ -49,7 +49,7 @@ describe('Payments', () => {
       regDialog.fillForm({
         name: userInfo.name,
         email: userInfo.email,
-        navitasId: userInfo.navitasId,
+        accessId: userInfo.accessId,
         password: userInfo.password,
         passwordRepeat: userInfo.password,
       });
@@ -130,7 +130,7 @@ describe('Payments', () => {
     it('should be possible to download an xlsx with active subscriptions', () => {
       new DataStoreManipulator().makeUserAdmin(userInfo.email).destroy();
 
-      const pageDatesP = getPageDatesAsExportedRow(userInfo.navitasId, userInfo.email);
+      const pageDatesP = getPageDatesAsExportedRow(userInfo.accessId, userInfo.email);
       const userRowsP = downloadXsltTransactionExport()
         .then(rows => rows.filter(row => row.Comments === userInfo.email));
       const userRowP = userRowsP.then(u => u[0]);
@@ -146,7 +146,7 @@ describe('Payments', () => {
       NavigationPageObject.mainPageTab.click();
       NavigationPageObject.statusPageTab.click();
 
-      const pageDatesP = getPageDatesAsExportedRow(userInfo.navitasId, userInfo.email);
+      const pageDatesP = getPageDatesAsExportedRow(userInfo.accessId, userInfo.email);
       const userRowsP = downloadXsltTransactionExport()
         .then(rows => rows.filter(row => row.Comments === userInfo.email));
       const userRowP = userRowsP.then(u => u[0]);

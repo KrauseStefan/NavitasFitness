@@ -6,7 +6,7 @@ import { browser, protractor } from 'protractor';
 const userInfo = {
   name: 'test',
   email: 'email@domain.com',
-  navitasId: '1234509876',
+  accessId: '1234509876',
   password: 'Password123',
 };
 
@@ -53,7 +53,7 @@ describe('User Autentication', () => {
     regDialog.fillForm({
       name: userInfo.name,
       email: userInfo.email,
-      navitasId: userInfo.navitasId,
+      accessId: userInfo.accessId,
       password: userInfo.password,
       passwordRepeat: userInfo.password,
     });
@@ -71,7 +71,7 @@ describe('User Autentication', () => {
     regDialog.fillForm({
       name: userInfo.name,
       email: userInfo.email,
-      navitasId: userInfo.navitasId,
+      accessId: userInfo.accessId,
       password: userInfo.password,
       passwordRepeat: userInfo.password,
     });
@@ -98,7 +98,7 @@ describe('User Autentication', () => {
     regDialog.fillForm({
       name: userInfo.name,
       email: userInfo.email,
-      navitasId: userInfo.navitasId,
+      accessId: userInfo.accessId,
       password: userInfo.password,
       passwordRepeat: userInfo.password,
     });
@@ -139,10 +139,10 @@ describe('User Autentication', () => {
     regDialog.fillForm({ email: userInfo.email });
     expect(regDialog.buttonRegister.isEnabled()).toBe(true);
 
-    regDialog.fillForm({ navitasId: '' });
+    regDialog.fillForm({ accessId: '' });
     expect(regDialog.buttonRegister.isEnabled()).toBe(false);
 
-    regDialog.fillForm({ navitasId: userInfo.navitasId });
+    regDialog.fillForm({ accessId: userInfo.accessId });
     expect(regDialog.buttonRegister.isEnabled()).toBe(true);
 
     regDialog.termsAcceptedChkBx.click();

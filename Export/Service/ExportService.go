@@ -141,9 +141,9 @@ func createXlsxFile(ctx appengine.Context) (*xlsx.File, error) {
 	for _, user := range userTxnTuple {
 		addRow(
 			sheet,
-			user.user.NavitasId,
+			user.user.AccessId,
 			user.firstDate.Format(xlsxDateFormat),
-			user.user.NavitasId,
+			user.user.AccessId,
 			user.firstDate.Format(xlsxDateFormat),
 			user.lastDate.AddDate(0, 6, 0).Format(xlsxDateFormat),
 			"24 Timers",

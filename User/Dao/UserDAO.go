@@ -40,7 +40,7 @@ var (
 type UserDTO struct {
 	Name               string    `json:"name",datastore:",noindex",validate:"min=2"`
 	Email              string    `json:"email",validate:"email"`
-	NavitasId          string    `json:"navitasId",validate:"min=2"`
+	AccessId           string    `json:"accessId",validate:"min=2"`
 	Password           string    `json:"password,omitempty",datastore:",noindex",validate:"min=2"`
 	PasswordHash       []byte    `json:"-",datastore:",noindex"`
 	PasswordSalt       []byte    `json:"-",datastore:",noindex"`

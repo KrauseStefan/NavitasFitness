@@ -37,13 +37,13 @@ md-dialog
         md-tooltip.unrestrict-height(md-direction="Bottom")
           span Some long text describing how this ID should be types input
           br
-          span This message kan be on multipe lines
+          span This message can consist of multipe lines
         label
           span Access ID
           md-icon(style="font-size: 16px;") info_outline
 
         md-icon perm_identity
-        input(name="navitasId", ng-model="model.navitasId", required)
+        input(name="accessId", ng-model="model.accessId", required)
 
       md-input-container
         md-checkbox(name="termsAccepted", ng-model="termsAccepted", ng-required="true") You must accept the terms
