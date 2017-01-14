@@ -76,6 +76,11 @@ func getUserFromSession(ctx appengine.Context, r *http.Request) (*UserDao.UserDT
 	return UserDao.GetUserFromSessionUUID(ctx, uuid)
 }
 
+type UserSessionDto struct {
+	User    *UserDao.UserDTO `json:"user"`
+	IsAdmin bool             `json:"isAdmin"`
+}
+
 func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 
@@ -85,7 +90,9 @@ func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := AppEngineHelper.WriteJSON(w, user); err != nil {
+	us := UserSessionDto{user, user.IsAdmin}
+
+	if _, err := AppEngineHelper.WriteJSON(w, us); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

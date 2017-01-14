@@ -47,7 +47,7 @@ type UserDTO struct {
 	Key                string    `json:"-",datastore:"-"`
 	CreatedDate        time.Time `json:"-"`
 	CurrentSessionUUID string    `json:"-"`
-	IsAdmin bool `json:"-"`
+	IsAdmin            bool      `json:"-"`
 }
 
 func (user *UserDTO) ValidateUser() error {

@@ -44,9 +44,10 @@ export class UserService {
   }
 
   private getUserFromSessionData(): ng.IPromise<IUserDTO> {
-    return this.$http.get(this.userServiceUrl)
+    return this.$http.get<IUserSessionDto>(this.userServiceUrl)
       .then((res) => {
-        const currentUser = <IUserDTO>res.data;
+        const currentUser = res.data.user;
+        currentUser.isAdmin = res.data.isAdmin;
         this.currentUserSubject.next(currentUser);
         return currentUser;
       });
@@ -62,4 +63,9 @@ export interface IUserDTO extends IBaseUserDTO {
   name: string;
   accessId: string;
   isAdmin?: boolean;
+}
+
+export interface IUserSessionDto {
+  user: IUserDTO;
+  isAdmin: boolean;
 }
