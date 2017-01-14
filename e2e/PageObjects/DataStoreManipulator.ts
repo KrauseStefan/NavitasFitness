@@ -22,7 +22,7 @@ export class DataStoreManipulator {
   }
 
   public removeUser(email: string) {
-    this.selecteItem(7, email);
+    this.selecteItem(8, email);
 
     this.deleteBtn.isPresent()
       .then(isPresent => isPresent ? this.deleteBtn.isEnabled() : wdp.fullyResolved<boolean>(false))
@@ -39,7 +39,7 @@ export class DataStoreManipulator {
   }
 
   public makeUserAdmin(email) {
-    this.openItem(7, email);
+    this.openItem(8, email);
 
     const selectAdmin = `document.querySelector('select[name="bool|IsAdmin"]').value = 1;`;
     browser.driver.executeScript(selectAdmin);

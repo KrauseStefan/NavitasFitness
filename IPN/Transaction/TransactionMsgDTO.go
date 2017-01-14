@@ -61,8 +61,8 @@ func NewTransactionMsgDTOList(dtos []transactionMsgDsDTO, keys []*datastore.Key)
 type transactionMsgDsDTO struct {
 	IpnMessages []string `json:"ipn_messages"` //History of IpnMessages
 
-	PaymentDate                time.Time `json:"payment_date"` //Only included so that it can be indexed
-	TxnId                      string    `json:"txn_id"`
+	PaymentDate time.Time `json:"payment_date"` //Only included so that it can be indexed
+	TxnId       string    `json:"txn_id"`
 }
 
 type TransactionMsgDTO struct {
