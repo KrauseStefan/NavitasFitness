@@ -84,6 +84,7 @@ func setSessionCookie(w http.ResponseWriter, uuid string) error {
 		Value:  encoded,
 		Path:   "/",
 		MaxAge: maxAge,
+		HttpOnly: true,
 	}
 	http.SetCookie(w, cookie)
 

@@ -12,11 +12,7 @@ export class UserService {
     private $http: ng.IHttpService,
     private $cookies: ng.cookies.ICookiesService) {
 
-    const cookieName = 'Session-Key';
-    const sessionKey = $cookies.get(cookieName);
-    if (isDefined(sessionKey)) {
-      this.getUserFromSessionData();
-    }
+    this.getUserFromSessionData();
   }
 
   public createUser(user: IUserDTO): ng.IPromise<IUserDTO> {
