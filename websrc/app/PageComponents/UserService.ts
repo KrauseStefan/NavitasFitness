@@ -1,4 +1,3 @@
-import { isDefined } from 'angular';
 import { Observable, ReplaySubject } from 'rxjs';
 
 export class UserService {

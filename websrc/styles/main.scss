@@ -73,6 +73,23 @@ table {
   }
 }
 
-md-tooltip.unrestrict-height .md-content {
+md-tooltip.unrestrict-height {
   height: auto;
+  line-height: 20px;
+  max-width: 95vw;
+  font-size: 14px;
+
+  h4 {
+    margin: 4px 0;
+  }
+
+  p:nth-of-type(1) {
+    margin-top: 0;
+  }
+
+  p {
+    margin: 4px 0;
+    margin-left: 10px;
+  }
+
 }

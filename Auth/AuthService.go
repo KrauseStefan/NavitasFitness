@@ -80,10 +80,10 @@ func setSessionCookie(w http.ResponseWriter, uuid string) error {
 	}
 
 	cookie := &http.Cookie{
-		Name:   sessionCookieName,
-		Value:  encoded,
-		Path:   "/",
-		MaxAge: maxAge,
+		Name:     sessionCookieName,
+		Value:    encoded,
+		Path:     "/",
+		MaxAge:   maxAge,
 		HttpOnly: true,
 	}
 	http.SetCookie(w, cookie)

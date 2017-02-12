@@ -1,6 +1,7 @@
 package AppEngineHelper
 
 import (
+	"strings"
 	"time"
 )
 
@@ -25,13 +26,15 @@ var timezoneOffsetMap = map[string]int{
 }
 
 func LoadLocation(timeZone string) (*time.Location, error) {
-	location, err := time.LoadLocation(timeZone)
+	timeZoneUpper := strings.ToUpper(timeZone)
+
+	location, err := time.LoadLocation(timeZoneUpper)
 	if err == nil {
 		return location, nil
 	}
 
-	if utcOffset, ok := timezoneOffsetMap[timeZone]; ok {
-		return time.FixedZone(timeZone, utcOffset*60*60), nil
+	if utcOffset, ok := timezoneOffsetMap[timeZoneUpper]; ok {
+		return time.FixedZone(timeZoneUpper, utcOffset*60*60), nil
 	}
 
 	return nil, err
