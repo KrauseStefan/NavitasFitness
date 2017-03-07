@@ -11,9 +11,12 @@ import (
 
 	"AppEngineHelper"
 	"Auth"
+	"Dropbox"
 	"IPN/Transaction"
 	"User/Dao"
 )
+
+const accessIdKey = "accessId"
 
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/user"
@@ -21,21 +24,42 @@ func IntegrateRoutes(router *mux.Router) {
 	router.
 		Methods("GET").
 		Path(path).
-		Name("GetUserCurrentUserInfo").
+		Name("Get User Current User Info").
 		HandlerFunc(getUserFromSessionHandler)
 
 	router.
 		Methods("GET").
 		Path(path + "/transactions").
-		Name("GetLatestTransactions").
+		Name("Get Latest Transactions").
 		HandlerFunc(getUserTransactionsHandler)
 
 	router.
 		Methods("POST").
 		Path(path).
-		Name("CreateUserInfo").
+		Name("Create User Info").
 		HandlerFunc(userPost)
 
+	router.
+		Methods("GET").
+		Path(path + "/validate_id/{" + accessIdKey + "}").
+		Name("Validate Access Id").
+		HandlerFunc(validateAccessId)
+
+}
+
+func validateAccessId(w http.ResponseWriter, r *http.Request) {
+	ctx := appengine.NewContext(r)
+	accessId_bytes := []byte(mux.Vars(r)[accessIdKey])
+
+	isValid, err := Dropbox.ValidateAccessId(ctx, accessId_bytes)
+	if err != nil {
+		ctx.Errorf(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	if isValid {
+		w.Write(accessId_bytes)
+	}
 }
 
 func AsAdmin(f func(http.ResponseWriter, *http.Request, *UserDao.UserDTO)) func(http.ResponseWriter, *http.Request) {

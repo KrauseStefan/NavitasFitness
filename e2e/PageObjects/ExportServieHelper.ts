@@ -89,7 +89,7 @@ export function sendPayment(custom: string, paymentDate: string): wdp.Promise<st
     let successStatus = false;
 
     const req = http.request(options, (res) => {
-      if (res.statusCode <= 200 && res.statusCode < 300) {
+      if (res.statusCode && res.statusCode <= 200 && res.statusCode < 300) {
         successStatus = true;
       }
       res.setEncoding('utf8');
