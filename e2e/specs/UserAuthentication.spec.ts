@@ -176,8 +176,9 @@ describe('User Autentication', () => {
     expect(NavigationPageObject.menuRegister.isDisplayed()).toBe(false);
 
     NavigationPageObject.menuLogout.click();
-
     NavigationPageObject.menuButton.click();
+
+    browser.wait(NavigationPageObject.menuLogin.isDisplayed(), 1000, 'menu did not display login button');
 
     expect(NavigationPageObject.menuLogin.isDisplayed()).toBe(true);
     expect(NavigationPageObject.menuRegister.isDisplayed()).toBe(true);

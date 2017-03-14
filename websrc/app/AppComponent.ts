@@ -46,6 +46,7 @@ class AppComponentController {
 
   public logout() {
     this.userService.logout();
+    this.loggedInUser = null;
   }
 
   public isLoggedIn() {

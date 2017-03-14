@@ -5,7 +5,7 @@ export class UserService {
   private userServiceUrl = 'rest/user';
   private authServiceUrl = 'rest/auth';
 
-  private currentUserSubject = new ReplaySubject<IUserDTO>();
+  private currentUserSubject = new ReplaySubject<IUserDTO>(1);
 
   constructor(
     private $http: ng.IHttpService,
@@ -45,6 +45,8 @@ export class UserService {
         currentUser.isAdmin = res.data.isAdmin;
         this.currentUserSubject.next(currentUser);
         return currentUser;
+      }).catch(() => {
+        this.currentUserSubject.next(null);
       });
   }
 }

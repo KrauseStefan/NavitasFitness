@@ -8,7 +8,7 @@ const momentFn: (
 
 export const statusRouterState = {
   template: '<user-status></user-status>',
-  url: '/status',
+  url: '/status/',
 };
 
 class UserStatus {

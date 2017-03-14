@@ -12,7 +12,7 @@ describe('Navigation tests', () => {
     // expect(browser.getLocationAbsUrl()).toBe('/status');
 
     NavigationPageObject.mainPageTab.click();
-    expect(browser.getLocationAbsUrl()).toBe('/main-page');
+    expect(browser.getLocationAbsUrl()).toBe('/main-page/');
   });
 
   // it('should respond to the basic "/" address', () => {

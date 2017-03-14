@@ -1,4 +1,4 @@
-import { Config, ProtractorBy } from 'protractor';
+import { Config, ProtractorBy, browser } from 'protractor';
 
 import { PluginConfig } from 'protractor/built/plugins';
 
@@ -54,6 +54,14 @@ export const config: Config = {
         // shardTestFiles: true,
     }],
     onPrepare: () => {
+
+        const disableNgAnimate = () => {
+            angular.module('disableNgAnimate', []).run(['$animate', ($animate) => {
+                $animate.enabled(false);
+            }]);
+        };
+        browser.addMockModule('disableNgAnimate', disableNgAnimate);
+
         by.addLocator('linkUiSref', (toState: string, optParentElement: HTMLElement) => {
             const using = optParentElement || document;
             const tabs = using.querySelectorAll('md-tab-item');

@@ -7,7 +7,7 @@ export class NavigationPageObject {
   public static allTabs = $('md-tabs');
   public static menuContent = $('md-menu-content');
 
-  public static menuButton = $('.md-button[ng-click="$mdOpenMenu()"]');
+  public static menuButton = $('.md-button[ng-click="$mdMenu.open()"]');
 
   public static mainPageTab = element((<any> by).linkUiSref('MainPage'));
   public static statusPageTab = element((<any> by).linkUiSref('Status'));
