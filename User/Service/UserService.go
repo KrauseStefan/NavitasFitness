@@ -25,19 +25,19 @@ func IntegrateRoutes(router *mux.Router) {
 		Methods("GET").
 		Path(path).
 		Name("Get User Current User Info").
-		HandlerFunc(getUserFromSessionHandler)
+		HandlerFunc(AsUser(getUserFromSessionHandler))
 
 	router.
 		Methods("GET").
 		Path(path + "/transactions").
 		Name("Get Latest Transactions").
-		HandlerFunc(getUserTransactionsHandler)
+		HandlerFunc(AsUser(getUserTransactionsHandler))
 
 	router.
 		Methods("POST").
 		Path(path).
 		Name("Create User Info").
-		HandlerFunc(userPost)
+		HandlerFunc(createUserHandler)
 
 	router.
 		Methods("GET").
@@ -105,15 +105,7 @@ type UserSessionDto struct {
 	IsAdmin bool             `json:"isAdmin"`
 }
 
-func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
-
-	user, err := getUserFromSession(ctx, r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
-	}
-
+func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
 	us := UserSessionDto{user, user.IsAdmin}
 
 	if _, err := AppEngineHelper.WriteJSON(w, us); err != nil {
@@ -122,7 +114,7 @@ func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func userPost(w http.ResponseWriter, r *http.Request) {
+func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 	user := &UserDao.UserDTO{}
 
@@ -158,14 +150,8 @@ func userPost(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request) {
+func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
 	ctx := appengine.NewContext(r)
-
-	user, err := getUserFromSession(ctx, r)
-	if err != nil {
-		// User is not authorised sending back an empty response
-		return
-	}
 
 	transactions, err := TransactionDao.GetTransactionsByUser(ctx, user.GetDataStoreKey(ctx))
 	if err != nil {
