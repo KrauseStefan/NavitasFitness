@@ -126,20 +126,28 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := user.ValidateUser(); err != nil {
+	if err := user.ValidateUser(ctx); err != nil {
 		ctx.Errorf(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if err := UserDao.CreateUser(ctx, user); err != nil {
-		if err == UserDao.EmailAlreadyExistsError {
-			http.Error(w, err.Error(), http.StatusConflict)
+		switch v := err.(type) {
+		case UserDao.ConstraintError:
+			switch v.Type {
+			case UserDao.UniqueConstraint:
+				http.Error(w, err.Error(), http.StatusConflict)
+			case UserDao.Invalid:
+				http.Error(w, err.Error(), http.StatusBadRequest)
+			default:
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
 			ctx.Infof(err.Error())
-			return
+		default:
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			ctx.Errorf(err.Error())
 		}
-		ctx.Errorf(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

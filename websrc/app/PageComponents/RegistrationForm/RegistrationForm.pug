@@ -15,10 +15,10 @@ md-dialog
       md-input-container
         label E-Mail
         md-icon email
-        input(name="email", type="email", ng-model="model.email", required, nf-reset-on-change="emailAvailable")
+        input(name="email", type="email", ng-model="model.email", required, nf-reset-on-change="unique_constraint")
         div(ng-messages="RegistrationForm.email.$error", md-auto-hide="true")
-          div(ng-message="emailAvailable").
-            This e-mail address is already registred
+          div(ng-message="unique_constraint").
+            This e-mail address has already been registred
 
       md-input-container
         label Password
@@ -60,7 +60,13 @@ md-dialog
           md-icon(style="font-size: 16px;") info_outline
 
         md-icon perm_identity
-        input(name="accessId", ng-model="model.accessId", required)
+        input(name="accessId", ng-model="model.accessId", required, nf-reset-on-change="unique_constraint, invalid")
+        div(ng-messages="RegistrationForm.accessId.$error", md-auto-hide="true")
+          div(ng-message="invalid").
+            This Access ID does not exist
+        div(ng-messages="RegistrationForm.accessId.$error", md-auto-hide="true")
+          div(ng-message="unique_constraint").
+            This Access ID has already been registred
 
       md-input-container
         md-checkbox(name="termsAccepted", ng-model="termsAccepted", ng-required="true") You must accept the terms

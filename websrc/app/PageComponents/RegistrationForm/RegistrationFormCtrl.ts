@@ -6,7 +6,11 @@ import IHttpPromiseCallbackArg = angular.IHttpPromiseCallbackArg;
 import INgModelController = angular.INgModelController;
 import IScope = angular.IScope;
 
-const HttpConflict = 409;
+interface IRegistrationError {
+  field?: keyof RegistrationFormModel;
+  message: string;
+  type: 'invalid' | 'unique_constraint';
+}
 
 export class RegistrationFormModel implements IUserDTO {
   public name = '';
@@ -14,15 +18,6 @@ export class RegistrationFormModel implements IUserDTO {
   public password = '';
   public passwordRepeat = '';
   public accessId = '';
-
-  public toUserDTO(): IUserDTO {
-    return {
-      name: this.name,
-      email: this.email,
-      accessId: this.accessId,
-      password: this.password,
-    };
-  }
 }
 
 export class RegistrationForm {
@@ -33,9 +28,7 @@ export class RegistrationForm {
       cancel: () => void,
       model: RegistrationFormModel,
       errorMsg: any,
-      RegistrationForm: {
-        email: INgModelController
-      }
+      RegistrationForm: {[field in keyof RegistrationFormModel]: INgModelController }
     } & IScope,
     private userService: UserService,
     private $mdDialog: IDialogService,
@@ -46,13 +39,26 @@ export class RegistrationForm {
     $scope.model = new RegistrationFormModel();
   }
 
+  public toUserDTO(formModel: RegistrationFormModel): IUserDTO {
+    return {
+      name: formModel.name,
+      email: formModel.email,
+      accessId: formModel.accessId,
+      password: formModel.password,
+    };
+  }
+
   public submit() {
-    this.userService.createUser(this.$scope.model.toUserDTO()).then(() => {
+    this.userService.createUser(this.toUserDTO(this.$scope.model)).then(() => {
       this.$scope.model = new RegistrationFormModel();
       this.$mdDialog.hide();
-    }, (errorResponse: IHttpPromiseCallbackArg<string>) => {
-      if (errorResponse.status === HttpConflict) {
-        this.$scope.RegistrationForm.email.$setValidity('emailAvailable', false);
+    }, (err: IHttpPromiseCallbackArg<IRegistrationError>) => {
+      if (err.data.field && err.data.field.length > 0) {
+        if (err.data.type) {
+          this.$scope.RegistrationForm[err.data.field].$setValidity(err.data.type, false);
+        } else {
+          this.$scope.RegistrationForm[err.data.field].$setValidity('serverValidation', false);
+        }
       }
     });
   }

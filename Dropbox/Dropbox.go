@@ -4,15 +4,20 @@ import (
 	"appengine"
 	"appengine/urlfetch"
 	"bytes"
+	"encoding/hex"
 	"io/ioutil"
 	"time"
 )
 
-const downloadLink = "https://www.dropbox.com/s/x61e0hter4kr9ry/Kort%20navitas.csv?_download_id=462948430621974902922706508949901694802577845535546831947836167394&dl=1"
+const (
+	downloadLink = "https://www.dropbox.com/s/x61e0hter4kr9ry/Kort%20navitas.csv?_download_id=462948430621974902922706508949901694802577845535546831947836167394&dl=1"
+)
 
-var downloadedIds *[][]byte = nil
-
-var lastDownload time.Time
+var (
+	bomPrefix               = []byte{0xef, 0xbb, 0xbf}
+	downloadedIds *[][]byte = nil
+	lastDownload  time.Time
+)
 
 func downloadValidAccessIds(ctx appengine.Context) error {
 
@@ -28,7 +33,10 @@ func downloadValidAccessIds(ctx appengine.Context) error {
 		return err
 	}
 
-	ids := bytes.Split(data, []byte{'\n'})
+	//BOM does not make sense for UTF-8, should be safe to strip
+	dataWithoutBom := bytes.TrimPrefix(data, bomPrefix)
+
+	ids := bytes.Split(dataWithoutBom, []byte{'\n'})
 
 	idsNoSpace := make([][]byte, len(ids), len(ids))
 
@@ -52,6 +60,7 @@ func ensureUpdatedIds(ctx appengine.Context) error {
 	return nil
 }
 
+//Go strings are UTF 8 without bom converting it to byte should be safe
 func ValidateAccessId(ctx appengine.Context, accessId []byte) (bool, error) {
 
 	if err := ensureUpdatedIds(ctx); err != nil {
@@ -64,7 +73,7 @@ func ValidateAccessId(ctx appengine.Context, accessId []byte) (bool, error) {
 		}
 	}
 
-	ctx.Infof("%s", *downloadedIds)
+	ctx.Infof("length %s - %d", hex.Dump(accessId), len(accessId))
 
 	return false, nil
 }

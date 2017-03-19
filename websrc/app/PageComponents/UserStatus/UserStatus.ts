@@ -30,6 +30,7 @@ class UserStatus {
     private $q: ng.IQService) {
 
     this.model = {
+      userNameStr: '',
       statusMsgKey: 'inActive',
       transactionHistory: [],
       userEmail: '',
@@ -64,6 +65,7 @@ class UserStatus {
   private moniterUserCredentials(): void {
     this.userService.getLoggedinUser$().subscribe((user: IUserDTO) => {
       if (user) {
+        this.model.userNameStr = ' - ' + user.name;
         this.model.userEmail = user.email;
         this.getTransactionsUpdate();
       } else if (this.$state.is(statusRouterState)) {
@@ -75,6 +77,7 @@ class UserStatus {
 }
 
 interface IUserStatusModel {
+  userNameStr: string;
   userEmail: string;
   statusMsgKey: string;
   transactionHistory: Array<ITransactionEntry>;

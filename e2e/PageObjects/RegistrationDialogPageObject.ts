@@ -8,6 +8,9 @@ export class RegistrationDialogPageObject extends DialogPageObject {
   public closeButton = this.formContainer.$('.md-toolbar-tools button[ng-click="cancel()"]');
   public cancelButton = this.formContainer.$('md-dialog-actions button[ng-click="cancel()"]');
 
-  public errorEmailUnavailable = this.formContainer.$('[ng-message="emailAvailable"]');
+  public errorEmailConflict = this.formContainer.$('[ng-message="unique_constraint"]');
+  public errorAccessIdConflict = this.formContainer.$('[ng-message="unique_constraint"]');
+  public errorAccessIdInvalid = this.formContainer.$('[ng-message="invalid"]');
+
   public errorPasswordDifferent = this.formContainer.$('[ng-message="nfShouldEqual"]');
 }

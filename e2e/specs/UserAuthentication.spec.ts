@@ -1,12 +1,13 @@
 import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
+import { RegistrationDialogPageObject } from '../PageObjects/RegistrationDialogPageObject';
 import { verifyBrowserLog } from '../utility';
 import { browser, protractor } from 'protractor';
 
 const userInfo = {
   name: 'test',
   email: 'email@domain.com',
-  accessId: '1234509876',
+  accessId: 'N0774',
   password: 'Password123',
 };
 
@@ -65,93 +66,114 @@ describe('User Autentication', () => {
     regDialog.safeClick(regDialog.cancelButton);
   });
 
-  it('should not be able to create a user that already exists', () => {
-    const regDialog = NavigationPageObject.openRegistrationDialog();
+  describe('validation', () => {
+    let regDialog: RegistrationDialogPageObject;
 
-    regDialog.fillForm({
-      name: userInfo.name,
-      email: userInfo.email,
-      accessId: userInfo.accessId,
-      password: userInfo.password,
-      passwordRepeat: userInfo.password,
+    beforeEach(() => {
+      regDialog = NavigationPageObject.openRegistrationDialog();
+
+      regDialog.fillForm({
+        name: userInfo.name,
+        email: userInfo.email,
+        accessId: userInfo.accessId,
+        password: userInfo.password,
+        passwordRepeat: userInfo.password,
+      });
+      regDialog.termsAcceptedChkBx.click();
     });
-    regDialog.termsAcceptedChkBx.click();
 
-    regDialog.buttonRegister.click();
-
-    expect(regDialog.formContainer.isDisplayed()).toBe(true);
-    expect(regDialog.errorEmailUnavailable.isDisplayed()).toBe(true);
-    verifyBrowserLog([[
-      'http://localhost:8080/rest/user',
-      '0:0',
-      'Failed to load resource: the server responded with a status of 409 (Conflict)',
-    ].join(' ')]);
-
-    regDialog.safeClick(regDialog.cancelButton);
-  });
-
-  it('should validate user input', () => {
-    const regDialog = NavigationPageObject.openRegistrationDialog();
-    expect(regDialog.buttonRegister.isEnabled()).toBe(false);
-    expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
-
-    regDialog.fillForm({
-      name: userInfo.name,
-      email: userInfo.email,
-      accessId: userInfo.accessId,
-      password: userInfo.password,
-      passwordRepeat: userInfo.password,
+    afterEach(() => {
+      regDialog.safeClick(regDialog.cancelButton);
     });
-    regDialog.termsAcceptedChkBx.click();
 
-    expect(regDialog.buttonRegister.isEnabled()).toBe(true);
-    expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
+    it('should get an error message when using an already registred email', () => {
+      regDialog.buttonRegister.click();
 
-    regDialog.fillForm({ name: '' });
-    expect(regDialog.buttonRegister.isEnabled()).toBe(false);
+      expect(regDialog.errorEmailConflict.isDisplayed()).toBe(true);
+      verifyBrowserLog([[
+        'http://localhost:8080/rest/user',
+        '0:0',
+        'Failed to load resource: the server responded with a status of 409 (Conflict)',
+      ].join(' ')]);
+    });
 
-    regDialog.fillForm({ name: userInfo.name });
-    expect(regDialog.buttonRegister.isEnabled()).toBe(true);
+    it('should get an error message when using an already registred accessId', () => {
+      regDialog.fillForm({ email: 'email_other@domain.com' });
 
-    regDialog.fillForm({ password: 'bad' });
-    expect(regDialog.buttonRegister.isEnabled()).toBe(false);
-    expect(regDialog.errorPasswordDifferent.isPresent()).toBe(true);
+      regDialog.buttonRegister.click();
 
-    regDialog.fillForm({ passwordRepeat: 'bad' });
-    expect(regDialog.buttonRegister.isEnabled()).toBe(true);
-    expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
+      expect(regDialog.errorAccessIdConflict.isDisplayed()).toBe(true);
+      verifyBrowserLog([[
+        'http://localhost:8080/rest/user',
+        '0:0',
+        'Failed to load resource: the server responded with a status of 409 (Conflict)',
+      ].join(' ')]);
+    });
 
-    regDialog.fillForm({ passwordRepeat: userInfo.password });
-    expect(regDialog.buttonRegister.isEnabled()).toBe(false);
-    expect(regDialog.errorPasswordDifferent.isPresent()).toBe(true);
+    it('should get an error message when using an already invalid access id', () => {
+      regDialog.fillForm({
+        email: 'email_other@domain.com',
+        accessId: 'Invalid Id',
+      });
 
-    regDialog.fillForm({ password: userInfo.password });
-    expect(regDialog.buttonRegister.isEnabled()).toBe(true);
+      regDialog.buttonRegister.click();
 
-    expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
+      expect(regDialog.errorAccessIdInvalid.isDisplayed()).toBe(true);
+      verifyBrowserLog([[
+        'http://localhost:8080/rest/user',
+        '0:0',
+        'Failed to load resource: the server responded with a status of 409 (Conflict)',
+      ].join(' ')]);
+    });
 
-    regDialog.fillForm({ email: 'ab' });
-    expect(regDialog.buttonRegister.isEnabled()).toBe(false);
+    it('should validate some user input client side', () => {
+      expect(regDialog.buttonRegister.isEnabled()).toBe(true);
+      expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
 
-    regDialog.fillForm({ email: '' });
-    expect(regDialog.buttonRegister.isEnabled()).toBe(false);
+      regDialog.fillForm({ name: '' });
+      expect(regDialog.buttonRegister.isEnabled()).toBe(false);
 
-    regDialog.fillForm({ email: userInfo.email });
-    expect(regDialog.buttonRegister.isEnabled()).toBe(true);
+      regDialog.fillForm({ name: userInfo.name });
+      expect(regDialog.buttonRegister.isEnabled()).toBe(true);
 
-    regDialog.fillForm({ accessId: '' });
-    expect(regDialog.buttonRegister.isEnabled()).toBe(false);
+      regDialog.fillForm({ password: 'bad' });
+      expect(regDialog.buttonRegister.isEnabled()).toBe(false);
+      expect(regDialog.errorPasswordDifferent.isPresent()).toBe(true);
 
-    regDialog.fillForm({ accessId: userInfo.accessId });
-    expect(regDialog.buttonRegister.isEnabled()).toBe(true);
+      regDialog.fillForm({ passwordRepeat: 'bad' });
+      expect(regDialog.buttonRegister.isEnabled()).toBe(true);
+      expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
 
-    regDialog.termsAcceptedChkBx.click();
-    expect(regDialog.buttonRegister.isEnabled()).toBe(false);
+      regDialog.fillForm({ passwordRepeat: userInfo.password });
+      expect(regDialog.buttonRegister.isEnabled()).toBe(false);
+      expect(regDialog.errorPasswordDifferent.isPresent()).toBe(true);
 
-    regDialog.termsAcceptedChkBx.click();
-    expect(regDialog.buttonRegister.isEnabled()).toBe(true);
+      regDialog.fillForm({ password: userInfo.password });
+      expect(regDialog.buttonRegister.isEnabled()).toBe(true);
 
-    regDialog.safeClick(regDialog.cancelButton);
+      expect(regDialog.errorPasswordDifferent.isPresent()).toBe(false);
+
+      regDialog.fillForm({ email: 'ab' });
+      expect(regDialog.buttonRegister.isEnabled()).toBe(false);
+
+      regDialog.fillForm({ email: '' });
+      expect(regDialog.buttonRegister.isEnabled()).toBe(false);
+
+      regDialog.fillForm({ email: userInfo.email });
+      expect(regDialog.buttonRegister.isEnabled()).toBe(true);
+
+      regDialog.fillForm({ accessId: '' });
+      expect(regDialog.buttonRegister.isEnabled()).toBe(false);
+
+      regDialog.fillForm({ accessId: userInfo.accessId });
+      expect(regDialog.buttonRegister.isEnabled()).toBe(true);
+
+      regDialog.termsAcceptedChkBx.click();
+      expect(regDialog.buttonRegister.isEnabled()).toBe(false);
+
+      regDialog.termsAcceptedChkBx.click();
+      expect(regDialog.buttonRegister.isEnabled()).toBe(true);
+    });
   });
 
   it('should be able to login a user', () => {

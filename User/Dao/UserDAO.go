@@ -11,7 +11,17 @@ import (
 	"appengine/datastore"
 
 	"AppEngineHelper"
+	"Dropbox"
+	"encoding/json"
+	"fmt"
 	"gopkg.in/validator.v2"
+)
+
+type ErrorType string
+
+const (
+	UniqueConstraint ErrorType = "unique_constraint"
+	Invalid          ErrorType = "invalid"
 )
 
 const (
@@ -23,13 +33,39 @@ const (
 	PW_SALT_BYTES = 32
 )
 
+type ConstraintError struct {
+	Field   string    `json:"field"`
+	Type    ErrorType `json:"type"`
+	Message string    `json:"message"`
+}
+
+func (e ConstraintError) Error() string {
+	if len(e.Message) == 0 {
+		if e.Type == UniqueConstraint {
+			e.Message = fmt.Sprintf("Cannot create user, %s already in use", e.Field)
+		} else if e.Type == Invalid {
+			e.Message = fmt.Sprintf("Cannot create user, %s is invalid", e.Field)
+		}
+	}
+
+	js, err := json.Marshal(e)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(js)
+}
+
 var (
-	userHasIdError          = errors.New("Cannot create new user, key must be nil")
-	userHasNoIdError        = errors.New("Cannot create new user, key must be defined")
-	EmailAlreadyExistsError = errors.New("Cannot create user, email already in use")
-	UserNotFoundError       = errors.New("User does not exist in datastore")
-	invalidSessionError     = errors.New("Invalid user session")
-	passwordCanNotBeEmpty   = errors.New("Can not set update password when password is blank")
+	userHasIdError = errors.New("Cannot create new user, key must be nil")
+
+	UniqueConstraint_email    = &ConstraintError{Field: "email", Type: UniqueConstraint}
+	UniqueConstraint_accessId = &ConstraintError{Field: "accessId", Type: UniqueConstraint}
+	Invalid_accessId          = &ConstraintError{Field: "accessId", Type: Invalid}
+
+	UserNotFoundError     = errors.New("User does not exist in datastore")
+	invalidSessionError   = errors.New("Invalid user session")
+	passwordCanNotBeEmpty = errors.New("Can not set update password when password is blank")
 )
 
 var (
@@ -50,7 +86,11 @@ type UserDTO struct {
 	IsAdmin            bool      `json:"-"`
 }
 
-func (user *UserDTO) ValidateUser() error {
+func (user *UserDTO) ValidateUser(ctx appengine.Context) error {
+	if isValid, _ := Dropbox.ValidateAccessId(ctx, []byte(user.AccessId)); !isValid {
+		return Invalid_accessId
+	}
+
 	return validator.Validate(user)
 }
 
@@ -123,6 +163,28 @@ func GetUserByEmail(ctx appengine.Context, email string) (*UserDTO, error) {
 	return &userDtoList[0], nil
 }
 
+func GetUserByAccessId(ctx appengine.Context, accessId string) (*UserDTO, error) {
+	q := datastore.NewQuery(USER_KIND).
+		Ancestor(userCollectionParentKey(ctx)).
+		Filter("AccessId=", accessId).
+		Limit(1)
+
+	userDtoList := make([]UserDTO, 0, 1)
+
+	keys, err := q.GetAll(ctx, &userDtoList)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(keys) == 0 {
+		return nil, UserNotFoundError
+	}
+
+	userDtoList[0].Key = strconv.FormatInt(keys[0].IntID(), 10)
+
+	return &userDtoList[0], nil
+}
+
 func GetAllUsers(ctx appengine.Context) ([]*datastore.Key, []UserDTO, error) {
 	query := datastore.NewQuery(USER_KIND).
 		Ancestor(userCollectionParentKey(ctx))
@@ -152,7 +214,11 @@ func CreateUser(ctx appengine.Context, user *UserDTO) error {
 	}
 
 	if user, _ := GetUserByEmail(ctx, user.Email); user != nil {
-		return EmailAlreadyExistsError
+		return UniqueConstraint_email
+	}
+
+	if user, _ := GetUserByAccessId(ctx, user.AccessId); user != nil {
+		return UniqueConstraint_accessId
 	}
 
 	if err := user.UpdatePasswordHash(nil); err != nil {

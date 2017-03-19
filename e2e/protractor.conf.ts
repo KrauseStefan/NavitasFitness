@@ -23,7 +23,7 @@ interface IJasmine2ProtractorUtilsConfig extends PluginConfig {
 
 const utilsPlugin: IJasmine2ProtractorUtilsConfig = {
     clearFoldersBeforeTest: true,
-    disableHTMLReport: false,
+    disableHTMLReport: true,
     disableScreenshot: false,
     failTestOnErrorLog: {
         excludeKeywords: [], // {A JSON Array}

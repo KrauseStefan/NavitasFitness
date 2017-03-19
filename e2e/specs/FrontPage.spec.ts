@@ -7,7 +7,7 @@ import { Key, browser } from 'protractor';
 const userInfo = {
   name: 'test',
   email: 't-frontpage-admin@domain.com',
-  accessId: '1234509876',
+  accessId: 'AAMS-asa',
   password: 'Password123',
 };
 
