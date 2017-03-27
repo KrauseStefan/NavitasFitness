@@ -19,5 +19,4 @@ gnome-terminal -e "npm start" &
 cd -
 
 goapp get -v ./...
-gnome-terminal -e "goapp serve ." &
-
+gnome-terminal -e "/home/stefan/Apps/go_appengine/dev_appserver.py ." &

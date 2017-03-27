@@ -2,19 +2,20 @@ package UserDao
 
 import (
 	"crypto/rand"
+	"encoding/json"
 	"errors"
-	"golang.org/x/crypto/bcrypt"
+	"fmt"
 	"strconv"
 	"time"
 
 	"appengine"
 	"appengine/datastore"
 
-	"AppEngineHelper"
-	"Dropbox"
-	"encoding/json"
-	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/validator.v2"
+
+	"AccessIdValidator"
+	"AppEngineHelper"
 )
 
 type ErrorType string
@@ -87,7 +88,7 @@ type UserDTO struct {
 }
 
 func (user *UserDTO) ValidateUser(ctx appengine.Context) error {
-	if isValid, _ := Dropbox.ValidateAccessId(ctx, []byte(user.AccessId)); !isValid {
+	if isValid, _ := AccessIdValidator.ValidateAccessId(ctx, []byte(user.AccessId)); !isValid {
 		return Invalid_accessId
 	}
 

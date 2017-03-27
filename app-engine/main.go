@@ -1,20 +1,20 @@
 package main
 
 import (
+	"errors"
 	"net/http"
+	"reflect"
+	"regexp"
 
 	"github.com/gorilla/mux"
 	"gopkg.in/validator.v2"
 
 	"Auth"
+	"DropboxService"
 	"Export/Service"
 	"IPN"
 	"MainPage"
 	"User/Service"
-	"errors"
-	"reflect"
-
-	"regexp"
 )
 
 const emailRegStr = `^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$`
@@ -44,7 +44,7 @@ func init() {
 	AuthService.IntegrateRoutes(router)
 	IPN.IntegrateRoutes(router)
 	ExportService.IntegrateRoutes(router)
-
+	DropboxService.IntegrateRoutes(router)
 	http.Handle("/", router)
 	//	http.HandleFunc("/rest/", root)
 

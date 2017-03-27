@@ -14,3 +14,5 @@ bower_components
 typings
 
 /**/.vscode/.*
+
+config.json

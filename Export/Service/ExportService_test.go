@@ -1,17 +1,18 @@
 package ExportService
 
 import (
+	"errors"
 	"net/http"
 	"testing"
+	"time"
+
+	"github.com/tealeg/xlsx"
 
 	"appengine"
 	"appengine/datastore"
 
 	"TestHelper"
 	"User/Dao"
-	"errors"
-	"github.com/tealeg/xlsx"
-	"time"
 )
 
 var assert = TestHelper.Assert
@@ -131,7 +132,7 @@ func TestShouldAddHeaderRowBasedOnPassedArgumentsToAddRow(t *testing.T) {
 	col2 := "test2"
 	sheet := xlsx.Sheet{}
 
-	addRow(&sheet, col1, col2)
+	addXlsxRow(&sheet, col1, col2)
 
 	assert(t, len(sheet.Rows)).Equals(1)
 	assert(t, sheet.Rows[0].Cells[0].Value).Equals(col1)

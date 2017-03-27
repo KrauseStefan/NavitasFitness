@@ -1,12 +1,14 @@
-package Dropbox
+package AccessIdValidator
 
 import (
-	"appengine"
-	"appengine/urlfetch"
 	"bytes"
 	"encoding/hex"
 	"io/ioutil"
 	"time"
+
+	"appengine"
+
+	"Dropbox"
 )
 
 const (
@@ -21,14 +23,12 @@ var (
 
 func downloadValidAccessIds(ctx appengine.Context) error {
 
-	client := urlfetch.Client(ctx)
-
-	rsp, err := client.Get(downloadLink)
+	resp, err := Dropbox.DownloadFile(ctx, downloadLink)
 	if err != nil {
 		return err
 	}
 
-	data, err := ioutil.ReadAll(rsp.Body)
+	data, err := ioutil.ReadAll(resp)
 	if err != nil {
 		return err
 	}

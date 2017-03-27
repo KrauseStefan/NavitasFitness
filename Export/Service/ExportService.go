@@ -1,21 +1,27 @@
 package ExportService
 
 import (
+	"bytes"
+	"io"
 	"net/http"
+	"time"
 
 	"appengine"
+	"appengine/datastore"
 
 	"github.com/gorilla/mux"
 	"github.com/tealeg/xlsx"
 
+	"Dropbox"
 	"IPN/Transaction"
 	"User/Dao"
 	"User/Service"
-	"appengine/datastore"
-	"time"
 )
 
-const xlsxDateFormat = "02.01.2006"
+const (
+	xlsxDateFormat = "02.01.2006"
+	csvDateFormat  = "02-01-2006"
+)
 
 var (
 	userDao_GetAllUsers                        = UserDao.GetAllUsers
@@ -49,6 +55,12 @@ func IntegrateRoutes(router *mux.Router) {
 		Path(path + "/xlsx").
 		Name("export").
 		HandlerFunc(UserService.AsAdmin(exportXlsxHandler))
+
+	router.
+		Methods("GET").
+		Path(path + "/csv").
+		Name("export").
+		HandlerFunc(UserService.AsAdmin(exportCsvHandler))
 }
 
 func getExtrema(txns []*TransactionDao.TransactionMsgDTO) (*TransactionDao.TransactionMsgDTO, *TransactionDao.TransactionMsgDTO) {
@@ -105,7 +117,7 @@ func configureHeaderForFileDownload(header *http.Header, filename string) {
 	header.Add("Expires", "0")
 }
 
-func addRow(sheet *xlsx.Sheet, values ...string) {
+func addXlsxRow(sheet *xlsx.Sheet, values ...string) {
 	row := sheet.AddRow()
 
 	for _, value := range values {
@@ -127,7 +139,7 @@ func createXlsxFile(ctx appengine.Context) (*xlsx.File, error) {
 		return nil, err
 	}
 
-	addRow(
+	addXlsxRow(
 		sheet,
 		"Medarbejder nr i ADK",
 		"Aktiveringsdato",
@@ -139,7 +151,7 @@ func createXlsxFile(ctx appengine.Context) (*xlsx.File, error) {
 	)
 
 	for _, user := range userTxnTuple {
-		addRow(
+		addXlsxRow(
 			sheet,
 			user.user.AccessId,
 			user.firstDate.Format(xlsxDateFormat),
@@ -175,4 +187,67 @@ func exportXlsxHandler(w http.ResponseWriter, r *http.Request, user *UserDao.Use
 	}
 
 	err = file.Write(w)
+}
+
+func createCsvFile(ctx appengine.Context, w io.Writer) error {
+	userTxnTuple, err := getActiveTransactionList(ctx)
+	if err != nil {
+		return err
+	}
+
+	bomPrefix := []byte{0xef, 0xbb, 0xbf}
+	windowsNewline := []byte{0x0D, 0x0A}
+	comma := []byte{','}
+	w.Write(bomPrefix)
+
+	//N0774,27-06-2016,03-01-2017
+	//AAMS-asa,27-06-2016,03-01-2017
+	//201505600,27-06-2016,03-01-2017
+
+	if len(userTxnTuple) > 0 {
+		user := userTxnTuple[0]
+		ctx.Infof("%s, %s, %s", user.user.AccessId, user.firstDate.String(), user.lastDate.String())
+		w.Write([]byte(user.user.AccessId))
+		w.Write(comma)
+		w.Write([]byte(user.firstDate.Format(csvDateFormat)))
+		w.Write(comma)
+		w.Write([]byte(user.lastDate.AddDate(0, 6, 0).Format(csvDateFormat)))
+	}
+
+	for _, user := range userTxnTuple[1:] {
+		ctx.Infof("%s, %s, %s", user.user.AccessId, user.firstDate.String(), user.lastDate.String())
+		w.Write([]byte(windowsNewline))
+		w.Write([]byte(user.user.AccessId))
+		w.Write(comma)
+		w.Write([]byte(user.firstDate.Format(csvDateFormat)))
+		w.Write(comma)
+		w.Write([]byte(user.lastDate.AddDate(0, 6, 0).Format(csvDateFormat)))
+	}
+
+	return nil
+}
+
+func exportCsvHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
+	ctx := appengine.NewContext(r)
+	fileName := "ActiveSubscriptions.csv"
+
+	var buffer bytes.Buffer
+
+	err := createCsvFile(ctx, &buffer)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = Dropbox.UploadDoc(ctx, fileName, &buffer)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 }

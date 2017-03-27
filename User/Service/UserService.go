@@ -9,9 +9,9 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"AccessIdValidator"
 	"AppEngineHelper"
 	"Auth"
-	"Dropbox"
 	"IPN/Transaction"
 	"User/Dao"
 )
@@ -51,7 +51,7 @@ func validateAccessId(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 	accessId_bytes := []byte(mux.Vars(r)[accessIdKey])
 
-	isValid, err := Dropbox.ValidateAccessId(ctx, accessId_bytes)
+	isValid, err := AccessIdValidator.ValidateAccessId(ctx, accessId_bytes)
 	if err != nil {
 		ctx.Errorf(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)

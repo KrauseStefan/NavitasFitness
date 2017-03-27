@@ -67,3 +67,14 @@ func IntIDToKeyInt64(kind string, parentKeyGetter CollectionParentKeyGetter) Int
 		return datastore.NewKey(ctx, kind, "", intId, parentKeyGetter(ctx))
 	}
 }
+
+func CreateQueryParamString(params map[string]string) string {
+	var paramStr string
+	for k, v := range params {
+		if len(paramStr) != 0 {
+			paramStr = paramStr + "&"
+		}
+		paramStr = paramStr + k + "=" + v
+	}
+	return paramStr
+}
