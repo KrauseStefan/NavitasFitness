@@ -1,18 +1,11 @@
 package UserDao
 
 import (
-	"crypto/rand"
 	"errors"
 	"strconv"
-	"time"
-
 	"appengine"
 	"appengine/datastore"
 
-	"golang.org/x/crypto/bcrypt"
-	"gopkg.in/validator.v2"
-
-	"AccessIdValidator"
 	"AppEngineHelper"
 	"DAOHelper"
 )
@@ -43,72 +36,8 @@ var (
 	userIntIDToKeyInt64     = AppEngineHelper.IntIDToKeyInt64(USER_KIND, userCollectionParentKey)
 )
 
-type UserDTO struct {
-	Name               string    `json:"name",datastore:",noindex",validate:"min=2"`
-	Email              string    `json:"email",validate:"email"`
-	AccessId           string    `json:"accessId"`
-	Password           string    `json:"password,omitempty",datastore:",noindex",validate:"min=2"`
-	PasswordHash       []byte    `json:"-",datastore:",noindex"`
-	PasswordSalt       []byte    `json:"-",datastore:",noindex"`
-	Key                string    `json:"-",datastore:"-"`
-	CreatedDate        time.Time `json:"-"`
-	CurrentSessionUUID string    `json:"-"`
-	IsAdmin            bool      `json:"-"`
-}
-
-func (user *UserDTO) ValidateUser(ctx appengine.Context) error {
-	if isValid, _ := AccessIdValidator.ValidateAccessId(ctx, []byte(user.AccessId)); !isValid {
-		return Invalid_accessId
-	}
-
-	return validator.Validate(user)
-}
-
-func (user *UserDTO) hasKey() bool {
-	return len(user.Key) > 0
-}
-
-func (user *UserDTO) GetDataStoreKey(ctx appengine.Context) *datastore.Key {
-	return StringToKey(ctx, user.Key)
-}
-
-func (user *UserDTO) setKey(key *datastore.Key) *UserDTO {
-	user.Key = strconv.FormatInt(key.IntID(), 10)
-	return user
-}
-
 func StringToKey(ctx appengine.Context, key string) *datastore.Key {
 	return userIntIDToKeyInt64(ctx, key)
-}
-
-func (user *UserDTO) getPasswordWithSalt(password []byte) []byte {
-	return append(user.PasswordSalt, password...)
-}
-
-func (user *UserDTO) UpdatePasswordHash(password []byte) error {
-	if password == nil && user.Password != "" {
-		password = []byte(user.Password)
-	}
-	if password == nil {
-		return passwordCanNotBeEmpty
-	}
-	// https://crackstation.net/hashing-security.htm
-	user.PasswordSalt = make([]byte, PW_SALT_BYTES)
-	rand.Read(user.PasswordSalt)
-
-	passwordHash, err := bcrypt.GenerateFromPassword(user.getPasswordWithSalt(password), bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
-
-	user.PasswordHash = passwordHash
-	user.Password = ""
-
-	return nil
-}
-
-func (user *UserDTO) VerifyPassword(password string) error {
-	return bcrypt.CompareHashAndPassword(user.PasswordHash, user.getPasswordWithSalt([]byte(password)))
 }
 
 func GetUserByEmail(ctx appengine.Context, email string) (*UserDTO, error) {
