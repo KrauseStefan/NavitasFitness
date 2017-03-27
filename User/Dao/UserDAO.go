@@ -2,9 +2,7 @@ package UserDao
 
 import (
 	"crypto/rand"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -16,13 +14,7 @@ import (
 
 	"AccessIdValidator"
 	"AppEngineHelper"
-)
-
-type ErrorType string
-
-const (
-	UniqueConstraint ErrorType = "unique_constraint"
-	Invalid          ErrorType = "invalid"
+	"DAOHelper"
 )
 
 const (
@@ -34,35 +26,12 @@ const (
 	PW_SALT_BYTES = 32
 )
 
-type ConstraintError struct {
-	Field   string    `json:"field"`
-	Type    ErrorType `json:"type"`
-	Message string    `json:"message"`
-}
-
-func (e ConstraintError) Error() string {
-	if len(e.Message) == 0 {
-		if e.Type == UniqueConstraint {
-			e.Message = fmt.Sprintf("Cannot create user, %s already in use", e.Field)
-		} else if e.Type == Invalid {
-			e.Message = fmt.Sprintf("Cannot create user, %s is invalid", e.Field)
-		}
-	}
-
-	js, err := json.Marshal(e)
-	if err != nil {
-		panic(err)
-	}
-
-	return string(js)
-}
-
 var (
 	userHasIdError = errors.New("Cannot create new user, key must be nil")
 
-	UniqueConstraint_email    = &ConstraintError{Field: "email", Type: UniqueConstraint}
-	UniqueConstraint_accessId = &ConstraintError{Field: "accessId", Type: UniqueConstraint}
-	Invalid_accessId          = &ConstraintError{Field: "accessId", Type: Invalid}
+	UniqueConstraint_email    = &DAOHelper.ConstraintError{Field: "email", Type: DAOHelper.UniqueConstraint}
+	UniqueConstraint_accessId = &DAOHelper.ConstraintError{Field: "accessId", Type: DAOHelper.UniqueConstraint}
+	Invalid_accessId          = &DAOHelper.ConstraintError{Field: "accessId", Type: DAOHelper.Invalid}
 
 	UserNotFoundError     = errors.New("User does not exist in datastore")
 	invalidSessionError   = errors.New("Invalid user session")

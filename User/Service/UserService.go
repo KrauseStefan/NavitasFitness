@@ -14,6 +14,7 @@ import (
 	"Auth"
 	"IPN/Transaction"
 	"User/Dao"
+	"DAOHelper"
 )
 
 const accessIdKey = "accessId"
@@ -134,11 +135,11 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := UserDao.CreateUser(ctx, user); err != nil {
 		switch v := err.(type) {
-		case UserDao.ConstraintError:
+		case DAOHelper.ConstraintError:
 			switch v.Type {
-			case UserDao.UniqueConstraint:
+			case DAOHelper.UniqueConstraint:
 				http.Error(w, err.Error(), http.StatusConflict)
-			case UserDao.Invalid:
+			case DAOHelper.Invalid:
 				http.Error(w, err.Error(), http.StatusBadRequest)
 			default:
 				http.Error(w, err.Error(), http.StatusInternalServerError)
