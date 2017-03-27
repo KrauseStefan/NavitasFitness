@@ -18,6 +18,8 @@ import (
 	"User/Dao"
 )
 
+var userDAO = UserDao.GetInstance()
+
 const (
 	localIpn         = "http://localhost:8081/cgi-bin/webscr"          //(Will behave like a live IPN)
 	PaypalIpn        = "https://www.paypal.com/cgi-bin/webscr"         //(for live IPNs)
@@ -170,7 +172,7 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 		ctx.Infof(fmt.Sprintf("TxnId not found: %q", transaction.GetField(TransactionDao.FIELD_TXN_ID)))
 		ctx.Infof(fmt.Sprintf("Recived transaction from: %q", email))
 
-		user, err := UserDao.GetUserByEmail(ctx, email)
+		user, err := userDAO.GetUserByEmail(ctx, email)
 		if err != nil {
 			return err
 		}

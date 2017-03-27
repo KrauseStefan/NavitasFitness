@@ -9,8 +9,8 @@ import (
 	"appengine/datastore"
 
 	"AccessIdValidator"
-	"golang.org/x/crypto/bcrypt"
 	"crypto/rand"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserDTO struct {
@@ -39,7 +39,7 @@ func (user *UserDTO) hasKey() bool {
 }
 
 func (user *UserDTO) GetDataStoreKey(ctx appengine.Context) *datastore.Key {
-	return StringToKey(ctx, user.Key)
+	return userDao.StringToKey(ctx, user.Key)
 }
 
 func (user *UserDTO) setKey(key *datastore.Key) *UserDTO {

@@ -18,13 +18,15 @@ import (
 	"User/Service"
 )
 
+var userDAO = UserDao.GetInstance()
+
 const (
 	xlsxDateFormat = "02.01.2006"
 	csvDateFormat  = "02-01-2006"
 )
 
 var (
-	userDao_GetAllUsers                        = UserDao.GetAllUsers
+	userDao_GetAllUsers                        = userDAO.GetAllUsers
 	transactionDao_GetCurrentTransactionsAfter = func(ctx appengine.Context, userKey *datastore.Key, date time.Time) (time.Time, time.Time, error) {
 		activeSubscriptions, err := TransactionDao.GetCurrentTransactionsAfter(ctx, userKey, date)
 		if err != nil {

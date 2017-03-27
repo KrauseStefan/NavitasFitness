@@ -11,6 +11,8 @@ import (
 	"User/Dao"
 )
 
+var userDAO = UserDao.GetInstance()
+
 var (
 	TxnDuplicateTxnMsg = errors.New("Doublicate message recived, this is likely not a programming error")
 	//txnUnableToVerify = errors.New("Unable to verify message")
@@ -41,7 +43,7 @@ func PersistNewIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO, user
 	if userKey == "" {
 		newKey = datastore.NewIncompleteKey(ctx, TXN_KIND, txnCollectionParentKey(ctx))
 	} else {
-		newKey = datastore.NewIncompleteKey(ctx, TXN_KIND, UserDao.StringToKey(ctx, userKey))
+		newKey = datastore.NewIncompleteKey(ctx, TXN_KIND, userDAO.StringToKey(ctx, userKey))
 	}
 
 	//Make sure indexed fields are updated

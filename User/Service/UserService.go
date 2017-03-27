@@ -12,10 +12,12 @@ import (
 	"AccessIdValidator"
 	"AppEngineHelper"
 	"Auth"
+	"DAOHelper"
 	"IPN/Transaction"
 	"User/Dao"
-	"DAOHelper"
 )
+
+var userDAO = UserDao.GetInstance()
 
 const accessIdKey = "accessId"
 
@@ -133,7 +135,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := UserDao.CreateUser(ctx, user); err != nil {
+	if err := userDAO.CreateUser(ctx, user); err != nil {
 		switch v := err.(type) {
 		case DAOHelper.ConstraintError:
 			switch v.Type {

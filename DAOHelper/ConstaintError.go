@@ -1,8 +1,8 @@
 package DAOHelper
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 )
 
 type ErrorType string

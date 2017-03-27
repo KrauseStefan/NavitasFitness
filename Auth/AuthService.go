@@ -15,6 +15,8 @@ import (
 	"User/Dao"
 )
 
+var userDAO = UserDao.GetInstance()
+
 const sessionCookieName = "Session-Key"
 
 type UserLogin struct {
@@ -122,7 +124,7 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err = UserDao.GetUserByEmail(ctx, loginRequestUser.Email)
+	user, err = userDAO.GetUserByEmail(ctx, loginRequestUser.Email)
 	if user == nil || err == UserDao.UserNotFoundError {
 		ctx.Errorf("Failed to login, %s does not exist in DB", loginRequestUser.Email)
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
@@ -152,7 +154,7 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = UserDao.SetSessionUUID(ctx, user, uuid)
+	err = userDAO.SetSessionUUID(ctx, user, uuid)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
