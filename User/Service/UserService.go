@@ -100,7 +100,7 @@ func getUserFromSession(ctx appengine.Context, r *http.Request) (*UserDao.UserDT
 		return nil, err
 	}
 
-	return UserDao.GetUserFromSessionUUID(ctx, uuid)
+	return userDAO.GetUserFromSessionUUID(ctx, uuid)
 }
 
 type UserSessionDto struct {

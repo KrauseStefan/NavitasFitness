@@ -55,7 +55,7 @@ func GetSetting(ctx appengine.Context, key string) (*datastore.Key, string, erro
 	settings := make([]systemSetting, 0, 1)
 	keys, err := datastore.NewQuery(SETTING_KIND).
 		Ancestor(settingCollectionParentKey(ctx)).
-		Filter("key = ", key).
+		Filter("Key = ", key).
 		Limit(1).
 		GetAll(ctx, &settings)
 

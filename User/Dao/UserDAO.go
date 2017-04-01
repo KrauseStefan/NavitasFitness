@@ -40,7 +40,7 @@ var (
 
 var userDao UserDAO
 
-func GetInstance() *UserDAO {
+func GetInstance() IUserDAO {
 	return &userDao
 }
 
@@ -167,7 +167,7 @@ func (u *UserDAO) SetSessionUUID(ctx appengine.Context, user *UserDTO, uuid stri
 	return u.saveUser(ctx, user)
 }
 
-func GetUserFromSessionUUID(ctx appengine.Context, uuid string) (*UserDTO, error) {
+func (u *UserDAO) GetUserFromSessionUUID(ctx appengine.Context, uuid string) (*UserDTO, error) {
 
 	users := make([]UserDTO, 0, 2)
 

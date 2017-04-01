@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Hints
+# sudo ln -s ~/Apps/google-cloud-sdk/platform/google_appengine/goroot/src/appengine $GOROOT/src/
+# sudo ln -s ~/Apps/google-cloud-sdk/platform/google_appengine/goroot/src/appengine_internal $GOROOT/src/
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd ${DIR}
 
@@ -16,6 +20,6 @@ for dir in $(ls -d */); do
     fi;
 done
 
-goapp fmt ./...
-goapp get -d -v ./...
-goapp test -v ./...
+go fmt ./...
+go get -d -v ./...
+go test -v ./...

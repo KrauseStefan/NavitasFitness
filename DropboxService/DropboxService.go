@@ -9,6 +9,7 @@ import (
 	"User/Dao"
 	"User/Service"
 	"appengine"
+	"strings"
 )
 
 const (
@@ -16,6 +17,7 @@ const (
 
 	clientId = "v34s5hrxzkjw8ie"
 
+	redirectUriBase     = "https://navitas-fitness-aarhus.appspot.com"
 	redirectUriBaseTest = "http://localhost:9000"
 	path                = "/rest/dropbox"
 	tokenCallback       = "/tokenCallback"
@@ -37,15 +39,20 @@ func IntegrateRoutes(router *mux.Router) {
 
 }
 
-func getRedirectUri() string {
-	return redirectUriBaseTest + path + tokenCallback
+func getRedirectUri(r *http.Request) string {
+	if strings.Contains(r.Host, "localhost") {
+		return redirectUriBaseTest + path + tokenCallback
+	} else {
+		return redirectUriBase + path + tokenCallback
+	}
+
 }
 
 func authorizeWithDropboxHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
 	params := map[string]string{
 		"response_type": "code", // token or code
 		"client_id":     clientId,
-		"redirect_uri":  getRedirectUri(),
+		"redirect_uri":  getRedirectUri(r),
 		//"state": fmt.Sprint("%i", rand.Int63()), // Up to 500 bytes of arbitrary data that will be passed back to your redirect URI (CSRF protection)
 	}
 
@@ -59,7 +66,7 @@ func authorizationCallbackHandler(w http.ResponseWriter, r *http.Request, user *
 	r.ParseForm()
 
 	code := r.Form["code"][0]
-	if err := Dropbox.RetrieveAccessToken(ctx, code, getRedirectUri()); err != nil {
+	if err := Dropbox.RetrieveAccessToken(ctx, code, getRedirectUri(r)); err != nil {
 		ctx.Errorf(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
