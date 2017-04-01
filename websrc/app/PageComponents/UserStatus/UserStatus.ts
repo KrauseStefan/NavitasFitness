@@ -65,7 +65,7 @@ class UserStatus {
   private moniterUserCredentials(): void {
     this.userService.getLoggedinUser$().subscribe((user: IUserDTO) => {
       if (user) {
-        this.model.userNameStr = ' - ' + user.name;
+        this.model.userNameStr = ' - ' + user.name + ' - ' + user.accessId;
         this.model.userEmail = user.email;
         this.getTransactionsUpdate();
       } else if (this.$state.is(statusRouterState)) {

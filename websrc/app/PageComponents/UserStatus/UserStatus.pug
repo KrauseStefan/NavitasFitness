@@ -1,7 +1,9 @@
 .user-status
   md-card
     md-content(layout-padding)
-      h3.md-title Current status {{ $ctrl.model.userNameStr }}
+      h3.md-title
+        b Current status
+        span {{ $ctrl.model.userNameStr }}
       div
         md-input-container
           label Subscription status
