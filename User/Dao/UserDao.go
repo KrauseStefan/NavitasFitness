@@ -11,9 +11,12 @@ type UserCreator interface {
 	Create(ctx appengine.Context, user *UserDTO) error
 }
 
-type UserRetriever interface {
+type SingleUserRetriever interface {
 	GetByEmail(ctx appengine.Context, email string) (*UserDTO, error)
 	GetByAccessId(ctx appengine.Context, accessId string) (*UserDTO, error)
+}
+
+type UsersRetriever interface {
 	GetAll(ctx appengine.Context) ([]*datastore.Key, []UserDTO, error)
 }
 
@@ -28,7 +31,8 @@ type UserSessionRetriever interface {
 type UserDAO interface {
 	AppEngineHelper.AppEngineDaoBase
 	UserCreator
-	UserRetriever
+	SingleUserRetriever
+	UsersRetriever
 	UserSessionRetriever
 	UserSessionSetter
 }

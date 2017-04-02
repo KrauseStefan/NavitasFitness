@@ -6,10 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tealeg/xlsx"
-
 	"appengine"
 	"appengine/datastore"
+	"github.com/tealeg/xlsx"
 
 	"TestHelper"
 	"User/Dao"
@@ -17,17 +16,7 @@ import (
 
 var assert = TestHelper.Assert
 
-func mockoutGetAllUsers(keys []*datastore.Key, users []UserDao.UserDTO, err error) *TestHelper.Spy {
-	spy := new(TestHelper.Spy)
-	userDao_GetAll = func(ctx appengine.Context) ([]*datastore.Key, []UserDao.UserDTO, error) {
-		spy.RegisterCall()
-		spy.RegisterArg1(ctx)
-		return keys, users, err
-	}
-	return spy
-}
-
-func mockoutUserHasActiveSubscription(firstDate []time.Time, lastDate []time.Time, err []error) *TestHelper.Spy {
+func mockUserHasActiveSubscription(firstDate []time.Time, lastDate []time.Time, err []error) *TestHelper.Spy {
 	spy := new(TestHelper.Spy)
 	transactionDao_GetCurrentTransactionsAfter = func(ctx appengine.Context, userKey *datastore.Key, date time.Time) (time.Time, time.Time, error) {
 		spy.RegisterCall()
@@ -80,31 +69,30 @@ func TestShouldGetTransactionsFromDataStore(t *testing.T) {
 
 	now := time.Now()
 	invalid := time.Time{}
-	spy := mockoutGetAllUsers(keys, users, nil)
-	spyHasActiveSub := mockoutUserHasActiveSubscription([]time.Time{invalid, now, now}, []time.Time{invalid, now, now}, []error{nil, nil, nil})
+	userDaoMock := mockUserRetriever(keys, users, nil)
+	spyHasActiveSub := mockUserHasActiveSubscription([]time.Time{invalid, now, now}, []time.Time{invalid, now, now}, []error{nil, nil, nil})
 
 	userTxnTuple, err := getActiveTransactionList(ctx)
 
-	assert(t, spy.CallCount()).Equals(1)
-	assert(t, spy.GetLatestArg1()).Equals(ctx)
+	assert(t, userDaoMock.CallCount).Equals(1)
+	assert(t, userDaoMock.LatestCallCtxArg).Equals(ctx)
 	assert(t, len(userTxnTuple)).Equals(1)
 	assert(t, userTxnTuple[0].user).Equals(users[1])
 	assert(t, err).Equals(nil)
 
 	assert(t, spyHasActiveSub.CallCount()).Equals(2)
-
 }
 
 func TestShouldPassOnErrorsFromDataStore_GetAllUsers(t *testing.T) {
 	ctx := &TestHelper.ContextMock{}
 	testError := errors.New("test error")
 
-	getAllUsersSpy := mockoutGetAllUsers(nil, nil, testError)
+	userDaoMock := mockUserRetriever(nil, nil, testError)
 
 	userTxnTuple, err := getActiveTransactionList(ctx)
 
-	assert(t, getAllUsersSpy.CallCount()).Equals(1)
-	assert(t, getAllUsersSpy.GetLatestArg1()).Equals(ctx)
+	assert(t, userDaoMock.CallCount).Equals(1)
+	assert(t, userDaoMock.LatestCallCtxArg).Equals(ctx)
 	assert(t, userTxnTuple).Equals(nil)
 	assert(t, err).Equals(testError)
 }
@@ -113,13 +101,13 @@ func TestShouldPassOnErrorsFromDataStore_HasSubscription(t *testing.T) {
 	ctx := &TestHelper.ContextMock{}
 	testError := errors.New("test error")
 
-	keys := []*datastore.Key{&datastore.Key{}}
-	users := []UserDao.UserDTO{UserDao.UserDTO{}}
+	keys := []*datastore.Key{{}}
+	users := []UserDao.UserDTO{{}}
 
 	now := time.Now()
 
-	mockoutGetAllUsers(keys, users, nil)
-	mockoutUserHasActiveSubscription([]time.Time{now}, []time.Time{now}, []error{testError})
+	mockUserRetriever(keys, users, nil)
+	mockUserHasActiveSubscription([]time.Time{now}, []time.Time{now}, []error{testError})
 
 	userTxnTuple, err := getActiveTransactionList(ctx)
 
@@ -147,8 +135,8 @@ func TestShouldCreateXlsxSheetWithAllUserHavingActiveSubscription(t *testing.T) 
 
 	now := time.Now()
 
-	mockoutGetAllUsers(keys, users, nil)
-	mockoutUserHasActiveSubscription([]time.Time{now}, []time.Time{now}, []error{nil})
+	mockUserRetriever(keys, users, nil)
+	mockUserHasActiveSubscription([]time.Time{now}, []time.Time{now}, []error{nil})
 
 	file, error := createXlsxFile(ctx)
 
@@ -172,7 +160,7 @@ func TestExportXlsxHandler(t *testing.T) {
 	ctx := new(TestHelper.ContextMock)
 	testError := errors.New("test error")
 
-	mockoutGetAllUsers(nil, nil, testError)
+	mockUserRetriever(nil, nil, testError)
 
 	file, err := createXlsxFile(ctx)
 
