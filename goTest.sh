@@ -7,19 +7,27 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd ${DIR}
 
-export GOPATH="$HOME/TEST-GOPATH"
+GO_TEST_PATH="$HOME/TEST-GOPATH"
 
-rm $GOPATH -rf
+#rm $GO_TEST_PATH -rf
 
-mkdir -p $GOPATH
-mkdir -p "$GOPATH/src"
+mkdir -p $GO_TEST_PATH
+mkdir -p "$GO_TEST_PATH/src"
 
 for dir in $(ls -d */); do
     if [[ $dir =~ ^[A-Z].* ]]; then
-        ln -s "$HOME/git/NavitasFitness/${dir::-1}" "$HOME/TEST-GOPATH/src/"
+        ln -sf "$HOME/git/NavitasFitness/${dir::-1}" "$HOME/TEST-GOPATH/src/"
     fi;
 done
 
+export GOPATH="$GOPATH:$GO_TEST_PATH"
+
+echo "$(date +%H:%M:%S.%N) go fmt"
 go fmt ./...
+echo "$(date +%H:%M:%S.%N) go vet"
+go vet ./...
+echo "$(date +%H:%M:%S.%N) go get"
 go get -d -v ./...
+echo "$(date +%H:%M:%S.%N) go test"
 go test -v ./...
+echo "$(date +%H:%M:%S.%N) Finished"
