@@ -135,7 +135,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := userDAO.CreateUser(ctx, user); err != nil {
+	if err := userDAO.Create(ctx, user); err != nil {
 		switch v := err.(type) {
 		case DAOHelper.ConstraintError:
 			switch v.Type {

@@ -39,7 +39,7 @@ func (user *UserDTO) hasKey() bool {
 }
 
 func (user *UserDTO) GetDataStoreKey(ctx appengine.Context) *datastore.Key {
-	return userDao.StringToKey(ctx, user.Key)
+	return GetInstance().StringToKey(ctx, user.Key)
 }
 
 func (user *UserDTO) setKey(key *datastore.Key) *UserDTO {

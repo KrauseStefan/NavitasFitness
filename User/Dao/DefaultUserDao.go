@@ -10,7 +10,7 @@ import (
 	"DAOHelper"
 )
 
-type UserDAO struct{}
+type DefaultUserDAO struct{}
 
 const (
 	USER_KIND             = "User"
@@ -38,17 +38,17 @@ var (
 	userIntIDToKeyInt64     = AppEngineHelper.IntIDToKeyInt64(USER_KIND, userCollectionParentKey)
 )
 
-var userDao UserDAO
+var defaultUserDaoInstance = DefaultUserDAO{}
 
-func GetInstance() IUserDAO {
-	return &userDao
+func GetInstance() UserDAO {
+	return &defaultUserDaoInstance
 }
 
-func (u *UserDAO) StringToKey(ctx appengine.Context, key string) *datastore.Key {
+func (u *DefaultUserDAO) StringToKey(ctx appengine.Context, key string) *datastore.Key {
 	return userIntIDToKeyInt64(ctx, key)
 }
 
-func (u *UserDAO) GetUserByEmail(ctx appengine.Context, email string) (*UserDTO, error) {
+func (u *DefaultUserDAO) GetByEmail(ctx appengine.Context, email string) (*UserDTO, error) {
 	q := datastore.NewQuery(USER_KIND).
 		Ancestor(userCollectionParentKey(ctx)).
 		Filter("Email=", email).
@@ -70,7 +70,7 @@ func (u *UserDAO) GetUserByEmail(ctx appengine.Context, email string) (*UserDTO,
 	return &userDtoList[0], nil
 }
 
-func (u *UserDAO) GetUserByAccessId(ctx appengine.Context, accessId string) (*UserDTO, error) {
+func (u *DefaultUserDAO) GetByAccessId(ctx appengine.Context, accessId string) (*UserDTO, error) {
 	q := datastore.NewQuery(USER_KIND).
 		Ancestor(userCollectionParentKey(ctx)).
 		Filter("AccessId=", accessId).
@@ -92,7 +92,7 @@ func (u *UserDAO) GetUserByAccessId(ctx appengine.Context, accessId string) (*Us
 	return &userDtoList[0], nil
 }
 
-func (u *UserDAO) GetAllUsers(ctx appengine.Context) ([]*datastore.Key, []UserDTO, error) {
+func (u *DefaultUserDAO) GetAll(ctx appengine.Context) ([]*datastore.Key, []UserDTO, error) {
 	query := datastore.NewQuery(USER_KIND).
 		Ancestor(userCollectionParentKey(ctx))
 
@@ -114,17 +114,17 @@ func (u *UserDAO) GetAllUsers(ctx appengine.Context) ([]*datastore.Key, []UserDT
 	return keys, users, nil
 }
 
-func (u *UserDAO) CreateUser(ctx appengine.Context, user *UserDTO) error {
+func (u *DefaultUserDAO) Create(ctx appengine.Context, user *UserDTO) error {
 
 	if user.hasKey() {
 		return userHasIdError
 	}
 
-	if user, _ := u.GetUserByEmail(ctx, user.Email); user != nil {
+	if user, _ := u.GetByEmail(ctx, user.Email); user != nil {
 		return UniqueConstraint_email
 	}
 
-	if user, _ := u.GetUserByAccessId(ctx, user.AccessId); user != nil {
+	if user, _ := u.GetByAccessId(ctx, user.AccessId); user != nil {
 		return UniqueConstraint_accessId
 	}
 
@@ -143,7 +143,7 @@ func (u *UserDAO) CreateUser(ctx appengine.Context, user *UserDTO) error {
 	return nil
 }
 
-func (u *UserDAO) saveUser(ctx appengine.Context, user *UserDTO) error {
+func (u *DefaultUserDAO) saveUser(ctx appengine.Context, user *UserDTO) error {
 	if !user.hasKey() {
 		return userHasIdError
 	}
@@ -160,14 +160,14 @@ func (u *UserDAO) saveUser(ctx appengine.Context, user *UserDTO) error {
 	return err
 }
 
-func (u *UserDAO) SetSessionUUID(ctx appengine.Context, user *UserDTO, uuid string) error {
+func (u *DefaultUserDAO) SetSessionUUID(ctx appengine.Context, user *UserDTO, uuid string) error {
 
 	user.CurrentSessionUUID = uuid
 
 	return u.saveUser(ctx, user)
 }
 
-func (u *UserDAO) GetUserFromSessionUUID(ctx appengine.Context, uuid string) (*UserDTO, error) {
+func (u *DefaultUserDAO) GetUserFromSessionUUID(ctx appengine.Context, uuid string) (*UserDTO, error) {
 
 	users := make([]UserDTO, 0, 2)
 

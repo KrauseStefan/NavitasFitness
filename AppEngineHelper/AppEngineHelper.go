@@ -11,6 +11,10 @@ import (
 	"appengine/datastore"
 )
 
+type AppEngineDaoBase interface {
+	StringToKey(ctx appengine.Context, key string) *datastore.Key
+}
+
 var formDataDecoder = schema.NewDecoder()
 
 type FormDataDecoderFn func(interface{}) error

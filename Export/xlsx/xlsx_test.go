@@ -19,7 +19,7 @@ var assert = TestHelper.Assert
 
 func mockoutGetAllUsers(keys []*datastore.Key, users []UserDao.UserDTO, err error) *TestHelper.Spy {
 	spy := new(TestHelper.Spy)
-	userDao_GetAllUsers = func(ctx appengine.Context) ([]*datastore.Key, []UserDao.UserDTO, error) {
+	userDao_GetAll = func(ctx appengine.Context) ([]*datastore.Key, []UserDao.UserDTO, error) {
 		spy.RegisterCall()
 		spy.RegisterArg1(ctx)
 		return keys, users, err

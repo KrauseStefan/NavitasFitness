@@ -172,7 +172,7 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 		ctx.Infof(fmt.Sprintf("TxnId not found: %q", transaction.GetField(TransactionDao.FIELD_TXN_ID)))
 		ctx.Infof(fmt.Sprintf("Recived transaction from: %q", email))
 
-		user, err := userDAO.GetUserByEmail(ctx, email)
+		user, err := userDAO.GetByEmail(ctx, email)
 		if err != nil {
 			return err
 		}
