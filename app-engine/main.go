@@ -11,7 +11,8 @@ import (
 
 	"Auth"
 	"DropboxService"
-	"Export/Service"
+	"Export/csv"
+	"Export/xlsx"
 	"IPN"
 	"MainPage"
 	"User/Service"
@@ -43,7 +44,8 @@ func init() {
 	UserService.IntegrateRoutes(router)
 	AuthService.IntegrateRoutes(router)
 	IPN.IntegrateRoutes(router)
-	ExportService.IntegrateRoutes(router)
+	xlsx.IntegrateRoutes(router)
+	csv.IntegrateRoutes(router)
 	DropboxService.IntegrateRoutes(router)
 	http.Handle("/", router)
 	//	http.HandleFunc("/rest/", root)

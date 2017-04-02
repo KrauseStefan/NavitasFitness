@@ -1,4 +1,4 @@
-package ExportService
+package xlsx
 
 import (
 	"errors"
