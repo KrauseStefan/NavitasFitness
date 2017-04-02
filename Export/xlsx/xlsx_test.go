@@ -6,36 +6,24 @@ import (
 	"testing"
 	"time"
 
-	"appengine"
 	"appengine/datastore"
 	"github.com/tealeg/xlsx"
 
+	"IPN/Transaction"
 	"TestHelper"
 	"User/Dao"
 )
 
 var assert = TestHelper.Assert
 
-func mockUserHasActiveSubscription(firstDate []time.Time, lastDate []time.Time, err []error) *TestHelper.Spy {
-	spy := new(TestHelper.Spy)
-	transactionDao_GetCurrentTransactionsAfter = func(ctx appengine.Context, userKey *datastore.Key, date time.Time) (time.Time, time.Time, error) {
-		spy.RegisterCall()
-		spy.RegisterArg3(ctx, userKey, date)
-		_firstDate := firstDate[0]
-		_lastDate := lastDate[0]
-		_err := err[0]
-		if len(firstDate) > 1 {
-			firstDate = firstDate[1:]
-		}
-		if len(lastDate) > 1 {
-			lastDate = lastDate[1:]
-		}
-		if len(err) > 1 {
-			err = err[1:]
-		}
-		return _firstDate, _lastDate, _err
-	}
-	return spy
+var utc, _ = time.LoadLocation("UTC")
+
+func createMessage(date time.Time) []*TransactionDao.TransactionMsgDTO {
+	const layout = "15:04:05 Jan 02, 2006 MST"
+	dateStr := date.In(utc).Format(layout)
+	dateIpnMsg := TransactionDao.FIELD_PAYMENT_DATE + "=" + dateStr
+	dateTxnMsg := TransactionDao.NewTransactionMsgDTOFromIpn(dateIpnMsg)
+	return []*TransactionDao.TransactionMsgDTO{dateTxnMsg, dateTxnMsg}
 }
 
 func TestShouldConfigureHeaderForDownload(t *testing.T) {
@@ -58,19 +46,18 @@ func TestShouldConfigureHeaderForNoCache(t *testing.T) {
 func TestShouldGetTransactionsFromDataStore(t *testing.T) {
 	ctx := &TestHelper.ContextMock{}
 
-	keys := []*datastore.Key{
-		{},
-		{},
-	}
+	keys := []*datastore.Key{{}, {}}
 	users := []UserDao.UserDTO{
 		{Email: "NO_Subscription"},
 		{Email: "hasSubscription"},
 	}
 
-	now := time.Now()
-	invalid := time.Time{}
+	invalidMessages := createMessage(time.Time{})
+	nowMessages := createMessage(time.Now())
+
 	userDaoMock := mockUserRetriever(keys, users, nil)
-	spyHasActiveSub := mockUserHasActiveSubscription([]time.Time{invalid, now, now}, []time.Time{invalid, now, now}, []error{nil, nil, nil})
+	transactionRetrieverMock := mockTransactionRetriever(invalidMessages, nil).
+		addReturn(nowMessages, nil)
 
 	userTxnTuple, err := getActiveTransactionList(ctx)
 
@@ -80,7 +67,7 @@ func TestShouldGetTransactionsFromDataStore(t *testing.T) {
 	assert(t, userTxnTuple[0].user).Equals(users[1])
 	assert(t, err).Equals(nil)
 
-	assert(t, spyHasActiveSub.CallCount()).Equals(2)
+	assert(t, transactionRetrieverMock.CallCount).Equals(2)
 }
 
 func TestShouldPassOnErrorsFromDataStore_GetAllUsers(t *testing.T) {
@@ -103,11 +90,10 @@ func TestShouldPassOnErrorsFromDataStore_HasSubscription(t *testing.T) {
 
 	keys := []*datastore.Key{{}}
 	users := []UserDao.UserDTO{{}}
-
 	now := time.Now()
 
+	mockTransactionRetriever(createMessage(now), testError)
 	mockUserRetriever(keys, users, nil)
-	mockUserHasActiveSubscription([]time.Time{now}, []time.Time{now}, []error{testError})
 
 	userTxnTuple, err := getActiveTransactionList(ctx)
 
@@ -132,13 +118,12 @@ func TestShouldCreateXlsxSheetWithAllUserHavingActiveSubscription(t *testing.T) 
 
 	keys := []*datastore.Key{{}}
 	users := []UserDao.UserDTO{{Email: "testMail"}}
-
 	now := time.Now()
 
+	mockTransactionRetriever(createMessage(now), nil)
 	mockUserRetriever(keys, users, nil)
-	mockUserHasActiveSubscription([]time.Time{now}, []time.Time{now}, []error{nil})
 
-	file, error := createXlsxFile(ctx)
+	file, err := createXlsxFile(ctx)
 
 	headerCells := file.Sheets[0].Rows[0].Cells
 	firstRowCells := file.Sheets[0].Rows[1].Cells
@@ -153,7 +138,7 @@ func TestShouldCreateXlsxSheetWithAllUserHavingActiveSubscription(t *testing.T) 
 	assert(t, firstRowCells[4].Value).Equals(now.AddDate(0, 6, 0).Format(xlsxDateFormat))
 	assert(t, firstRowCells[5].Value).Equals("24 Timers")
 	assert(t, firstRowCells[6].Value).Equals(users[0].Email)
-	assert(t, error).Equals(nil)
+	assert(t, err).Equals(nil)
 }
 
 func TestExportXlsxHandler(t *testing.T) {

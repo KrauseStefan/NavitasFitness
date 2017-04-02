@@ -21,9 +21,6 @@ func mockUserRetriever(keys []*datastore.Key, users []UserDao.UserDTO, err error
 		keys:  keys,
 		users: users,
 		err:   err,
-
-		CallCount:        0,
-		LatestCallCtxArg: nil,
 	}
 	userDAO = mock
 	return mock

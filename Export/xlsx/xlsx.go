@@ -16,8 +16,8 @@ import (
 )
 
 var (
-	userDAO        UserDao.UsersRetriever = UserDao.GetInstance()
-	transactionDao                        = TransactionDao.GetInstance()
+	userDAO        UserDao.UsersRetriever              = UserDao.GetInstance()
+	transactionDao TransactionDao.TransactionRetriever = TransactionDao.GetInstance()
 )
 
 type UserTxnTuple struct {
@@ -39,7 +39,6 @@ var (
 
 		if len(activeSubscriptions) >= 1 {
 			firstTxn, lastTxn := getExtrema(activeSubscriptions)
-
 			return firstTxn.GetPaymentDate(), lastTxn.GetPaymentDate(), nil
 		}
 
