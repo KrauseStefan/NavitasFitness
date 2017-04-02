@@ -17,7 +17,10 @@ import (
 	"User/Dao"
 )
 
-var userDAO = UserDao.GetInstance()
+var (
+	userDao        = UserDao.GetInstance()
+	transactionDao = TransactionDao.GetInstance()
+)
 
 const accessIdKey = "accessId"
 
@@ -100,7 +103,7 @@ func getUserFromSession(ctx appengine.Context, r *http.Request) (*UserDao.UserDT
 		return nil, err
 	}
 
-	return userDAO.GetUserFromSessionUUID(ctx, uuid)
+	return userDao.GetUserFromSessionUUID(ctx, uuid)
 }
 
 type UserSessionDto struct {
@@ -135,7 +138,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := userDAO.Create(ctx, user); err != nil {
+	if err := userDao.Create(ctx, user); err != nil {
 		switch v := err.(type) {
 		case DAOHelper.ConstraintError:
 			switch v.Type {
@@ -164,7 +167,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
 	ctx := appengine.NewContext(r)
 
-	transactions, err := TransactionDao.GetTransactionsByUser(ctx, user.GetDataStoreKey(ctx))
+	transactions, err := transactionDao.GetTransactionsByUser(ctx, user.GetDataStoreKey(ctx))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

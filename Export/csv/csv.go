@@ -17,7 +17,10 @@ import (
 	"User/Service"
 )
 
-var userDAO = UserDao.GetInstance()
+var (
+	userDAO        = UserDao.GetInstance()
+	transactionDao = TransactionDao.GetInstance()
+)
 
 const (
 	csvDateFormat = "02-01-2006"
@@ -26,7 +29,7 @@ const (
 var (
 	userDao_GetAll                             = userDAO.GetAll
 	transactionDao_GetCurrentTransactionsAfter = func(ctx appengine.Context, userKey *datastore.Key, date time.Time) (time.Time, time.Time, error) {
-		activeSubscriptions, err := TransactionDao.GetCurrentTransactionsAfter(ctx, userKey, date)
+		activeSubscriptions, err := transactionDao.GetCurrentTransactionsAfter(ctx, userKey, date)
 		if err != nil {
 			return time.Time{}, time.Time{}, err
 		}

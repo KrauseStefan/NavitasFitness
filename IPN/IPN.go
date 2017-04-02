@@ -18,7 +18,10 @@ import (
 	"User/Dao"
 )
 
-var userDAO = UserDao.GetInstance()
+var (
+	userDAO        = UserDao.GetInstance()
+	transactionDao = TransactionDao.GetInstance()
+)
 
 const (
 	localIpn         = "http://localhost:8081/cgi-bin/webscr"          //(Will behave like a live IPN)
@@ -142,7 +145,7 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 
 	ctx.Debugf(fmt.Sprintf("%s: %q", TransactionDao.FIELD_PAYMENT_STATUS, transaction.GetField(TransactionDao.FIELD_PAYMENT_STATUS)))
 
-	savedTransaction, err := TransactionDao.GetTransaction(ctx, transaction.GetField(TransactionDao.FIELD_TXN_ID))
+	savedTransaction, err := transactionDao.GetTransaction(ctx, transaction.GetField(TransactionDao.FIELD_TXN_ID))
 	if err != nil {
 		return err
 	}
@@ -165,7 +168,7 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 			}
 		}
 
-		if err := TransactionDao.UpdateIpnMessage(ctx, savedTransaction); err != nil {
+		if err := transactionDao.UpdateIpnMessage(ctx, savedTransaction); err != nil {
 			return err
 		}
 	} else {
@@ -197,7 +200,7 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 			}
 		}
 
-		if err := TransactionDao.PersistNewIpnMessage(ctx, transaction, userKey); err != nil {
+		if err := transactionDao.PersistNewIpnMessage(ctx, transaction, userKey); err != nil {
 			return err
 		}
 	}

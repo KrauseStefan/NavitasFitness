@@ -12,6 +12,12 @@ import (
 
 type DefaultUserDAO struct{}
 
+var defaultUserDaoInstance = DefaultUserDAO{}
+
+func GetInstance() UserDAO {
+	return &defaultUserDaoInstance
+}
+
 const (
 	USER_KIND             = "User"
 	USER_PARENT_STRING_ID = "default_user"
@@ -37,12 +43,6 @@ var (
 	userCollectionParentKey = AppEngineHelper.CollectionParentKeyGetFnGenerator(USER_KIND, USER_PARENT_STRING_ID, 0)
 	userIntIDToKeyInt64     = AppEngineHelper.IntIDToKeyInt64(USER_KIND, userCollectionParentKey)
 )
-
-var defaultUserDaoInstance = DefaultUserDAO{}
-
-func GetInstance() UserDAO {
-	return &defaultUserDaoInstance
-}
 
 func (u *DefaultUserDAO) StringToKey(ctx appengine.Context, key string) *datastore.Key {
 	return userIntIDToKeyInt64(ctx, key)

@@ -15,7 +15,10 @@ import (
 	"User/Service"
 )
 
-var userDAO UserDao.UsersRetriever = UserDao.GetInstance()
+var (
+	userDAO        UserDao.UsersRetriever = UserDao.GetInstance()
+	transactionDao                        = TransactionDao.GetInstance()
+)
 
 type UserTxnTuple struct {
 	user      UserDao.UserDTO
@@ -29,7 +32,7 @@ const (
 
 var (
 	transactionDao_GetCurrentTransactionsAfter = func(ctx appengine.Context, userKey *datastore.Key, date time.Time) (time.Time, time.Time, error) {
-		activeSubscriptions, err := TransactionDao.GetCurrentTransactionsAfter(ctx, userKey, date)
+		activeSubscriptions, err := transactionDao.GetCurrentTransactionsAfter(ctx, userKey, date)
 		if err != nil {
 			return time.Time{}, time.Time{}, err
 		}
