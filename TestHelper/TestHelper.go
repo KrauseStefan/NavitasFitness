@@ -1,59 +1,58 @@
 package TestHelper
 
 import (
-	"appengine_internal"
-
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"runtime/debug"
 	"testing"
+
+	"appengine_internal"
 )
 
-type Spy struct {
-	argument_1 []interface{}
-	argument_2 []interface{}
-	argument_3 []interface{}
-	callCount  uint
-}
+//type Spy struct {
+//	argument_1 []interface{}
+//	argument_2 []interface{}
+//	argument_3 []interface{}
+//	callCount  uint
+//}
+//
+//func (s *Spy) RegisterCall() {
+//	s.callCount += 1
+//}
 
-func (s *Spy) RegisterCall() {
-	s.callCount += 1
-}
+//func (s *Spy) CallCount() int {
+//	return int(s.callCount)
+//}
 
-func (s *Spy) CallCount() int {
-	return int(s.callCount)
-}
-
-func prependToArgumentSlice(argSlice []interface{}, item interface{}) []interface{} {
-	if len(argSlice) == 0 {
-		argSlice = make([]interface{}, 0, 10)
-	}
-
-	return append([]interface{}{item}, argSlice...)
-}
-
-func (s *Spy) RegisterArg1(arg1 interface{}) {
-	s.argument_1 = prependToArgumentSlice(s.argument_1, arg1)
-}
-
-func (s *Spy) RegisterArg2(arg1 interface{}, arg2 interface{}) {
-	s.RegisterArg1(arg1)
-	s.argument_2 = prependToArgumentSlice(s.argument_2, arg2)
-}
-
-func (s *Spy) RegisterArg3(arg1 interface{}, arg2 interface{}, arg3 interface{}) {
-	s.RegisterArg2(arg1, arg2)
-	s.argument_3 = prependToArgumentSlice(s.argument_3, arg3)
-}
-
-func (s *Spy) GetLatestArg1() interface{} {
-	if len(s.argument_1) > 0 {
-		return s.argument_1[0]
-	}
-	return nil
-}
+//func prependToArgumentSlice(argSlice []interface{}, item interface{}) []interface{} {
+//	if len(argSlice) == 0 {
+//		argSlice = make([]interface{}, 0, 10)
+//	}
+//
+//	return append([]interface{}{item}, argSlice...)
+//}
+//
+//func (s *Spy) RegisterArg1(arg1 interface{}) {
+//	s.argument_1 = prependToArgumentSlice(s.argument_1, arg1)
+//}
+//
+//func (s *Spy) RegisterArg2(arg1 interface{}, arg2 interface{}) {
+//	s.RegisterArg1(arg1)
+//	s.argument_2 = prependToArgumentSlice(s.argument_2, arg2)
+//}
+//
+//func (s *Spy) RegisterArg3(arg1 interface{}, arg2 interface{}, arg3 interface{}) {
+//	s.RegisterArg2(arg1, arg2)
+//	s.argument_3 = prependToArgumentSlice(s.argument_3, arg3)
+//}
+//
+//func (s *Spy) GetLatestArg1() interface{} {
+//	if len(s.argument_1) > 0 {
+//		return s.argument_1[0]
+//	}
+//	return nil
+//}
 
 type ContextMock struct {
 	OptionalId int
@@ -75,12 +74,6 @@ func (c *ContextMock) FullyQualifiedAppID() string {
 func (c *ContextMock) Request() interface{} {
 	return nil
 }
-
-//func assert(t *testing.T, result bool) {
-//	if !result {
-//		t.Fail()
-//	}
-//}
 
 type AssertObj struct {
 	t        *testing.T
@@ -141,9 +134,4 @@ func Assert(t *testing.T, leftSide interface{}) *AssertObj {
 	assertObj.t = t
 	assertObj.leftSide = leftSide
 	return assertObj
-}
-
-func LogObject(obj interface{}, message string) {
-	json, _ := json.Marshal(obj)
-	fmt.Println(message, string(json))
 }
