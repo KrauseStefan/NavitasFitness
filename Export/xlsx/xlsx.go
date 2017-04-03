@@ -30,21 +30,19 @@ const (
 	xlsxDateFormat = "02.01.2006"
 )
 
-var (
-	transactionDao_GetCurrentTransactionsAfter = func(ctx appengine.Context, userKey *datastore.Key, date time.Time) (time.Time, time.Time, error) {
-		activeSubscriptions, err := transactionDao.GetCurrentTransactionsAfter(ctx, userKey, date)
-		if err != nil {
-			return time.Time{}, time.Time{}, err
-		}
-
-		if len(activeSubscriptions) >= 1 {
-			firstTxn, lastTxn := getExtrema(activeSubscriptions)
-			return firstTxn.GetPaymentDate(), lastTxn.GetPaymentDate(), nil
-		}
-
-		return time.Time{}, time.Time{}, nil
+func getFirstAndLastTxn(ctx appengine.Context, userKey *datastore.Key, date time.Time) (time.Time, time.Time, error) {
+	activeSubscriptions, err := transactionDao.GetCurrentTransactionsAfter(ctx, userKey, date)
+	if err != nil {
+		return time.Time{}, time.Time{}, err
 	}
-)
+
+	if len(activeSubscriptions) >= 1 {
+		firstTxn, lastTxn := getExtrema(activeSubscriptions)
+		return firstTxn.GetPaymentDate(), lastTxn.GetPaymentDate(), nil
+	}
+
+	return time.Time{}, time.Time{}, nil
+}
 
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/export"
@@ -98,7 +96,7 @@ func getActiveTransactionList(ctx appengine.Context) ([]UserTxnTuple, error) {
 	usersWithActiveSubscription := make([]UserTxnTuple, 0, len(userKeys))
 
 	for i, userKey := range userKeys {
-		firstDate, lastDate, err := transactionDao_GetCurrentTransactionsAfter(ctx, userKey, time.Now().AddDate(0, -6, 0))
+		firstDate, lastDate, err := getFirstAndLastTxn(ctx, userKey, time.Now().AddDate(0, -6, 0))
 		if err != nil {
 			return nil, err
 		}
