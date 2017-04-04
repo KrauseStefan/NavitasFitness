@@ -1,4 +1,4 @@
-package xlsx
+package UserDaoTestHelper
 
 import (
 	"appengine"
@@ -16,13 +16,12 @@ type UserRetrieverMock struct {
 	LatestCallCtxArg appengine.Context
 }
 
-func mockUserRetriever(keys []*datastore.Key, users []UserDao.UserDTO, err error) *UserRetrieverMock {
+func NewUserRetrieverMock(keys []*datastore.Key, users []UserDao.UserDTO, err error) *UserRetrieverMock {
 	mock := &UserRetrieverMock{
 		keys:  keys,
 		users: users,
 		err:   err,
 	}
-	userDAO = mock
 	return mock
 }
 

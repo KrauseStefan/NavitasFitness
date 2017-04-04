@@ -1,4 +1,4 @@
-package xlsx
+package TransactionDaoTestHelper
 
 import (
 	"time"
@@ -28,14 +28,13 @@ type TransactionRetrieverMock struct {
 	CallArgs  []CallArgs
 }
 
-func mockTransactionRetriever(messages []*TransactionDao.TransactionMsgDTO, err error) *TransactionRetrieverMock {
+func NewTransactionRetrieverMock(messages []*TransactionDao.TransactionMsgDTO, err error) *TransactionRetrieverMock {
 	mock := &TransactionRetrieverMock{}
-	mock.addReturn(messages, err)
-	transactionDao = mock
+	mock.AddReturn(messages, err)
 	return mock
 }
 
-func (mock *TransactionRetrieverMock) addReturn(messages []*TransactionDao.TransactionMsgDTO, err error) *TransactionRetrieverMock {
+func (mock *TransactionRetrieverMock) AddReturn(messages []*TransactionDao.TransactionMsgDTO, err error) *TransactionRetrieverMock {
 	mock.returnValues = append(mock.returnValues, ReturnValues{
 		messages: messages,
 		err:      err,

@@ -12,11 +12,26 @@ import (
 	"IPN/Transaction"
 	"TestHelper"
 	"User/Dao"
+
+	"IPN/Transaction/TransactionDaoTestHelper"
+	"User/Dao/UserDaoTestHelper"
 )
 
 var assert = TestHelper.Assert
 
 var utc, _ = time.LoadLocation("UTC")
+
+func mockTransactionRetriever(messages []*TransactionDao.TransactionMsgDTO, err error) *TransactionDaoTestHelper.TransactionRetrieverMock {
+	mock := TransactionDaoTestHelper.NewTransactionRetrieverMock(messages, err)
+	transactionDao = mock
+	return mock
+}
+
+func mockUserRetriever(keys []*datastore.Key, users []UserDao.UserDTO, err error) *UserDaoTestHelper.UserRetrieverMock {
+	mock := UserDaoTestHelper.NewUserRetrieverMock(keys, users, err)
+	userDAO = mock
+	return mock
+}
 
 func createMessage(date time.Time) []*TransactionDao.TransactionMsgDTO {
 	const layout = "15:04:05 Jan 02, 2006 MST"
@@ -57,7 +72,7 @@ func TestShouldGetTransactionsFromDataStore(t *testing.T) {
 
 	userDaoMock := mockUserRetriever(keys, users, nil)
 	transactionRetrieverMock := mockTransactionRetriever(invalidMessages, nil).
-		addReturn(nowMessages, nil)
+		AddReturn(nowMessages, nil)
 
 	userTxnTuple, err := getActiveTransactionList(ctx)
 
