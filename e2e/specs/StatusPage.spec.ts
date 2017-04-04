@@ -53,7 +53,6 @@ describe('Payments', () => {
         password: userInfo.password,
         passwordRepeat: userInfo.password,
       });
-      regDialog.termsAcceptedChkBx.click();
       regDialog.buttonRegister.click();
     });
 
@@ -83,8 +82,16 @@ describe('Payments', () => {
       expect(pageObject.getValidUntilFieldValue()).toEqual('-');
     });
 
+    it('should not be able to process a payment before terms has been accepted', () => {
+      pageObject.waitForPaypalSimBtn();
+      NavigationPageObject.statusPageTab.click();
+
+      expect(pageObject.paypalBtn.isEnabled()).toBe(false);
+    });
+
     it('should be able to process a payment', () => {
       pageObject.waitForPaypalSimBtn();
+      pageObject.termsAcceptedChkBx.click();
       pageObject.triggerPaypalPayment();
       NavigationPageObject.statusPageTab.click();
 

@@ -31,7 +31,6 @@ describe('Frontpage tests', () => {
       password: userInfo.password,
       passwordRepeat: userInfo.password,
     });
-    regDialog.termsAcceptedChkBx.click();
     regDialog.buttonRegister.click();
   });
 

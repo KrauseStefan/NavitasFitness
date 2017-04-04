@@ -23,7 +23,8 @@ export const NavitasFitnessModule = module('NavitasFitness', [
   .config((
     $stateProvider: ng.ui.IStateProvider,
     $urlRouterProvider: ng.ui.IUrlRouterProvider,
-    $locationProvider: ng.ILocationProvider
+    $locationProvider: ng.ILocationProvider,
+    $sceDelegateProvider: ng.ISCEDelegateProvider
   ) => {
     $locationProvider.html5Mode(true);
     $urlRouterProvider.otherwise('/main-page/');
@@ -31,6 +32,15 @@ export const NavitasFitnessModule = module('NavitasFitness', [
     $stateProvider
       .state('MainPage', mainPageRouterState)
       .state('Status', statusRouterState);
+
+    $sceDelegateProvider.resourceUrlWhitelist([
+      // Allow same origin resource loads.
+      'self',
+      'http://localhost:8081/processPayment',
+      'https://www.sandbox.paypal.com/cgi-bin/webscr',
+      'https://www.paypal.com/cgi-bin/webscr',
+    ]);
+
   })
   .service('userService', UserService)
   .service('mainPageService', MainPageService)

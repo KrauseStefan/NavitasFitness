@@ -58,7 +58,6 @@ describe('User Autentication', () => {
       password: userInfo.password,
       passwordRepeat: userInfo.password,
     });
-    regDialog.termsAcceptedChkBx.click();
     regDialog.buttonRegister.click();
 
     expect(regDialog.formContainer.isPresent()).toBe(false);
@@ -79,7 +78,6 @@ describe('User Autentication', () => {
         password: userInfo.password,
         passwordRepeat: userInfo.password,
       });
-      regDialog.termsAcceptedChkBx.click();
     });
 
     afterEach(() => {
@@ -166,12 +164,6 @@ describe('User Autentication', () => {
       expect(regDialog.buttonRegister.isEnabled()).toBe(false);
 
       regDialog.fillForm({ accessId: userInfo.accessId });
-      expect(regDialog.buttonRegister.isEnabled()).toBe(true);
-
-      regDialog.termsAcceptedChkBx.click();
-      expect(regDialog.buttonRegister.isEnabled()).toBe(false);
-
-      regDialog.termsAcceptedChkBx.click();
       expect(regDialog.buttonRegister.isEnabled()).toBe(true);
     });
   });

@@ -29,7 +29,9 @@ function getModelValue(model: string): wdp.Promise<string> {
 
 export class StatusPageObject {
 
-  public static paypalSimBtn = $('form[action="http://localhost:8081/processPayment"] input[name="submit"]');
+  public static paypalBtn = $('form[action] input[name="submit"]');
+
+  public static termsAcceptedChkBx = $('[name="termsAccepted"]');
 
   public static getStatusMsgFieldValue(): wdp.Promise<string> {
     return <any>byModel('$ctrl.statusMessages[$ctrl.model.statusMsgKey]')
@@ -56,13 +58,13 @@ export class StatusPageObject {
   }
 
   public static waitForPaypalSimBtn() {
-    const btnIsDisplayed = () => StatusPageObject.paypalSimBtn.isDisplayed();
+    const btnIsDisplayed = () => StatusPageObject.paypalBtn.isDisplayed();
     browser.wait(btnIsDisplayed, 5 * 1000, 'Paypall button did not display in time');
   }
 
   public static triggerPaypalPayment() {
     browser.ignoreSynchronization = true;
-    StatusPageObject.paypalSimBtn.click();
+    StatusPageObject.paypalBtn.click();
 
     waitForPageToLoad();
     $('a').click();

@@ -68,9 +68,6 @@ md-dialog
           div(ng-message="unique_constraint").
             This Access ID has already been registred
 
-      md-input-container
-        md-checkbox(name="termsAccepted", ng-model="termsAccepted", ng-required="true") You must accept the terms
-
     md-dialog-actions
       md-button(ng-click="cancel()") Cancel
       md-button.md-primary(ng-disabled="RegistrationForm.$invalid", type="submit", ng-click="submit()") Create
