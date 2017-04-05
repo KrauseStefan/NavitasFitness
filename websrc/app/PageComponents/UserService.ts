@@ -52,13 +52,13 @@ export class UserService {
 }
 
 export interface IBaseUserDTO {
-  email: string;
+  accessId: string;
   password: string;
 }
 
 export interface IUserDTO extends IBaseUserDTO {
+  email: string;
   name: string;
-  accessId: string;
   isAdmin?: boolean;
 }
 

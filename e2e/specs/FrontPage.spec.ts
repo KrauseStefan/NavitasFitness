@@ -42,7 +42,7 @@ describe('Frontpage tests', () => {
     const loginDialog = NavigationPageObject.openLoginDialog();
 
     loginDialog.fillForm({
-      email: userInfo.email,
+      accessId: userInfo.accessId,
       password: userInfo.password,
     });
 

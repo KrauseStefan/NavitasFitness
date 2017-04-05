@@ -36,7 +36,7 @@ describe('User Autentication', () => {
     const loginDialog = NavigationPageObject.openLoginDialog();
 
     loginDialog.fillForm({
-      email: userInfo.email,
+      accessId: userInfo.accessId,
       password: userInfo.password,
     });
 
@@ -96,7 +96,7 @@ describe('User Autentication', () => {
     });
 
     it('should get an error message when using an already registred accessId', () => {
-      regDialog.fillForm({ email: 'email_other@domain.com' });
+      regDialog.fillForm({ email: 'email_other@domain.com' }); // To avoid using an already registred email
 
       regDialog.buttonRegister.click();
 
@@ -172,7 +172,7 @@ describe('User Autentication', () => {
     const loginDialog = NavigationPageObject.openLoginDialog();
 
     loginDialog.fillForm({
-      email: userInfo.email,
+      accessId: userInfo.accessId,
       password: userInfo.password,
     });
 

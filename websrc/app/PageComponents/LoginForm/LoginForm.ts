@@ -19,7 +19,7 @@ export class LoginForm {
 
   public resetForm() {
     const model: IBaseUserDTO = {
-      email: '',
+      accessId: '',
       password: '',
     };
     this.$scope.model = model;

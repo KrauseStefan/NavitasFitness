@@ -21,11 +21,11 @@ const sessionCookieName = "Session-Key"
 
 type UserLogin struct {
 	Password string `json:"password"`
-	Email    string `json:"email"`
+	AccessId string `json:"accessId"`
 }
 
 func (ul UserLogin) hasValues() bool {
-	return len(ul.Email) > 0 && len(ul.Password) > 0
+	return len(ul.AccessId) > 0 && len(ul.Password) > 0
 }
 
 var (
@@ -124,9 +124,9 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err = userDAO.GetByEmail(ctx, loginRequestUser.Email)
+	user, err = userDAO.GetByAccessId(ctx, loginRequestUser.AccessId)
 	if user == nil || err == UserDao.UserNotFoundError {
-		ctx.Errorf("Failed to login, %s does not exist in DB", loginRequestUser.Email)
+		ctx.Errorf("Failed to login, %s does not exist in DB", loginRequestUser.AccessId)
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}
@@ -136,7 +136,7 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := user.VerifyPassword(loginRequestUser.Password); err != nil {
-		ctx.Errorf("Failed to login, %s Invalid password", loginRequestUser.Email)
+		ctx.Errorf("Failed to login, %s Invalid password", loginRequestUser.AccessId)
 		ctx.Errorf(err.Error())
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
