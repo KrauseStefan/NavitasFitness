@@ -7,7 +7,7 @@ import (
 	"appengine/urlfetch"
 )
 
-func DownloadFile(ctx appengine.Context, url string) (io.ReadCloser, error) {
+func DownloadFileOld(ctx appengine.Context, url string) (io.ReadCloser, error) {
 	client := urlfetch.Client(ctx)
 
 	rsp, err := client.Get(url)

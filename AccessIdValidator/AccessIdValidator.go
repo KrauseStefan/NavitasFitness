@@ -23,7 +23,7 @@ var (
 
 func downloadValidAccessIds(ctx appengine.Context) error {
 
-	resp, err := Dropbox.DownloadFile(ctx, downloadLink)
+	resp, err := Dropbox.DownloadFileOld(ctx, downloadLink)
 	if err != nil {
 		return err
 	}

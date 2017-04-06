@@ -144,25 +144,25 @@ func createCsvFile(ctx appengine.Context, w io.Writer) error {
 
 func exportCsvHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
 	ctx := appengine.NewContext(r)
+
+	if err := CreateAndUploadFile(ctx); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func CreateAndUploadFile(ctx appengine.Context) error {
 	fileName := "ActiveSubscriptions.csv"
 
 	var buffer bytes.Buffer
 
-	err := createCsvFile(ctx, &buffer)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if err := createCsvFile(ctx, &buffer); err != nil {
+		return err
 	}
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if _, err := Dropbox.UploadDoc(ctx, fileName, &buffer); err != nil {
+		return err
 	}
 
-	_, err = Dropbox.UploadDoc(ctx, fileName, &buffer)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
+	return nil
 }

@@ -14,6 +14,7 @@ import (
 	"appengine/taskqueue"
 	"appengine/urlfetch"
 
+	"Export/csv"
 	"IPN/Transaction"
 	"User/Dao"
 )
@@ -122,7 +123,9 @@ func ipnDoResponseTaskHandler(w http.ResponseWriter, r *http.Request) {
 	if err := ipnDoResponseTask(ctx, r); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		ctx.Errorf(err.Error())
+		return
 	}
+
 }
 
 func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
@@ -203,6 +206,10 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 		if err := transactionDao.PersistNewIpnMessage(ctx, transaction, userKey); err != nil {
 			return err
 		}
+	}
+
+	if err := csv.CreateAndUploadFile(ctx); err != nil {
+		return err
 	}
 
 	return nil
