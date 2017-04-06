@@ -27,7 +27,11 @@ type UserDTO struct {
 }
 
 func (user *UserDTO) ValidateUser(ctx appengine.Context) error {
-	if isValid, _ := AccessIdValidator.ValidateAccessId(ctx, []byte(user.AccessId)); !isValid {
+	isValid, err := AccessIdValidator.ValidateAccessId(ctx, []byte(user.AccessId))
+	if err != nil {
+		return err
+	}
+	if !isValid {
 		return Invalid_accessId
 	}
 

@@ -133,8 +133,14 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := user.ValidateUser(ctx); err != nil {
+		_, isConstraintError := err.(DAOHelper.ConstraintError)
+		errorCode := http.StatusInternalServerError
+		if isConstraintError {
+			errorCode = http.StatusBadRequest
+		}
+
 		ctx.Errorf(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), errorCode)
 		return
 	}
 

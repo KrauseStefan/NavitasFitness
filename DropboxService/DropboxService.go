@@ -6,8 +6,6 @@ import (
 
 	"AppEngineHelper"
 	"Dropbox"
-	"User/Dao"
-	"User/Service"
 	"appengine"
 	"strings"
 )

@@ -66,11 +66,13 @@ func setSessionCookie(w http.ResponseWriter, uuid string) error {
 	const MaxAgeDeleteNow = -1
 	const MaxAgeDefault = 0
 	var (
-		err     error
 		encoded string
 		maxAge  int = MaxAgeDefault
 	)
-	s := GetSecureCookieInst()
+	s, err := GetSecureCookieInst()
+	if err != nil {
+		return err
+	}
 
 	if uuid != "" {
 		encoded, err = s.Encode(sessionCookieName, uuid)
@@ -179,7 +181,11 @@ func GetSessionUUID(r *http.Request) (string, error) {
 
 	uuid := ""
 
-	if err := GetSecureCookieInst().Decode(sessionCookieName, cookie.Value, &uuid); err != nil {
+	s, err := GetSecureCookieInst()
+	if err != nil {
+		return "", err
+	}
+	if s.Decode(sessionCookieName, cookie.Value, &uuid); err != nil {
 		appengine.NewContext(r).Errorf("Coockie decode error: " + err.Error())
 		return "", nil
 	}

@@ -34,7 +34,7 @@ type UploadDto struct {
 	Mode UploadModeDto `json:"mode"`
 }
 
-func UploadDoc(ctx appengine.Context, filename string, file io.Reader) (*UploadResp, error) {
+func UploadDoc(ctx appengine.Context, filePath string, file io.Reader) (*UploadResp, error) {
 
 	client := urlfetch.Client(ctx)
 
@@ -44,7 +44,7 @@ func UploadDoc(ctx appengine.Context, filename string, file io.Reader) (*UploadR
 	}
 
 	uploadDto := UploadDto{
-		Path: "/FitnessTest/" + filename,
+		Path: filePath,
 		Mode: UploadModeDto{
 			Tag: "overwrite",
 		},
@@ -64,7 +64,6 @@ func UploadDoc(ctx appengine.Context, filename string, file io.Reader) (*UploadR
 		return nil, errors.New("Access id has not been assigned, unable to upload to dropbox")
 	}
 
-	ctx.Infof("accessToken: %s", accessToken)
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 	req.Header.Set("Content-Type", "application/octet-stream")
 	req.Header.Set("Dropbox-API-Arg", string(js))

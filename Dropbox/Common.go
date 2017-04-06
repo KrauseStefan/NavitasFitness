@@ -8,9 +8,14 @@ import (
 	"net/http"
 
 	"AppEngineHelper"
+	"ConfigurationReader"
 	"SystemSettingDAO"
 	"appengine"
 	"appengine/urlfetch"
+)
+
+var (
+	accessToken_intenal = ""
 )
 
 const (
@@ -18,13 +23,6 @@ const (
 	tokenUrl = "https://api.dropboxapi.com/oauth2/token"
 
 	accessTokenSystemSettingKey = "accessToken"
-)
-
-var (
-	clientKey    = ""
-	clientSecret = ""
-
-	accessToken = ""
 )
 
 type TokenRspDTO struct {
@@ -40,15 +38,19 @@ func GetAccessToken(ctx appengine.Context) (string, error) {
 		accessTokenValue string
 	)
 
-	if accessToken == "" {
+	if accessToken_intenal == "" {
 		_, accessTokenValue, err = SystemSettingDAO.GetSetting(ctx, accessTokenSystemSettingKey)
-		accessToken = accessTokenValue
+		accessToken_intenal = accessTokenValue
 	}
 
-	return accessToken, err
+	return accessToken_intenal, err
 }
 
 func RetrieveAccessToken(ctx appengine.Context, code string, redirectUri string) error {
+	conf, err := ConfigurationReader.GetConfiguration()
+	if err != nil {
+		return err
+	}
 
 	params := map[string]string{
 		"code":         code,                 // String The code acquired by directing users to /oauth2/authorize?response_type=code.
@@ -65,7 +67,7 @@ func RetrieveAccessToken(ctx appengine.Context, code string, redirectUri string)
 		return err
 	}
 
-	req.SetBasicAuth(clientKey, clientSecret)
+	req.SetBasicAuth(conf.ClientKey, conf.ClientSecret)
 
 	resp, err := client.Do(req)
 
@@ -81,7 +83,7 @@ func RetrieveAccessToken(ctx appengine.Context, code string, redirectUri string)
 		return err
 	}
 
-	accessToken = tokenRspDTO.AccessToken
+	accessToken_intenal = tokenRspDTO.AccessToken
 
-	return SystemSettingDAO.PersistSetting(ctx, "accessToken", accessToken)
+	return SystemSettingDAO.PersistSetting(ctx, "accessToken", accessToken_intenal)
 }

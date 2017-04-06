@@ -1,31 +1,49 @@
 package ConfigurationReader
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"os"
 )
 
-type ConfigurationReader struct{}
-
 type Configuration struct {
-	clientKey    string
-	clientSecret string
+	SecureCookieSecretHex string `json:"secureCookieSecretHex"`
+
+	ClientKey    string `json:"clientKey"`
+	ClientSecret string `json:"clientSecret"`
 }
 
-var configuration = Configuration{}
+var (
+	configuration     Configuration
+	configurationRead = false
+)
 
-func (c *ConfigurationReader) readConfiguration(path string) (Configuration, error) {
+func GetConfiguration() (*Configuration, error) {
+	if !configurationRead {
+		if err := ReadConfiguration("config.json", &configuration); err != nil {
+			return nil, err
+		}
+		configurationRead = true
+	}
+	return &configuration, nil
+}
 
-	file, err := os.Open("config.json")
+func ReadConfiguration(path string, config *Configuration) error {
+
+	file, err := os.Open(path)
 	if err != nil {
-		return Configuration{}, err
+		return err
 	}
 
 	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&configuration)
+	err = decoder.Decode(config)
 	if err != nil {
-		return Configuration{}, err
+		return err
 	}
 
-	return configuration, nil
+	return nil
+}
+
+func (c Configuration) GetAuthCookieSecret() ([]byte, error) {
+	return hex.DecodeString(c.SecureCookieSecretHex)
 }

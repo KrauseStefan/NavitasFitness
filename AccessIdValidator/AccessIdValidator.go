@@ -9,10 +9,12 @@ import (
 	"appengine"
 
 	"Dropbox"
+	"SystemSettingDAO"
 )
 
 const (
-	downloadLink = "https://www.dropbox.com/s/x61e0hter4kr9ry/Kort%20navitas.csv?_download_id=462948430621974902922706508949901694802577845535546831947836167394&dl=1"
+	fitnessAccessIdsPathSettingKey = "fitnessAccessIdsPath"
+	defaultFitnessAccessIdsPath    = "/AccessIds/AccessIds.csv"
 )
 
 var (
@@ -21,9 +23,25 @@ var (
 	lastDownload  time.Time
 )
 
+func getPath(ctx appengine.Context) string {
+	_, value, err := SystemSettingDAO.GetSetting(ctx, fitnessAccessIdsPathSettingKey)
+	if err != nil {
+		ctx.Errorf(err.Error())
+	}
+
+	if value == "" {
+		value = defaultFitnessAccessIdsPath
+		if err := SystemSettingDAO.PersistSetting(ctx, fitnessAccessIdsPathSettingKey, value); err != nil {
+			ctx.Errorf(err.Error())
+		}
+	}
+
+	return value
+}
+
 func downloadValidAccessIds(ctx appengine.Context) error {
 
-	resp, err := Dropbox.DownloadFileOld(ctx, downloadLink)
+	resp, _, err := Dropbox.DownloadFile(ctx, getPath(ctx))
 	if err != nil {
 		return err
 	}

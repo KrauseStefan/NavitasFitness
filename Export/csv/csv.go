@@ -13,6 +13,7 @@ import (
 
 	"Dropbox"
 	"IPN/Transaction"
+	"SystemSettingDAO"
 	"User/Dao"
 	"User/Service"
 )
@@ -23,7 +24,9 @@ var (
 )
 
 const (
-	csvDateFormat = "02-01-2006"
+	fitnessAccessListPathSettingKey = "fitnessAccessListPath"
+	defaultFitnessAccessListPath    = "/FitnessAccessList/FitnessAccessList.csv"
+	csvDateFormat                   = "02-01-2006"
 )
 
 func getFirstAndLastTxn(ctx appengine.Context, userKey *datastore.Key, date time.Time) (time.Time, time.Time, error) {
@@ -151,16 +154,30 @@ func exportCsvHandler(w http.ResponseWriter, r *http.Request, user *UserDao.User
 	}
 }
 
-func CreateAndUploadFile(ctx appengine.Context) error {
-	fileName := "ActiveSubscriptions.csv"
+func getPath(ctx appengine.Context) string {
+	_, value, err := SystemSettingDAO.GetSetting(ctx, fitnessAccessListPathSettingKey)
+	if err != nil {
+		ctx.Errorf(err.Error())
+	}
 
+	if value == "" {
+		value = defaultFitnessAccessListPath
+		if err := SystemSettingDAO.PersistSetting(ctx, fitnessAccessListPathSettingKey, value); err != nil {
+			ctx.Errorf(err.Error())
+		}
+	}
+
+	return value
+}
+
+func CreateAndUploadFile(ctx appengine.Context) error {
 	var buffer bytes.Buffer
 
 	if err := createCsvFile(ctx, &buffer); err != nil {
 		return err
 	}
 
-	if _, err := Dropbox.UploadDoc(ctx, fileName, &buffer); err != nil {
+	if _, err := Dropbox.UploadDoc(ctx, getPath(ctx), &buffer); err != nil {
 		return err
 	}
 
