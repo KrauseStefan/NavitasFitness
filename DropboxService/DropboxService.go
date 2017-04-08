@@ -1,13 +1,17 @@
 package DropboxService
 
 import (
-	"github.com/gorilla/mux"
 	"net/http"
+	"strings"
+
+	"github.com/gorilla/mux"
+
+	"appengine"
 
 	"AppEngineHelper"
 	"Dropbox"
-	"appengine"
-	"strings"
+	"User/Dao"
+	"User/Service"
 )
 
 const (
@@ -27,14 +31,27 @@ func IntegrateRoutes(router *mux.Router) {
 		Methods("GET").
 		Path(path + "/authenticate").
 		Name("Authenticate with dropbox redirect").
-		HandlerFunc(UserService.AsAdmin(authorizeWithDropboxHandler))
+		HandlerFunc(asAdminIfAlreadyConfigured(authorizeWithDropboxHandler))
 
 	router.
 		Methods("GET").
 		Path(path + tokenCallback).
 		Name("Authenticate with dropbox callback").
-		HandlerFunc(UserService.AsAdmin(authorizationCallbackHandler))
+		HandlerFunc(asAdminIfAlreadyConfigured(authorizationCallbackHandler))
 
+}
+
+func asAdminIfAlreadyConfigured(f func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		value, err := Dropbox.GetAccessToken(appengine.NewContext(r))
+		if err != nil || value != "" {
+			UserService.AsAdmin(func(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
+				f(w, r)
+			})
+		} else {
+			f(w, r)
+		}
+	}
 }
 
 func getRedirectUri(r *http.Request) string {
@@ -43,10 +60,9 @@ func getRedirectUri(r *http.Request) string {
 	} else {
 		return redirectUriBase + path + tokenCallback
 	}
-
 }
 
-func authorizeWithDropboxHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
+func authorizeWithDropboxHandler(w http.ResponseWriter, r *http.Request) {
 	params := map[string]string{
 		"response_type": "code", // token or code
 		"client_id":     clientId,
@@ -59,7 +75,7 @@ func authorizeWithDropboxHandler(w http.ResponseWriter, r *http.Request, user *U
 	http.Redirect(w, r, authenticateUrl+"?"+paramStr, http.StatusTemporaryRedirect)
 }
 
-func authorizationCallbackHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
+func authorizationCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 	r.ParseForm()
 

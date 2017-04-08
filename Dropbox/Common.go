@@ -53,7 +53,7 @@ func RetrieveAccessToken(ctx appengine.Context, code string, redirectUri string)
 	}
 
 	params := map[string]string{
-		"code":         code,                 // String The code acquired by directing users to /oauth2/authorize?response_type=code.
+		"code":         code,
 		"grant_type":   "authorization_code", //The grant type, which must be authorization_code.
 		"redirect_uri": redirectUri,
 	}
