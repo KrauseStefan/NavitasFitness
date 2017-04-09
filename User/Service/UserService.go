@@ -2,6 +2,7 @@ package UserService
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"time"
 
@@ -122,52 +123,33 @@ func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request, user *Use
 
 func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
+
+	user, err := createUser(ctx, r.Body)
+
+	if err == nil {
+		_, err = AppEngineHelper.WriteJSON(w, user)
+	}
+
+	DAOHelper.ReportError(ctx, w, err)
+}
+
+func createUser(ctx appengine.Context, respBody io.ReadCloser) (*UserDao.UserDTO, error) {
 	user := &UserDao.UserDTO{}
 
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(user)
-	if err != nil {
-		ctx.Errorf(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	decoder := json.NewDecoder(respBody)
+	if err := decoder.Decode(user); err != nil {
+		return nil, err
 	}
 
 	if err := user.ValidateUser(ctx); err != nil {
-		_, isConstraintError := err.(DAOHelper.ConstraintError)
-		errorCode := http.StatusInternalServerError
-		if isConstraintError {
-			errorCode = http.StatusBadRequest
-		}
-
-		ctx.Errorf(err.Error())
-		http.Error(w, err.Error(), errorCode)
-		return
+		return nil, err
 	}
 
 	if err := userDao.Create(ctx, user); err != nil {
-		switch v := err.(type) {
-		case DAOHelper.ConstraintError:
-			switch v.Type {
-			case DAOHelper.UniqueConstraint:
-				http.Error(w, err.Error(), http.StatusConflict)
-			case DAOHelper.Invalid:
-				http.Error(w, err.Error(), http.StatusBadRequest)
-			default:
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-			ctx.Infof(err.Error())
-		default:
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			ctx.Errorf(err.Error())
-		}
-		return
+		return nil, err
 	}
 
-	if _, err := AppEngineHelper.WriteJSON(w, user); err != nil {
-		ctx.Errorf(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	return user, nil
 }
 
 func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {

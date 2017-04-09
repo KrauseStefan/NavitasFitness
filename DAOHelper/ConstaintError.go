@@ -3,6 +3,7 @@ package DAOHelper
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 )
 
 type ErrorType string
@@ -16,6 +17,17 @@ type ConstraintError struct {
 	Field   string    `json:"field"`
 	Type    ErrorType `json:"type"`
 	Message string    `json:"message"`
+}
+
+func (e ConstraintError) GetStatus() int {
+	switch e.Type {
+	case UniqueConstraint:
+		return http.StatusConflict
+	case Invalid:
+		return http.StatusBadRequest
+	default:
+		return http.StatusInternalServerError
+	}
 }
 
 func (e ConstraintError) Error() string {
