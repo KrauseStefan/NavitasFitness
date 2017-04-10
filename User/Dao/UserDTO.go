@@ -1,31 +1,30 @@
 package UserDao
 
 import (
-	"gopkg.in/validator.v2"
-	"strconv"
+	"crypto/rand"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/validator.v2"
 
 	"appengine"
 	"appengine/datastore"
 
 	"AccessIdValidator"
-	"DAOHelper"
-	"crypto/rand"
-	"golang.org/x/crypto/bcrypt"
-	"net/http"
 )
 
 type UserDTO struct {
-	Name               string    `json:"name",datastore:",noindex",validate:"min=2"`
-	Email              string    `json:"email",validate:"email"`
-	AccessId           string    `json:"accessId"`
-	Password           string    `json:"password,omitempty",datastore:",noindex",validate:"min=2"`
-	PasswordHash       []byte    `json:"-",datastore:",noindex"`
-	PasswordSalt       []byte    `json:"-",datastore:",noindex"`
-	Key                string    `json:"-",datastore:"-"`
-	CreatedDate        time.Time `json:"-"`
-	CurrentSessionUUID string    `json:"-"`
-	IsAdmin            bool      `json:"-"`
+	Name               string        `json:"name",datastore:",noindex",validate:"min=2"`
+	Email              string        `json:"email",validate:"email"`
+	AccessId           string        `json:"accessId"`
+	Password           string        `json:"password,omitempty",datastore:",noindex",validate:"min=2"`
+	PasswordHash       []byte        `json:"-",datastore:",noindex"`
+	PasswordSalt       []byte        `json:"-",datastore:",noindex"`
+	Key                *datastore.Key `json:"-",datastore:"-"`
+	CreatedDate        time.Time     `json:"-"`
+	CurrentSessionUUID string        `json:"-"`
+	IsAdmin            bool          `json:"-"`
+	Verified           bool          `json:"-"`
 }
 
 func (user *UserDTO) ValidateUser(ctx appengine.Context) error {
@@ -41,16 +40,7 @@ func (user *UserDTO) ValidateUser(ctx appengine.Context) error {
 }
 
 func (user *UserDTO) hasKey() bool {
-	return len(user.Key) > 0
-}
-
-func (user *UserDTO) GetDataStoreKey(ctx appengine.Context) *datastore.Key {
-	return GetInstance().StringToKey(ctx, user.Key)
-}
-
-func (user *UserDTO) setKey(key *datastore.Key) *UserDTO {
-	user.Key = strconv.FormatInt(key.IntID(), 10)
-	return user
+	return user.Key != nil
 }
 
 func (user *UserDTO) getPasswordWithSalt(password []byte) []byte {

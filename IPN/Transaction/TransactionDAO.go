@@ -10,7 +10,7 @@ import (
 type TransactionIpnManipulator interface {
 	UpdateIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO) error
 
-	PersistNewIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO, userKey string) error
+	PersistNewIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO, userKey *datastore.Key) error
 }
 
 type TransactionRetriever interface {

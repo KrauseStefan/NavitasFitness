@@ -4,6 +4,7 @@ import IDialogService = angular.material.IDialogService;
 import IHttpPromiseCallbackArg = angular.IHttpPromiseCallbackArg;
 
 const HttpUnauthorized = 401;
+const StatusForbidden = 403;
 
 export class LoginForm {
 
@@ -31,9 +32,10 @@ export class LoginForm {
       this.$mdDialog.hide();
     }, (errorResponse: IHttpPromiseCallbackArg<string>) => {
       if (errorResponse.status === HttpUnauthorized) {
-        this.$scope.LoginForm.password.$setValidity('loginSuccessful', false);
+        this.$scope.LoginForm.password.$setValidity('credentialsInvalid', false);
+      } else if (errorResponse.status === StatusForbidden) {
+        this.$scope.LoginForm.accessId.$setValidity('emailNotVerified', false);
       }
-
     });
   }
 

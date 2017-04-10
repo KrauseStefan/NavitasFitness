@@ -4,8 +4,6 @@ import (
 	"appengine"
 	"appengine/datastore"
 	"errors"
-	"strconv"
-
 	"AppEngineHelper"
 	"DAOHelper"
 )
@@ -65,7 +63,7 @@ func (u *DefaultUserDAO) GetByEmail(ctx appengine.Context, email string) (*UserD
 		return nil, UserNotFoundError
 	}
 
-	userDtoList[0].Key = strconv.FormatInt(keys[0].IntID(), 10)
+	userDtoList[0].Key = keys[0]
 
 	return &userDtoList[0], nil
 }
@@ -87,7 +85,7 @@ func (u *DefaultUserDAO) GetByAccessId(ctx appengine.Context, accessId string) (
 		return nil, UserNotFoundError
 	}
 
-	userDtoList[0].Key = strconv.FormatInt(keys[0].IntID(), 10)
+	userDtoList[0].Key = keys[0]
 
 	return &userDtoList[0], nil
 }
@@ -120,12 +118,20 @@ func (u *DefaultUserDAO) Create(ctx appengine.Context, user *UserDTO) error {
 		return userHasIdError
 	}
 
-	if user, _ := u.GetByEmail(ctx, user.Email); user != nil {
-		return UniqueConstraint_email
+	if user, _ := u.GetByEmail(ctx, user.Email); user != nil && user.Verified {
+		if user.Verified {
+			return UniqueConstraint_email
+		} else {
+
+		}
 	}
 
-	if user, _ := u.GetByAccessId(ctx, user.AccessId); user != nil {
-		return UniqueConstraint_accessId
+	if user, _ := u.GetByAccessId(ctx, user.AccessId); user != nil && user.Verified {
+		if user.Verified {
+			return UniqueConstraint_accessId
+		} else {
+			datastore.Delete(ctx, user.Key)
+		}
 	}
 
 	if err := user.UpdatePasswordHash(nil); err != nil {
@@ -138,7 +144,7 @@ func (u *DefaultUserDAO) Create(ctx appengine.Context, user *UserDTO) error {
 		return err
 	}
 
-	user.Key = strconv.FormatInt(newKey.IntID(), 10)
+	user.Key = newKey
 
 	return nil
 }
@@ -151,10 +157,9 @@ func (u *DefaultUserDAO) saveUser(ctx appengine.Context, user *UserDTO) error {
 	//Only updates if password field has been set
 	user.UpdatePasswordHash(nil)
 
-	key, err := datastore.Put(ctx, user.GetDataStoreKey(ctx), user)
-
+	key, err := datastore.Put(ctx, user.Key, user)
 	if err == nil {
-		user.setKey(key)
+		user.Key = key
 	}
 
 	return err
@@ -184,4 +189,25 @@ func (u *DefaultUserDAO) GetUserFromSessionUUID(ctx appengine.Context, uuid stri
 	}
 
 	return &users[0], nil
+}
+
+func (u *DefaultUserDAO) MarkUserVerified(ctx appengine.Context, keyStr string) error {
+
+	key, err := datastore.DecodeKey(keyStr)
+	if err != nil {
+		return err
+	}
+
+	userDto := &UserDTO{}
+	if err := datastore.Get(ctx, key, userDto); err != nil {
+		return err
+	}
+
+	userDto.Verified = true
+
+	if _, err := datastore.Put(ctx, key, userDto); err != nil {
+		return err
+	}
+
+	return nil
 }

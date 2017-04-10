@@ -52,6 +52,11 @@ func IntegrateRoutes(router *mux.Router) {
 		Name("Validate Access Id").
 		HandlerFunc(validateAccessId)
 
+	router.
+		Methods("GET").
+		Path(path + "/verify").
+		Name("VerifyEmailCallback").
+		HandlerFunc(verifyUserRequestHandler)
 }
 
 func validateAccessId(w http.ResponseWriter, r *http.Request) {
@@ -149,13 +154,17 @@ func createUser(ctx appengine.Context, respBody io.ReadCloser) (*UserDao.UserDTO
 		return nil, err
 	}
 
+	if err := SendConfirmationMail(ctx, user); err != nil {
+		return nil, err
+	}
+
 	return user, nil
 }
 
 func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
 	ctx := appengine.NewContext(r)
 
-	transactions, err := transactionDao.GetTransactionsByUser(ctx, user.GetDataStoreKey(ctx))
+	transactions, err := transactionDao.GetTransactionsByUser(ctx, user.Key)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -194,4 +203,24 @@ func newTransactionMsgClientDTO(source *TransactionDao.TransactionMsgDTO) *Trans
 	}
 
 	return &txClient
+}
+
+func verifyUserRequestHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := appengine.NewContext(r)
+
+	if err := r.ParseForm(); err != nil {
+		DAOHelper.ReportError(ctx, w, err)
+		return
+	}
+
+	key := r.Form.Get("code")
+	verifyUserRequest(ctx, key)
+
+	http.Redirect(w, r, "/?Verified=true", http.StatusTemporaryRedirect)
+}
+
+func verifyUserRequest(ctx appengine.Context, encodedKey string) error {
+
+	return userDao.MarkUserVerified(ctx, encodedKey)
+
 }

@@ -17,6 +17,7 @@ import (
 	"Export/csv"
 	"IPN/Transaction"
 	"User/Dao"
+	"appengine/datastore"
 )
 
 var (
@@ -186,9 +187,9 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 			return errors.New("User does not exist")
 		}
 
-		var userKey string = ""
+		var userKey *datastore.Key = nil
 		if user != nil {
-			ctx.Debugf(fmt.Sprintf("User key: %q", user.Key))
+			ctx.Debugf(fmt.Sprintf("User key: %q", user.Key.Encode()))
 			userKey = user.Key
 		} else {
 			ctx.Errorf("Recived paypal IPN message for unknown user")

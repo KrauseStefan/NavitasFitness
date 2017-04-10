@@ -3,8 +3,6 @@ package UserDao
 import (
 	"appengine"
 	"appengine/datastore"
-
-	"AppEngineHelper"
 )
 
 type UserCreator interface {
@@ -29,10 +27,11 @@ type UserSessionRetriever interface {
 }
 
 type UserDAO interface {
-	AppEngineHelper.AppEngineDaoBase
 	UserCreator
 	SingleUserRetriever
 	UsersRetriever
 	UserSessionRetriever
 	UserSessionSetter
+
+	MarkUserVerified(ctx appengine.Context, keyStr string) error
 }

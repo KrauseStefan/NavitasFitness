@@ -127,13 +127,18 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err = userDAO.GetByAccessId(ctx, loginRequestUser.AccessId)
+	if err != nil && err != UserDao.UserNotFoundError{
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	if user == nil || err == UserDao.UserNotFoundError {
 		ctx.Errorf("Failed to login, %s does not exist in DB", loginRequestUser.AccessId)
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if !user.Verified {
+		ctx.Errorf("Failed to login, %s email is not verified", loginRequestUser.AccessId)
+		http.Error(w, "Email is not verified", http.StatusForbidden)
 		return
 	}
 

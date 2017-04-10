@@ -40,7 +40,7 @@ func (t *DefaultTransactionDao) UpdateIpnMessage(ctx appengine.Context, ipnTxn *
 	return nil
 }
 
-func (t *DefaultTransactionDao) PersistNewIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO, userKey string) error {
+func (t *DefaultTransactionDao) PersistNewIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO, userKey *datastore.Key) error {
 
 	var newKey *datastore.Key
 
@@ -48,10 +48,10 @@ func (t *DefaultTransactionDao) PersistNewIpnMessage(ctx appengine.Context, ipnT
 		return errors.New("ipnTxn has already been persisted, use update function ínstead")
 	}
 
-	if userKey == "" {
+	if userKey == nil {
 		newKey = datastore.NewIncompleteKey(ctx, TXN_KIND, txnCollectionParentKey(ctx))
 	} else {
-		newKey = datastore.NewIncompleteKey(ctx, TXN_KIND, userDao.StringToKey(ctx, userKey))
+		newKey = datastore.NewIncompleteKey(ctx, TXN_KIND, userKey)
 	}
 
 	//Make sure indexed fields are updated

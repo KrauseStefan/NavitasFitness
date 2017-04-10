@@ -11,14 +11,17 @@ md-dialog
         label Access ID
         md-icon perm_identity
         input(name="accessId", ng-model="model.accessId", required, nf-reset-on-change="loginFailed")
+        div(ng-messages="LoginForm.accessId.$error", md-auto-hide="true")
+          div(ng-message="emailNotVerified").
+            The email accociated with the access id has not been verified.
 
       md-input-container
         label Password
         md-icon lock_outline
-        input(name="password", type="password", ng-model="model.password", required, nf-reset-on-change="loginSuccessful")
+        input(name="password", type="password", ng-model="model.password", required, nf-reset-on-change="credentialsInvalid")
         div(ng-messages="LoginForm.password.$error", md-auto-hide="true")
-          div(ng-message="loginSuccessful").
-            The email or password is incorrect
+          div(ng-message="credentialsInvalid").
+            The access id or password is incorrect.
 
     md-dialog-actions
       md-button(ng-click="cancel()") Cancel
