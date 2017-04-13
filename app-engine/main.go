@@ -15,7 +15,7 @@ import (
 	"Export/xlsx"
 	"IPN"
 	"MainPage"
-	"User/Service"
+	"User"
 )
 
 const emailRegStr = `^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$`
@@ -41,7 +41,7 @@ func init() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	MainPageService.IntegrateRoutes(router)
-	UserService.IntegrateRoutes(router)
+	UserRest.IntegrateRoutes(router)
 	AuthService.IntegrateRoutes(router)
 	IPN.IntegrateRoutes(router)
 	xlsx.IntegrateRoutes(router)

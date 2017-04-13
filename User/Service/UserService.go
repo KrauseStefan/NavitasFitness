@@ -8,12 +8,7 @@ import (
 
 	"appengine"
 
-	"github.com/gorilla/mux"
-
-	"AccessIdValidator"
-	"AppEngineHelper"
 	"Auth"
-	"DAOHelper"
 	"IPN/Transaction"
 	"User/Dao"
 )
@@ -22,57 +17,6 @@ var (
 	userDao        = UserDao.GetInstance()
 	transactionDao = TransactionDao.GetInstance()
 )
-
-const accessIdKey = "accessId"
-
-func IntegrateRoutes(router *mux.Router) {
-	path := "/rest/user"
-
-	router.
-		Methods("GET").
-		Path(path).
-		Name("Get User Current User Info").
-		HandlerFunc(AsUser(getUserFromSessionHandler))
-
-	router.
-		Methods("GET").
-		Path(path + "/transactions").
-		Name("Get Latest Transactions").
-		HandlerFunc(AsUser(getUserTransactionsHandler))
-
-	router.
-		Methods("POST").
-		Path(path).
-		Name("Create User Info").
-		HandlerFunc(createUserHandler)
-
-	router.
-		Methods("GET").
-		Path(path + "/validate_id/{" + accessIdKey + "}").
-		Name("Validate Access Id").
-		HandlerFunc(validateAccessId)
-
-	router.
-		Methods("GET").
-		Path(path + "/verify").
-		Name("VerifyEmailCallback").
-		HandlerFunc(verifyUserRequestHandler)
-}
-
-func validateAccessId(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
-	accessId_bytes := []byte(mux.Vars(r)[accessIdKey])
-
-	isValid, err := AccessIdValidator.ValidateAccessId(ctx, accessId_bytes)
-	if err != nil {
-		ctx.Errorf(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	if isValid {
-		w.Write(accessId_bytes)
-	}
-}
 
 func AsAdmin(f func(http.ResponseWriter, *http.Request, *UserDao.UserDTO)) func(http.ResponseWriter, *http.Request) {
 	return AsUser(func(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
@@ -112,33 +56,7 @@ func getUserFromSession(ctx appengine.Context, r *http.Request) (*UserDao.UserDT
 	return userDao.GetUserFromSessionUUID(ctx, uuid)
 }
 
-type UserSessionDto struct {
-	User    *UserDao.UserDTO `json:"user"`
-	IsAdmin bool             `json:"isAdmin"`
-}
-
-func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
-	us := UserSessionDto{user, user.IsAdmin}
-
-	if _, err := AppEngineHelper.WriteJSON(w, us); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-func createUserHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
-
-	user, err := createUser(ctx, r.Body)
-
-	if err == nil {
-		_, err = AppEngineHelper.WriteJSON(w, user)
-	}
-
-	DAOHelper.ReportError(ctx, w, err)
-}
-
-func createUser(ctx appengine.Context, respBody io.ReadCloser) (*UserDao.UserDTO, error) {
+func CreateUser(ctx appengine.Context, respBody io.ReadCloser) (*UserDao.UserDTO, error) {
 	user := &UserDao.UserDTO{}
 
 	decoder := json.NewDecoder(respBody)
@@ -161,25 +79,18 @@ func createUser(ctx appengine.Context, respBody io.ReadCloser) (*UserDao.UserDTO
 	return user, nil
 }
 
-func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
-	ctx := appengine.NewContext(r)
-
+func GetUserTransactions(ctx appengine.Context, user *UserDao.UserDTO) ([]*TransactionMsgClientDTO, error) {
 	transactions, err := transactionDao.GetTransactionsByUser(ctx, user.Key)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
 	txnClientDtoList := make([]*TransactionMsgClientDTO, len(transactions))
-
 	for i, txn := range transactions {
 		txnClientDtoList[i] = newTransactionMsgClientDTO(txn)
 	}
 
-	if _, err := AppEngineHelper.WriteJSON(w, txnClientDtoList); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	return txnClientDtoList, nil
 }
 
 type TransactionMsgClientDTO struct {
@@ -205,23 +116,7 @@ func newTransactionMsgClientDTO(source *TransactionDao.TransactionMsgDTO) *Trans
 	return &txClient
 }
 
-func verifyUserRequestHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
-
-	if err := r.ParseForm(); err != nil {
-		DAOHelper.ReportError(ctx, w, err)
-		return
-	}
-
-	key := r.Form.Get("code")
-	if err := verifyUserRequest(ctx, key); err != nil {
-		http.Redirect(w, r, "/?Verified=false", http.StatusTemporaryRedirect)
-	} else {
-		http.Redirect(w, r, "/?Verified=true", http.StatusTemporaryRedirect)
-	}
-}
-
-func verifyUserRequest(ctx appengine.Context, encodedKey string) error {
+func MarkUserVerified(ctx appengine.Context, encodedKey string) error {
 
 	return userDao.MarkUserVerified(ctx, encodedKey)
 
