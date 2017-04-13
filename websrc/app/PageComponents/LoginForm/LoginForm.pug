@@ -10,7 +10,7 @@ md-dialog
       md-input-container
         label Access ID
         md-icon perm_identity
-        input(name="accessId", ng-model="model.accessId", required, nf-reset-on-change="loginFailed")
+        input(name="accessId", ng-model="model.accessId", required, nf-reset-on-change="emailNotVerified")
         div(ng-messages="LoginForm.accessId.$error", md-auto-hide="true")
           div(ng-message="emailNotVerified").
             The email accociated with the access id has not been verified.

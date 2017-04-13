@@ -14,17 +14,17 @@ import (
 )
 
 type UserDTO struct {
-	Name               string        `json:"name",datastore:",noindex",validate:"min=2"`
-	Email              string        `json:"email",validate:"email"`
-	AccessId           string        `json:"accessId"`
-	Password           string        `json:"password,omitempty",datastore:",noindex",validate:"min=2"`
-	PasswordHash       []byte        `json:"-",datastore:",noindex"`
-	PasswordSalt       []byte        `json:"-",datastore:",noindex"`
+	Name               string         `json:"name",datastore:",noindex",validate:"min=2"`
+	Email              string         `json:"email",validate:"email"`
+	AccessId           string         `json:"accessId"`
+	Password           string         `json:"password,omitempty",datastore:",noindex",validate:"min=2"`
+	PasswordHash       []byte         `json:"-",datastore:",noindex"`
+	PasswordSalt       []byte         `json:"-",datastore:",noindex"`
 	Key                *datastore.Key `json:"-",datastore:"-"`
-	CreatedDate        time.Time     `json:"-"`
-	CurrentSessionUUID string        `json:"-"`
-	IsAdmin            bool          `json:"-"`
-	Verified           bool          `json:"-"`
+	CreatedDate        time.Time      `json:"-"`
+	CurrentSessionUUID string         `json:"-"`
+	IsAdmin            bool           `json:"-"`
+	Verified           bool           `json:"-"`
 }
 
 func (user *UserDTO) ValidateUser(ctx appengine.Context) error {

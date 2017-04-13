@@ -18,5 +18,5 @@ gnome-terminal -e "npm start" &
 
 cd -
 
-goapp get -v ./...
+/home/stefan/Apps/google-cloud-sdk/platform/google_appengine/goroot/bin/goapp get -v ./...
 gnome-terminal -e "/home/stefan/Apps/go_appengine/dev_appserver.py ." &

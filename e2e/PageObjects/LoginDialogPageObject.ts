@@ -7,6 +7,6 @@ export class LoginDialogPageObject extends DialogPageObject {
   public closeButton = this.formContainer.$('.md-toolbar-tools button[ng-click="cancel()"]');
   public cancelButton = this.formContainer.$('md-dialog-actions button[ng-click="cancel()"]');
 
-  public errorLoginSuccessful = this.formContainer.$('[ng-message="loginSuccessful"]');
-
+  public errorEmailNotVerified = this.formContainer.$('[ng-message="emailNotVerified"]');
+  public errorCredentialsInvalid = this.formContainer.$('[ng-message="credentialsInvalid"]');
 }

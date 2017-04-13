@@ -127,7 +127,7 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err = userDAO.GetByAccessId(ctx, loginRequestUser.AccessId)
-	if err != nil && err != UserDao.UserNotFoundError{
+	if err != nil && err != UserDao.UserNotFoundError {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

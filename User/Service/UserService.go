@@ -214,9 +214,11 @@ func verifyUserRequestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	key := r.Form.Get("code")
-	verifyUserRequest(ctx, key)
-
-	http.Redirect(w, r, "/?Verified=true", http.StatusTemporaryRedirect)
+	if err := verifyUserRequest(ctx, key); err != nil {
+		http.Redirect(w, r, "/?Verified=false", http.StatusTemporaryRedirect)
+	} else {
+		http.Redirect(w, r, "/?Verified=true", http.StatusTemporaryRedirect)
+	}
 }
 
 func verifyUserRequest(ctx appengine.Context, encodedKey string) error {

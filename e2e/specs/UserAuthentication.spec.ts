@@ -7,8 +7,13 @@ import { browser, protractor } from 'protractor';
 const userInfo = {
   name: 'test',
   email: 'email@domain.com',
-  accessId: 'N0774',
+  accessId: 'AccessId1',
   password: 'Password123',
+};
+
+const alternateUserInfo = {
+  email: 'otherEmail@domain.dk',
+  accessId: 'AccessId2',
 };
 
 describe('User Autentication', () => {
@@ -17,7 +22,10 @@ describe('User Autentication', () => {
 
   it('[META] ensure test user does not exist', () => {
     browser.get('/');
-    new DataStoreManipulator().removeUser(userInfo.email).destroy();
+    new DataStoreManipulator()
+      .removeUserByEmail(userInfo.email)
+      .removeUserByAccessId(userInfo.accessId)
+      .destroy();
   });
 
   it('[META] ensure user is not logged in', () => {
@@ -43,29 +51,99 @@ describe('User Autentication', () => {
     loginDialog.loginButton.click();
 
     expect(loginDialog.formContainer.isDisplayed()).toBe(true);
-    expect(loginDialog.errorLoginSuccessful.isDisplayed()).toBe(true);
+    expect(loginDialog.errorCredentialsInvalid.isDisplayed()).toBe(true);
 
     loginDialog.safeClick(loginDialog.cancelButton);
   });
 
-  it('should be able to create a user', () => {
-    const regDialog = NavigationPageObject.openRegistrationDialog();
+  describe('user creation', () => {
+    let regDialog: RegistrationDialogPageObject;
 
-    regDialog.fillForm({
-      name: userInfo.name,
-      email: userInfo.email,
-      accessId: userInfo.accessId,
-      password: userInfo.password,
-      passwordRepeat: userInfo.password,
+    let keyUserDifferntEmail;
+    let keyUserDifferntAccessId;
+    let keyUser;
+
+    beforeEach(() => {
+      regDialog = NavigationPageObject.openRegistrationDialog();
     });
-    regDialog.buttonRegister.click();
 
-    expect(regDialog.formContainer.isPresent()).toBe(false);
+    afterEach(() => {
+      regDialog.safeClick(regDialog.cancelButton);
+    });
 
-    regDialog.safeClick(regDialog.cancelButton);
+    it('should be able to create a user', () => {
+      regDialog.fillForm({
+        name: userInfo.name,
+        email: alternateUserInfo.email,
+        accessId: alternateUserInfo.accessId,
+        password: userInfo.password,
+        passwordRepeat: userInfo.password,
+      });
+      regDialog.buttonRegister.click();
+
+      const dataStoreManipulator = new DataStoreManipulator();
+      keyUserDifferntEmail = dataStoreManipulator.getUserEntityIdFromEmail(alternateUserInfo.email);
+      dataStoreManipulator.destroy();
+
+      expect(regDialog.formContainer.isPresent()).toBe(false);
+    });
+
+    it('should be able to override unregistred user with a differnt email but same Access ID', () => {
+      regDialog.fillForm({
+        name: userInfo.name,
+        email: userInfo.email,
+        accessId: alternateUserInfo.accessId,
+        password: userInfo.password,
+        passwordRepeat: userInfo.password,
+      });
+      regDialog.buttonRegister.click();
+
+      const dataStoreManipulator = new DataStoreManipulator();
+      keyUserDifferntAccessId = dataStoreManipulator.getUserEntityIdFromEmail(userInfo.email);
+      dataStoreManipulator.destroy();
+
+      expect(regDialog.formContainer.isPresent()).toBe(false);
+    });
+
+    it('should be able to override unregistred user with a differnt Access ID but same email', () => {
+      regDialog.fillForm({
+        name: userInfo.name,
+        email: userInfo.email,
+        accessId: userInfo.accessId,
+        password: userInfo.password,
+        passwordRepeat: userInfo.password,
+      });
+      regDialog.buttonRegister.click();
+
+      const dataStoreManipulator = new DataStoreManipulator();
+      keyUser = dataStoreManipulator.getUserEntityIdFromEmail(userInfo.email);
+      dataStoreManipulator.destroy();
+
+      expect(regDialog.formContainer.isPresent()).toBe(false);
+    });
+
+    it('should not be able to verify overriden user with different email', () => {
+      DataStoreManipulator.sendValidationRequestFromKey(keyUserDifferntEmail).then(
+        () => { fail(); },
+        () => { /* success */ }
+      );
+    });
+
+    it('should not be able to verify overriden user with different accessId', () => {
+      DataStoreManipulator.sendValidationRequestFromKey(keyUserDifferntAccessId).then(
+        () => { fail(); },
+        () => { /* success */ }
+      );
+
+    });
+
+    it('should be able to verify user email from link', () => {
+      DataStoreManipulator.sendValidationRequestFromKey(keyUser);
+    });
+
   });
 
-  describe('validation', () => {
+  describe('registration validation', () => {
     let regDialog: RegistrationDialogPageObject;
 
     beforeEach(() => {
@@ -108,7 +186,7 @@ describe('User Autentication', () => {
       ].join(' ')]);
     });
 
-    it('should get an error message when using an already invalid access id', () => {
+    it('should get an error message when using an invalid access id', () => {
       regDialog.fillForm({
         email: 'email_other@domain.com',
         accessId: 'Invalid Id',

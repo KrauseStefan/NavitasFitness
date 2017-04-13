@@ -1,9 +1,11 @@
 package UserDao
 
 import (
+	"errors"
+
 	"appengine"
 	"appengine/datastore"
-	"errors"
+
 	"AppEngineHelper"
 	"DAOHelper"
 )
@@ -118,15 +120,15 @@ func (u *DefaultUserDAO) Create(ctx appengine.Context, user *UserDTO) error {
 		return userHasIdError
 	}
 
-	if user, _ := u.GetByEmail(ctx, user.Email); user != nil && user.Verified {
+	if user, _ := u.GetByEmail(ctx, user.Email); user != nil {
 		if user.Verified {
 			return UniqueConstraint_email
 		} else {
-
+			datastore.Delete(ctx, user.Key)
 		}
 	}
 
-	if user, _ := u.GetByAccessId(ctx, user.AccessId); user != nil && user.Verified {
+	if user, _ := u.GetByAccessId(ctx, user.AccessId); user != nil {
 		if user.Verified {
 			return UniqueConstraint_accessId
 		} else {

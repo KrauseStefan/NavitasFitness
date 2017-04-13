@@ -20,7 +20,7 @@ describe('Frontpage tests', () => {
   });
 
   it('[META] create user', () => {
-    new DataStoreManipulator().removeUser(userInfo.email).destroy();
+    new DataStoreManipulator().removeUserByEmail(userInfo.email).destroy();
 
     const regDialog = NavigationPageObject.openRegistrationDialog();
 
@@ -40,6 +40,7 @@ describe('Frontpage tests', () => {
 
   it('[META] login user', () => {
     const loginDialog = NavigationPageObject.openLoginDialog();
+    DataStoreManipulator.sendValidationRequest(userInfo.email);
 
     loginDialog.fillForm({
       accessId: userInfo.accessId,

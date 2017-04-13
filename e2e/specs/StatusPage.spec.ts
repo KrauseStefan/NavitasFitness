@@ -41,7 +41,7 @@ describe('Payments', () => {
   describe('StatusPage', () => {
 
     it('[META] create user', () => {
-      new DataStoreManipulator().removeUser(userInfo.email).destroy();
+      new DataStoreManipulator().removeUserByEmail(userInfo.email).destroy();
       browser.get('/');
 
       const regDialog = NavigationPageObject.openRegistrationDialog();
@@ -63,6 +63,7 @@ describe('Payments', () => {
 
     it('[META] login user', () => {
       const loginDialog = NavigationPageObject.openLoginDialog();
+      DataStoreManipulator.sendValidationRequest(userInfo.email);
 
       loginDialog.fillForm({
         accessId: userInfo.accessId,
