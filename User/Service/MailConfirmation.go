@@ -20,7 +20,7 @@ Please confirm your email address by clicking on the link below:
 func createConfirmationURL(key string) string {
 	form := url.Values{}
 	form.Set("code", key)
-	return "http://localhost:9000/rest/user/verify?" + form.Encode()
+	return "https://navitas-fitness-aarhus.appspot.com/rest/user/verify?" + form.Encode()
 }
 
 func SendConfirmationMail(ctx appengine.Context, user *UserDao.UserDTO) error {
