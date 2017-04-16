@@ -18,7 +18,8 @@ type UsersRetriever interface {
 	GetAll(ctx appengine.Context) ([]*datastore.Key, []UserDTO, error)
 }
 
-type UserSessionSetter interface {
+type UserModifier interface {
+	SaveUser(ctx appengine.Context, user *UserDTO) error
 	SetSessionUUID(ctx appengine.Context, user *UserDTO, uuid string) error
 }
 
@@ -31,7 +32,5 @@ type UserDAO interface {
 	SingleUserRetriever
 	UsersRetriever
 	UserSessionRetriever
-	UserSessionSetter
-
-	MarkUserVerified(ctx appengine.Context, keyStr string) error
+	UserModifier
 }

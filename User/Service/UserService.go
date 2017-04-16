@@ -117,7 +117,23 @@ func newTransactionMsgClientDTO(source *TransactionDao.TransactionMsgDTO) *Trans
 }
 
 func MarkUserVerified(ctx appengine.Context, encodedKey string) error {
+	key, err := datastore.DecodeKey(encodedKey)
+	if err != nil {
+		return err
+	}
 
-	return userDao.MarkUserVerified(ctx, encodedKey)
+	userDto := &UserDao.UserDTO{}
+	if err := datastore.Get(ctx, key, userDto); err != nil {
+		return err
+	}
+
+	userDto.Verified = true
+
+	if _, err := datastore.Put(ctx, key, userDto); err != nil {
+		return err
+	}
+
+	return nil
+
 
 }

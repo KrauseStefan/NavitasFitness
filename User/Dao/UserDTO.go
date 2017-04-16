@@ -47,24 +47,20 @@ func (user *UserDTO) getPasswordWithSalt(password []byte) []byte {
 	return append(user.PasswordSalt, password...)
 }
 
-func (user *UserDTO) UpdatePasswordHash(password []byte) error {
-	if password == nil && user.Password != "" {
-		password = []byte(user.Password)
-	}
-	if password == nil {
+func (user *UserDTO) UpdatePasswordHash(password string) error {
+	if password == "" {
 		return passwordCanNotBeEmpty
 	}
 	// https://crackstation.net/hashing-security.htm
 	user.PasswordSalt = make([]byte, PW_SALT_BYTES)
 	rand.Read(user.PasswordSalt)
 
-	passwordHash, err := bcrypt.GenerateFromPassword(user.getPasswordWithSalt(password), bcrypt.DefaultCost)
+	passwordHash, err := bcrypt.GenerateFromPassword(user.getPasswordWithSalt([]byte(password)), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
 	user.PasswordHash = passwordHash
-	user.Password = ""
 
 	return nil
 }

@@ -136,7 +136,7 @@ func (u *DefaultUserDAO) Create(ctx appengine.Context, user *UserDTO) error {
 		}
 	}
 
-	if err := user.UpdatePasswordHash(nil); err != nil {
+	if err := user.UpdatePasswordHash(user.Password); err != nil {
 		return err
 	}
 
@@ -151,13 +151,14 @@ func (u *DefaultUserDAO) Create(ctx appengine.Context, user *UserDTO) error {
 	return nil
 }
 
-func (u *DefaultUserDAO) saveUser(ctx appengine.Context, user *UserDTO) error {
+func (u *DefaultUserDAO) SaveUser(ctx appengine.Context, user *UserDTO) error {
 	if !user.hasKey() {
 		return userHasIdError
 	}
 
-	//Only updates if password field has been set
-	user.UpdatePasswordHash(nil)
+	if err := user.UpdatePasswordHash(user.Password); err != nil {
+		return nil
+	}
 
 	key, err := datastore.Put(ctx, user.Key, user)
 	if err == nil {
@@ -171,7 +172,7 @@ func (u *DefaultUserDAO) SetSessionUUID(ctx appengine.Context, user *UserDTO, uu
 
 	user.CurrentSessionUUID = uuid
 
-	return u.saveUser(ctx, user)
+	return u.SaveUser(ctx, user)
 }
 
 func (u *DefaultUserDAO) GetUserFromSessionUUID(ctx appengine.Context, uuid string) (*UserDTO, error) {
@@ -191,25 +192,4 @@ func (u *DefaultUserDAO) GetUserFromSessionUUID(ctx appengine.Context, uuid stri
 	}
 
 	return &users[0], nil
-}
-
-func (u *DefaultUserDAO) MarkUserVerified(ctx appengine.Context, keyStr string) error {
-
-	key, err := datastore.DecodeKey(keyStr)
-	if err != nil {
-		return err
-	}
-
-	userDto := &UserDTO{}
-	if err := datastore.Get(ctx, key, userDto); err != nil {
-		return err
-	}
-
-	userDto.Verified = true
-
-	if _, err := datastore.Put(ctx, key, userDto); err != nil {
-		return err
-	}
-
-	return nil
 }

@@ -94,8 +94,7 @@ func validateAccessId(w http.ResponseWriter, r *http.Request) {
 
 	isValid, err := AccessIdValidator.ValidateAccessId(ctx, accessId_bytes)
 	if err != nil {
-		ctx.Errorf(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		DAOHelper.ReportError(ctx, w, err)
 	}
 
 	if isValid {
