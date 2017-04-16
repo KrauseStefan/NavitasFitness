@@ -16,6 +16,8 @@ import (
 
 const accessIdKey = "accessId"
 
+var accessIdValidator = AccessIdValidator.GetInstance()
+
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/user"
 
@@ -51,14 +53,26 @@ func IntegrateRoutes(router *mux.Router) {
 }
 
 type UserSessionDto struct {
-	User    *UserDao.UserDTO `json:"user"`
-	IsAdmin bool             `json:"isAdmin"`
+	User          *UserDao.UserDTO `json:"user"`
+	IsAdmin       bool             `json:"isAdmin"`
+	ValidAccessId bool             `json:"validAccessId"`
 }
 
 func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
-	us := UserSessionDto{user, user.IsAdmin}
+	ctx := appengine.NewContext(r)
+	isValid, err := accessIdValidator.ValidateAccessId(ctx, []byte(user.AccessId))
 
-	if _, err := AppEngineHelper.WriteJSON(w, us); err != nil {
+	us := UserSessionDto{
+		User:          user,
+		IsAdmin:       user.IsAdmin,
+		ValidAccessId: isValid,
+	}
+
+	if err == nil {
+		_, err = AppEngineHelper.WriteJSON(w, us)
+	}
+
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -92,7 +106,7 @@ func validateAccessId(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 	accessId_bytes := []byte(mux.Vars(r)[accessIdKey])
 
-	isValid, err := AccessIdValidator.ValidateAccessId(ctx, accessId_bytes)
+	isValid, err := accessIdValidator.ValidateAccessId(ctx, accessId_bytes)
 	if err != nil {
 		DAOHelper.ReportError(ctx, w, err)
 	}

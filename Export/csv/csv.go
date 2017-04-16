@@ -11,6 +11,7 @@ import (
 	"appengine"
 	"appengine/datastore"
 
+	"AccessIdValidator"
 	"Dropbox"
 	"IPN/Transaction"
 	"SystemSettingDAO"
@@ -19,8 +20,9 @@ import (
 )
 
 var (
-	userDAO        UserDao.UsersRetriever              = UserDao.GetInstance()
-	transactionDao TransactionDao.TransactionRetriever = TransactionDao.GetInstance()
+	userDAO           UserDao.UsersRetriever              = UserDao.GetInstance()
+	transactionDao    TransactionDao.TransactionRetriever = TransactionDao.GetInstance()
+	accessIdValidator                                     = AccessIdValidator.GetInstance()
 )
 
 const (
@@ -87,6 +89,12 @@ func getActiveTransactionList(ctx appengine.Context) ([]UserTxnTuple, error) {
 	usersWithActiveSubscription := make([]UserTxnTuple, 0, len(userKeys))
 
 	for i, userKey := range userKeys {
+		isValid, err := accessIdValidator.ValidateAccessId(ctx, []byte(users[i].AccessId))
+		if err != nil || !isValid {
+			ctx.Infof("%s has paid for access but ID is not valid, skipped in csv export", users[i].AccessId)
+			continue // Skip uses with invalid access ids they are not allowed access
+		}
+
 		firstDate, lastDate, err := getFirstAndLastTxn(ctx, userKey, time.Now().AddDate(0, -6, 0))
 		if err != nil {
 			return nil, err

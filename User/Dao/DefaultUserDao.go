@@ -6,6 +6,7 @@ import (
 	"appengine"
 	"appengine/datastore"
 
+	"AccessIdValidator"
 	"AppEngineHelper"
 	"DAOHelper"
 )
@@ -13,6 +14,7 @@ import (
 type DefaultUserDAO struct{}
 
 var defaultUserDaoInstance = DefaultUserDAO{}
+var accessIdValidator = AccessIdValidator.GetInstance()
 
 func GetInstance() UserDAO {
 	return &defaultUserDaoInstance

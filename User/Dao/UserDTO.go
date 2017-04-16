@@ -9,8 +9,6 @@ import (
 
 	"appengine"
 	"appengine/datastore"
-
-	"AccessIdValidator"
 )
 
 type UserDTO struct {
@@ -28,7 +26,7 @@ type UserDTO struct {
 }
 
 func (user *UserDTO) ValidateUser(ctx appengine.Context) error {
-	isValid, err := AccessIdValidator.ValidateAccessId(ctx, []byte(user.AccessId))
+	isValid, err := accessIdValidator.ValidateAccessId(ctx, []byte(user.AccessId))
 	if err != nil {
 		return err
 	}
