@@ -24,5 +24,7 @@ md-dialog
             The access id or password is incorrect.
 
     md-dialog-actions
+      md-button.md-primary(ng-click="openResetPasswordDialog($event)") Forgot password?
+      span(flex)
       md-button(ng-click="cancel()") Cancel
       md-button.md-primary(ng-disabled="LoginForm.$invalid", type="submit", ng-click="submit()") Login

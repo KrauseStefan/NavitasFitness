@@ -1,4 +1,6 @@
+import { ResetPasswordFormController } from '../ResetPasswordForm/ResetPasswordForm';
 import { IBaseUserDTO, UserService } from '../UserService';
+import { element } from 'angular';
 
 import IDialogService = angular.material.IDialogService;
 import IHttpPromiseCallbackArg = angular.IHttpPromiseCallbackArg;
@@ -15,6 +17,7 @@ export class LoginForm {
 
     $scope.submit = () => this.submit();
     $scope.cancel = () => this.cancel();
+    $scope.openResetPasswordDialog = (event: MouseEvent) => this.openResetPasswordDialog(event);
     this.resetForm();
   }
 
@@ -24,6 +27,18 @@ export class LoginForm {
       password: '',
     };
     this.$scope.model = model;
+  }
+
+  public openResetPasswordDialog(event: MouseEvent) {
+    this.$mdDialog.show({
+      clickOutsideToClose: true,
+      controller: ResetPasswordFormController,
+      fullscreen: false,
+      // multiple: true,
+      parent: element(document.body),
+      targetEvent: event,
+      templateUrl: '/PageComponents/ResetPasswordForm/ResetPasswordForm.html',
+    });
   }
 
   public submit() {

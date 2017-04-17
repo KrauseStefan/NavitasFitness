@@ -2,13 +2,17 @@ package UserService
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
+	"math/rand"
 	"net/http"
 	"time"
 
 	"appengine"
+	"appengine/datastore"
 
 	"Auth"
+	"DAOHelper"
 	"IPN/Transaction"
 	"User/Dao"
 )
@@ -134,6 +138,90 @@ func MarkUserVerified(ctx appengine.Context, encodedKey string) error {
 	}
 
 	return nil
+}
 
+func RandString(n int) string {
+	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Int63()%int64(len(letterBytes))]
+	}
+	return string(b)
+}
+
+func RequestResetUserPassword(ctx appengine.Context, email string) error {
+
+	rndStr := RandString(10)
+
+	user, err := userDao.GetByEmail(ctx, email)
+	if err == UserDao.UserNotFoundError {
+		return &DAOHelper.DefaultHttpError{
+			InnerError: err,
+			StatusCode: http.StatusNotFound,
+		}
+	} else if err != nil {
+		return err
+	}
+
+	user.PasswordResetTime = time.Now()
+	user.PasswordResetSecret = rndStr
+
+	if err := userDao.SaveUser(ctx, user); err != nil {
+		return err
+	}
+
+	if err := SendPasswordResetMail(ctx, user, rndStr); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type PasswordChangeDto struct {
+	Key      string `json:"key"`
+	Password string `json:"password"`
+	Secret   string `json:"secret"`
+}
+
+var resetInputInvalidError = &DAOHelper.DefaultHttpError{
+	StatusCode: http.StatusBadRequest,
+	InnerError: errors.New("Invalid password reset token"),
+}
+
+func ResetUserPassword(ctx appengine.Context, respBody io.ReadCloser) error {
+	dto := &PasswordChangeDto{}
+	user := &UserDao.UserDTO{}
+	maxAge := time.Now().Add(time.Minute * -30)
+
+	decoder := json.NewDecoder(respBody)
+	if err := decoder.Decode(dto); err != nil {
+		return resetInputInvalidError
+	}
+
+	key, err := datastore.DecodeKey(dto.Key)
+	if err != nil {
+		return resetInputInvalidError
+	}
+
+	if err := datastore.Get(ctx, key, user); err != nil {
+		return resetInputInvalidError
+	}
+
+	if user.PasswordResetSecret == "" || user.PasswordResetSecret != dto.Secret || user.PasswordResetTime.After(maxAge) {
+		return resetInputInvalidError
+	}
+
+	if err := user.UpdatePasswordHash(dto.Password); err != nil {
+		return err
+	}
+
+	user.PasswordResetTime = time.Time{}
+	user.PasswordResetSecret = ""
+
+	if _, err := datastore.Put(ctx, key, user); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -38,6 +38,14 @@ export class UserService {
     return this.currentUserSubject.asObservable();
   }
 
+  public sendResetPasswordRequest(email: string) {
+    return this.$http.post<string>(`${this.userServiceUrl}/resetPassword/${email}`, undefined);
+  }
+
+  public sendPasswordChangeRequest(dto: IChangePasswordDTO) {
+    return this.$http.post(`${this.userServiceUrl}/changePassword`, dto);
+  }
+
   private getUserFromSessionData(): ng.IPromise<IUserDTO> {
     return this.$http.get<IUserSessionDto>(this.userServiceUrl)
       .then((res) => {
@@ -49,6 +57,12 @@ export class UserService {
         this.currentUserSubject.next(null);
       });
   }
+}
+
+export interface IChangePasswordDTO {
+  password: string;
+  key: string;
+  secret: string;
 }
 
 export interface IBaseUserDTO {

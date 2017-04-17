@@ -15,6 +15,7 @@ import (
 )
 
 const accessIdKey = "accessId"
+const emailKey = "email"
 
 var accessIdValidator = AccessIdValidator.GetInstance()
 
@@ -50,6 +51,19 @@ func IntegrateRoutes(router *mux.Router) {
 		Path(path + "/verify").
 		Name("VerifyEmailCallback").
 		HandlerFunc(verifyUserRequestHandler)
+
+	router.
+		Methods("POST").
+		Path(path + "/resetPassword/{" + emailKey + "}").
+		Name("ResetPassword").
+		HandlerFunc(requestResetUserPasswordHandler)
+
+	router.
+		Methods("POST").
+		Path(path + "/changePassword").
+		Name("ChangePassword").
+		HandlerFunc(resetUserPasswordHandler)
+
 }
 
 type UserSessionDto struct {
@@ -129,5 +143,22 @@ func verifyUserRequestHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/?Verified=false", http.StatusTemporaryRedirect)
 	} else {
 		http.Redirect(w, r, "/?Verified=true", http.StatusTemporaryRedirect)
+	}
+}
+
+func requestResetUserPasswordHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := appengine.NewContext(r)
+	email := mux.Vars(r)[emailKey]
+
+	if err := UserService.RequestResetUserPassword(ctx, email); err != nil {
+		DAOHelper.ReportError(ctx, w, err)
+	}
+}
+
+func resetUserPasswordHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := appengine.NewContext(r)
+
+	if err := UserService.ResetUserPassword(ctx, r.Body); err != nil {
+		DAOHelper.ReportError(ctx, w, err)
 	}
 }

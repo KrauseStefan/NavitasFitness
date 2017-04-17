@@ -16,6 +16,8 @@ import (
 	"IPN"
 	"MainPage"
 	"User"
+	"math/rand"
+	"time"
 )
 
 const emailRegStr = `^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$`
@@ -38,6 +40,7 @@ func validateEmail(v interface{}, param string) error {
 // http://blog.golang.org/go-videos-from-google-io-2012
 
 func init() {
+	rand.Seed(time.Now().UnixNano())
 
 	router := mux.NewRouter().StrictSlash(true)
 	MainPageService.IntegrateRoutes(router)
