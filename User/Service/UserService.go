@@ -208,7 +208,12 @@ func ResetUserPassword(ctx appengine.Context, respBody io.ReadCloser) error {
 		return resetInputInvalidError
 	}
 
-	if user.PasswordResetSecret == "" || user.PasswordResetSecret != dto.Secret || user.PasswordResetTime.After(maxAge) {
+	if user.PasswordResetSecret == "" || user.PasswordResetSecret != dto.Secret || !user.PasswordResetTime.After(maxAge) {
+		ctx.Infof("serects user: %q", user.PasswordResetSecret)
+		ctx.Infof("serects dto : %q", dto.Secret)
+		ctx.Infof("serects qeuals: %v", dto.Secret == user.PasswordResetSecret)
+		ctx.Infof("PasswordResetTime: %v, should be after Maxage: %v", user.PasswordResetTime.Format(time.Stamp), maxAge.Format(time.Stamp))
+		ctx.Infof("PasswordResetTime ok: %v", user.PasswordResetTime.After(maxAge))
 		return resetInputInvalidError
 	}
 

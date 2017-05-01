@@ -19,12 +19,11 @@ type UserDTO struct {
 	PasswordHash        []byte         `json:"-",datastore:",noindex"`
 	PasswordSalt        []byte         `json:"-",datastore:",noindex"`
 	Key                 *datastore.Key `json:"-",datastore:"-"`
-	CreatedDate         time.Time      `json:"-"`
-	CurrentSessionUUID  string         `json:"-"`
-	IsAdmin             bool           `json:"-"`
-	Verified            bool           `json:"-"`
-	PasswordResetTime   time.Time      `json:"-"`
-	PasswordResetSecret string         `json:"-"`
+	CurrentSessionUUID  string         `json:"-",datastore:",noindex"`
+	IsAdmin             bool           `json:"-",datastore:",noindex"`
+	Verified            bool           `json:"-",datastore:",noindex"`
+	PasswordResetTime   time.Time      `json:"-",datastore:",noindex"`
+	PasswordResetSecret string         `json:"-",datastore:",noindex"`
 }
 
 func (user *UserDTO) ValidateUser(ctx appengine.Context) error {

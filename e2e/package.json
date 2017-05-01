@@ -7,7 +7,8 @@
     "build": "tsc",
     "install": "webdriver-manager update",
     "test": "npm-run-all test:*",
-    "test:e2e": "npm run clean && npm run build && protractor",
+    "test-serial": "npm run clean && npm run build && protractor",
+    "test:E2E": "npm run clean && npm run build && protractor --parallel",
     "test:tslint": "tslint --project .",
     "clean": "rimraf PageObjects/*.js && rimraf specs/*.js && rimraf *.js"
   },
@@ -16,6 +17,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "https://registry.npmjs.org/@types/node/-/node-6.0.65.tgz",
+    "command-line-args": "^4.0.3",
     "exceljs": "^0.2.46",
     "jasmine2-protractor-utils": "^1.3.0",
     "npm-run-all": "^3.1.2",

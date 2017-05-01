@@ -12,8 +12,9 @@ const KeyFieldName = "passwordResetKey"
 const secretFieldName = "passwordResetSecret"
 
 const passwordResetMessageTpl = `
-Thank you for creating an account!
-Please confirm your email address by clicking on the link below:
+A Password reset request has been made for this mail, if you did not request this please ignore this mail.
+
+If you did request the change then please click the below link to reset your accunt password.
 
 %s
 `
@@ -33,7 +34,7 @@ func SendPasswordResetMail(ctx appengine.Context, user *UserDao.UserDTO, secret 
 	msg := &mail.Message{
 		Sender:  "noreply - Navitass Fitness <navitas-fitness-aarhus@appspot.gserviceaccount.com>",
 		To:      []string{user.Email},
-		Subject: "Confirm your registration",
+		Subject: "Password Reset Request",
 		Body:    fmt.Sprintf(passwordResetMessageTpl, passwordResetUrl),
 	}
 

@@ -6,14 +6,14 @@ import { browser, protractor } from 'protractor';
 
 const userInfo = {
   name: 'test',
-  email: 'email@domain.com',
-  accessId: 'AccessId1',
+  email: 'auth-test-1@domain.com',
+  accessId: 'auth-test-1',
   password: 'Password123',
 };
 
 const alternateUserInfo = {
-  email: 'otherEmail@domain.dk',
-  accessId: 'AccessId2',
+  email: 'auth-test-2@domain.dk',
+  accessId: 'auth-test-2',
 };
 
 describe('User Autentication', () => {

@@ -64,6 +64,11 @@
       "from": "arguments-extended@>=0.0.3 <0.1.0",
       "resolved": "https://registry.npmjs.org/arguments-extended/-/arguments-extended-0.0.3.tgz"
     },
+    "array-back": {
+      "version": "1.0.4",
+      "from": "array-back@>=1.0.4 <2.0.0",
+      "resolved": "https://registry.npmjs.org/array-back/-/array-back-1.0.4.tgz"
+    },
     "array-extended": {
       "version": "0.0.11",
       "from": "array-extended@>=0.0.4 <0.1.0",
@@ -221,6 +226,11 @@
       "version": "1.0.5",
       "from": "combined-stream@>=1.0.5 <1.1.0",
       "resolved": "https://registry.npmjs.org/combined-stream/-/combined-stream-1.0.5.tgz"
+    },
+    "command-line-args": {
+      "version": "4.0.3",
+      "from": "command-line-args@latest",
+      "resolved": "https://registry.npmjs.org/command-line-args/-/command-line-args-4.0.3.tgz"
     },
     "compress-commons": {
       "version": "0.2.9",
@@ -391,6 +401,11 @@
       "version": "0.5.7",
       "from": "fast-csv@0.5.7",
       "resolved": "https://registry.npmjs.org/fast-csv/-/fast-csv-0.5.7.tgz"
+    },
+    "find-replace": {
+      "version": "1.0.3",
+      "from": "find-replace@>=1.0.3 <2.0.0",
+      "resolved": "https://registry.npmjs.org/find-replace/-/find-replace-1.0.3.tgz"
     },
     "find-up": {
       "version": "1.1.2",
@@ -1199,6 +1214,11 @@
         }
       }
     },
+    "test-value": {
+      "version": "2.1.0",
+      "from": "test-value@>=2.1.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/test-value/-/test-value-2.1.0.tgz"
+    },
     "through": {
       "version": "2.3.8",
       "from": "through@>=2.3.1 <2.4.0",
@@ -1246,6 +1266,11 @@
       "version": "2.2.2",
       "from": "typescript@2.2.2",
       "resolved": "https://registry.npmjs.org/typescript/-/typescript-2.2.2.tgz"
+    },
+    "typical": {
+      "version": "2.6.0",
+      "from": "typical@>=2.6.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/typical/-/typical-2.6.0.tgz"
     },
     "ultron": {
       "version": "1.0.2",

@@ -6,7 +6,8 @@ import { promise as wdp } from 'selenium-webdriver';
 let browser: ProtractorBrowser;
 
 const accessIdCol = 5;
-const emailCol = 8;
+const emailCol = 7;
+const resetSecretCol = 13;
 
 export class DataStoreManipulator {
 
@@ -45,6 +46,7 @@ export class DataStoreManipulator {
     browser = mainBrowser.forkNewDriverInstance(false, false);
     browser.ignoreSynchronization = true;
     browser.driver.get('http://localhost:8000/datastore?kind=User');
+    browser.sleep(200);
 
     this.deleteBtn = browser.$('#delete_button');
   }
@@ -66,6 +68,26 @@ export class DataStoreManipulator {
       return row.find('a')[0]
         .href
         .match(/\\/edit\\/([\\w|\\d|\\-|%]*)?/)[1];
+      `;
+
+    return browser.driver.executeScript(queryStr).then((key: string) => {
+      if (key) {
+        return key;
+      }
+      throw `Unable to lookup user DB key, email used: ${email}`;
+    });
+  }
+
+  public getUserEntityResetSecretFromEmail(email: string): wdp.Promise<string> {
+    const queryStr = `
+      const row = $('.ae-table.ae-settings-block tr')
+        .slice(1)
+        .filter((_, elm) => $(elm).find('td:nth(${emailCol})').text() === '${email}');
+
+      if(row.length <= 0){
+        return;
+      }
+      return row.find('td')[${resetSecretCol}].innerText;
       `;
 
     return browser.driver.executeScript(queryStr).then((key: string) => {

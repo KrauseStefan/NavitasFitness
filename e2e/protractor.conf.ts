@@ -1,6 +1,12 @@
+import * as commandLineArgs from 'command-line-args';
 import { Config, ProtractorBy, browser } from 'protractor';
-
 import { PluginConfig } from 'protractor/built/plugins';
+
+const optionDefinitions = [
+    { name: 'parallel', type: Boolean, defaultOption: false },
+];
+
+const cmdOpts = commandLineArgs(optionDefinitions);
 
 const timeoutMils = 1000 * 60 * 10;
 
@@ -46,7 +52,7 @@ export const config: Config = {
     multiCapabilities: [{
         browserName: 'chrome',
         maxInstances: 5,
-        shardTestFiles: true,
+        shardTestFiles: cmdOpts.parallel,
         // }, {
         // browserName: 'firefox',
         // marionette: true,
