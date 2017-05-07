@@ -12,18 +12,18 @@ import (
 )
 
 type UserDTO struct {
-	Name                string         `json:"name",datastore:",noindex",validate:"min=2"`
-	Email               string         `json:"email",validate:"email"`
+	Name                string         `json:"name" datastore:",noindex"`
+	Email               string         `json:"email" validate:"email"`
 	AccessId            string         `json:"accessId"`
-	Password            string         `json:"password,omitempty",datastore:"-",validate:"min=2"`
-	PasswordHash        []byte         `json:"-",datastore:",noindex"`
-	PasswordSalt        []byte         `json:"-",datastore:",noindex"`
-	Key                 *datastore.Key `json:"-",datastore:"-"`
-	CurrentSessionUUID  string         `json:"-",datastore:",noindex"`
-	IsAdmin             bool           `json:"-",datastore:",noindex"`
-	Verified            bool           `json:"-",datastore:",noindex"`
-	PasswordResetTime   time.Time      `json:"-",datastore:",noindex"`
-	PasswordResetSecret string         `json:"-",datastore:",noindex"`
+	Password            string         `json:"password,omitempty" datastore:"-"`
+	PasswordHash        []byte         `json:"-" datastore:",noindex"`
+	PasswordSalt        []byte         `json:"-" datastore:",noindex"`
+	Key                 *datastore.Key `json:"-" datastore:"-"`
+	CurrentSessionUUID  string         `json:"-"`
+	IsAdmin             bool           `json:"-" datastore:",noindex"`
+	Verified            bool           `json:"-" datastore:",noindex"`
+	PasswordResetTime   time.Time      `json:"-" datastore:",noindex"`
+	PasswordResetSecret string         `json:"-" datastore:",noindex"`
 }
 
 func (user *UserDTO) ValidateUser(ctx appengine.Context) error {

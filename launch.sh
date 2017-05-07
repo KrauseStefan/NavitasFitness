@@ -19,4 +19,4 @@ gnome-terminal -e "npm start" &
 cd -
 
 /home/stefan/Apps/google-cloud-sdk/platform/google_appengine/goroot/bin/goapp get -v ./...
-gnome-terminal -e "/home/stefan/Apps/go_appengine/dev_appserver.py ." &
+gnome-terminal -e "/home/stefan/Apps/go_appengine/dev_appserver.py --dev_appserver_log_level=warning ." &

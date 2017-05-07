@@ -5,10 +5,10 @@ import { verifyBrowserLog } from '../utility';
 import { Key, browser } from 'protractor';
 
 const userInfo = {
-  name: 'test',
-  email: 't-frontpage-admin@domain.com',
-  accessId: 'AAMS-asa',
-  password: 'Password123',
+  name: 'front-a',
+  email: 'front-a@domain.com',
+  accessId: 'front-a',
+  password: 'Password1',
 };
 
 describe('Frontpage tests', () => {

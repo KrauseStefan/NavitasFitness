@@ -158,16 +158,18 @@ func (u *DefaultUserDAO) SaveUser(ctx appengine.Context, user *UserDTO) error {
 		return userHasIdError
 	}
 
-	if err := user.UpdatePasswordHash(user.Password); err != nil {
-		return nil
+	if user.Password != "" {
+		if err := user.UpdatePasswordHash(user.Password); err != nil {
+			return err
+		}
 	}
 
 	key, err := datastore.Put(ctx, user.Key, user)
-	if err == nil {
-		user.Key = key
+	if err != nil {
+		return err
 	}
-
-	return err
+	user.Key = key
+	return nil
 }
 
 func (u *DefaultUserDAO) SetSessionUUID(ctx appengine.Context, user *UserDTO, uuid string) error {
@@ -193,5 +195,6 @@ func (u *DefaultUserDAO) GetUserFromSessionUUID(ctx appengine.Context, uuid stri
 		return nil, errors.New(invalidSessionError.Error() + " - uuid: " + uuid)
 	}
 
+	users[0].Key = keys[0]
 	return &users[0], nil
 }

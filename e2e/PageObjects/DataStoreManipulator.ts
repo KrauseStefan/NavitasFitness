@@ -7,7 +7,7 @@ let browser: ProtractorBrowser;
 
 const accessIdCol = 5;
 const emailCol = 7;
-const resetSecretCol = 13;
+const resetSecretCol = 11;
 
 export class DataStoreManipulator {
 
@@ -90,11 +90,12 @@ export class DataStoreManipulator {
       return row.find('td')[${resetSecretCol}].innerText;
       `;
 
-    return browser.driver.executeScript(queryStr).then((key: string) => {
-      if (key) {
-        return key;
+    return browser.driver.executeScript(queryStr).then((secret: string) => {
+      if (secret) {
+        return secret;
       }
-      throw `Unable to lookup user DB key, email used: ${email}`;
+      // console.log('failed script:', queryStr);
+      throw `Unable to lookup reset secret, email used: ${email}`;
     });
   }
 

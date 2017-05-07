@@ -30,9 +30,9 @@ export function getPageDatesAsExportedRow(id: string, email: string): wdp.Promis
 describe('Payments', () => {
 
   const userInfo = {
-    name: 'test',
-    email: 'status-test@domain.com',
-    accessId: '201505600',
+    name: 'status',
+    email: 'status@domain.com',
+    accessId: 'status',
     password: 'Password1',
   };
 
