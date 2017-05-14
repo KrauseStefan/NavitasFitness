@@ -1,5 +1,5 @@
 doctype html
-html(ng-app="NavitasFitness")
+html
   head
     meta(charset="UTF-8")
     meta(name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes")
@@ -54,7 +54,11 @@ html(ng-app="NavitasFitness")
       System.import('angular-ui-router');
       System.import('ckeditor');
 
-      System.import('NavitasFitnessModule');
+      System.import('NavitasFitnessModule').then(function() {
+        angular.element(function() {
+          angular.bootstrap(document, ['NavitasFitness']);
+        });
+      });
 
 
     link(href="https://fonts.googleapis.com/icon?family=Material+Icons", rel="stylesheet")
