@@ -33,7 +33,7 @@ export function verifyBrowserLog(expectedEntries: string[] = []) {
   });
 }
 
-export function waitForPageToLoad(): wdp.Promise<void> {
+export function waitForPageToLoad(): wdp.Promise<{}> {
   return browser.wait(browser.executeScript(() => document.readyState), 1000, 'Page did not load');
 }
 

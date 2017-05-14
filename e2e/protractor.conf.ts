@@ -49,6 +49,7 @@ export const config: Config = {
     // directConnect: true,
     framework: 'jasmine',
     jasmineNodeOpts: { defaultTimeoutInterval: timeoutMils },
+    disableChecks: true,
     multiCapabilities: [{
         browserName: 'chrome',
         maxInstances: 5,

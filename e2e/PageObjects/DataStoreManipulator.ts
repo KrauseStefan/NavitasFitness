@@ -43,9 +43,13 @@ export class DataStoreManipulator {
   private deleteBtn: ElementFinder;
 
   constructor() {
-    browser = mainBrowser.forkNewDriverInstance(false, false);
+    browser = mainBrowser.forkNewDriverInstance(false, false, false);
     browser.ignoreSynchronization = true;
-    browser.driver.get('http://localhost:8000/datastore?kind=User');
+    browser.get('http://localhost:8000/datastore?kind=User');
+    browser.ready.then(() => {
+      // Bug workaround: syncronisation is reenabled when ready event is fired
+      browser.ignoreSynchronization = true;
+    });
     browser.sleep(200);
 
     this.deleteBtn = browser.$('#delete_button');
@@ -53,6 +57,7 @@ export class DataStoreManipulator {
 
   public destroy() {
     browser.sleep(200);
+    browser.close();
     browser.quit();
   }
 
