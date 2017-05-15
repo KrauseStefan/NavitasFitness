@@ -1,16 +1,13 @@
 
 cd websrc
-
-#npm install
-& npm run clean
-
-Start-Process "npm" "run watch"
-
+& npm install
+& npm -new_console start
 cd ..
-
-& goapp get -v ./...
-Start-Process "goapp" "serve ./app-engine/"
 
 cd ipn-simulator
-Start-Process "npm start"
+& npm -new_console start
 cd ..
+
+& go get -v ./...
+& dev_appserver.py -new_console --dev_appserver_log_level=warning .
+

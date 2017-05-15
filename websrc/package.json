@@ -5,15 +5,15 @@
   "main": "index.js",
   "scripts": {
     "build": "npm-run-all clean --parallel copy:* build:**",
-    "start": "npm-run-all clean --parallel build:scss webserver copy:* 'build:* -- --watch'",
+    "start": "npm-run-all clean --parallel build:scss webserver copy:* build:* -- --watch",
     "build:pug": "pug app -o ../webapp/ --pretty --hierarchy",
     "build:ts": "tsc",
     "build:scss": "node-sass styles/main.scss ../webapp/main.css --source-map true",
-    "copy:favicon": "cp favicon.ico ../webapp/favicon.ico",
+    "copy:favicon": "shx cp favicon.ico ../webapp/favicon.ico",
     "copy:libs": "node buildenv/copyLibs.js",
     "test": "npm-run-all test:*",
     "test:tslint": "tslint --project . --type-check",
-    "clean": "rimraf ../webapp/*",
+    "clean": "shx rm -rf ../webapp/*",
     "webserver": "node buildenv/connect.server.js"
   },
   "author": "Stefan Krause-Kjær",
@@ -52,6 +52,7 @@
     "material-design-icons": "^2.2.3",
     "moment": "^2.17.1",
     "rxjs": "^5.0.0-beta.12",
+    "shx": "^0.2.2",
     "systemjs": "^0.19.46"
   }
 }

@@ -50,6 +50,7 @@ export const config: Config = {
     framework: 'jasmine',
     jasmineNodeOpts: { defaultTimeoutInterval: timeoutMils },
     disableChecks: true,
+    allScriptsTimeout: 60000,
     multiCapabilities: [{
         browserName: 'chrome',
         maxInstances: 5,
