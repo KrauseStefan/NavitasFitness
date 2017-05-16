@@ -43,6 +43,7 @@ export class DataStoreManipulator {
   private deleteBtn: ElementFinder;
 
   constructor() {
+    mainBrowser.waitForAngular();
     browser = mainBrowser.forkNewDriverInstance(false, false, false);
     browser.ignoreSynchronization = true;
     browser.get('http://localhost:8000/datastore?kind=User');

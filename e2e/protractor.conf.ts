@@ -43,23 +43,32 @@ const utilsPlugin: IJasmine2ProtractorUtilsConfig = {
 };
 
 export const config: Config = {
+    jvmArgs: [
+        '-Dwebdriver.ie.driver=node_modules/protractor/node_modules/webdriver-manager/selenium/IEDriverServer3.4.0.exe',
+    ],
     baseUrl: 'http://localhost:8080',
-    directConnect: true,
     // baseUrl: 'http://navitas-fitness-aarhus.appspot.com/',
     // directConnect: true,
     framework: 'jasmine',
     jasmineNodeOpts: { defaultTimeoutInterval: timeoutMils },
     disableChecks: true,
-    allScriptsTimeout: 60000,
+    allScriptsTimeout: timeoutMils,
     multiCapabilities: [{
         browserName: 'chrome',
         maxInstances: 5,
         shardTestFiles: cmdOpts.parallel,
-        // }, {
-        // browserName: 'firefox',
-        // marionette: true,
-        // // maxInstances: 3,
-        // shardTestFiles: true,
+    // }, {
+        // browserName: 'edge',
+        // maxInstances: 1,
+        // shardTestFiles: cmdOpts.parallel,
+    // }, {
+        // browserName: 'internet explorer',
+        // maxInstances: 1,
+        // shardTestFiles: cmdOpts.parallel,
+    // }, {
+    //     browserName: 'firefox',
+    //     maxInstances: 1,
+    //     shardTestFiles: cmdOpts.parallel,
     }],
     onPrepare: () => {
 
