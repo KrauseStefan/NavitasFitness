@@ -19,22 +19,34 @@
 
   md-card(ng-if="$ctrl.model.statusMsgKey != 'active'")
     md-content(layout-padding)
-      form(name="PaymentForm", action="{{::$ctrl.getSubmitUrl()}}", method="post", target="_top")
+      form(name="PaymentForm", action="https://www.paypal.com/cgi-bin/webscr", method="post", target="_top")
         h3.md-title Subscription Payment
         p
           span Payment of a fitness subscription gives access to the fitness room for 6 month. The right of withdrawal is cancelled during payment.
           br
-          span 6 month membership 300 kr.
+          span 6 month membership 300 kr plus 15kr payment fee.
+          br
+          span Total charge 315 kr.
           br
           b This button targets paypals sandbox API, only simulated payments can be made with special test accounts.
 
         md-input-container
-          md-checkbox(name="termsAccepted", ng-model="termsAccepted", ng-required="true") You must accept the terms
+          md-checkbox(name="termsAccepted", ng-model="$ctrl.termsAccepted", ng-required="true") You must accept the terms
 
+        input(type="hidden", name="cmd", value="_s-xclick")
+        input(type="hidden", name="hosted_button_id", value="N52FVSL4VG6Z4")
+        input(type="hidden", name="custom", value="{{$ctrl.model.userEmail}}")
+        input.paypalBtn(type="image", ng-disabled="PaymentForm.$invalid", src="https://www.sandbox.paypal.com/en_US/DK/i/btn/btn_paynowCC_LG.gif", border="0", name="submit")
+        img(alt="", border="0", src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif", width="1", height="1")
+
+  md-card(ng-if="$ctrl.model.statusMsgKey != 'active'")
+    md-content(layout-padding)
+      h3.md-title Simulation
+      form(name="PaymentSandBoxForm", action="{{::$ctrl.getSubmitUrl()}}", method="post", target="_top")
         input(type="hidden", name="cmd", value="_s-xclick")
         input(type="hidden", name="hosted_button_id", value="QBGG5JT5UJD62")
         input(type="hidden", name="custom", value="{{$ctrl.model.userEmail}}")
-        input.paypalBtn(type="image", ng-disabled="PaymentForm.$invalid", src="https://www.sandbox.paypal.com/en_US/DK/i/btn/btn_paynowCC_LG.gif", border="0", name="submit")
+        input.paypalBtn(type="image", ng-disabled="!$ctrl.termsAccepted", src="https://www.sandbox.paypal.com/en_US/DK/i/btn/btn_paynowCC_LG.gif", border="0", name="submit")
         img(alt="", border="0", src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif", width="1", height="1")
 
   md-card(ng-if="$ctrl.model.transactionHistory.length > 0")

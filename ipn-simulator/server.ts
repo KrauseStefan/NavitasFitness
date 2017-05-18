@@ -43,7 +43,7 @@ http.createServer((req, res) => {
   if (req.url === configuration.serverProcessPaymentUrl) {
     console.log('')
     sendIpnDataMessage(req, res).then((sentMessage: string) => {
-      res.write('<a href="//localhost:9000/status">back</a>\n');
+      res.write('<a href="//localhost:8080/status">back</a>\n');
 
       log('Data message sent', res);
       log('server closed connection', res);

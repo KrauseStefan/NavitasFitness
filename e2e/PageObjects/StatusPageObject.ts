@@ -29,7 +29,7 @@ function getModelValue(model: string): wdp.Promise<string> {
 
 export class StatusPageObject {
 
-  public static paypalBtn = $('form[action] input[name="submit"]');
+  public static paypalBtn = $('form[name="PaymentSandBoxForm"] input[name="submit"]');
 
   public static termsAcceptedChkBx = $('[name="termsAccepted"]');
 

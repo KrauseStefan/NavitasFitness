@@ -25,7 +25,7 @@ export class DataStoreManipulator {
       return new wdp.Promise<void>((resolve, reject) => {
         const url = '/rest/user/verify?code=' + keyStr;
         return http.get({
-          port: '9000',
+          port: '8080',
           path: url,
         }, (response: http.ClientResponse) => {
           if (response.headers['location'].includes('Verified=true')) {
@@ -43,7 +43,7 @@ export class DataStoreManipulator {
   private deleteBtn: ElementFinder;
 
   constructor() {
-    mainBrowser.waitForAngular();
+    // mainBrowser.waitForAngular();
     browser = mainBrowser.forkNewDriverInstance(false, false, false);
     browser.ignoreSynchronization = true;
     browser.get('http://localhost:8000/datastore?kind=User');

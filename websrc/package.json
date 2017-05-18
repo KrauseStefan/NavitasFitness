@@ -27,6 +27,7 @@
     "pug": "^2.0.0-beta9",
     "pug-cli": "^1.0.0-alpha6",
     "serve-static": "^1.12.1",
+    "shx": "^0.2.2",
     "tslint": "^3.15.1",
     "typescript": "^2.2.1"
   },
@@ -42,7 +43,7 @@
     "angular-animate": "^1.6.3",
     "angular-aria": "^1.6.3",
     "angular-cookies": "^1.6.3",
-    "angular-material": "^1.1.3",
+    "angular-material": "^1.1.4",
     "angular-messages": "^1.6.3",
     "angular-mocks": "^1.6.3",
     "angular-sanitize": "^1.6.3",
@@ -52,7 +53,6 @@
     "material-design-icons": "^2.2.3",
     "moment": "^2.17.1",
     "rxjs": "^5.0.0-beta.12",
-    "shx": "^0.2.2",
     "systemjs": "^0.19.46"
   }
 }
