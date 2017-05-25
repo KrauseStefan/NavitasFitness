@@ -14,8 +14,8 @@
     "typescript": "^2.0.7"
   },
   "scripts": {
-    "prestart": "tsc",
-    "start": "npm install && node server.js"
+    "prestart": "npm install && tsc",
+    "start": "node server.js"
   },
   "devDependencies": {}
 }

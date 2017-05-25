@@ -3,11 +3,9 @@
 # Hints
 # sudo ln -s ~/Apps/google-cloud-sdk/platform/google_appengine/goroot/src/appengine $GOROOT/src/
 # sudo ln -s ~/Apps/google-cloud-sdk/platform/google_appengine/goroot/src/appengine_internal $GOROOT/src/
-
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/App"
+SF="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DIR="$SF/App"
 cd "${DIR}"
-
-echo "$DIR"
 
 GO_TEST_PATH="$HOME/TEST-GOPATH"
 

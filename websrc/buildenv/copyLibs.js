@@ -1,7 +1,7 @@
 const fse = require('fs-extra');
 
 const nodeModulesPath = './node_modules';
-const appLibPath = '../App/webapp';
+const appLibPath = '../App/NavitasFitness/webapp';
 
 const filters = [
   'angular-mocks',

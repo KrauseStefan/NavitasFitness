@@ -9,7 +9,7 @@ const serverPort = 9000;
 const libPath = '/libs/';
 
 // below paths are relative to this script
-const appServerFolder = __dirname + '/../../App/webapp';
+const appServerFolder = __dirname + '/../../App/NavitasFitness/webapp';
 const srcServeFolder = __dirname + '/../app';
 const outputLibs = appServerFolder + libPath;
 
