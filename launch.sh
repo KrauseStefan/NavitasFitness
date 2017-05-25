@@ -18,6 +18,7 @@ gnome-terminal -e "npm start" &
 
 cd -
 
-goapp get -v ./...
+cp ../NavitasFitnessConfig.Json App/config.json
+go get -v ./...
 #gnome-terminal -e "dev_appserver.py --dev_appserver_log_level=warning ." &
-gnome-terminal -e "dev_appserver.py ." &
+gnome-terminal -e "dev_appserver.py App/app.yaml" &

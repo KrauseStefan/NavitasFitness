@@ -9,7 +9,7 @@ const serverPort = 9000;
 const libPath = '/libs/';
 
 // below paths are relative to this script
-const appServerFolder = __dirname + '/../../webapp';
+const appServerFolder = __dirname + '/../../App/webapp';
 const srcServeFolder = __dirname + '/../app';
 const outputLibs = appServerFolder + libPath;
 
@@ -23,7 +23,7 @@ connect()
     if (req.url.startsWith('/rest')) {
       modRewrite(['^/(.*)$ http://localhost:8080/$1 [P]'])(req, res, next);
     } else if (req.url.match(/\./) === null && req.url !== '') {
-      console.log(`redirecting ${req.url} to /`)
+      console.log(`redirecting ${ req.url } to /`)
       req.url = '/'
       next();
     } else {

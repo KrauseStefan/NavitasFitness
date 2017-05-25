@@ -47,7 +47,7 @@ func AsUser(f func(http.ResponseWriter, *http.Request, *UserDao.UserDTO)) func(h
 }
 
 func getUserFromSession(ctx appengine.Context, r *http.Request) (*UserDao.UserDTO, error) {
-	uuid, err := AuthService.GetSessionUUID(r)
+	uuid, err := Auth.GetSessionUUID(r)
 
 	if uuid == "" && err == nil {
 		return nil, nil

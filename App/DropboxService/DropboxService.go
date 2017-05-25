@@ -20,7 +20,7 @@ const (
 	clientId = "v34s5hrxzkjw8ie"
 
 	redirectUriBase     = "https://navitas-fitness-aarhus.appspot.com"
-	redirectUriBaseTest = "http://localhost:9000"
+	redirectUriBaseTest = "http://localhost:8080"
 	path                = "/rest/dropbox"
 	tokenCallback       = "/tokenCallback"
 )

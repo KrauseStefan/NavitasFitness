@@ -1,4 +1,4 @@
-package AuthService
+package Auth
 
 import (
 	"github.com/gorilla/securecookie"

@@ -11,7 +11,7 @@
     "pretty": true,
     "listFiles": false,
     "rootDir": "./app/",
-    "outFile": "../webapp/app.js",
+    "outFile": "../App/webapp/app.js",
     "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true
   },

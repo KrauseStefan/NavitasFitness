@@ -15,7 +15,7 @@
   },
   "scripts": {
     "prestart": "tsc",
-    "start": "node server.js"
+    "start": "npm install && node server.js"
   },
   "devDependencies": {}
 }

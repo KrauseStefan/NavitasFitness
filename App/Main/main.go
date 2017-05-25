@@ -45,7 +45,7 @@ func init() {
 	router := mux.NewRouter().StrictSlash(true)
 	MainPageService.IntegrateRoutes(router)
 	UserRest.IntegrateRoutes(router)
-	AuthService.IntegrateRoutes(router)
+	Auth.IntegrateRoutes(router)
 	IPN.IntegrateRoutes(router)
 	xlsx.IntegrateRoutes(router)
 	csv.IntegrateRoutes(router)
