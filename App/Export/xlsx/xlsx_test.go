@@ -6,20 +6,23 @@ import (
 	"testing"
 	"time"
 
-	"appengine/datastore"
+	"google.golang.org/appengine/datastore"
+
 	"github.com/tealeg/xlsx"
 
 	"IPN/Transaction"
-	"TestHelper"
 	"User/Dao"
 
 	"IPN/Transaction/TransactionDaoTestHelper"
+	"TestHelper"
 	"User/Dao/UserDaoTestHelper"
 )
 
-var assert = TestHelper.Assert
-
-var utc, _ = time.LoadLocation("UTC")
+var (
+	assert = TestHelper.Assert
+	utc, _ = time.LoadLocation("UTC")
+	ctx    = TestHelper.GetContext()
+)
 
 func mockTransactionRetriever(messages []*TransactionDao.TransactionMsgDTO, err error) *TransactionDaoTestHelper.TransactionRetrieverMock {
 	mock := TransactionDaoTestHelper.NewTransactionRetrieverMock(messages, err)
@@ -59,8 +62,6 @@ func TestShouldConfigureHeaderForNoCache(t *testing.T) {
 }
 
 func TestShouldGetTransactionsFromDataStore(t *testing.T) {
-	ctx := &TestHelper.ContextMock{}
-
 	keys := []*datastore.Key{{}, {}}
 	users := []UserDao.UserDTO{
 		{Email: "NO_Subscription"},
@@ -86,7 +87,6 @@ func TestShouldGetTransactionsFromDataStore(t *testing.T) {
 }
 
 func TestShouldPassOnErrorsFromDataStore_GetAllUsers(t *testing.T) {
-	ctx := &TestHelper.ContextMock{}
 	testError := errors.New("test error")
 
 	userDaoMock := mockUserRetriever(nil, nil, testError)
@@ -100,7 +100,6 @@ func TestShouldPassOnErrorsFromDataStore_GetAllUsers(t *testing.T) {
 }
 
 func TestShouldPassOnErrorsFromDataStore_HasSubscription(t *testing.T) {
-	ctx := &TestHelper.ContextMock{}
 	testError := errors.New("test error")
 
 	keys := []*datastore.Key{{}}
@@ -129,8 +128,6 @@ func TestShouldAddHeaderRowBasedOnPassedArgumentsToAddRow(t *testing.T) {
 }
 
 func TestShouldCreateXlsxSheetWithAllUserHavingActiveSubscription(t *testing.T) {
-	ctx := &TestHelper.ContextMock{}
-
 	keys := []*datastore.Key{{}}
 	users := []UserDao.UserDTO{{Email: "testMail"}}
 	now := time.Now()
@@ -157,7 +154,6 @@ func TestShouldCreateXlsxSheetWithAllUserHavingActiveSubscription(t *testing.T) 
 }
 
 func TestExportXlsxHandler(t *testing.T) {
-	ctx := new(TestHelper.ContextMock)
 	testError := errors.New("test error")
 
 	mockUserRetriever(nil, nil, testError)

@@ -7,8 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"appengine"
-	"appengine/urlfetch"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/urlfetch"
 )
 
 const uploadUrl = "/2/files/upload"
@@ -34,7 +34,7 @@ type UploadDto struct {
 	Mode UploadModeDto `json:"mode"`
 }
 
-func UploadDoc(ctx appengine.Context, filePath string, file io.Reader) (*UploadResp, error) {
+func UploadDoc(ctx context.Context, filePath string, file io.Reader) (*UploadResp, error) {
 
 	client := urlfetch.Client(ctx)
 

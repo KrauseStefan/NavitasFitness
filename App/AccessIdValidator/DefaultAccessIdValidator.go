@@ -6,7 +6,8 @@ import (
 	"io/ioutil"
 	"time"
 
-	"appengine"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/log"
 
 	"Dropbox"
 	"SystemSettingDAO"
@@ -31,23 +32,23 @@ func GetInstance() AccessIdValidator {
 	return &instance
 }
 
-func getPath(ctx appengine.Context) string {
+func getPath(ctx context.Context) string {
 	_, value, err := SystemSettingDAO.GetSetting(ctx, fitnessAccessIdsPathSettingKey)
 	if err != nil {
-		ctx.Errorf(err.Error())
+		log.Errorf(ctx, err.Error())
 	}
 
 	if value == "" {
 		value = defaultFitnessAccessIdsPath
 		if err := SystemSettingDAO.PersistSetting(ctx, fitnessAccessIdsPathSettingKey, value); err != nil {
-			ctx.Errorf(err.Error())
+			log.Errorf(ctx, err.Error())
 		}
 	}
 
 	return value
 }
 
-func downloadValidAccessIds(ctx appengine.Context) error {
+func downloadValidAccessIds(ctx context.Context) error {
 
 	resp, _, err := Dropbox.DownloadFile(ctx, getPath(ctx))
 	if err != nil {
@@ -75,9 +76,9 @@ func downloadValidAccessIds(ctx appengine.Context) error {
 	return nil
 }
 
-func ensureUpdatedIds(ctx appengine.Context) error {
+func ensureUpdatedIds(ctx context.Context) error {
 	if downloadedIds == nil || lastDownload.Add(12*time.Hour).Before(time.Now()) {
-		ctx.Infof("Downloading ids")
+		log.Infof(ctx, "Downloading ids")
 		err := downloadValidAccessIds(ctx)
 		if err != nil {
 			return err
@@ -87,7 +88,7 @@ func ensureUpdatedIds(ctx appengine.Context) error {
 }
 
 //Go strings are UTF 8 without bom converting it to byte should be safe
-func (v *DefaultAccessIdValidator) ValidateAccessId(ctx appengine.Context, accessId []byte) (bool, error) {
+func (v *DefaultAccessIdValidator) ValidateAccessId(ctx context.Context, accessId []byte) (bool, error) {
 
 	if err := ensureUpdatedIds(ctx); err != nil {
 		return false, err
@@ -99,7 +100,7 @@ func (v *DefaultAccessIdValidator) ValidateAccessId(ctx appengine.Context, acces
 		}
 	}
 
-	ctx.Infof("length %s - %d", hex.Dump(accessId), len(accessId))
+	log.Infof(ctx, "length %s - %d", hex.Dump(accessId), len(accessId))
 
 	return false, nil
 }

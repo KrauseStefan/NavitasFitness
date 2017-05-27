@@ -1,8 +1,8 @@
 package SystemSettingDAO
 
 import (
-	"appengine"
-	"appengine/datastore"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/datastore"
 
 	"AppEngineHelper"
 )
@@ -22,7 +22,7 @@ type systemSetting struct {
 	Value string
 }
 
-func PersistSetting(ctx appengine.Context, key string, value string) error {
+func PersistSetting(ctx context.Context, key string, value string) error {
 	dsKey, currentValue, err := GetSetting(ctx, key)
 	if err != nil {
 		return err
@@ -51,7 +51,7 @@ func PersistSetting(ctx appengine.Context, key string, value string) error {
 	return nil
 }
 
-func GetSetting(ctx appengine.Context, key string) (*datastore.Key, string, error) {
+func GetSetting(ctx context.Context, key string) (*datastore.Key, string, error) {
 	settings := make([]systemSetting, 0, 1)
 	keys, err := datastore.NewQuery(SETTING_KIND).
 		Ancestor(settingCollectionParentKey(ctx)).

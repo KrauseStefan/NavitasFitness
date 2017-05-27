@@ -1,8 +1,10 @@
 package DAOHelper
 
 import (
-	"appengine"
 	"net/http"
+
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/log"
 )
 
 type HttpError interface {
@@ -27,7 +29,7 @@ func (e *DefaultHttpError) GetStatus() int {
 	return e.StatusCode
 }
 
-func ReportError(ctx appengine.Context, w http.ResponseWriter, e error) {
+func ReportError(ctx context.Context, w http.ResponseWriter, e error) {
 	if e == nil {
 		return
 	}
@@ -37,6 +39,6 @@ func ReportError(ctx appengine.Context, w http.ResponseWriter, e error) {
 		httpError = &DefaultHttpError{InnerError: e}
 	}
 
-	ctx.Errorf(httpError.Error())
+	log.Errorf(ctx, httpError.Error())
 	http.Error(w, httpError.Error(), httpError.GetStatus())
 }

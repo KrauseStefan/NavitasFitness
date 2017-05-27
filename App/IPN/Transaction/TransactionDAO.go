@@ -3,22 +3,22 @@ package TransactionDao
 import (
 	"time"
 
-	"appengine"
-	"appengine/datastore"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/datastore"
 )
 
 type TransactionIpnManipulator interface {
-	UpdateIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO) error
+	UpdateIpnMessage(ctx context.Context, ipnTxn *TransactionMsgDTO) error
 
-	PersistNewIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO, userKey *datastore.Key) error
+	PersistNewIpnMessage(ctx context.Context, ipnTxn *TransactionMsgDTO, userKey *datastore.Key) error
 }
 
 type TransactionRetriever interface {
-	GetTransaction(ctx appengine.Context, txnId string) (*TransactionMsgDTO, error)
+	GetTransaction(ctx context.Context, txnId string) (*TransactionMsgDTO, error)
 
-	GetTransactionsByUser(ctx appengine.Context, parentUserKey *datastore.Key) ([]*TransactionMsgDTO, error)
+	GetTransactionsByUser(ctx context.Context, parentUserKey *datastore.Key) ([]*TransactionMsgDTO, error)
 
-	GetCurrentTransactionsAfter(ctx appengine.Context, userKey *datastore.Key, date time.Time) ([]*TransactionMsgDTO, error)
+	GetCurrentTransactionsAfter(ctx context.Context, userKey *datastore.Key, date time.Time) ([]*TransactionMsgDTO, error)
 }
 
 type TransactionDao interface {

@@ -7,8 +7,9 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/tealeg/xlsx"
 
-	"appengine"
-	"appengine/datastore"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/datastore"
 
 	"IPN/Transaction"
 	"User/Dao"
@@ -30,7 +31,7 @@ const (
 	xlsxDateFormat = "02.01.2006"
 )
 
-func getFirstAndLastTxn(ctx appengine.Context, userKey *datastore.Key, date time.Time) (time.Time, time.Time, error) {
+func getFirstAndLastTxn(ctx context.Context, userKey *datastore.Key, date time.Time) (time.Time, time.Time, error) {
 	activeSubscriptions, err := transactionDao.GetCurrentTransactionsAfter(ctx, userKey, date)
 	if err != nil {
 		return time.Time{}, time.Time{}, err
@@ -86,7 +87,7 @@ func getExtrema(txns []*TransactionDao.TransactionMsgDTO) (*TransactionDao.Trans
 	return firstTxn, lastTxn
 }
 
-func getActiveTransactionList(ctx appengine.Context) ([]UserTxnTuple, error) {
+func getActiveTransactionList(ctx context.Context) ([]UserTxnTuple, error) {
 
 	userKeys, users, err := userDAO.GetAll(ctx)
 	if err != nil {
@@ -132,7 +133,7 @@ func addXlsxRow(sheet *xlsx.Sheet, values ...string) {
 	}
 }
 
-func createXlsxFile(ctx appengine.Context) (*xlsx.File, error) {
+func createXlsxFile(ctx context.Context) (*xlsx.File, error) {
 
 	userTxnTuple, err := getActiveTransactionList(ctx)
 	if err != nil {

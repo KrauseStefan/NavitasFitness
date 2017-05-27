@@ -8,8 +8,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"appengine"
-	"appengine/urlfetch"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/urlfetch"
 )
 
 const serviceUrl = "https://content.dropboxapi.com/2/files/download"
@@ -49,7 +49,7 @@ type FieldDto struct {
 	Value string
 }
 
-func DownloadFile(ctx appengine.Context, fileUrl string) (io.ReadCloser, *FileDownloadResponseDto, error) {
+func DownloadFile(ctx context.Context, fileUrl string) (io.ReadCloser, *FileDownloadResponseDto, error) {
 	client := urlfetch.Client(ctx)
 
 	accessToken, err := GetAccessToken(ctx)

@@ -1,11 +1,11 @@
 package AccessIdValidatorTestHelper
 
 import (
-	"appengine"
+	"golang.org/x/net/context"
 )
 
 type CallArgs struct {
-	ctx      appengine.Context
+	ctx      context.Context
 	accessId []byte
 }
 
@@ -26,7 +26,7 @@ func NewAccessIdValidatorMock(validAccessIds []string, err error) *AccessIdValid
 	return mock
 }
 
-func (mock *AccessIdValidatorMock) ValidateAccessId(ctx appengine.Context, accessId []byte) (bool, error) {
+func (mock *AccessIdValidatorMock) ValidateAccessId(ctx context.Context, accessId []byte) (bool, error) {
 	mock.CallCount++
 	mock.CallArgs = append(mock.CallArgs, CallArgs{ctx, accessId})
 

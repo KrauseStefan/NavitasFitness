@@ -3,14 +3,14 @@ package TransactionDaoTestHelper
 import (
 	"time"
 
-	"appengine"
-	"appengine/datastore"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/datastore"
 
 	"IPN/Transaction"
 )
 
 type CallArgs struct {
-	Ctx   appengine.Context
+	Ctx   context.Context
 	Key   *datastore.Key
 	TxnId string
 	Date  time.Time
@@ -42,7 +42,7 @@ func (mock *TransactionRetrieverMock) AddReturn(messages []*TransactionDao.Trans
 	return mock
 }
 
-func (mock *TransactionRetrieverMock) GetTransaction(ctx appengine.Context, txnId string) (*TransactionDao.TransactionMsgDTO, error) {
+func (mock *TransactionRetrieverMock) GetTransaction(ctx context.Context, txnId string) (*TransactionDao.TransactionMsgDTO, error) {
 	rtnValues := mock.returnValues[mock.CallCount]
 	mock.CallCount++
 	mock.CallArgs = append(mock.CallArgs, CallArgs{
@@ -52,7 +52,7 @@ func (mock *TransactionRetrieverMock) GetTransaction(ctx appengine.Context, txnI
 	return rtnValues.messages[0], rtnValues.err
 }
 
-func (mock *TransactionRetrieverMock) GetTransactionsByUser(ctx appengine.Context, parentUserKey *datastore.Key) ([]*TransactionDao.TransactionMsgDTO, error) {
+func (mock *TransactionRetrieverMock) GetTransactionsByUser(ctx context.Context, parentUserKey *datastore.Key) ([]*TransactionDao.TransactionMsgDTO, error) {
 	rtnValues := mock.returnValues[mock.CallCount]
 	mock.CallCount++
 	mock.CallArgs = append(mock.CallArgs, CallArgs{
@@ -62,7 +62,7 @@ func (mock *TransactionRetrieverMock) GetTransactionsByUser(ctx appengine.Contex
 	return rtnValues.messages, rtnValues.err
 }
 
-func (mock *TransactionRetrieverMock) GetCurrentTransactionsAfter(ctx appengine.Context, userKey *datastore.Key, date time.Time) ([]*TransactionDao.TransactionMsgDTO, error) {
+func (mock *TransactionRetrieverMock) GetCurrentTransactionsAfter(ctx context.Context, userKey *datastore.Key, date time.Time) ([]*TransactionDao.TransactionMsgDTO, error) {
 	rtnValues := mock.returnValues[mock.CallCount]
 	mock.CallCount++
 	mock.CallArgs = append(mock.CallArgs, CallArgs{

@@ -8,8 +8,10 @@ import (
 	"net/http"
 	"time"
 
-	"appengine"
-	"appengine/datastore"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/datastore"
+	"google.golang.org/appengine/log"
 
 	"Auth"
 	"DAOHelper"
@@ -46,7 +48,7 @@ func AsUser(f func(http.ResponseWriter, *http.Request, *UserDao.UserDTO)) func(h
 	}
 }
 
-func getUserFromSession(ctx appengine.Context, r *http.Request) (*UserDao.UserDTO, error) {
+func getUserFromSession(ctx context.Context, r *http.Request) (*UserDao.UserDTO, error) {
 	uuid, err := Auth.GetSessionUUID(r)
 
 	if uuid == "" && err == nil {
@@ -60,7 +62,7 @@ func getUserFromSession(ctx appengine.Context, r *http.Request) (*UserDao.UserDT
 	return userDao.GetUserFromSessionUUID(ctx, uuid)
 }
 
-func CreateUser(ctx appengine.Context, respBody io.ReadCloser) (*UserDao.UserDTO, error) {
+func CreateUser(ctx context.Context, respBody io.ReadCloser) (*UserDao.UserDTO, error) {
 	user := &UserDao.UserDTO{}
 
 	decoder := json.NewDecoder(respBody)
@@ -83,7 +85,7 @@ func CreateUser(ctx appengine.Context, respBody io.ReadCloser) (*UserDao.UserDTO
 	return user, nil
 }
 
-func GetUserTransactions(ctx appengine.Context, user *UserDao.UserDTO) ([]*TransactionMsgClientDTO, error) {
+func GetUserTransactions(ctx context.Context, user *UserDao.UserDTO) ([]*TransactionMsgClientDTO, error) {
 	transactions, err := transactionDao.GetTransactionsByUser(ctx, user.Key)
 	if err != nil {
 		return nil, err
@@ -120,7 +122,7 @@ func newTransactionMsgClientDTO(source *TransactionDao.TransactionMsgDTO) *Trans
 	return &txClient
 }
 
-func MarkUserVerified(ctx appengine.Context, encodedKey string) error {
+func MarkUserVerified(ctx context.Context, encodedKey string) error {
 	key, err := datastore.DecodeKey(encodedKey)
 	if err != nil {
 		return err
@@ -150,7 +152,7 @@ func RandString(n int) string {
 	return string(b)
 }
 
-func RequestResetUserPassword(ctx appengine.Context, email string) error {
+func RequestResetUserPassword(ctx context.Context, email string) error {
 
 	rndStr := RandString(10)
 
@@ -189,7 +191,7 @@ var resetInputInvalidError = &DAOHelper.DefaultHttpError{
 	InnerError: errors.New("Invalid password reset token"),
 }
 
-func ResetUserPassword(ctx appengine.Context, respBody io.ReadCloser) error {
+func ResetUserPassword(ctx context.Context, respBody io.ReadCloser) error {
 	dto := &PasswordChangeDto{}
 	user := &UserDao.UserDTO{}
 	maxAge := time.Now().Add(time.Minute * -30)
@@ -209,11 +211,11 @@ func ResetUserPassword(ctx appengine.Context, respBody io.ReadCloser) error {
 	}
 
 	if user.PasswordResetSecret == "" || user.PasswordResetSecret != dto.Secret || !user.PasswordResetTime.After(maxAge) {
-		ctx.Infof("serects user: %q", user.PasswordResetSecret)
-		ctx.Infof("serects dto : %q", dto.Secret)
-		ctx.Infof("serects qeuals: %v", dto.Secret == user.PasswordResetSecret)
-		ctx.Infof("PasswordResetTime: %v, should be after Maxage: %v", user.PasswordResetTime.Format(time.Stamp), maxAge.Format(time.Stamp))
-		ctx.Infof("PasswordResetTime ok: %v", user.PasswordResetTime.After(maxAge))
+		log.Infof(ctx, "serects user: %q", user.PasswordResetSecret)
+		log.Infof(ctx, "serects dto : %q", dto.Secret)
+		log.Infof(ctx, "serects qeuals: %v", dto.Secret == user.PasswordResetSecret)
+		log.Infof(ctx, "PasswordResetTime: %v, should be after Maxage: %v", user.PasswordResetTime.Format(time.Stamp), maxAge.Format(time.Stamp))
+		log.Infof(ctx, "PasswordResetTime ok: %v", user.PasswordResetTime.After(maxAge))
 		return resetInputInvalidError
 	}
 

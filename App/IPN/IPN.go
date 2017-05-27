@@ -10,14 +10,16 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"appengine"
-	"appengine/taskqueue"
-	"appengine/urlfetch"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/datastore"
+	"google.golang.org/appengine/log"
+	"google.golang.org/appengine/taskqueue"
+	"google.golang.org/appengine/urlfetch"
 
 	"Export/csv"
 	"IPN/Transaction"
 	"User/Dao"
-	"appengine/datastore"
 )
 
 var (
@@ -83,7 +85,7 @@ func processIPN(w http.ResponseWriter, r *http.Request) {
 	// Persist transaction details in unconfirmed state (processing?)
 }
 
-func verifyMassageWithPaypal(ctx appengine.Context, content string, testIpnField string) error {
+func verifyMassageWithPaypal(ctx context.Context, content string, testIpnField string) error {
 
 	paypalIpnUrl := PaypalIpn
 	if testIpnField != "" {
@@ -94,7 +96,7 @@ func verifyMassageWithPaypal(ctx appengine.Context, content string, testIpnField
 		}
 	}
 
-	ctx.Infof("Sending msg to: " + paypalIpnUrl)
+	log.Infof(ctx, "Sending msg to: "+paypalIpnUrl)
 	extraData := []byte("cmd=_notify-validate&")
 	client := urlfetch.Client(ctx)
 	resp, err := client.Post(paypalIpnUrl, FromEncodedContentType, bytes.NewBuffer(append(extraData, content...)))
@@ -105,7 +107,7 @@ func verifyMassageWithPaypal(ctx appengine.Context, content string, testIpnField
 	respBody, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
 
-	ctx.Debugf("Ipn Validation response " + string(respBody))
+	log.Debugf(ctx, "Ipn Validation response "+string(respBody))
 
 	if err == nil && string(respBody) != "VERIFIED" {
 		return IpnMessageCouldNotBeValidated
@@ -123,13 +125,13 @@ func ipnDoResponseTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := ipnDoResponseTask(ctx, r); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		ctx.Errorf(err.Error())
+		log.Errorf(ctx, err.Error())
 		return
 	}
 
 }
 
-func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
+func ipnDoResponseTask(ctx context.Context, r *http.Request) error {
 	const expectedAmount = 300 // kr
 
 	content, err := ioutil.ReadAll(r.Body)
@@ -147,7 +149,7 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 
 	//message is now verified and should be persisted
 
-	ctx.Debugf(fmt.Sprintf("%s: %q", TransactionDao.FIELD_PAYMENT_STATUS, transaction.GetField(TransactionDao.FIELD_PAYMENT_STATUS)))
+	log.Debugf(ctx, fmt.Sprintf("%s: %q", TransactionDao.FIELD_PAYMENT_STATUS, transaction.GetField(TransactionDao.FIELD_PAYMENT_STATUS)))
 
 	savedTransaction, err := transactionDao.GetTransaction(ctx, transaction.GetField(TransactionDao.FIELD_TXN_ID))
 	if err != nil {
@@ -164,11 +166,11 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 		savedTransaction.AddNewIpnMessage(string(content))
 
 		js, _ := json.Marshal(savedTransaction)
-		ctx.Debugf("IpnSaved: %q", js)
+		log.Debugf(ctx, "IpnSaved: %q", js)
 
 		if savedTransaction.PaymentIsCompleted() {
 			if savedTransaction.GetAmount() != expectedAmount {
-				ctx.Warningf("The amount for the transaction was wrong, recived %f expected %f", savedTransaction.GetAmount(), expectedAmount)
+				log.Warningf(ctx, "The amount for the transaction was wrong, recived %f expected %f", savedTransaction.GetAmount(), expectedAmount)
 			}
 		}
 
@@ -176,8 +178,8 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 			return err
 		}
 	} else {
-		ctx.Infof(fmt.Sprintf("TxnId not found: %q", transaction.GetField(TransactionDao.FIELD_TXN_ID)))
-		ctx.Infof(fmt.Sprintf("Recived transaction from: %q", email))
+		log.Infof(ctx, fmt.Sprintf("TxnId not found: %q", transaction.GetField(TransactionDao.FIELD_TXN_ID)))
+		log.Infof(ctx, fmt.Sprintf("Recived transaction from: %q", email))
 
 		user, err := userDAO.GetByEmail(ctx, email)
 		if err != nil {
@@ -189,18 +191,18 @@ func ipnDoResponseTask(ctx appengine.Context, r *http.Request) error {
 
 		var userKey *datastore.Key = nil
 		if user != nil {
-			ctx.Debugf(fmt.Sprintf("User key: %q", user.Key.Encode()))
+			log.Debugf(ctx, fmt.Sprintf("User key: %q", user.Key.Encode()))
 			userKey = user.Key
 		} else {
-			ctx.Errorf("Recived paypal IPN message for unknown user")
+			log.Errorf(ctx, "Recived paypal IPN message for unknown user")
 		}
 
 		js, _ := json.Marshal(transaction)
-		ctx.Debugf("IpnSaved: %q", js)
+		log.Debugf(ctx, "IpnSaved: %q", js)
 
 		if transaction.PaymentIsCompleted() {
 			if transaction.GetAmount() != expectedAmount {
-				ctx.Warningf("The amount for the transaction was wrong, recived %f expected %f", transaction.GetAmount(), expectedAmount)
+				log.Warningf(ctx, "The amount for the transaction was wrong, recived %f expected %f", transaction.GetAmount(), expectedAmount)
 			}
 		}
 

@@ -1,11 +1,14 @@
 package UserService
 
 import (
-	"User/Dao"
-	"appengine"
-	"appengine/mail"
 	"fmt"
 	"net/url"
+
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/log"
+	"google.golang.org/appengine/mail"
+
+	"User/Dao"
 )
 
 const KeyFieldName = "passwordResetKey"
@@ -23,14 +26,14 @@ func createPasswordResetURL(form *url.Values) string {
 	return "https://navitas-fitness-aarhus.appspot.com/main-page/?" + form.Encode()
 }
 
-func SendPasswordResetMail(ctx appengine.Context, user *UserDao.UserDTO, secret string) error {
+func SendPasswordResetMail(ctx context.Context, user *UserDao.UserDTO, secret string) error {
 	form := url.Values{}
 	form.Add(KeyFieldName, user.Key.Encode())
 	form.Add(secretFieldName, secret)
 
 	passwordResetUrl := createPasswordResetURL(&form)
 
-	ctx.Infof("Password Reset URL: " + passwordResetUrl)
+	log.Infof(ctx, "Password Reset URL: "+passwordResetUrl)
 	msg := &mail.Message{
 		Sender:  "noreply - Navitass Fitness <navitas-fitness-aarhus@appspot.gserviceaccount.com>",
 		To:      []string{user.Email},

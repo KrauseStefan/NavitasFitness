@@ -3,7 +3,7 @@ package UserRest
 import (
 	"net/http"
 
-	"appengine"
+	"google.golang.org/appengine"
 
 	"github.com/gorilla/mux"
 

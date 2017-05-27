@@ -7,11 +7,12 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/urlfetch"
+
 	"AppEngineHelper"
 	"ConfigurationReader"
 	"SystemSettingDAO"
-	"appengine"
-	"appengine/urlfetch"
 )
 
 var (
@@ -32,7 +33,7 @@ type TokenRspDTO struct {
 	Uid         string `json:"uid"`
 }
 
-func GetAccessToken(ctx appengine.Context) (string, error) {
+func GetAccessToken(ctx context.Context) (string, error) {
 	var (
 		err              error = nil
 		accessTokenValue string
@@ -46,7 +47,7 @@ func GetAccessToken(ctx appengine.Context) (string, error) {
 	return accessToken_intenal, err
 }
 
-func RetrieveAccessToken(ctx appengine.Context, code string, redirectUri string) error {
+func RetrieveAccessToken(ctx context.Context, code string, redirectUri string) error {
 	conf, err := ConfigurationReader.GetConfiguration()
 	if err != nil {
 		return err

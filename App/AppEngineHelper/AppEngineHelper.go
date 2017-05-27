@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"appengine"
-	"appengine/datastore"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/datastore"
 )
 
 type FormDataDecoderFn func(interface{}) error
@@ -25,17 +25,17 @@ func WriteJSON(w http.ResponseWriter, data interface{}) ([]byte, error) {
 	return js, err
 }
 
-type CollectionParentKeyGetter func(c appengine.Context) *datastore.Key
-type Int64KeyGetter func(c appengine.Context, id string) *datastore.Key
+type CollectionParentKeyGetter func(c context.Context) *datastore.Key
+type Int64KeyGetter func(c context.Context, id string) *datastore.Key
 
 func CollectionParentKeyGetFnGenerator(kind string, parentStringId string, keyId int64) CollectionParentKeyGetter {
-	return func(ctx appengine.Context) *datastore.Key {
+	return func(ctx context.Context) *datastore.Key {
 		return datastore.NewKey(ctx, kind, parentStringId, 0, nil)
 	}
 }
 
 func IntIDToKeyInt64(kind string, parentKeyGetter CollectionParentKeyGetter) Int64KeyGetter {
-	return func(ctx appengine.Context, id string) *datastore.Key {
+	return func(ctx context.Context, id string) *datastore.Key {
 		intId, _ := strconv.ParseInt(id, 10, 64)
 		return datastore.NewKey(ctx, kind, "", intId, parentKeyGetter(ctx))
 	}

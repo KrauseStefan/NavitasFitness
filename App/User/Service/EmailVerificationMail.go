@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"net/url"
 
-	"appengine"
-	"appengine/mail"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/log"
+	"google.golang.org/appengine/mail"
 
 	"User/Dao"
 )
@@ -23,10 +24,10 @@ func createConfirmationURL(key string) string {
 	return "https://navitas-fitness-aarhus.appspot.com/rest/user/verify?" + form.Encode()
 }
 
-func SendConfirmationMail(ctx appengine.Context, user *UserDao.UserDTO) error {
+func SendConfirmationMail(ctx context.Context, user *UserDao.UserDTO) error {
 	confirmationUrl := createConfirmationURL(user.Key.Encode())
 
-	ctx.Infof("Confirmatin URL: " + confirmationUrl)
+	log.Infof(ctx, "Confirmatin URL: "+confirmationUrl)
 	msg := &mail.Message{
 		Sender:  "Navitass Fitness <navitas-fitness-aarhus@appspot.gserviceaccount.com>",
 		To:      []string{user.Email},

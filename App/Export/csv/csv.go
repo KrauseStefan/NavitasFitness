@@ -8,8 +8,10 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"appengine"
-	"appengine/datastore"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/datastore"
+	"google.golang.org/appengine/log"
 
 	"AccessIdValidator"
 	"Dropbox"
@@ -31,7 +33,7 @@ const (
 	csvDateFormat                   = "02-01-2006"
 )
 
-func getFirstAndLastTxn(ctx appengine.Context, userKey *datastore.Key, date time.Time) (time.Time, time.Time, error) {
+func getFirstAndLastTxn(ctx context.Context, userKey *datastore.Key, date time.Time) (time.Time, time.Time, error) {
 	activeSubscriptions, err := transactionDao.GetCurrentTransactionsAfter(ctx, userKey, date)
 	if err != nil {
 		return time.Time{}, time.Time{}, err
@@ -79,7 +81,7 @@ func getExtrema(txns []*TransactionDao.TransactionMsgDTO) (*TransactionDao.Trans
 	return firstTxn, lastTxn
 }
 
-func getActiveTransactionList(ctx appengine.Context) ([]UserTxnTuple, error) {
+func getActiveTransactionList(ctx context.Context) ([]UserTxnTuple, error) {
 
 	userKeys, users, err := userDAO.GetAll(ctx)
 	if err != nil {
@@ -91,7 +93,7 @@ func getActiveTransactionList(ctx appengine.Context) ([]UserTxnTuple, error) {
 	for i, userKey := range userKeys {
 		isValid, err := accessIdValidator.ValidateAccessId(ctx, []byte(users[i].AccessId))
 		if err != nil || !isValid {
-			ctx.Infof("%s has paid for access but ID is not valid, skipped in csv export", users[i].AccessId)
+			log.Infof(ctx, "%s has paid for access but ID is not valid, skipped in csv export", users[i].AccessId)
 			continue // Skip uses with invalid access ids they are not allowed access
 		}
 
@@ -114,7 +116,7 @@ func getActiveTransactionList(ctx appengine.Context) ([]UserTxnTuple, error) {
 	return usersWithActiveSubscription, nil
 }
 
-func createCsvFile(ctx appengine.Context, w io.Writer) error {
+func createCsvFile(ctx context.Context, w io.Writer) error {
 	userTxnTuple, err := getActiveTransactionList(ctx)
 	if err != nil {
 		return err
@@ -131,7 +133,7 @@ func createCsvFile(ctx appengine.Context, w io.Writer) error {
 
 	if len(userTxnTuple) > 0 {
 		user := userTxnTuple[0]
-		ctx.Infof("%s, %s, %s", user.user.AccessId, user.firstDate.String(), user.lastDate.String())
+		log.Infof(ctx, "%s, %s, %s", user.user.AccessId, user.firstDate.String(), user.lastDate.String())
 		w.Write([]byte(user.user.AccessId))
 		w.Write(comma)
 		w.Write([]byte(user.firstDate.Format(csvDateFormat)))
@@ -141,7 +143,7 @@ func createCsvFile(ctx appengine.Context, w io.Writer) error {
 
 	if len(userTxnTuple) > 1 {
 		for _, user := range userTxnTuple[1:] {
-			ctx.Infof("%s, %s, %s", user.user.AccessId, user.firstDate.String(), user.lastDate.String())
+			log.Infof(ctx, "%s, %s, %s", user.user.AccessId, user.firstDate.String(), user.lastDate.String())
 			w.Write([]byte(windowsNewline))
 			w.Write([]byte(user.user.AccessId))
 			w.Write(comma)
@@ -162,23 +164,23 @@ func exportCsvHandler(w http.ResponseWriter, r *http.Request, user *UserDao.User
 	}
 }
 
-func getPath(ctx appengine.Context) string {
+func getPath(ctx context.Context) string {
 	_, value, err := SystemSettingDAO.GetSetting(ctx, fitnessAccessListPathSettingKey)
 	if err != nil {
-		ctx.Errorf(err.Error())
+		log.Infof(ctx, err.Error())
 	}
 
 	if value == "" {
 		value = defaultFitnessAccessListPath
 		if err := SystemSettingDAO.PersistSetting(ctx, fitnessAccessListPathSettingKey, value); err != nil {
-			ctx.Errorf(err.Error())
+			log.Infof(ctx, err.Error())
 		}
 	}
 
 	return value
 }
 
-func CreateAndUploadFile(ctx appengine.Context) error {
+func CreateAndUploadFile(ctx context.Context) error {
 	var buffer bytes.Buffer
 
 	if err := createCsvFile(ctx, &buffer); err != nil {

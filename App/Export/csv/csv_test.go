@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"appengine/datastore"
+	"google.golang.org/appengine/datastore"
 
 	"IPN/Transaction"
 	"User/Dao"
@@ -32,7 +32,7 @@ var (
 	assert = TestHelper.Assert
 	utc, _ = time.LoadLocation("UTC")
 
-	ctx = &TestHelper.ContextMock{}
+	ctx = TestHelper.GetContext()
 	now = time.Now()
 
 	validIds = []string{

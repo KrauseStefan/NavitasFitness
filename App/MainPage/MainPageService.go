@@ -8,8 +8,8 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"appengine"
-	"appengine/datastore"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/datastore"
 
 	"AppEngineHelper"
 	"User/Dao"

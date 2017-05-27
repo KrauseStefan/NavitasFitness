@@ -6,7 +6,8 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"appengine"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 
 	"AppEngineHelper"
 	"Dropbox"
@@ -82,7 +83,7 @@ func authorizationCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	code := r.Form["code"][0]
 	if err := Dropbox.RetrieveAccessToken(ctx, code, getRedirectUri(r)); err != nil {
-		ctx.Errorf(err.Error())
+		log.Errorf(ctx, err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

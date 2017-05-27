@@ -1,8 +1,8 @@
 package UserDaoTestHelper
 
 import (
-	"appengine"
-	"appengine/datastore"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/datastore"
 
 	"User/Dao"
 )
@@ -13,7 +13,7 @@ type UserRetrieverMock struct {
 	err   error
 
 	CallCount        int
-	LatestCallCtxArg appengine.Context
+	LatestCallCtxArg context.Context
 }
 
 func NewUserRetrieverMock(keys []*datastore.Key, users []UserDao.UserDTO, err error) *UserRetrieverMock {
@@ -25,7 +25,7 @@ func NewUserRetrieverMock(keys []*datastore.Key, users []UserDao.UserDTO, err er
 	return mock
 }
 
-func (mock *UserRetrieverMock) GetAll(ctx appengine.Context) ([]*datastore.Key, []UserDao.UserDTO, error) {
+func (mock *UserRetrieverMock) GetAll(ctx context.Context) ([]*datastore.Key, []UserDao.UserDTO, error) {
 	mock.CallCount++
 	mock.LatestCallCtxArg = ctx
 	return mock.keys, mock.users, mock.err

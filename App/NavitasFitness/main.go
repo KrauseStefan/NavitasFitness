@@ -2,9 +2,11 @@ package main
 
 import (
 	"errors"
+	"math/rand"
 	"net/http"
 	"reflect"
 	"regexp"
+	"time"
 
 	"github.com/gorilla/mux"
 	"gopkg.in/validator.v2"
@@ -16,8 +18,6 @@ import (
 	"IPN"
 	"MainPage"
 	"User"
-	"math/rand"
-	"time"
 )
 
 const emailRegStr = `^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$`

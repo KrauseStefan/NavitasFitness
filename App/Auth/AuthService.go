@@ -9,7 +9,8 @@ import (
 	"errors"
 	"net/http"
 
-	"appengine"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 
 	"AppEngineHelper"
 	"User/Dao"
@@ -132,19 +133,19 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if user == nil || err == UserDao.UserNotFoundError {
-		ctx.Errorf("Failed to login, %s does not exist in DB", loginRequestUser.AccessId)
+		log.Errorf(ctx, "Failed to login, %s does not exist in DB", loginRequestUser.AccessId)
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}
 	if !user.Verified {
-		ctx.Errorf("Failed to login, %s email is not verified", loginRequestUser.AccessId)
+		log.Errorf(ctx, "Failed to login, %s email is not verified", loginRequestUser.AccessId)
 		http.Error(w, "Email is not verified", http.StatusForbidden)
 		return
 	}
 
 	if err := user.VerifyPassword(loginRequestUser.Password); err != nil {
-		ctx.Errorf("Failed to login, %s Invalid password", loginRequestUser.AccessId)
-		ctx.Errorf(err.Error())
+		log.Errorf(ctx, "Failed to login, %s Invalid password", loginRequestUser.AccessId)
+		log.Errorf(ctx, err.Error())
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}
@@ -191,7 +192,8 @@ func GetSessionUUID(r *http.Request) (string, error) {
 		return "", err
 	}
 	if s.Decode(sessionCookieName, cookie.Value, &uuid); err != nil {
-		appengine.NewContext(r).Errorf("Coockie decode error: " + err.Error())
+		ctx := appengine.NewContext(r)
+		log.Errorf(ctx, "Coockie decode error: "+err.Error())
 		return "", nil
 	}
 

@@ -7,8 +7,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/validator.v2"
 
-	"appengine"
-	"appengine/datastore"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/datastore"
 )
 
 type UserDTO struct {
@@ -26,7 +26,7 @@ type UserDTO struct {
 	PasswordResetSecret string         `json:"-" datastore:",noindex"`
 }
 
-func (user *UserDTO) ValidateUser(ctx appengine.Context) error {
+func (user *UserDTO) ValidateUser(ctx context.Context) error {
 	isValid, err := accessIdValidator.ValidateAccessId(ctx, []byte(user.AccessId))
 	if err != nil {
 		return err

@@ -7,72 +7,17 @@ import (
 	"runtime/debug"
 	"testing"
 
-	"appengine_internal"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/aetest"
 )
 
-//type Spy struct {
-//	argument_1 []interface{}
-//	argument_2 []interface{}
-//	argument_3 []interface{}
-//	callCount  uint
-//}
-//
-//func (s *Spy) RegisterCall() {
-//	s.callCount += 1
-//}
-
-//func (s *Spy) CallCount() int {
-//	return int(s.callCount)
-//}
-
-//func prependToArgumentSlice(argSlice []interface{}, item interface{}) []interface{} {
-//	if len(argSlice) == 0 {
-//		argSlice = make([]interface{}, 0, 10)
-//	}
-//
-//	return append([]interface{}{item}, argSlice...)
-//}
-//
-//func (s *Spy) RegisterArg1(arg1 interface{}) {
-//	s.argument_1 = prependToArgumentSlice(s.argument_1, arg1)
-//}
-//
-//func (s *Spy) RegisterArg2(arg1 interface{}, arg2 interface{}) {
-//	s.RegisterArg1(arg1)
-//	s.argument_2 = prependToArgumentSlice(s.argument_2, arg2)
-//}
-//
-//func (s *Spy) RegisterArg3(arg1 interface{}, arg2 interface{}, arg3 interface{}) {
-//	s.RegisterArg2(arg1, arg2)
-//	s.argument_3 = prependToArgumentSlice(s.argument_3, arg3)
-//}
-//
-//func (s *Spy) GetLatestArg1() interface{} {
-//	if len(s.argument_1) > 0 {
-//		return s.argument_1[0]
-//	}
-//	return nil
-//}
-
-type ContextMock struct {
-	OptionalId int
-	//req  *http.Request
-	//done chan struct{} // Closed when the context has expired.
-}
-
-func (c *ContextMock) Debugf(format string, args ...interface{})    {}
-func (c *ContextMock) Infof(format string, args ...interface{})     {}
-func (c *ContextMock) Warningf(format string, args ...interface{})  {}
-func (c *ContextMock) Errorf(format string, args ...interface{})    {}
-func (c *ContextMock) Criticalf(format string, args ...interface{}) {}
-func (c *ContextMock) Call(service, method string, in, out appengine_internal.ProtoMessage, opts *appengine_internal.CallOptions) error {
-	return nil
-}
-func (c *ContextMock) FullyQualifiedAppID() string {
-	return ""
-}
-func (c *ContextMock) Request() interface{} {
-	return nil
+func GetContext() context.Context {
+	ctx, done, err := aetest.NewContext()
+	if err != nil {
+		panic(err)
+	}
+	defer done()
+	return ctx
 }
 
 type AssertObj struct {

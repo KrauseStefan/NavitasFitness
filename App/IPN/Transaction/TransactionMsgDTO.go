@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"time"
 
-	"appengine"
-	"appengine/datastore"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/datastore"
 
 	"AppEngineHelper"
 	"strings"
@@ -76,7 +76,7 @@ func (txDto *TransactionMsgDTO) hasKey() bool {
 	return txDto.key != nil
 }
 
-func (txDto *TransactionMsgDTO) GetDataStoreKey(ctx appengine.Context) *datastore.Key {
+func (txDto *TransactionMsgDTO) GetDataStoreKey(ctx context.Context) *datastore.Key {
 	return txDto.key
 }
 

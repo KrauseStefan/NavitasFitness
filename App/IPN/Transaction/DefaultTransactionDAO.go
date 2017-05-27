@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"appengine"
-	"appengine/datastore"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/datastore"
+	"google.golang.org/appengine/log"
 
 	"User/Dao"
 )
@@ -26,7 +27,7 @@ var (
 	//txnUnableToVerify = errors.New("Unable to verify message")
 )
 
-func (t *DefaultTransactionDao) UpdateIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO) error {
+func (t *DefaultTransactionDao) UpdateIpnMessage(ctx context.Context, ipnTxn *TransactionMsgDTO) error {
 
 	key := ipnTxn.GetDataStoreKey(ctx)
 
@@ -40,7 +41,7 @@ func (t *DefaultTransactionDao) UpdateIpnMessage(ctx appengine.Context, ipnTxn *
 	return nil
 }
 
-func (t *DefaultTransactionDao) PersistNewIpnMessage(ctx appengine.Context, ipnTxn *TransactionMsgDTO, userKey *datastore.Key) error {
+func (t *DefaultTransactionDao) PersistNewIpnMessage(ctx context.Context, ipnTxn *TransactionMsgDTO, userKey *datastore.Key) error {
 
 	var newKey *datastore.Key
 
@@ -63,7 +64,7 @@ func (t *DefaultTransactionDao) PersistNewIpnMessage(ctx appengine.Context, ipnT
 	return nil
 }
 
-func (t *DefaultTransactionDao) GetTransaction(ctx appengine.Context, txnId string) (*TransactionMsgDTO, error) {
+func (t *DefaultTransactionDao) GetTransaction(ctx context.Context, txnId string) (*TransactionMsgDTO, error) {
 	q := datastore.NewQuery(TXN_KIND).
 		Filter("TxnId=", txnId).
 		Limit(1)
@@ -82,7 +83,7 @@ func (t *DefaultTransactionDao) GetTransaction(ctx appengine.Context, txnId stri
 	return NewTransactionMsgDTOFromDs(txnDtoList[0], keys[0]), nil
 }
 
-func (t *DefaultTransactionDao) GetTransactionsByUser(ctx appengine.Context, parentUserKey *datastore.Key) ([]*TransactionMsgDTO, error) {
+func (t *DefaultTransactionDao) GetTransactionsByUser(ctx context.Context, parentUserKey *datastore.Key) ([]*TransactionMsgDTO, error) {
 
 	q := datastore.NewQuery(TXN_KIND).
 		Ancestor(parentUserKey).
@@ -103,7 +104,7 @@ func (t *DefaultTransactionDao) GetTransactionsByUser(ctx appengine.Context, par
 	return NewTransactionMsgDTOList(txnDsDtoList, keys), nil
 }
 
-func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx appengine.Context, userKey *datastore.Key, date time.Time) ([]*TransactionMsgDTO, error) {
+func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx context.Context, userKey *datastore.Key, date time.Time) ([]*TransactionMsgDTO, error) {
 
 	q := datastore.NewQuery(TXN_KIND).
 		Ancestor(userKey).
@@ -122,7 +123,7 @@ func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx appengine.Contex
 	}
 
 	if count > 1 {
-		ctx.Criticalf(fmt.Sprintf("User has multiple (%d) active subscriptions, key: %s", count, userKey.String()))
+		log.Criticalf(ctx, fmt.Sprintf("User has multiple (%d) active subscriptions, key: %s", count, userKey.String()))
 	}
 
 	return NewTransactionMsgDTOList(txnDsDtoList, keys), nil

@@ -1,7 +1,7 @@
 package AccessIdValidator
 
-import "appengine"
+import "golang.org/x/net/context"
 
 type AccessIdValidator interface {
-	ValidateAccessId(ctx appengine.Context, accessId []byte) (bool, error)
+	ValidateAccessId(ctx context.Context, accessId []byte) (bool, error)
 }
