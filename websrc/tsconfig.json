@@ -11,7 +11,7 @@
     "pretty": true,
     "listFiles": false,
     "rootDir": "./app/",
-    "outFile": "../App/NavitasFitness/webapp/app.js",
+    "outFile": "../src/NavitasFitness/webapp/app.js",
     "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true
   },

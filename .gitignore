@@ -9,7 +9,8 @@ bower_components
 *.iml
 *.log
 
-/App/NavitasFitness/webapp
+/src/NavitasFitness/webapp
+/pkg
 
 typings
 
