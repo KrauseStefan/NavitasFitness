@@ -74,7 +74,11 @@ type UserSessionDto struct {
 
 func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
 	ctx := appengine.NewContext(r)
-	isValid, err := accessIdValidator.ValidateAccessId(ctx, []byte(user.AccessId))
+	isValid, err := accessIdValidator.ValidateAccessIdPrimary(ctx, []byte(user.AccessId))
+
+	if !isValid && err == nil {
+		isValid, err = accessIdValidator.ValidateAccessIdSecondary(ctx, []byte(user.AccessId))
+	}
 
 	us := UserSessionDto{
 		User:          user,
@@ -120,7 +124,7 @@ func validateAccessId(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 	accessId_bytes := []byte(mux.Vars(r)[accessIdKey])
 
-	isValid, err := accessIdValidator.ValidateAccessId(ctx, accessId_bytes)
+	isValid, err := accessIdValidator.ValidateAccessIdPrimary(ctx, accessId_bytes)
 	if err != nil {
 		DAOHelper.ReportError(ctx, w, err)
 	}

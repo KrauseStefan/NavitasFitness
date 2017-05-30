@@ -2,7 +2,6 @@ package AccessIdValidator
 
 import (
 	"bytes"
-	"encoding/hex"
 	"io/ioutil"
 	"time"
 
@@ -21,9 +20,10 @@ const (
 )
 
 var (
-	bomPrefix               = []byte{0xef, 0xbb, 0xbf}
-	downloadedIds *[][]byte = nil
-	lastDownload  time.Time
+	bomPrefix             = []byte{0xef, 0xbb, 0xbf}
+	primaryIds   [][]byte = nil
+	secondaryIds [][]byte = nil
+	lastDownload time.Time
 )
 
 var instance = DefaultAccessIdValidator{}
@@ -48,16 +48,16 @@ func getPath(ctx context.Context) string {
 	return value
 }
 
-func downloadValidAccessIds(ctx context.Context) error {
-
-	resp, _, err := Dropbox.DownloadFile(ctx, getPath(ctx))
+func downloadValidAccessIds(ctx context.Context, dropboxAccessToken string) ([][]byte, error) {
+	log.Infof(ctx, "Downloading AccessIds: %s", dropboxAccessToken)
+	resp, _, err := Dropbox.DownloadFile(ctx, dropboxAccessToken, getPath(ctx))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	data, err := ioutil.ReadAll(resp)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	//BOM does not make sense for UTF-8, should be safe to strip
@@ -71,36 +71,72 @@ func downloadValidAccessIds(ctx context.Context) error {
 		idsNoSpace[i] = bytes.TrimSpace(id)
 	}
 
-	downloadedIds = &idsNoSpace
-	lastDownload = time.Now()
-	return nil
+	return idsNoSpace, nil
 }
 
 func ensureUpdatedIds(ctx context.Context) error {
-	if downloadedIds == nil || lastDownload.Add(12*time.Hour).Before(time.Now()) {
-		log.Infof(ctx, "Downloading ids")
-		err := downloadValidAccessIds(ctx)
-		if err != nil {
-			return err
-		}
+	var err error
+	primaryIds, err = updateTokenCache(ctx, Dropbox.PrimaryAccessTokenSystemSettingKey, primaryIds)
+	if err != nil {
+		return err
 	}
+
+	secondaryIds, err = updateTokenCache(ctx, Dropbox.SecondaryAccessTokenSystemSettingKey, secondaryIds)
+	if err != nil {
+		return err
+	}
+
+	log.Infof(ctx, "length primary: %d, secondary: %d", len(primaryIds), len(secondaryIds))
+	lastDownload = time.Now()
+
 	return nil
 }
 
-//Go strings are UTF 8 without bom converting it to byte should be safe
-func (v *DefaultAccessIdValidator) ValidateAccessId(ctx context.Context, accessId []byte) (bool, error) {
+func updateTokenCache(ctx context.Context, settingKey string, currentCache [][]byte) ([][]byte, error) {
+	token, err := Dropbox.GetAccessToken(ctx, settingKey)
+	if token == "" {
+		return nil, nil
+	}
 
+	if err != nil || !(len(currentCache) <= 0 || lastDownload.Add(4*time.Hour).Before(time.Now())) {
+		return currentCache, err
+	}
+
+	ids, err := downloadValidAccessIds(ctx, token)
+	if err != nil {
+		return currentCache, err
+	}
+
+	return ids, nil
+}
+
+func validateAccessId(ctx context.Context, accessId []byte, validIdList *[][]byte) (bool, error) {
 	if err := ensureUpdatedIds(ctx); err != nil {
 		return false, err
 	}
 
-	for _, id := range *downloadedIds {
-		if bytes.Equal(id, accessId) {
+	if len(*validIdList) <= 0 {
+		log.Warningf(ctx, "No valid access Ids, list is empty!")
+		return false, nil
+	}
+
+	for _, validId := range *validIdList {
+		if bytes.Equal(validId, accessId) {
 			return true, nil
 		}
 	}
 
-	log.Infof(ctx, "length %s - %d", hex.Dump(accessId), len(accessId))
+	log.Infof(ctx, "Id not validated")
+	log.Infof(ctx, "length %v - hex: %X", len(accessId), accessId)
 
 	return false, nil
+}
+
+func (v *DefaultAccessIdValidator) ValidateAccessIdPrimary(ctx context.Context, accessId []byte) (bool, error) {
+	log.Infof(ctx, "primaryIds: %d", len(primaryIds))
+	return validateAccessId(ctx, accessId, &primaryIds)
+}
+
+func (v *DefaultAccessIdValidator) ValidateAccessIdSecondary(ctx context.Context, accessId []byte) (bool, error) {
+	return validateAccessId(ctx, accessId, &secondaryIds)
 }

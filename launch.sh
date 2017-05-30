@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-SF="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd ${SF}
+root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $root
+cp "$root/../NavitasFitnessConfig.Json" "$root/src/NavitasFitness/config.json"
 
-export GOPATH="$GOPATH:$SF"
+export GOPATH="$GOPATH:$root"
 
 cd websrc
 npm install
@@ -14,9 +15,9 @@ cd ipn-simulator
 gnome-terminal -e "npm start" &
 cd -
 
-cd $SF/src/
-cp ../NavitasFitnessConfig.Json "$SF/src/NavitasFitness/config.json"
+cd $root/src/
 go get -v ./... > /dev/null
-#gnome-terminal -e "dev_appserver.py --dev_appserver_log_level=warning ." &
-gnome-terminal -e "dev_appserver.py $SF/src/NavitasFitness/app.yaml" &
 cd -
+
+#gnome-terminal -e "dev_appserver.py $root/src/NavitasFitness/app.yaml" &
+gnome-terminal -e "dev_appserver.py --dev_appserver_log_level=warning $root/src/NavitasFitness/app.yaml" &

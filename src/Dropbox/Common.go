@@ -16,14 +16,15 @@ import (
 )
 
 var (
-	accessToken_intenal = ""
+	accessTokenIntenal = ""
 )
 
 const (
 	baseUrl  = "https://content.dropboxapi.com"
 	tokenUrl = "https://api.dropboxapi.com/oauth2/token"
 
-	accessTokenSystemSettingKey = "accessToken"
+	PrimaryAccessTokenSystemSettingKey   = "PrimaryAccessToken"
+	SecondaryAccessTokenSystemSettingKey = "SecondaryAccessToken"
 )
 
 type TokenRspDTO struct {
@@ -33,18 +34,39 @@ type TokenRspDTO struct {
 	Uid         string `json:"uid"`
 }
 
-func GetAccessToken(ctx context.Context) (string, error) {
+func GetAccessToken(ctx context.Context, key string) (string, error) {
+	_, accessToken, err := SystemSettingDAO.GetSetting(ctx, key)
+	if err != nil {
+		return "", err
+	}
+	return accessToken, err
+}
+
+func appendAccessToken(ctx context.Context, key string, tokens []string) ([]string, error) {
+	accessToken, err := GetAccessToken(ctx, key)
+	if err != nil {
+		return nil, err
+	}
+	if len(accessToken) > 0 {
+		tokens = append(tokens, accessToken)
+	}
+	return tokens, nil
+}
+
+func GetAccessTokens(ctx context.Context) ([]string, error) {
 	var (
-		err              error = nil
-		accessTokenValue string
+		tokens       = []string{}
+		err    error = nil
 	)
 
-	if accessToken_intenal == "" {
-		_, accessTokenValue, err = SystemSettingDAO.GetSetting(ctx, accessTokenSystemSettingKey)
-		accessToken_intenal = accessTokenValue
+	if tokens, err = appendAccessToken(ctx, PrimaryAccessTokenSystemSettingKey, tokens); err != nil {
+		return nil, err
+	}
+	if tokens, err = appendAccessToken(ctx, SecondaryAccessTokenSystemSettingKey, tokens); err != nil {
+		return nil, err
 	}
 
-	return accessToken_intenal, err
+	return tokens, nil
 }
 
 func RetrieveAccessToken(ctx context.Context, code string, redirectUri string) error {
@@ -84,7 +106,7 @@ func RetrieveAccessToken(ctx context.Context, code string, redirectUri string) e
 		return err
 	}
 
-	accessToken_intenal = tokenRspDTO.AccessToken
+	accessTokenIntenal = tokenRspDTO.AccessToken
 
-	return SystemSettingDAO.PersistSetting(ctx, "accessToken", accessToken_intenal)
+	return SystemSettingDAO.PersistSetting(ctx, PrimaryAccessTokenSystemSettingKey, accessTokenIntenal)
 }

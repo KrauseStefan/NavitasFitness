@@ -7,7 +7,6 @@ import (
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 
-	"AccessIdValidator"
 	"AppEngineHelper"
 	"DAOHelper"
 )
@@ -15,7 +14,6 @@ import (
 type DefaultUserDAO struct{}
 
 var defaultUserDaoInstance = DefaultUserDAO{}
-var accessIdValidator = AccessIdValidator.GetInstance()
 
 func GetInstance() UserDAO {
 	return &defaultUserDaoInstance

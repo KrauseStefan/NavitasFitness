@@ -49,13 +49,12 @@ type FieldDto struct {
 	Value string
 }
 
-func DownloadFile(ctx context.Context, fileUrl string) (io.ReadCloser, *FileDownloadResponseDto, error) {
-	client := urlfetch.Client(ctx)
-
-	accessToken, err := GetAccessToken(ctx)
-	if err != nil {
-		return nil, nil, err
+func DownloadFile(ctx context.Context, accessToken string, fileUrl string) (io.ReadCloser, *FileDownloadResponseDto, error) {
+	if accessToken == "" || fileUrl == "" {
+		return nil, nil, errors.New("Invalid arguments for downloading file")
 	}
+
+	client := urlfetch.Client(ctx)
 
 	req, err := http.NewRequest("POST", serviceUrl, nil)
 	if err != nil {

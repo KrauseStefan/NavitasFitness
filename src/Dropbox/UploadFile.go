@@ -34,7 +34,7 @@ type UploadDto struct {
 	Mode UploadModeDto `json:"mode"`
 }
 
-func UploadDoc(ctx context.Context, filePath string, file io.Reader) (*UploadResp, error) {
+func UploadDoc(ctx context.Context, accessToken string, filePath string, file io.Reader) (*UploadResp, error) {
 
 	client := urlfetch.Client(ctx)
 
@@ -51,11 +51,6 @@ func UploadDoc(ctx context.Context, filePath string, file io.Reader) (*UploadRes
 	}
 
 	js, err := json.Marshal(&uploadDto)
-	if err != nil {
-		return nil, err
-	}
-
-	accessToken, err := GetAccessToken(ctx)
 	if err != nil {
 		return nil, err
 	}

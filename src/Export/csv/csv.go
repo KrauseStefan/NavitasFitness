@@ -91,7 +91,7 @@ func getActiveTransactionList(ctx context.Context) ([]UserTxnTuple, error) {
 	usersWithActiveSubscription := make([]UserTxnTuple, 0, len(userKeys))
 
 	for i, userKey := range userKeys {
-		isValid, err := accessIdValidator.ValidateAccessId(ctx, []byte(users[i].AccessId))
+		isValid, err := accessIdValidator.ValidateAccessIdPrimary(ctx, []byte(users[i].AccessId))
 		if err != nil || !isValid {
 			log.Infof(ctx, "%s has paid for access but ID is not valid, skipped in csv export", users[i].AccessId)
 			continue // Skip uses with invalid access ids they are not allowed access
@@ -183,12 +183,19 @@ func getPath(ctx context.Context) string {
 func CreateAndUploadFile(ctx context.Context) error {
 	var buffer bytes.Buffer
 
+	tokens, err := Dropbox.GetAccessTokens(ctx)
+	if err != nil {
+		return err
+	}
+
 	if err := createCsvFile(ctx, &buffer); err != nil {
 		return err
 	}
 
-	if _, err := Dropbox.UploadDoc(ctx, getPath(ctx), &buffer); err != nil {
-		return err
+	for _, token := range tokens {
+		if _, err := Dropbox.UploadDoc(ctx, token, getPath(ctx), &buffer); err != nil {
+			return err
+		}
 	}
 
 	return nil

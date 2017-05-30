@@ -45,8 +45,8 @@ func IntegrateRoutes(router *mux.Router) {
 func asAdminIfAlreadyConfigured(f func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := appengine.NewContext(r)
-		value, err := Dropbox.GetAccessToken(ctx)
-		if err != nil || value != "" {
+		tokens, err := Dropbox.GetAccessTokens(ctx)
+		if err != nil || len(tokens) > 0 {
 			UserService.AsAdmin(func(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
 				f(w, r)
 			})(w, r)

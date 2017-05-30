@@ -26,7 +26,7 @@ func NewAccessIdValidatorMock(validAccessIds []string, err error) *AccessIdValid
 	return mock
 }
 
-func (mock *AccessIdValidatorMock) ValidateAccessId(ctx context.Context, accessId []byte) (bool, error) {
+func (mock *AccessIdValidatorMock) ValidateAccessIdPrimary(ctx context.Context, accessId []byte) (bool, error) {
 	mock.CallCount++
 	mock.CallArgs = append(mock.CallArgs, CallArgs{ctx, accessId})
 
@@ -42,4 +42,8 @@ func (mock *AccessIdValidatorMock) ValidateAccessId(ctx context.Context, accessI
 	}
 
 	return false, nil
+}
+
+func (mock *AccessIdValidatorMock) ValidateAccessIdSecondary(ctx context.Context, accessId []byte) (bool, error) {
+	panic("Not Implemented")
 }
