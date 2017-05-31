@@ -16,7 +16,6 @@ import (
 	"AccessIdValidator"
 	"Dropbox"
 	"IPN/Transaction"
-	"SystemSettingDAO"
 	"User/Dao"
 	"User/Service"
 )
@@ -28,8 +27,6 @@ var (
 )
 
 const (
-	fitnessAccessListPathSettingKey = "fitnessAccessListPath"
-	defaultFitnessAccessListPath    = "/FitnessAccessList/FitnessAccessList.csv"
 	csvDateFormat                   = "02-01-2006"
 )
 
@@ -164,22 +161,6 @@ func exportCsvHandler(w http.ResponseWriter, r *http.Request, user *UserDao.User
 	}
 }
 
-func getPath(ctx context.Context) string {
-	_, value, err := SystemSettingDAO.GetSetting(ctx, fitnessAccessListPathSettingKey)
-	if err != nil {
-		log.Infof(ctx, err.Error())
-	}
-
-	if value == "" {
-		value = defaultFitnessAccessListPath
-		if err := SystemSettingDAO.PersistSetting(ctx, fitnessAccessListPathSettingKey, value); err != nil {
-			log.Infof(ctx, err.Error())
-		}
-	}
-
-	return value
-}
-
 func CreateAndUploadFile(ctx context.Context) error {
 	var buffer bytes.Buffer
 
@@ -193,7 +174,7 @@ func CreateAndUploadFile(ctx context.Context) error {
 	}
 
 	for _, token := range tokens {
-		if _, err := Dropbox.UploadDoc(ctx, token, getPath(ctx), &buffer); err != nil {
+		if _, err := Dropbox.UploadDoc(ctx, token, AccessIdValidator.GetAccessListPath(ctx), &buffer); err != nil {
 			return err
 		}
 	}

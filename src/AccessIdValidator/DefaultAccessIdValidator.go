@@ -9,15 +9,9 @@ import (
 	"google.golang.org/appengine/log"
 
 	"Dropbox"
-	"SystemSettingDAO"
 )
 
 type DefaultAccessIdValidator struct{}
-
-const (
-	fitnessAccessIdsPathSettingKey = "fitnessAccessIdsPath"
-	defaultFitnessAccessIdsPath    = "/AccessIds/AccessIds.csv"
-)
 
 var (
 	bomPrefix             = []byte{0xef, 0xbb, 0xbf}
@@ -32,25 +26,9 @@ func GetInstance() AccessIdValidator {
 	return &instance
 }
 
-func getPath(ctx context.Context) string {
-	_, value, err := SystemSettingDAO.GetSetting(ctx, fitnessAccessIdsPathSettingKey)
-	if err != nil {
-		log.Errorf(ctx, err.Error())
-	}
-
-	if value == "" {
-		value = defaultFitnessAccessIdsPath
-		if err := SystemSettingDAO.PersistSetting(ctx, fitnessAccessIdsPathSettingKey, value); err != nil {
-			log.Errorf(ctx, err.Error())
-		}
-	}
-
-	return value
-}
-
 func downloadValidAccessIds(ctx context.Context, dropboxAccessToken string) ([][]byte, error) {
 	log.Infof(ctx, "Downloading AccessIds: %s", dropboxAccessToken)
-	resp, _, err := Dropbox.DownloadFile(ctx, dropboxAccessToken, getPath(ctx))
+	resp, _, err := Dropbox.DownloadFile(ctx, dropboxAccessToken, GetAccessIdPath(ctx))
 	if err != nil {
 		return nil, err
 	}
