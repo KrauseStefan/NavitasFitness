@@ -9,8 +9,10 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 
+	"AccessIdValidator"
 	"AppEngineHelper"
 	"Dropbox"
+	"Export/csv"
 	"User/Dao"
 	"User/Service"
 )
@@ -82,11 +84,17 @@ func authorizationCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	code := r.Form["code"][0]
-	if err := Dropbox.RetrieveAccessToken(ctx, code, getRedirectUri(r)); err != nil {
+	token, err := Dropbox.RetrieveAccessToken(ctx, code, getRedirectUri(r))
+	if err != nil {
 		log.Errorf(ctx, err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+
+	// Below would be best as a real callback but will cause cyclic dependencies
+	// For now this will do
+	AccessIdValidator.PushMissingSampleData(ctx, token)
+	csv.CreateAndUploadFile(ctx)
 }

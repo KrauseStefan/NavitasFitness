@@ -27,7 +27,7 @@ var (
 )
 
 const (
-	csvDateFormat                   = "02-01-2006"
+	csvDateFormat = "02-01-2006"
 )
 
 func getFirstAndLastTxn(ctx context.Context, userKey *datastore.Key, date time.Time) (time.Time, time.Time, error) {

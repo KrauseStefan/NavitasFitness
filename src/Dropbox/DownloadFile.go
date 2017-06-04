@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"DAOHelper"
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/urlfetch"
 )
@@ -75,8 +76,21 @@ func DownloadFile(ctx context.Context, accessToken string, fileUrl string) (io.R
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		all, _ := ioutil.ReadAll(resp.Body)
-		return nil, nil, errors.New(string(all))
+		jsonError, _ := ioutil.ReadAll(resp.Body)
+
+		errorDtoMap := make(map[string]interface{})
+		if err := json.Unmarshal([]byte(jsonError), &errorDtoMap); err != nil {
+			return nil, nil, err
+		}
+
+		err := &DAOHelper.DefaultHttpError{StatusCode: resp.StatusCode}
+		if val, ok := errorDtoMap["error_summary"].(string); ok {
+			err.InnerError = errors.New(string(val))
+		} else {
+			err.InnerError = errors.New(string(jsonError))
+		}
+
+		return nil, nil, err
 	}
 
 	respJson := resp.Header.Get("dropbox-api-result")

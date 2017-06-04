@@ -69,10 +69,10 @@ func GetAccessTokens(ctx context.Context) ([]string, error) {
 	return tokens, nil
 }
 
-func RetrieveAccessToken(ctx context.Context, code string, redirectUri string) error {
+func RetrieveAccessToken(ctx context.Context, code string, redirectUri string) (string, error) {
 	conf, err := ConfigurationReader.GetConfiguration()
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	params := map[string]string{
@@ -87,7 +87,7 @@ func RetrieveAccessToken(ctx context.Context, code string, redirectUri string) e
 
 	req, err := http.NewRequest("POST", tokenUrl+"?"+paramStr, &bytes.Buffer{})
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	req.SetBasicAuth(conf.ClientKey, conf.ClientSecret)
@@ -96,17 +96,20 @@ func RetrieveAccessToken(ctx context.Context, code string, redirectUri string) e
 
 	if resp.StatusCode != http.StatusOK {
 		all, _ := ioutil.ReadAll(resp.Body)
-		return errors.New(string(all))
+		return "", errors.New(string(all))
 	}
 
 	tokenRspDTO := TokenRspDTO{}
 	decoder := json.NewDecoder(resp.Body)
 	err = decoder.Decode(&tokenRspDTO)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	accessTokenIntenal = tokenRspDTO.AccessToken
 
-	return SystemSettingDAO.PersistSetting(ctx, PrimaryAccessTokenSystemSettingKey, accessTokenIntenal)
+	if err := SystemSettingDAO.PersistSetting(ctx, PrimaryAccessTokenSystemSettingKey, accessTokenIntenal); err != nil {
+		return "", err
+	}
+	return accessTokenIntenal, nil
 }
