@@ -1,36 +1,31 @@
 {
   "name": "ipn-simulator",
   "version": "1.0.0",
+  "lockfileVersion": 1,
   "dependencies": {
     "@types/lodash": {
-      "version": "4.14.52",
-      "from": "@types/lodash@>=4.14.38 <5.0.0",
-      "resolved": "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.52.tgz"
+      "version": "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.52.tgz",
+      "integrity": "sha1-3lx6sU2hKJczIzybDsb543fbkPU="
     },
     "@types/node": {
-      "version": "6.0.63",
-      "from": "@types/node@>=6.0.46 <7.0.0",
-      "resolved": "https://registry.npmjs.org/@types/node/-/node-6.0.63.tgz"
+      "version": "https://registry.npmjs.org/@types/node/-/node-6.0.63.tgz",
+      "integrity": "sha1-4IrLvVlG4OlZkLHHbzzlt4gqSOs="
     },
     "lodash": {
-      "version": "4.17.4",
-      "from": "lodash@>=4.11.1 <5.0.0",
-      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz"
+      "version": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz",
+      "integrity": "sha1-eCA6TRwyiuHYbcpkYONptX9AVa4="
     },
     "moment": {
-      "version": "2.17.1",
-      "from": "moment@>=2.13.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/moment/-/moment-2.17.1.tgz"
+      "version": "https://registry.npmjs.org/moment/-/moment-2.17.1.tgz",
+      "integrity": "sha1-/tlQYGPzaxDwZsi1mhRNf66+HYI="
     },
     "moment-timezone": {
-      "version": "0.5.11",
-      "from": "moment-timezone@>=0.5.4 <0.6.0",
-      "resolved": "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.5.11.tgz"
+      "version": "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.5.11.tgz",
+      "integrity": "sha1-m3bAPY71FMfkJJp7vOZJ7tOe8p8="
     },
     "typescript": {
-      "version": "2.1.6",
-      "from": "typescript@>=2.0.7 <3.0.0",
-      "resolved": "https://registry.npmjs.org/typescript/-/typescript-2.1.6.tgz"
+      "version": "https://registry.npmjs.org/typescript/-/typescript-2.1.6.tgz",
+      "integrity": "sha1-QMfm6eXaeWG3cYtVUF+crJSHpgc="
     }
   }
 }
