@@ -1,3 +1,4 @@
+import { AlerDialogPageObject } from '../PageObjects/AlertDialogPageObject';
 import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
 import { verifyBrowserLog } from '../utility';
@@ -54,6 +55,7 @@ describe('Payments', () => {
         passwordRepeat: userInfo.password,
       });
       regDialog.buttonRegister.click();
+      AlerDialogPageObject.mainButton.click();
     });
 
     it('should not be able to click status before being logged in', () => {

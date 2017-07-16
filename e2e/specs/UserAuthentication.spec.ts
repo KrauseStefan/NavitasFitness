@@ -1,6 +1,8 @@
+import { AlerDialogPageObject } from '../PageObjects/AlertDialogPageObject';
 import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
 import { RegistrationDialogPageObject } from '../PageObjects/RegistrationDialogPageObject';
+
 import { verifyBrowserLog } from '../utility';
 import { browser, protractor } from 'protractor';
 
@@ -25,6 +27,8 @@ describe('User Autentication', () => {
     new DataStoreManipulator()
       .removeUserByEmail(userInfo.email)
       .removeUserByAccessId(userInfo.accessId)
+      .removeUserByEmail(alternateUserInfo.email)
+      .removeUserByAccessId(alternateUserInfo.accessId)
       .destroy();
   });
 
@@ -80,6 +84,7 @@ describe('User Autentication', () => {
         passwordRepeat: userInfo.password,
       });
       regDialog.buttonRegister.click();
+      AlerDialogPageObject.mainButton.click();
 
       const dataStoreManipulator = new DataStoreManipulator();
       keyUserDifferntEmail = dataStoreManipulator.getUserEntityIdFromEmail(alternateUserInfo.email);
@@ -97,6 +102,7 @@ describe('User Autentication', () => {
         passwordRepeat: userInfo.password,
       });
       regDialog.buttonRegister.click();
+      AlerDialogPageObject.mainButton.click();
 
       const dataStoreManipulator = new DataStoreManipulator();
       keyUserDifferntAccessId = dataStoreManipulator.getUserEntityIdFromEmail(userInfo.email);
@@ -114,6 +120,7 @@ describe('User Autentication', () => {
         passwordRepeat: userInfo.password,
       });
       regDialog.buttonRegister.click();
+      AlerDialogPageObject.mainButton.click();
 
       const dataStoreManipulator = new DataStoreManipulator();
       keyUser = dataStoreManipulator.getUserEntityIdFromEmail(userInfo.email);

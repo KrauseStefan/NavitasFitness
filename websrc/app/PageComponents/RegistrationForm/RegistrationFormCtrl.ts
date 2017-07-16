@@ -1,10 +1,7 @@
 import { IUserDTO, UserService } from '../UserService';
 
-import IDialogService = angular.material.IDialogService;
-import IToastService = angular.material.IToastService;
-import IHttpPromiseCallbackArg = angular.IHttpPromiseCallbackArg;
-import INgModelController = angular.INgModelController;
-import IScope = angular.IScope;
+import IDialogService = ng.material.IDialogService;
+import IToastService = ng.material.IToastService;
 
 interface IRegistrationError {
   field?: keyof RegistrationFormModel;
@@ -28,8 +25,8 @@ export class RegistrationForm {
       cancel: () => void,
       model: RegistrationFormModel,
       errorMsg: any,
-      RegistrationForm: {[field in keyof RegistrationFormModel]: INgModelController }
-    } & IScope,
+      RegistrationForm: {[field in keyof RegistrationFormModel]: ng.INgModelController }
+    } & ng.IScope,
     private userService: UserService,
     private $mdDialog: IDialogService,
     private $mdToast: IToastService) {
@@ -52,7 +49,8 @@ export class RegistrationForm {
     this.userService.createUser(this.toUserDTO(this.$scope.model)).then(() => {
       this.$scope.model = new RegistrationFormModel();
       this.$mdDialog.hide();
-    }, (err: IHttpPromiseCallbackArg<IRegistrationError>) => {
+      this.displayCheckEmailNotice();
+    }, (err: ng.IHttpPromiseCallbackArg<IRegistrationError>) => {
       if (err.data.field && err.data.field.length > 0) {
         if (err.data.type) {
           this.$scope.RegistrationForm[err.data.field].$setValidity(err.data.type, false);
@@ -65,5 +63,16 @@ export class RegistrationForm {
 
   public cancel() {
     this.$mdDialog.cancel();
+  }
+
+  private displayCheckEmailNotice() {
+    return this.$mdDialog.show(
+      this.$mdDialog.alert()
+        .clickOutsideToClose(true)
+        .title('Confirmation e-mail sent')
+        .textContent(`Please check your e-mail inbox to compleate registration`)
+        .ariaLabel('Confirmation e-mail sent')
+        .ok('OK')
+    );
   }
 }

@@ -1,3 +1,4 @@
+import { AlerDialogPageObject } from '../PageObjects/AlertDialogPageObject';
 import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { ResetPasswordDialogPageObject } from '../PageObjects/LoginDialogPageObject';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
@@ -33,6 +34,7 @@ describe('Reset password', () => {
       passwordRepeat: userInfo.password,
     });
     regDialog.buttonRegister.click();
+    AlerDialogPageObject.mainButton.click();
   });
 
   it('should be request a password rest', () => {
@@ -44,6 +46,7 @@ describe('Reset password', () => {
     });
 
     resetDialog.resetButton.click();
+    AlerDialogPageObject.mainButton.click();
   });
 
   it('should be able to reset password', () => {

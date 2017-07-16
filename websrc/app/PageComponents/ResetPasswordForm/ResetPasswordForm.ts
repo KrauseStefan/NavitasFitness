@@ -23,6 +23,7 @@ export class ResetPasswordFormController {
       .then(() => {
         this.$mdToast.show(this.$mdToast.simple().textContent(resetMailSentMessage));
         this.$mdDialog.hide();
+        this.displayCheckEmailNotice();
       }, (err) => {
         if (err.status === 404) {
           this.$scope.ResetPasswordForm['email'].$setValidity('NotFound', false);
@@ -33,4 +34,16 @@ export class ResetPasswordFormController {
   public cancel() {
     this.$mdDialog.cancel();
   }
+
+  private displayCheckEmailNotice() {
+    return this.$mdDialog.show(
+      this.$mdDialog.alert()
+        .clickOutsideToClose(true)
+        .title('Password rest e-mail sent')
+        .textContent(`Please check your e-mail inbox for instructions on how to complete the password reset procedure.`)
+        .ariaLabel('Confirmation e-mail sent')
+        .ok('OK')
+    );
+  }
+
 }
