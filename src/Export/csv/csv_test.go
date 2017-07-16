@@ -164,7 +164,7 @@ func TestShouldBeAbleToCreateCsvWithOneEntry(t *testing.T) {
 
 	startTimeStr := now.Format(csvDateFormat)
 	endTimeStr := now.AddDate(0, 6, 0).Format(csvDateFormat)
-	assert(t, csvString).Equals(fmt.Sprintf("%s,%s,%s", users[0].AccessId, startTimeStr, endTimeStr))
+	assert(t, csvString).Equals(fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, startTimeStr, endTimeStr, windowsNewline))
 	assert(t, accessIdValidatorMock.CallCount).Equals(1)
 	assert(t, txnDaoMock.CallCount).Equals(1)
 }
@@ -188,7 +188,7 @@ func TestShouldBeAbleToCreateCsvWithTwoEntries(t *testing.T) {
 
 	assert(t, csvString).Equals(
 		fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline) +
-			fmt.Sprintf("%s,%s,%s", users[1].AccessId, dateStrs[1][0], dateStrs[1][1]))
+			fmt.Sprintf("%s,%s,%s%s", users[1].AccessId, dateStrs[1][0], dateStrs[1][1], windowsNewline))
 	assert(t, userDaoMock.CallCount).Equals(1)
 	assert(t, accessIdValidatorMock.CallCount).Equals(2)
 	assert(t, txnDaoMock.CallCount).Equals(2)
@@ -209,7 +209,7 @@ func TestShouldNotIncludeUsersWithInvalidAccessIds(t *testing.T) {
 	dateStrs := convertDates([]time.Time{now})
 
 	assert(t, csvString).Equals(
-		fmt.Sprintf("%s,%s,%s", users[0].AccessId, dateStrs[0][0], dateStrs[0][1]))
+		fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline))
 	assert(t, userDaoMock.CallCount).Equals(1)
 	assert(t, accessIdValidatorMock.CallCount).Equals(2)
 	assert(t, txnDaoMock.CallCount).Equals(1)
@@ -237,7 +237,7 @@ func TestShouldBeAbleToCreateCsvWithTreeEntries(t *testing.T) {
 	assert(t, csvString).Equals(
 		fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline) +
 			fmt.Sprintf("%s,%s,%s%s", users[1].AccessId, dateStrs[1][0], dateStrs[1][1], windowsNewline) +
-			fmt.Sprintf("%s,%s,%s", users[2].AccessId, dateStrs[2][0], dateStrs[2][1]))
+			fmt.Sprintf("%s,%s,%s%s", users[2].AccessId, dateStrs[2][0], dateStrs[2][1], windowsNewline))
 	assert(t, userDaoMock.CallCount).Equals(1)
 	assert(t, accessIdValidatorMock.CallCount).Equals(3)
 	assert(t, txnDaoMock.CallCount).Equals(3)
@@ -266,7 +266,7 @@ func TestShouldBeAbleToCreateCsvWithMultipleTxnEntries(t *testing.T) {
 
 	assert(t, csvString).Equals(
 		fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline) +
-			fmt.Sprintf("%s,%s,%s", users[1].AccessId, dateStrs[5][0], dateStrs[4][1]))
+			fmt.Sprintf("%s,%s,%s%s", users[1].AccessId, dateStrs[5][0], dateStrs[4][1], windowsNewline))
 	assert(t, userDaoMock.CallCount).Equals(1)
 	assert(t, accessIdValidatorMock.CallCount).Equals(2)
 	assert(t, txnDaoMock.CallCount).Equals(2)

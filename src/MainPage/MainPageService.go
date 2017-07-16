@@ -17,9 +17,9 @@ import (
 )
 
 type MainPageEntry struct {
-	Key          string    `json:"key",datastore:"-"`
+	Key          string    `json:"key" datastore:"-"`
 	LastEditedBy string    `json:"lastEditedBy"`
-	Content      string    `json:"content",datastore:",noindex"`
+	Content      string    `json:"content" datastore:",noindex"`
 	Date         time.Time `json:"date"`
 }
 

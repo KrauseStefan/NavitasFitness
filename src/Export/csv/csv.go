@@ -128,27 +128,16 @@ func createCsvFile(ctx context.Context, w io.Writer) error {
 	//AAMS-asa,27-06-2016,03-01-2017
 	//201505600,27-06-2016,03-01-2017
 
-	if len(userTxnTuple) > 0 {
-		user := userTxnTuple[0]
+	for _, user := range userTxnTuple {
 		log.Infof(ctx, "%s, %s, %s", user.user.AccessId, user.firstDate.String(), user.lastDate.String())
 		w.Write([]byte(user.user.AccessId))
 		w.Write(comma)
 		w.Write([]byte(user.firstDate.Format(csvDateFormat)))
 		w.Write(comma)
 		w.Write([]byte(user.lastDate.AddDate(0, 6, 0).Format(csvDateFormat)))
+		w.Write([]byte(windowsNewline))
 	}
 
-	if len(userTxnTuple) > 1 {
-		for _, user := range userTxnTuple[1:] {
-			log.Infof(ctx, "%s, %s, %s", user.user.AccessId, user.firstDate.String(), user.lastDate.String())
-			w.Write([]byte(windowsNewline))
-			w.Write([]byte(user.user.AccessId))
-			w.Write(comma)
-			w.Write([]byte(user.firstDate.Format(csvDateFormat)))
-			w.Write(comma)
-			w.Write([]byte(user.lastDate.AddDate(0, 6, 0).Format(csvDateFormat)))
-		}
-	}
 	return nil
 }
 
