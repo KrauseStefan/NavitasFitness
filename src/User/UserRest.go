@@ -12,6 +12,7 @@ import (
 	"DAOHelper"
 	"User/Dao"
 	"User/Service"
+	"google.golang.org/appengine/log"
 )
 
 const accessIdKey = "accessId"
@@ -74,6 +75,10 @@ type UserSessionDto struct {
 
 func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
 	ctx := appengine.NewContext(r)
+	if user == nil {
+		log.Infof(ctx, "User is not logged in")
+		return
+	}
 	isValid, err := accessIdValidator.ValidateAccessIdPrimary(ctx, []byte(user.AccessId))
 
 	if !isValid && err == nil {

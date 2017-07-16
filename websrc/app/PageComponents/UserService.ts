@@ -8,8 +8,9 @@ export class UserService {
   private currentUserSubject = new ReplaySubject<IUserDTO>(1);
 
   constructor(
+    private $cookies: ng.cookies.ICookiesService,
     private $http: ng.IHttpService,
-    private $cookies: ng.cookies.ICookiesService) {
+    private $q: ng.IQService) {
 
     this.getUserFromSessionData();
   }
@@ -49,10 +50,14 @@ export class UserService {
   private getUserFromSessionData(): ng.IPromise<IUserDTO> {
     return this.$http.get<IUserSessionDto>(this.userServiceUrl)
       .then((res) => {
-        const currentUser = res.data.user;
-        currentUser.isAdmin = res.data.isAdmin;
-        this.currentUserSubject.next(currentUser);
-        return currentUser;
+        if (res.data && res.data.user) {
+          const currentUser = res.data.user;
+          currentUser.isAdmin = res.data.isAdmin;
+          this.currentUserSubject.next(currentUser);
+          return currentUser;
+        } else {
+          return this.$q.reject("No User Session");
+        }
       }).catch(() => {
         this.currentUserSubject.next(null);
       });
