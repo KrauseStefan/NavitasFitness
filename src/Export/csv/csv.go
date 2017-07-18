@@ -119,10 +119,10 @@ func createCsvFile(ctx context.Context, w io.Writer) error {
 		return err
 	}
 
-	bomPrefix := []byte{0xef, 0xbb, 0xbf}
+	//bomPrefix := []byte{0xef, 0xbb, 0xbf}
 	windowsNewline := []byte{0x0D, 0x0A}
 	comma := []byte{','}
-	w.Write(bomPrefix)
+	//w.Write(bomPrefix)
 
 	//N0774,27-06-2016,03-01-2017
 	//AAMS-asa,27-06-2016,03-01-2017
