@@ -8,11 +8,12 @@ import (
 )
 
 const (
+	defaultDropboxPrefix           = "/Test/3210 Navitas ADK - Fitness"
 	fitnessAccessIdsPathSettingKey = "fitnessAccessIdsPath"
-	defaultFitnessAccessIdsPath    = "/AccessIds/AccessIds.csv"
+	defaultFitnessAccessIdsPath    = defaultDropboxPrefix + "/AccessIds/AccessIds.csv"
 
 	fitnessAccessListPathSettingKey = "fitnessAccessListPath"
-	defaultFitnessAccessListPath    = "/FitnessAccessList/FitnessAccessList.csv"
+	defaultFitnessAccessListPath    = defaultDropboxPrefix + "/FitnessAccessList/FitnessAccessList.csv"
 )
 
 func GetAccessIdPath(ctx context.Context) string {

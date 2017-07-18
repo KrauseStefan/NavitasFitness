@@ -11,6 +11,7 @@ import (
 
 	"AccessIdValidator"
 	"AppEngineHelper"
+	"ConfigurationReader"
 	"Dropbox"
 	"Export/csv"
 	"User/Dao"
@@ -19,8 +20,6 @@ import (
 
 const (
 	authenticateUrl = "https://www.dropbox.com/oauth2/authorize"
-
-	clientId = "v34s5hrxzkjw8ie"
 
 	redirectUriBase     = "https://navitas-fitness-aarhus.appspot.com"
 	redirectUriBaseTest = "http://localhost:8080"
@@ -67,9 +66,15 @@ func getRedirectUri(r *http.Request) string {
 }
 
 func authorizeWithDropboxHandler(w http.ResponseWriter, r *http.Request) {
+	conf, err := ConfigurationReader.GetConfiguration()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	params := map[string]string{
 		"response_type": "code", // token or code
-		"client_id":     clientId,
+		"client_id":     conf.ClientKey,
 		"redirect_uri":  getRedirectUri(r),
 		//"state": fmt.Sprint("%i", rand.Int63()), // Up to 500 bytes of arbitrary data that will be passed back to your redirect URI (CSRF protection)
 	}
