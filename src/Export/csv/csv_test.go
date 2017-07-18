@@ -26,7 +26,6 @@ var (
 )
 
 var (
-	bom            = []byte{0xef, 0xbb, 0xbf}
 	windowsNewline = []byte{0x0D, 0x0A}
 
 	assert = TestHelper.Assert
@@ -101,9 +100,9 @@ func TestShouldBeAbleToCreateAnEmptyCsvFileWithBom(t *testing.T) {
 	mockTransactionRetriever(nil, nil)
 
 	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
-	csvBytes, _ := ioutil.ReadAll(buffer)
+	doc, _ := ioutil.ReadAll(buffer)
 
-	assert(t, csvBytes).Equals(bom)
+	assert(t, doc).Equals([]byte{})
 	//assert(t, userDaoMock.CallCount).Equals(1)
 	assert(t, txnDaoMock.CallCount).Equals(0)
 	assert(t, userDaoMock.LatestCallCtxArg).Equals(ctx)
@@ -129,9 +128,9 @@ func TestShouldCreateEmptyCsvIfNoUserHasAnyTxn(t *testing.T) {
 	mockTransactionRetriever(nil, nil)
 
 	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
-	csvBytes, _ := ioutil.ReadAll(buffer)
+	csv, _ := ioutil.ReadAll(buffer)
 
-	assert(t, csvBytes).Equals(bom)
+	assert(t, csv).Equals([]byte{})
 	assert(t, accessIdValidatorMock.CallCount).Equals(1)
 	assert(t, txnDaoMock.CallCount).Equals(1)
 }
@@ -160,7 +159,7 @@ func TestShouldBeAbleToCreateCsvWithOneEntry(t *testing.T) {
 
 	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
 	csvBytes, _ := ioutil.ReadAll(buffer)
-	csvString := string(bytes.TrimPrefix(csvBytes, bom))
+	csvString := string(csvBytes)
 
 	startTimeStr := now.Format(csvDateFormat)
 	endTimeStr := now.AddDate(0, 6, 0).Format(csvDateFormat)
@@ -182,7 +181,7 @@ func TestShouldBeAbleToCreateCsvWithTwoEntries(t *testing.T) {
 
 	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
 	csvBytes, _ := ioutil.ReadAll(buffer)
-	csvString := string(bytes.TrimPrefix(csvBytes, bom))
+	csvString := string(csvBytes)
 
 	dateStrs := convertDates([]time.Time{now, plusFive})
 
@@ -204,7 +203,7 @@ func TestShouldNotIncludeUsersWithInvalidAccessIds(t *testing.T) {
 
 	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
 	csvBytes, _ := ioutil.ReadAll(buffer)
-	csvString := string(bytes.TrimPrefix(csvBytes, bom))
+	csvString := string(csvBytes)
 
 	dateStrs := convertDates([]time.Time{now})
 
@@ -230,7 +229,7 @@ func TestShouldBeAbleToCreateCsvWithTreeEntries(t *testing.T) {
 
 	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
 	csvBytes, _ := ioutil.ReadAll(buffer)
-	csvString := string(bytes.TrimPrefix(csvBytes, bom))
+	csvString := string(csvBytes)
 
 	dateStrs := convertDates([]time.Time{now, plusFive, plusFour})
 
@@ -260,7 +259,7 @@ func TestShouldBeAbleToCreateCsvWithMultipleTxnEntries(t *testing.T) {
 
 	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
 	csvBytes, _ := ioutil.ReadAll(buffer)
-	csvString := string(bytes.TrimPrefix(csvBytes, bom))
+	csvString := string(csvBytes)
 
 	dateStrs := convertDates([]time.Time{now, plusA, plusB, plusC, extremeHigh, extremeLow})
 

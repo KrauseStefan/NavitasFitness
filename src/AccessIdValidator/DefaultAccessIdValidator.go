@@ -43,10 +43,13 @@ func downloadValidAccessIds(ctx context.Context, dropboxAccessToken string) ([][
 
 	ids := bytes.Split(dataWithoutBom, []byte{'\n'})
 
-	idsNoSpace := make([][]byte, len(ids), len(ids))
+	idsNoSpace := make([][]byte, 0, len(ids))
 
-	for i, id := range ids {
-		idsNoSpace[i] = bytes.TrimSpace(id)
+	for _, id := range ids {
+		trimmedId := bytes.TrimSpace(id)
+		if len(trimmedId) > 0 {
+			idsNoSpace = append(idsNoSpace, trimmedId)
+		}
 	}
 
 	return idsNoSpace, nil
