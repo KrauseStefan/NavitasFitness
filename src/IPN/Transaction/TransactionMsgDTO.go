@@ -151,6 +151,10 @@ func (txDto *TransactionMsgDTO) GetIpnMessages() []string {
 	return txDto.dsDto.IpnMessages
 }
 
+func (txDto *TransactionMsgDTO) GetReceiverEmail() string {
+	return txDto.parseMessage().Get(FIELD_RECEIVER_EMAIL)
+}
+
 func (txDto TransactionMsgDTO) String() string {
 
 	dsDto := fmt.Sprintf("dsDto: %s\n", txDto.dsDto.String())

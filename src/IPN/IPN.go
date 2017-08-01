@@ -132,7 +132,7 @@ func ipnDoResponseTaskHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ipnDoResponseTask(ctx context.Context, r *http.Request) error {
-	const expectedAmount = 300 // kr
+	const expectedAmount = 315 // kr
 
 	content, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -178,7 +178,7 @@ func ipnDoResponseTask(ctx context.Context, r *http.Request) error {
 			return err
 		}
 	} else {
-		log.Infof(ctx, fmt.Sprintf("TxnId not found: %q", transaction.GetField(TransactionDao.FIELD_TXN_ID)))
+		log.Infof(ctx, fmt.Sprintf("No previus transaction with ID: %q", transaction.GetField(TransactionDao.FIELD_TXN_ID)))
 		log.Infof(ctx, fmt.Sprintf("Recived transaction from: %q", email))
 
 		user, err := userDAO.GetByEmail(ctx, email)

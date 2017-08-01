@@ -14,6 +14,9 @@ const (
 
 	fitnessAccessListPathSettingKey = "fitnessAccessListPath"
 	defaultFitnessAccessListPath    = defaultDropboxPrefix + "/FitnessAccessList/FitnessAccessList.csv"
+
+	paypallValidationEmailSettingKey = "paypallValidationEmail"
+	defaultPaypallValidationEmail    = "navitasShop2@mail.dk:gpmac_1231902686_biz@paypal.com:navitasShop@mail.dk"
 )
 
 func GetAccessIdPath(ctx context.Context) string {
@@ -41,6 +44,22 @@ func GetAccessListPath(ctx context.Context) string {
 	if value == "" {
 		value = defaultFitnessAccessListPath
 		if err := SystemSettingDAO.PersistSetting(ctx, fitnessAccessListPathSettingKey, value); err != nil {
+			log.Infof(ctx, err.Error())
+		}
+	}
+
+	return value
+}
+
+func GetPaypalValidationEmail(ctx context.Context) string {
+	_, value, err := SystemSettingDAO.GetSetting(ctx, paypallValidationEmailSettingKey)
+	if err != nil {
+		log.Infof(ctx, err.Error())
+	}
+
+	if value == "" {
+		value = defaultPaypallValidationEmail
+		if err := SystemSettingDAO.PersistSetting(ctx, paypallValidationEmailSettingKey, value); err != nil {
 			log.Infof(ctx, err.Error())
 		}
 	}

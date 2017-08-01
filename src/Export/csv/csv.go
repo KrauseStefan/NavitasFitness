@@ -18,6 +18,7 @@ import (
 	"IPN/Transaction"
 	"User/Dao"
 	"User/Service"
+	"strings"
 )
 
 var (
@@ -35,9 +36,21 @@ func getFirstAndLastTxn(ctx context.Context, userKey *datastore.Key, date time.T
 	if err != nil {
 		return time.Time{}, time.Time{}, err
 	}
+	validationEmails := strings.Split(AccessIdValidator.GetPaypalValidationEmail(ctx), ":")
 
-	if len(activeSubscriptions) >= 1 {
-		firstTxn, lastTxn := getExtrema(activeSubscriptions)
+	validActiveSubscriptions := make([]*TransactionDao.TransactionMsgDTO, 0, len(activeSubscriptions))
+	for _, txn := range activeSubscriptions {
+		email := txn.GetReceiverEmail()
+		for _, validationEmail := range validationEmails {
+			if email == validationEmail {
+				validActiveSubscriptions = append(validActiveSubscriptions, txn)
+				break
+			}
+		}
+	}
+
+	if len(validActiveSubscriptions) >= 1 {
+		firstTxn, lastTxn := getExtrema(validActiveSubscriptions)
 
 		return firstTxn.GetPaymentDate(), lastTxn.GetPaymentDate(), nil
 	}
