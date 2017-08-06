@@ -39,8 +39,12 @@ class UserStatus {
     this.moniterUserCredentials();
   }
 
+  public isLocalhost(): Boolean {
+    return this.$location.host().indexOf('localhost') !== -1;
+  }
+
   public getSubmitUrl() {
-    if (this.$location.host().indexOf('localhost') !== -1) {
+    if (this.isLocalhost()) {
       return 'http://localhost:8081/processPayment';
     } else {
       return 'https://www.sandbox.paypal.com/cgi-bin/webscr';
