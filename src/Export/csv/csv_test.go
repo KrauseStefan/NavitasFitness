@@ -61,12 +61,17 @@ func mockTransactionRetriever(messages []*TransactionDao.TransactionMsgDTO, err 
 }
 
 func createMessages(dates []time.Time) []*TransactionDao.TransactionMsgDTO {
+	return createMessagesWithEmail(dates, "gpmac_1231902686_biz@paypal.com")
+}
+
+func createMessagesWithEmail(dates []time.Time, email string) []*TransactionDao.TransactionMsgDTO {
 	const layout = "15:04:05 Jan 02, 2006 MST"
 	messages := make([]*TransactionDao.TransactionMsgDTO, 0, 5)
 	for _, date := range dates {
 		dateStr := date.In(utc).Format(layout)
 		dateIpnMsg := TransactionDao.FIELD_PAYMENT_DATE + "=" + dateStr
-		dateTxnMsg := TransactionDao.NewTransactionMsgDTOFromIpn(dateIpnMsg)
+		receiverEmail := TransactionDao.FIELD_RECEIVER_EMAIL + "=" + email
+		dateTxnMsg := TransactionDao.NewTransactionMsgDTOFromIpn(dateIpnMsg + "&" + receiverEmail)
 		messages = append(messages, dateTxnMsg)
 	}
 
@@ -146,6 +151,22 @@ func TestShouldReturnPassErrorFromTxnDaoThrough(t *testing.T) {
 	assert(t, createCsvFile(ctx, buffer)).Equals(err)
 
 	assert(t, userDaoMock.CallCount).Equals(1)
+	assert(t, accessIdValidatorMock.CallCount).Equals(1)
+	assert(t, txnDaoMock.CallCount).Equals(1)
+}
+
+func TestShouldNotBeAbleToCreateCsvWhenTxnHasWrongEmail(t *testing.T) {
+	buffer := &bytes.Buffer{}
+	keys, users := createUsers([]string{"AccessId1"})
+	mockUserRetriever(keys, users, nil)
+	mockAccessIdValidator()
+	txnDaoMock := mockTransactionRetriever(createMessagesWithEmail([]time.Time{now}, "bad@email.com"), nil)
+
+	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
+	csvBytes, _ := ioutil.ReadAll(buffer)
+	csvString := string(csvBytes)
+
+	assert(t, csvString).Equals("")
 	assert(t, accessIdValidatorMock.CallCount).Equals(1)
 	assert(t, txnDaoMock.CallCount).Equals(1)
 }
