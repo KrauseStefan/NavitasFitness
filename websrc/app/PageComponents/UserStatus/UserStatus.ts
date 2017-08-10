@@ -14,11 +14,13 @@ export const statusRouterState = {
 class UserStatus {
 
   public model: IUserStatusModel;
-
   public statusMessages: { [key: string]: string } = {
     active: 'Subscription Active',
     inActive: 'No Active Subscription',
   };
+
+  private paymentStorageKey = 'LastPaymentClick';
+  private fiveMin = 5 * 60 * 1000;
 
   private dateFormat = 'DD.MM.YYYY';
 
@@ -26,6 +28,7 @@ class UserStatus {
     private userService: UserService,
     private $http: ng.IHttpService,
     private $location: ng.ILocationService,
+    private $mdDialog: ng.material.IDialogService,
     private $state: ng.ui.IStateService,
     private $q: ng.IQService) {
 
@@ -49,6 +52,32 @@ class UserStatus {
     } else {
       return 'https://www.sandbox.paypal.com/cgi-bin/webscr';
     }
+  }
+
+  public onSubmit($event: Event) {
+    const storedTimeStamp = parseInt(localStorage.getItem(this.paymentStorageKey), 10);
+
+    if (!isNaN(storedTimeStamp) && storedTimeStamp > new Date().getTime()) {
+      let confirmDialog = this.$mdDialog
+        .confirm()
+        .title('Possible of multiple payments')
+        .textContent(`A payment has been started recently from this browser.
+        Please note that payments can take several minutes to be confirmed by paypal.
+        Are you sure you want to continue?`)
+        .ok('continue')
+        .cancel('cancel');
+
+      this.$mdDialog.show(confirmDialog).then(() => {
+        localStorage.setItem(this.paymentStorageKey, new Date().getTime().toString(10) + this.fiveMin);
+        (<HTMLFormElement>$event.target).submit();
+      });
+
+      $event.preventDefault();
+      return false;
+    }
+
+    localStorage.setItem(this.paymentStorageKey, new Date().getTime().toString(10) + this.fiveMin);
+    return true;
   }
 
   public getTransactionsUpdate() {
