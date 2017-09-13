@@ -10,16 +10,20 @@ import { nfResetOnChange } from './PageComponents/RegistrationForm/nfResetOnChan
 import { nfShouldEqual } from './PageComponents/RegistrationForm/nfShouldEqual';
 import { UserStatusComponent, statusRouterState } from './PageComponents/UserStatus/UserStatus';
 
+import { DefaultErrorHandlingModule } from './DefaultErrorHandling';
+
 import ngMat = ng.material;
 
 export const NavitasFitnessModule = module('NavitasFitness', [
   'ngMaterial', 'ui.router', 'ngCookies', 'ngMessages',
+  DefaultErrorHandlingModule.name,
 ])
   .config(($mdThemingProvider: ngMat.IThemingProvider) => {
     $mdThemingProvider.theme('default')
       .primaryPalette('blue')
       .accentPalette('orange');
   })
+
   .config((
     $stateProvider: ng.ui.IStateProvider,
     $urlRouterProvider: ng.ui.IUrlRouterProvider,
@@ -42,6 +46,7 @@ export const NavitasFitnessModule = module('NavitasFitness', [
     ]);
 
   })
+
   .service('userService', UserService)
   .service('mainPageService', MainPageService)
 

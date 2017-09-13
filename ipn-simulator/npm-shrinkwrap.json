@@ -2,6 +2,7 @@
   "name": "ipn-simulator",
   "version": "1.0.0",
   "lockfileVersion": 1,
+  "requires": true,
   "dependencies": {
     "@types/lodash": {
       "version": "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.52.tgz",
@@ -21,7 +22,10 @@
     },
     "moment-timezone": {
       "version": "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.5.11.tgz",
-      "integrity": "sha1-m3bAPY71FMfkJJp7vOZJ7tOe8p8="
+      "integrity": "sha1-m3bAPY71FMfkJJp7vOZJ7tOe8p8=",
+      "requires": {
+        "moment": "https://registry.npmjs.org/moment/-/moment-2.17.1.tgz"
+      }
     },
     "typescript": {
       "version": "https://registry.npmjs.org/typescript/-/typescript-2.1.6.tgz",
