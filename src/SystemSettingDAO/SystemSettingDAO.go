@@ -22,6 +22,7 @@ type systemSetting struct {
 	Value string
 }
 
+// Setting cannot be retrieved in a consistent way. Be aware
 func PersistSetting(ctx context.Context, key string, value string) error {
 	dsKey, currentValue, err := GetSetting(ctx, key)
 	if err != nil {
@@ -51,6 +52,7 @@ func PersistSetting(ctx context.Context, key string, value string) error {
 	return nil
 }
 
+// Returns eventually consistent results
 func GetSetting(ctx context.Context, key string) (*datastore.Key, string, error) {
 	settings := make([]systemSetting, 0, 1)
 	keys, err := datastore.NewQuery(SETTING_KIND).
