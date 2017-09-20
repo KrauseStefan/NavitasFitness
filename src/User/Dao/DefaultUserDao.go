@@ -124,16 +124,16 @@ func (u *DefaultUserDAO) Create(ctx context.Context, user *UserDTO) error {
 	if user, _ := u.GetByEmail(ctx, user.Email); user != nil {
 		if user.Verified {
 			return UniqueConstraint_email
-		} else {
-			datastore.Delete(ctx, user.Key)
+		} else if err := datastore.Delete(ctx, user.Key); err != nil {
+			return err
 		}
 	}
 
 	if user, _ := u.GetByAccessId(ctx, user.AccessId); user != nil {
 		if user.Verified {
 			return UniqueConstraint_accessId
-		} else {
-			datastore.Delete(ctx, user.Key)
+		} else if err := datastore.Delete(ctx, user.Key); err != nil {
+			return err
 		}
 	}
 
