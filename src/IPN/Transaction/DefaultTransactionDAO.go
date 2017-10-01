@@ -8,11 +8,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
-
-	"User/Dao"
 )
-
-var userDao = UserDao.GetInstance()
 
 type DefaultTransactionDao struct{}
 

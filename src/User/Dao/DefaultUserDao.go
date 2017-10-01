@@ -117,10 +117,6 @@ func (u *DefaultUserDAO) GetAll(ctx context.Context) ([]*datastore.Key, []UserDT
 
 func (u *DefaultUserDAO) Create(ctx context.Context, user *UserDTO) error {
 
-	if user.hasKey() {
-		return userHasIdError
-	}
-
 	if user, _ := u.GetByEmail(ctx, user.Email); user != nil {
 		if user.Verified {
 			return UniqueConstraint_email

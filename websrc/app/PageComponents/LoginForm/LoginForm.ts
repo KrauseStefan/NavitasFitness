@@ -42,7 +42,7 @@ export class LoginForm {
   }
 
   public submit() {
-    this.userService.createUserSession(this.$scope.model).then(() => {
+    this.userService.doUserLogin(this.$scope.model).then(() => {
       this.resetForm();
       this.$mdDialog.hide();
     }, (errorResponse: IHttpPromiseCallbackArg<string>) => {

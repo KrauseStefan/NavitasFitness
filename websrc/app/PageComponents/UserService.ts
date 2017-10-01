@@ -10,7 +10,8 @@ export class UserService {
   constructor(
     private $cookies: ng.cookies.ICookiesService,
     private $http: ng.IHttpService,
-    private $q: ng.IQService) {
+    private $q: ng.IQService,
+    private $log: ng.ILogService) {
 
     this.getUserFromSessionData();
   }
@@ -20,7 +21,7 @@ export class UserService {
       .then((res) => res.data);
   }
 
-  public createUserSession(user: IBaseUserDTO): ng.IPromise<IUserDTO> {
+  public doUserLogin(user: IBaseUserDTO): ng.IPromise<IUserDTO> {
     return this.$http.post<IUserDTO>(`${this.authServiceUrl}/login`, user)
       .then((res) => {
         const currentUser = res.data;
@@ -47,20 +48,24 @@ export class UserService {
     return this.$http.post(`${this.userServiceUrl}/changePassword`, dto);
   }
 
-  private getUserFromSessionData(): ng.IPromise<IUserDTO> {
-    return this.$http.get<IUserSessionDto>(this.userServiceUrl)
-      .then((res) => {
-        if (res.data && res.data.user) {
-          const currentUser = res.data.user;
-          currentUser.isAdmin = res.data.isAdmin;
-          this.currentUserSubject.next(currentUser);
-          return currentUser;
-        } else {
-          return this.$q.reject("No User Session");
+  private getUserFromSessionData(): void {
+    this.$http.get<IUserSessionDto>(this.userServiceUrl).then((res) => {
+      return this.$q<IUserDTO>((resolve, reject) => {
+        if (!res.data || !res.data.user) {
+          this.$log.debug('No User Session');
+          return resolve(null);
         }
-      }).catch(() => {
-        this.currentUserSubject.next(null);
+
+        const currentUser = res.data.user;
+        currentUser.isAdmin = res.data.isAdmin;
+        resolve(currentUser);
       });
+    }).then((userDto) => {
+      this.currentUserSubject.next(userDto);
+    }, (error) => {
+      this.currentUserSubject.next(null);
+      return this.$q.reject(error);
+    });
   }
 }
 
