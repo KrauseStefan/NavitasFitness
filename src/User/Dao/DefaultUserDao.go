@@ -34,7 +34,7 @@ var (
 	Invalid_accessId          = &DAOHelper.ConstraintError{Field: "accessId", Type: DAOHelper.Invalid}
 
 	UserNotFoundError = errors.New("User does not exist in datastore")
-	userHasIdError    = errors.New("Cannot create new user, key must be nil")
+	userHasNoIdError  = errors.New("Cannot update user without ID")
 
 	invalidSessionError   = errors.New("Invalid user session")
 	passwordCanNotBeEmpty = errors.New("Can not set update password when password is blank")
@@ -154,7 +154,7 @@ func (u *DefaultUserDAO) Create(ctx context.Context, user *UserDTO) error {
 
 func (u *DefaultUserDAO) SaveUser(ctx context.Context, user *UserDTO) error {
 	if !user.hasKey() {
-		return userHasIdError
+		return userHasNoIdError
 	}
 
 	if user.Password != "" {
