@@ -24,7 +24,7 @@ type UserModifier interface {
 }
 
 type UserSessionRetriever interface {
-	GetUserFromSessionUUID(ctx context.Context, uuid string) (*UserDTO, error)
+	GetUserFromSessionUUID(ctx context.Context, userKey *datastore.Key, uuid string) (*UserDTO, error)
 }
 
 type UserDAO interface {

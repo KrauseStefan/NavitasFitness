@@ -63,7 +63,7 @@ func IntegrateRoutes(router *mux.Router) {
 
 }
 
-func setSessionCookie(w http.ResponseWriter, uuid string) error {
+func setSessionCookie(w http.ResponseWriter, sessionData *SessionData) error {
 	const MaxAgeDeleteNow = -1
 	const MaxAgeDefault = 0
 	var (
@@ -75,8 +75,8 @@ func setSessionCookie(w http.ResponseWriter, uuid string) error {
 		return err
 	}
 
-	if uuid != "" {
-		encoded, err = s.Encode(sessionCookieName, uuid)
+	if sessionData != nil && sessionData.UserKey != nil {
+		encoded, err = s.Encode(sessionCookieName, sessionData)
 		if err != nil {
 			return err
 		}
@@ -97,7 +97,7 @@ func setSessionCookie(w http.ResponseWriter, uuid string) error {
 }
 
 func doLogout(w http.ResponseWriter, r *http.Request) {
-	err := setSessionCookie(w, "")
+	err := setSessionCookie(w, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -105,19 +105,12 @@ func doLogout(w http.ResponseWriter, r *http.Request) {
 }
 
 func doLogin(w http.ResponseWriter, r *http.Request) {
-
-	var (
-		user *UserDao.UserDTO
-		uuid string
-		err  error
-	)
-
 	ctx := appengine.NewContext(r)
 
 	loginRequestUser := new(UserLogin)
 
 	decoder := json.NewDecoder(r.Body)
-	if err = decoder.Decode(loginRequestUser); err != nil {
+	if err := decoder.Decode(loginRequestUser); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -127,16 +120,18 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err = userDAO.GetByAccessId(ctx, loginRequestUser.AccessId)
+	user, err := userDAO.GetByAccessId(ctx, loginRequestUser.AccessId)
 	if err != nil && err != UserDao.UserNotFoundError {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	if user == nil || err == UserDao.UserNotFoundError {
 		log.Errorf(ctx, "Failed to login, %s does not exist in DB", loginRequestUser.AccessId)
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}
+
 	if !user.Verified {
 		log.Errorf(ctx, "Failed to login, %s email is not verified", loginRequestUser.AccessId)
 		http.Error(w, "Email is not verified", http.StatusForbidden)
@@ -150,19 +145,24 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uuid, err = generateUUID()
+	uuid, err := generateUUID()
 	if err != nil {
 		http.Error(w, "Error Generating UUID", http.StatusInternalServerError)
 		return
 	}
 
-	err = setSessionCookie(w, uuid)
+	sessionData := &SessionData{
+		Uuid:    uuid,
+		UserKey: user.Key,
+	}
+
+	err = setSessionCookie(w, sessionData)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
-	err = userDAO.SetSessionUUID(ctx, user, uuid)
+	err = userDAO.SetSessionUUID(ctx, user, sessionData.Uuid)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
@@ -172,30 +172,30 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 }
 
-func GetSessionUUID(r *http.Request) (string, error) {
+func GetSessionData(r *http.Request) (*SessionData, error) {
+	sessionData := &SessionData{}
+
 	cookie, err := r.Cookie(sessionCookieName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if cookie.Value == "" {
-		return "", nil
+		return nil, nil
 	}
-
-	uuid := ""
 
 	s, err := GetSecureCookieInst()
 	if err != nil {
-		return "", err
-	}
-	if s.Decode(sessionCookieName, cookie.Value, &uuid); err != nil {
-		ctx := appengine.NewContext(r)
-		log.Errorf(ctx, "Coockie decode error: "+err.Error())
-		return "", nil
+		return nil, err
 	}
 
-	return uuid, nil
+	if s.Decode(sessionCookieName, cookie.Value, &sessionData); err != nil {
+		ctx := appengine.NewContext(r)
+		log.Errorf(ctx, "Coockie decode error: "+err.Error())
+		return nil, nil
+	}
+
+	return sessionData, nil
 }

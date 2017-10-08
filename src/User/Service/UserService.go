@@ -49,9 +49,12 @@ func AsUser(f func(http.ResponseWriter, *http.Request, *UserDao.UserDTO)) func(h
 }
 
 func getUserFromSession(ctx context.Context, r *http.Request) (*UserDao.UserDTO, error) {
-	uuid, err := Auth.GetSessionUUID(r)
+	sessionData, err := Auth.GetSessionData(r)
+	if err != nil {
+		return nil, err
+	}
 
-	if uuid == "" && err == nil {
+	if sessionData == nil && err == nil {
 		return nil, nil
 	}
 
@@ -59,7 +62,7 @@ func getUserFromSession(ctx context.Context, r *http.Request) (*UserDao.UserDTO,
 		return nil, err
 	}
 
-	return userDao.GetUserFromSessionUUID(ctx, uuid)
+	return userDao.GetUserFromSessionUUID(ctx, sessionData.UserKey, sessionData.Uuid)
 }
 
 func CreateUser(ctx context.Context, respBody io.ReadCloser) (*UserDao.UserDTO, error) {

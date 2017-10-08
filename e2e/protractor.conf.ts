@@ -62,7 +62,7 @@ export const config: Config = {
     allScriptsTimeout: 60000,
     multiCapabilities: [{
         browserName: 'chrome',
-        maxInstances: 3,
+        maxInstances: 4,
         shardTestFiles: cmdOpts.parallel,
         // }, {
         // browserName: 'edge',

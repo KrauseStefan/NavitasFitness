@@ -174,22 +174,17 @@ func (u *DefaultUserDAO) SetSessionUUID(ctx context.Context, user *UserDTO, uuid
 	return u.SaveUser(ctx, user)
 }
 
-func (u *DefaultUserDAO) GetUserFromSessionUUID(ctx context.Context, uuid string) (*UserDTO, error) {
+func (u *DefaultUserDAO) GetUserFromSessionUUID(ctx context.Context, userKey *datastore.Key, uuid string) (*UserDTO, error) {
+	user := &UserDTO{}
 
-	users := make([]UserDTO, 0, 2)
-
-	keys, err := datastore.NewQuery(USER_KIND).
-		Ancestor(userCollectionParentKey(ctx)).
-		Filter("CurrentSessionUUID =", uuid).
-		Limit(2).
-		GetAll(ctx, &users)
-
-	if err != nil {
+	if err := datastore.Get(ctx, userKey, user); err != nil {
 		return nil, err
-	} else if len(keys) != 1 {
-		return nil, errors.New(invalidSessionError.Error() + " - uuid: " + uuid)
 	}
 
-	users[0].Key = keys[0]
-	return &users[0], nil
+	if user.CurrentSessionUUID != uuid {
+		return nil, invalidSessionError
+	}
+
+	user.Key = userKey
+	return user, nil
 }
