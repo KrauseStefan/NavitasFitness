@@ -97,9 +97,31 @@ func setSessionCookie(w http.ResponseWriter, sessionData *SessionData) error {
 }
 
 func doLogout(w http.ResponseWriter, r *http.Request) {
-	err := setSessionCookie(w, nil)
+	ctx := appengine.NewContext(r)
+
+	sessionData, err := GetSessionData(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	user, err := UserDao.GetInstance().GetByKey(ctx, sessionData.UserKey)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	sessionData.Uuid = ""
+	user.CurrentSessionUUID = ""
+
+	if err := setSessionCookie(w, &sessionData); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = userDAO.SaveUser(ctx, user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 }
@@ -168,34 +190,39 @@ func doLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Errorf(ctx, "login: %+v", user)
+
 	if _, err := AppEngineHelper.WriteJSON(w, user); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
 
-func GetSessionData(r *http.Request) (*SessionData, error) {
+func GetSessionData(r *http.Request) (SessionData, error) {
 	sessionData := &SessionData{}
 
 	cookie, err := r.Cookie(sessionCookieName)
 	if err != nil {
-		return nil, err
+		if err == http.ErrNoCookie {
+			return *sessionData, nil
+		}
+		return *sessionData, err
 	}
 
 	if cookie.Value == "" {
-		return nil, nil
+		return *sessionData, nil
 	}
 
 	s, err := GetSecureCookieInst()
 	if err != nil {
-		return nil, err
+		return *sessionData, err
 	}
 
 	if s.Decode(sessionCookieName, cookie.Value, &sessionData); err != nil {
 		ctx := appengine.NewContext(r)
 		log.Errorf(ctx, "Coockie decode error: "+err.Error())
-		return nil, nil
+		return *sessionData, nil
 	}
 
-	return sessionData, nil
+	return *sessionData, nil
 }

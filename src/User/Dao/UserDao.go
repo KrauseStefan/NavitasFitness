@@ -16,6 +16,7 @@ type SingleUserRetriever interface {
 
 type UsersRetriever interface {
 	GetAll(ctx context.Context) ([]*datastore.Key, []UserDTO, error)
+	GetByKey(ctx context.Context, key *datastore.Key) (*UserDTO, error)
 }
 
 type UserModifier interface {

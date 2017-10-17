@@ -91,8 +91,9 @@ class AppComponentController {
   }
 
   public logout() {
-    this.userService.logout();
-    this.loggedInUser = null;
+    this.userService.logout().then(() => {
+      this.loggedInUser = null;
+    });
   }
 
   public isLoggedIn() {

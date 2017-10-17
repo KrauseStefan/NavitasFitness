@@ -148,6 +148,17 @@ func (u *DefaultUserDAO) Create(ctx context.Context, user *UserDTO) error {
 	return nil
 }
 
+func (u *DefaultUserDAO) GetByKey(ctx context.Context, key *datastore.Key) (*UserDTO, error) {
+	var user *UserDTO = &UserDTO{}
+
+	if err := datastore.Get(ctx, key, user); err != nil {
+		return nil, err
+	}
+
+	user.Key = key
+	return user, nil
+}
+
 func (u *DefaultUserDAO) SaveUser(ctx context.Context, user *UserDTO) error {
 	if !user.hasKey() {
 		return userHasNoIdError

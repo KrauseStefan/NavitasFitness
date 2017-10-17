@@ -54,7 +54,7 @@ func getUserFromSession(ctx context.Context, r *http.Request) (*UserDao.UserDTO,
 		return nil, err
 	}
 
-	if sessionData == nil && err == nil {
+	if !sessionData.HasLoginInfo() && err == nil {
 		return nil, nil
 	}
 
