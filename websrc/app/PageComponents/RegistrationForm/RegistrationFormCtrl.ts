@@ -25,7 +25,7 @@ export class RegistrationForm {
       cancel: () => void,
       model: RegistrationFormModel,
       errorMsg: any,
-      RegistrationForm: {[field in keyof RegistrationFormModel]: ng.INgModelController }
+      RegistrationForm: {[field in keyof RegistrationFormModel]: ng.INgModelController } & ng.IFormController
     } & ng.IScope,
     private userService: UserService,
     private $mdDialog: IDialogService,
@@ -46,6 +46,8 @@ export class RegistrationForm {
   }
 
   public submit() {
+    this.$scope.RegistrationForm.$pending = true;
+
     this.userService.createUser(this.toUserDTO(this.$scope.model)).then(() => {
       this.$scope.model = new RegistrationFormModel();
       this.$mdDialog.hide();
@@ -58,7 +60,7 @@ export class RegistrationForm {
           this.$scope.RegistrationForm[err.data.field].$setValidity('serverValidation', false);
         }
       }
-    });
+    }).finally(() => this.$scope.RegistrationForm.$pending = false);
   }
 
   public cancel() {

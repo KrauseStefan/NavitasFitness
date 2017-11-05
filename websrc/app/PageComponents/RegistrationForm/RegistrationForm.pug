@@ -69,5 +69,6 @@ md-dialog
             This Access ID has already been registred
 
     md-dialog-actions
+      md-progress-circular(ng-show="RegistrationForm.$pending")
       md-button(ng-click="cancel()") Cancel
-      md-button.md-primary(ng-disabled="RegistrationForm.$invalid", type="submit", ng-click="submit()") Create
+      md-button.md-primary(ng-disabled="RegistrationForm.$invalid || RegistrationForm.$pending", type="submit", ng-click="submit()") Create
