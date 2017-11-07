@@ -68,7 +68,7 @@ class UserStatus {
         .cancel('cancel');
 
       this.$mdDialog.show(confirmDialog).then(() => {
-        localStorage.setItem(this.paymentStorageKey, new Date().getTime().toString(10) + this.fiveMin);
+        localStorage.setItem(this.paymentStorageKey, (new Date().getTime() + this.fiveMin).toString(10));
         (<HTMLFormElement>$event.target).submit();
       });
 
@@ -76,7 +76,7 @@ class UserStatus {
       return false;
     }
 
-    localStorage.setItem(this.paymentStorageKey, new Date().getTime().toString(10) + this.fiveMin);
+    localStorage.setItem(this.paymentStorageKey, (new Date().getTime() + this.fiveMin).toString(10));
     return true;
   }
 
