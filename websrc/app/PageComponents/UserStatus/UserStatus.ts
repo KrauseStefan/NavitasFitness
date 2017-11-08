@@ -88,7 +88,7 @@ class UserStatus {
       });
       const validTxn = this.model.transactionHistory
         .filter((i) => momentFn(i.paymentDate).add({ month: 6 }).isSameOrAfter(momentFn()))
-        .sort((a, b) => momentFn(a).unix())[0];
+        .sort((a, b) => momentFn(a.paymentDate).unix())[0];
 
       if (!!validTxn) {
         this.model.validUntill = momentFn(validTxn.paymentDate)
