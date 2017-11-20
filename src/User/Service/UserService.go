@@ -65,10 +65,11 @@ func getUserFromSession(ctx context.Context, r *http.Request) (*UserDao.UserDTO,
 	return userDao.GetUserFromSessionUUID(ctx, sessionData.UserKey, sessionData.Uuid)
 }
 
-func CreateUser(ctx context.Context, respBody io.ReadCloser) (*UserDao.UserDTO, error) {
+// This function tries its best to validate and ensure no user is created with duplicated accessId or email
+func CreateUser(ctx context.Context, r *http.Request, sessionData Auth.SessionData) (*UserDao.UserDTO, error) {
 	user := &UserDao.UserDTO{}
 
-	decoder := json.NewDecoder(respBody)
+	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(user); err != nil {
 		return nil, err
 	}
@@ -77,7 +78,7 @@ func CreateUser(ctx context.Context, respBody io.ReadCloser) (*UserDao.UserDTO, 
 		return nil, err
 	}
 
-	if err := userDao.Create(ctx, user); err != nil {
+	if err := userDao.Create(ctx, user, sessionData.UserKey); err != nil {
 		return nil, err
 	}
 

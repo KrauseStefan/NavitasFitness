@@ -6,7 +6,7 @@ import (
 )
 
 type UserCreator interface {
-	Create(ctx context.Context, user *UserDTO) error
+	Create(ctx context.Context, user *UserDTO, keyHint *datastore.Key) error
 }
 
 type SingleUserRetriever interface {

@@ -9,6 +9,7 @@ import (
 
 	"AccessIdValidator"
 	"AppEngineHelper"
+	"Auth"
 	"DAOHelper"
 	"User/Dao"
 	"User/Service"
@@ -115,14 +116,33 @@ func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request, user *Us
 
 func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
-
-	user, err := UserService.CreateUser(ctx, r.Body)
+	user, err := createUserHandlerInternal(w, r)
 
 	if err == nil {
 		_, err = AppEngineHelper.WriteJSON(w, user)
 	}
 
 	DAOHelper.ReportError(ctx, w, err)
+}
+
+func createUserHandlerInternal(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+	ctx := appengine.NewContext(r)
+
+	sessionData, err := Auth.GetSessionData(r)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := UserService.CreateUser(ctx, r, sessionData)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := Auth.UpdateSessionDataUserKey(r, w, user.Key); err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func validateAccessId(w http.ResponseWriter, r *http.Request) {

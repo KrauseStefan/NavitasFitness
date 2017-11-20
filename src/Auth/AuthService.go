@@ -14,6 +14,7 @@ import (
 
 	"AppEngineHelper"
 	"User/Dao"
+	"google.golang.org/appengine/datastore"
 )
 
 var userDAO = UserDao.GetInstance()
@@ -61,6 +62,17 @@ func IntegrateRoutes(router *mux.Router) {
 		Name("logoutUser").
 		HandlerFunc(doLogout)
 
+}
+
+func UpdateSessionDataUserKey(r *http.Request, w http.ResponseWriter, userKey *datastore.Key) error {
+	sessionData, err := GetSessionData(r)
+	if err != nil {
+		return err
+	}
+
+	sessionData.UserKey = userKey
+
+	return setSessionCookie(w, &sessionData)
 }
 
 func setSessionCookie(w http.ResponseWriter, sessionData *SessionData) error {

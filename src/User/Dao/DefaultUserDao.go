@@ -115,7 +115,18 @@ func (u *DefaultUserDAO) GetAll(ctx context.Context) ([]*datastore.Key, []UserDT
 	return keys, users, nil
 }
 
-func (u *DefaultUserDAO) Create(ctx context.Context, user *UserDTO) error {
+// This function tries its best to ensure no user is created with duplicated accessId or email
+func (u *DefaultUserDAO) Create(ctx context.Context, user *UserDTO, keyHint *datastore.Key) error {
+
+	if existingUser, err := u.GetByKey(ctx, keyHint); existingUser != nil && err == nil {
+		if existingUser.Email == user.Email && existingUser.Verified {
+			return UniqueConstraint_email
+		} else if existingUser.AccessId == user.AccessId && existingUser.Verified {
+			return UniqueConstraint_accessId
+		}
+
+		// At this point it is concluded that the existing user found by the key hit is not equivalent
+	}
 
 	if user, _ := u.GetByEmail(ctx, user.Email); user != nil {
 		if user.Verified {
