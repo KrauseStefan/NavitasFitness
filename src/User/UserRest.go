@@ -42,11 +42,6 @@ func IntegrateRoutes(router *mux.Router) {
 		Name("Create User Info").
 		HandlerFunc(createUserHandler)
 
-	router.
-		Methods("GET").
-		Path(path + "/validate_id/{" + accessIdKey + "}").
-		Name("Validate Access Id").
-		HandlerFunc(validateAccessId)
 
 	router.
 		Methods("GET").
@@ -145,19 +140,6 @@ func createUserHandlerInternal(w http.ResponseWriter, r *http.Request) (interfac
 	return user, nil
 }
 
-func validateAccessId(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
-	accessId_bytes := []byte(mux.Vars(r)[accessIdKey])
-
-	isValid, err := accessIdValidator.ValidateAccessIdPrimary(ctx, accessId_bytes)
-	if err != nil {
-		DAOHelper.ReportError(ctx, w, err)
-	}
-
-	if isValid {
-		w.Write(accessId_bytes)
-	}
-}
 
 func verifyUserRequestHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
