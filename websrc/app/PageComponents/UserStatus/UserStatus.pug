@@ -27,8 +27,6 @@
           span 6 month membership 300 kr plus 15kr payment fee.
           br
           span Total charge 315 kr.
-          br
-          b This button targets paypals sandbox API, only simulated payments can be made with special test accounts.
 
         md-input-container
           md-checkbox(name="termsAccepted", ng-model="$ctrl.termsAccepted", ng-required="true") You must accept the terms
@@ -42,6 +40,10 @@
   md-card(ng-if="$ctrl.model.statusMsgKey != 'active' && $ctrl.isLocalhost()")
     md-content(layout-padding)
       h3.md-title Simulation
+
+      p
+        b This button targets paypals sandbox API, only simulated payments can be made with special test accounts.
+
       form(name="PaymentSandBoxForm", ng-submit="$ctrl.onSubmit($event)", action="{{::$ctrl.getSubmitUrl()}}", method="post", target="_top")
         input(type="hidden", name="cmd", value="_s-xclick")
         input(type="hidden", name="hosted_button_id", value="QBGG5JT5UJD62")
