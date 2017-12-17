@@ -1,4 +1,4 @@
-import { noop } from 'angular';
+import { IComponentOptions, noop } from 'angular';
 
 export class CkEditorComponent {
 
@@ -37,8 +37,8 @@ export class CkEditorComponent {
     }));
   }
 
-  public getEditordiv() {
-    return <HTMLDivElement> this.$element[0].querySelector('.editorContent');
+  public getEditordiv(): HTMLDivElement {
+    return (<HTMLElement>(<any>this.$element)[0]).querySelector('.editorContent');
   }
 
   public updateContent(content: string) {
@@ -51,7 +51,7 @@ export class CkEditorComponent {
 
 }
 
-export const CkEditor = {
+export const CkEditor: IComponentOptions = {
   bindings: {
     content: '=',
     isEditable: '=',

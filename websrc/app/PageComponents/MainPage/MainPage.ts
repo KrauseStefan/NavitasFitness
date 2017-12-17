@@ -1,7 +1,7 @@
 import { IUserDTO, UserService } from '../UserService';
 import { MainPageDTO, MainPageService } from './MainPageService';
 
-export const mainPageRouterState = {
+export const mainPageRouterState: angular.ui.IState = {
   template: '<main-page></main-page>',
   url: '/main-page/',
 };

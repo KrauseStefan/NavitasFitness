@@ -6,7 +6,7 @@ const momentFn: (
   language?: string, strict?: boolean
 ) => moment.Moment = (<any>moment).default;
 
-export const statusRouterState = {
+export const statusRouterState: angular.ui.IState = {
   template: '<user-status></user-status>',
   url: '/status/',
 };
