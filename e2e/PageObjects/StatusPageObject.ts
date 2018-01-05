@@ -59,18 +59,20 @@ export class StatusPageObject {
 
   public static waitForPaypalSimBtn() {
     const btnIsDisplayed = () => StatusPageObject.paypalBtn.isDisplayed();
-    browser.wait(btnIsDisplayed, 5 * 1000, 'Paypall button did not display in time');
+    return browser.wait(btnIsDisplayed, 5 * 1000, 'Paypall button did not display in time');
   }
 
   public static triggerPaypalPayment() {
-    browser.ignoreSynchronization = true;
+    browser.waitForAngularEnabled(false);
     StatusPageObject.paypalBtn.click();
 
     waitForPageToLoad();
+
     $('a').click();
 
     waitForPageToLoad();
-    browser.ignoreSynchronization = false;
+
+    return browser.waitForAngularEnabled(true);
   }
 
   public static getPageDates() {

@@ -97,8 +97,10 @@ describe('Payments', () => {
       pageObject.termsAcceptedChkBx.click();
       pageObject.triggerPaypalPayment();
       NavigationPageObject.statusPageTab.click();
-
-      expect(pageObject.getTableCellText(1, TransactionTableCells.Status)).toBe('Completed');
+      browser.wait(() => {
+        return pageObject.getTableCellText(1, TransactionTableCells.Status)
+          .then((status) => status === 'Completed', () => false);
+      }, 10000, 'Payment could not be compleatly processed');
     });
 
     it('should show subscription active when show subscription end date when subscribed', () => {

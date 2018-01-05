@@ -1,5 +1,4 @@
-import { excel } from '../Typings/exceljs';
-import * as Excel from 'exceljs';
+import { Workbook } from 'exceljs';
 
 import * as http from 'http';
 
@@ -7,10 +6,6 @@ import { browser } from 'protractor';
 import { promise as wdp } from 'selenium-webdriver';
 
 import { IParsedDate, dateParts } from './StatusPageObject';
-
-declare const Excel: {
-  Workbook: excel.IWorkbook;
-};
 
 const sessionCoockieKey = 'Session-Key';
 export const exportServiceUrl = 'http://localhost:8080/rest/export/xlsx';
@@ -114,12 +109,12 @@ export function sendPayment(custom: string, paymentDate: string): wdp.Promise<st
 
 }
 
-function parseXlsxDocument(resp: http.IncomingMessage): wdp.Promise<excel.IWorkbook> {
-  const workbook = new Excel.Workbook();
+function parseXlsxDocument(resp: http.IncomingMessage): wdp.Promise<Workbook> {
+  const workbook = new Workbook();
 
   const inputStream = workbook.xlsx.createInputStream();
   resp.pipe(inputStream);
-  return new wdp.Promise<excel.IWorkbook>((resolve, reject) => {
+  return new wdp.Promise<Workbook>((resolve, reject) => {
     inputStream.on('done', (listener) => {
       resolve(workbook);
     });
@@ -130,7 +125,7 @@ export function downloadXsltTransactionExport(): wdp.Promise<IExcelRow[]> {
   const respP = makeRequest(exportServiceUrl, true);
   const workbookP = respP.then(parseXlsxDocument);
   return workbookP.then((workbook) => {
-    const sheetData = workbook.getWorksheet(1).getSheetValues();
+    const sheetData = (<any>(workbook.getWorksheet(1))).getSheetValues();
     return sheetData.map(data => <IExcelRow>{
       SysID: data[1],
       DateActivation: dateParts(data[2]),

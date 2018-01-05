@@ -3,7 +3,7 @@ import { Config, ProtractorBy, browser } from 'protractor';
 // import { PluginConfig } from 'protractor/built/plugins';
 
 const optionDefinitions = [
-    { name: 'parallel', type: Boolean, defaultOption: false },
+  { name: 'parallel', type: Boolean, defaultOption: false },
 ];
 
 const cmdOpts = commandLineArgs(optionDefinitions);
@@ -46,64 +46,61 @@ declare const by: ProtractorBy;
 const webdriverFolder = 'node_modules/protractor/node_modules/webdriver-manager/selenium/';
 
 export const config: Config = {
-    jvmArgs: [
-        // '-Dwebdriver.ie.driver=${webdriverFolder}IEDriverServer3.4.0.exe',
-        `-Dwebdriver.gecko.driver=${webdriverFolder}geckodriver-v0.16.1`,
-    ],
-    baseUrl: 'http://localhost:8080',
-    // baseUrl: 'http://navitas-fitness-aarhus.appspot.com/',
-    // directConnect: true,
-    framework: 'jasmine2',
-    jasmineNodeOpts: {
-        defaultTimeoutInterval: timeoutMils,
-        realtimeFailure: true,
-    },
-    disableChecks: true,
-    allScriptsTimeout: 60000,
-    multiCapabilities: [{
-        browserName: 'chrome',
-        maxInstances: 4,
-        shardTestFiles: cmdOpts.parallel,
-        // }, {
-        // browserName: 'edge',
-        // maxInstances: 1,
-        // shardTestFiles: cmdOpts.parallel,
-        // }, {
-        // browserName: 'internet explorer',
-        // maxInstances: 1,
-        // shardTestFiles: cmdOpts.parallel,
-        // }, {
-        //     browserName: 'firefox',
-        //     maxInstances: 3,
-        //     marionette: true,
-        //     shardTestFiles: cmdOpts.parallel,
-    }],
-    onPrepare: () => {
-
-        const disableNgAnimate = () => {
-            angular.module('disableNgAnimate', []).run(['$animate', ($animate) => {
-                $animate.enabled(false);
-            }]);
-        };
-        browser.addMockModule('disableNgAnimate', disableNgAnimate);
-
-        by.addLocator('linkUiSref', (toState: string, optParentElement: HTMLElement) => {
-            const using = optParentElement || document;
-            const tabs = using.querySelectorAll('md-tab-item');
-
-            for (let i = 0; tabs.length > i; i++) {
-                const uiRef = angular.element(tabs[i]).scope().tab.element.attr('ui-sref');
-                if (uiRef === toState) {
-                    return tabs[i];
-                }
-            }
-
-            return null;
-        });
-    },
-    // plugins: [utilsPlugin],
-    // seleniumArgs: [
-    // '-Dwebdriver.gecko.driver=./node_modules/protractor/node_modules/webdriver-manager/selenium/geckodriver-v0.11.1',
-    // ],
-    specs: ['specs/*.js'],
+  jvmArgs: [
+    // '-Dwebdriver.ie.driver=${webdriverFolder}IEDriverServer3.4.0.exe',
+    `-Dwebdriver.gecko.driver=${webdriverFolder}geckodriver-v0.16.1`,
+  ],
+  baseUrl: 'http://localhost:8080',
+  // baseUrl: 'http://navitas-fitness-aarhus.appspot.com/',
+  // directConnect: true,
+  framework: 'jasmine2',
+  jasmineNodeOpts: {
+    defaultTimeoutInterval: timeoutMils,
+    realtimeFailure: true,
+  },
+  disableChecks: true,
+  allScriptsTimeout: 60000,
+  multiCapabilities: [{
+    browserName: 'chrome',
+    maxInstances: 4,
+    shardTestFiles: cmdOpts.parallel,
+    chromeOptions: { args: ["--headless", "--disable-gpu", "--window-size=800,600"] },
+    // }, {
+    // browserName: 'edge',
+    // maxInstances: 1,
+    // shardTestFiles: cmdOpts.parallel,
+    // }, {
+    // browserName: 'internet explorer',
+    // maxInstances: 1,
+    // shardTestFiles: cmdOpts.parallel,
+    // }, {
+    //     browserName: 'firefox',
+    //     maxInstances: 3,
+    //     marionette: true,
+    //     shardTestFiles: cmdOpts.parallel,
+  }],
+  onPrepare: () => {
+    const disableNgAnimate = () => {
+      angular.module('disableNgAnimate', []).run(['$animate', ($animate) => {
+        $animate.enabled(false);
+      }]);
+    };
+    browser.addMockModule('disableNgAnimate', disableNgAnimate);
+    by.addLocator('linkUiSref', (toState: string, optParentElement: HTMLElement) => {
+      const using = optParentElement || document;
+      const tabs = using.querySelectorAll('md-tab-item');
+      for (let i = 0; tabs.length > i; i++) {
+        const uiRef = angular.element(tabs[i]).scope().tab.element.attr('ui-sref');
+        if (uiRef === toState) {
+          return tabs[i];
+        }
+      }
+      return null;
+    });
+  },
+  // plugins: [utilsPlugin],
+  // seleniumArgs: [
+  // '-Dwebdriver.gecko.driver=./node_modules/protractor/node_modules/webdriver-manager/selenium/geckodriver-v0.11.1',
+  // ],
+  specs: ['specs/*.js'],
 };
