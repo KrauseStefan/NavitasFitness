@@ -17,72 +17,75 @@ describe('Frontpage tests', () => {
 
   afterEach(() => verifyBrowserLog());
 
-  it('[META] load page', () => {
-    browser.get('/');
+  it('[META] load page', async () => {
+    await browser.get('/');
   });
 
-  it('[META] create user', () => {
-    new DataStoreManipulator().removeUserByEmail(userInfo.email).destroy();
+  it('[META] create user', async () => {
+    await DataStoreManipulator.init();
+    await DataStoreManipulator.removeUserByEmail(userInfo.email);
+    await DataStoreManipulator.destroy();
 
-    const regDialog = NavigationPageObject.openRegistrationDialog();
+    const regDialog = await NavigationPageObject.openRegistrationDialog();
 
-    regDialog.fillForm({
+    await regDialog.fillForm({
       name: userInfo.name,
       email: userInfo.email,
       accessId: userInfo.accessId,
       password: userInfo.password,
       passwordRepeat: userInfo.password,
     });
-    regDialog.buttonRegister.click();
-    AlerDialogPageObject.mainButton.click();
+
+    await regDialog.buttonRegister.click();
+    await AlerDialogPageObject.mainButton.click();
   });
 
-  it('should not be able to click edit before being logged in', () => {
-    expect(FrontPageObject.adminEditBtn.isPresent()).toBe(false);
+  it('should not be able to click edit before being logged in', async () => {
+    await expect(FrontPageObject.adminEditBtn.isPresent()).toBe(false);
   });
 
-  it('[META] login user', () => {
-    const loginDialog = NavigationPageObject.openLoginDialog();
-    DataStoreManipulator.sendValidationRequest(userInfo.email);
+  it('[META] login user', async () => {
+    const loginDialog = await NavigationPageObject.openLoginDialog();
+    await DataStoreManipulator.sendValidationRequest(userInfo.email);
 
-    loginDialog.fillForm({
+    await loginDialog.fillForm({
       accessId: userInfo.accessId,
       password: userInfo.password,
     });
 
-    loginDialog.loginButton.click();
+    await loginDialog.loginButton.click();
   });
 
-  it('should not be able to click edit if logged in with a normal user', () => {
-    expect(FrontPageObject.adminEditBtn.isPresent()).toBe(false);
+  it('should not be able to click edit if logged in with a normal user', async () => {
+    await expect(FrontPageObject.adminEditBtn.isPresent()).toBe(false);
   });
 
-  it('[META] make user admin', () => {
-    new DataStoreManipulator().makeUserAdmin(userInfo.email).destroy();
-    browser.refresh();
+  it('[META] make user admin', async () => {
+    await DataStoreManipulator.init();
+    await DataStoreManipulator.makeUserAdmin(userInfo.email);
+    await DataStoreManipulator.destroy();
+    await browser.refresh();
   });
 
-  it('should be able to enter edit mode as admin', () => {
+  it('should be able to enter edit mode as admin', async () => {
     const testText = 'This is a test message';
-    const textPromise = FrontPageObject.editableArea.getText();
+    const text = await FrontPageObject.editableArea.getText();
 
-    FrontPageObject.adminEditBtn.click();
+    await FrontPageObject.adminEditBtn.click();
 
-    textPromise.then(text => {
-      const backspaces = new Array(text.length + 1).join(Key.DELETE);
-      FrontPageObject.editableArea.sendKeys(backspaces);
-    });
+    const backspaces = new Array(text.length + 1).join(Key.DELETE);
+    await FrontPageObject.editableArea.sendKeys(backspaces);
 
-    FrontPageObject.editableArea.sendKeys(testText);
+    await FrontPageObject.editableArea.sendKeys(testText);
 
-    FrontPageObject.adminSaveBtn.click();
+    await FrontPageObject.adminSaveBtn.click();
 
-    expect(FrontPageObject.editableArea.getText()).toEqual(testText);
+    await expect(FrontPageObject.editableArea.getText()).toEqual(testText);
   });
 
-  it('[META] user admin', () => {
-    NavigationPageObject.menuButton.click();
-    NavigationPageObject.menuLogout.click();
+  it('[META] user admin', async () => {
+    await NavigationPageObject.menuButton.click();
+    await NavigationPageObject.menuLogout.click();
   });
 
 });

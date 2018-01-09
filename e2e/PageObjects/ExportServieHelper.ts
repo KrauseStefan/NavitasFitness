@@ -20,13 +20,12 @@ export interface IExcelRow {
   Comments: string;
 }
 
-function getSessionCookie(): wdp.Promise<string> {
-  return browser
+async function getSessionCookie(): wdp.Promise<string> {
+  const cookie = await browser
     .manage()
-    .getCookie(sessionCoockieKey)
-    .then((cookie) => {
-      return `${sessionCoockieKey}=${cookie.value}`;
-    });
+    .getCookie(sessionCoockieKey);
+
+  return `${sessionCoockieKey}=${cookie.value}`;
 }
 
 export function parseUrlToReqOj(url: string): http.RequestOptions {
@@ -40,28 +39,27 @@ export function parseUrlToReqOj(url: string): http.RequestOptions {
   };
 }
 
-function sendRequstWithCookie(url: string, Cookie?: string) {
+function sendRequstWithCookie(url: string, Cookie?: string): Promise<http.IncomingMessage> {
   const options = parseUrlToReqOj(url);
   options.headers = Cookie ? { Cookie } : {};
   options.method = 'get';
 
-  return new wdp.Promise<http.IncomingMessage>((resolve, reject) => {
+  return new Promise<http.IncomingMessage>((resolve, reject) => {
     const req = http.request(options, resolve);
     req.end();
   });
 }
 
-export function makeRequest(url: string, useSession: boolean = false): wdp.Promise<http.IncomingMessage> {
+export async function makeRequest(url: string, useSession: boolean = false): Promise<http.IncomingMessage> {
   if (useSession) {
-    return getSessionCookie().then((cookie) => {
-      return sendRequstWithCookie(url, cookie);
-    });
+    const cookie = await getSessionCookie();
+    return await sendRequstWithCookie(url, cookie);
   } else {
-    return sendRequstWithCookie(url);
+    return await sendRequstWithCookie(url);
   }
 }
 
-export function sendPayment(custom: string, paymentDate: string): wdp.Promise<string> {
+export async function sendPayment(custom: string, paymentDate: string): Promise<string> {
   const dataData = {
     cmd: '_s-xclick',
     custom,
@@ -79,7 +77,7 @@ export function sendPayment(custom: string, paymentDate: string): wdp.Promise<st
     'Content-Length': dataStr.length,
   };
 
-  return new wdp.Promise<string>((resolve, reject) => {
+  const data = await new Promise<string>((resolve, reject) => {
     let returnedData = '';
     let successStatus = false;
 
@@ -101,12 +99,9 @@ export function sendPayment(custom: string, paymentDate: string): wdp.Promise<st
     });
     req.write(dataStr);
     req.end();
-  }).then((data) => {
-    return browser.sleep(500).then(() => {
-      return data;
-    });
   });
 
+  return data;
 }
 
 function parseXlsxDocument(resp: http.IncomingMessage): wdp.Promise<Workbook> {
@@ -114,26 +109,26 @@ function parseXlsxDocument(resp: http.IncomingMessage): wdp.Promise<Workbook> {
 
   const inputStream = workbook.xlsx.createInputStream();
   resp.pipe(inputStream);
-  return new wdp.Promise<Workbook>((resolve, reject) => {
+  return new Promise<Workbook>((resolve, reject) => {
     inputStream.on('done', (listener) => {
       resolve(workbook);
     });
   });
 }
 
-export function downloadXsltTransactionExport(): wdp.Promise<IExcelRow[]> {
-  const respP = makeRequest(exportServiceUrl, true);
-  const workbookP = respP.then(parseXlsxDocument);
-  return workbookP.then((workbook) => {
-    const sheetData = (<any>(workbook.getWorksheet(1))).getSheetValues();
-    return sheetData.map(data => <IExcelRow>{
-      SysID: data[1],
-      DateActivation: dateParts(data[2]),
-      SysID2: data[3],
-      DateStart: dateParts(data[4]),
-      DateEnd: dateParts(data[5]),
-      TimeScheme: data[6],
-      Comments: data[7],
-    });
+export async function downloadXsltTransactionExport(): Promise<IExcelRow[]> {
+  const resp = await makeRequest(exportServiceUrl, true);
+
+  const workbook = await parseXlsxDocument(resp);
+
+  const sheetData = (<any>(workbook.getWorksheet(1))).getSheetValues();
+  return sheetData.map(data => <IExcelRow>{
+    SysID: data[1],
+    DateActivation: dateParts(data[2]),
+    SysID2: data[3],
+    DateStart: dateParts(data[4]),
+    DateEnd: dateParts(data[5]),
+    TimeScheme: data[6],
+    Comments: data[7],
   });
 }

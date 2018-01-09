@@ -14,18 +14,18 @@ import {
   TransactionTableCells,
 } from '../PageObjects/StatusPageObject';
 
-export function getPageDatesAsExportedRow(id: string, email: string): wdp.Promise<IExcelRow> {
-  return pageObject.getPageDates().then((dates) => {
-    return <IExcelRow>{
-      SysID: id,
-      DateActivation: dates.firstTrxDate,
-      SysID2: id,
-      DateStart: dates.firstTrxDate,
-      DateEnd: dates.validUntil,
-      TimeScheme: "24 Timers",
-      Comments: email,
-    };
-  });
+export async function getPageDatesAsExportedRow(id: string, email: string): wdp.Promise<IExcelRow> {
+  const dates = await pageObject.getPageDates();
+
+  return <IExcelRow>{
+    SysID: id,
+    DateActivation: dates.firstTrxDate,
+    SysID2: id,
+    DateStart: dates.firstTrxDate,
+    DateEnd: dates.validUntil,
+    TimeScheme: "24 Timers",
+    Comments: email,
+  };
 }
 
 describe('Payments', () => {
@@ -41,69 +41,73 @@ describe('Payments', () => {
 
   describe('StatusPage', () => {
 
-    it('[META] create user', () => {
-      new DataStoreManipulator().removeUserByEmail(userInfo.email).destroy();
-      browser.get('/');
+    it('[META] create user', async () => {
+      await browser.get('/');
+      await DataStoreManipulator.init();
+      await DataStoreManipulator.removeUserByEmail(userInfo.email);
+      await DataStoreManipulator.destroy();
 
-      const regDialog = NavigationPageObject.openRegistrationDialog();
+      const regDialog = await NavigationPageObject.openRegistrationDialog();
 
-      regDialog.fillForm({
+      await regDialog.fillForm({
         name: userInfo.name,
         email: userInfo.email,
         accessId: userInfo.accessId,
         password: userInfo.password,
         passwordRepeat: userInfo.password,
       });
-      regDialog.buttonRegister.click();
-      AlerDialogPageObject.mainButton.click();
+
+      await regDialog.buttonRegister.click();
+      await AlerDialogPageObject.mainButton.click();
+      await expect(regDialog.formContainer.isPresent()).toBe(false, 'Registration dialog was not closed');
     });
 
-    it('should not be able to click status before being logged in', () => {
-      NavigationPageObject.statusPageTab.click()
+    it('should not be able to click status before being logged in', async () => {
+      await NavigationPageObject.statusPageTab.click()
         .then(() => fail(), () => {/* */ });
     });
 
-    it('[META] login user', () => {
-      const loginDialog = NavigationPageObject.openLoginDialog();
-      DataStoreManipulator.sendValidationRequest(userInfo.email);
+    it('[META] login user', async () => {
+      const loginDialog = await NavigationPageObject.openLoginDialog();
+      await DataStoreManipulator.sendValidationRequest(userInfo.email);
 
-      loginDialog.fillForm({
+      await loginDialog.fillForm({
         accessId: userInfo.accessId,
         password: userInfo.password,
       });
 
-      loginDialog.loginButton.click();
+      await loginDialog.loginButton.click();
     });
 
-    it('should be able to click status when logged in', () => {
-      NavigationPageObject.statusPageTab.click();
-      expect(browser.getCurrentUrl()).toContain('status');
+    it('should be able to click status when logged in', async () => {
+      await NavigationPageObject.statusPageTab.click();
+      await expect(browser.getCurrentUrl()).toContain('status');
     });
 
-    it('should report an inactive subscription when no payment is made', () => {
-      expect(pageObject.getStatusMsgFieldValue()).toEqual('inActive');
-      expect(pageObject.getValidUntilFieldValue()).toEqual('-');
+    it('should report an inactive subscription when no payment is made', async () => {
+      await expect(pageObject.getStatusMsgFieldValue()).toEqual('inActive');
+      await expect(pageObject.getValidUntilFieldValue()).toEqual('-');
     });
 
-    it('should not be able to process a payment before terms has been accepted', () => {
-      pageObject.waitForPaypalSimBtn();
-      NavigationPageObject.statusPageTab.click();
+    it('should not be able to process a payment before terms has been accepted', async () => {
+      await pageObject.waitForPaypalSimBtn();
+      await NavigationPageObject.statusPageTab.click();
 
-      expect(pageObject.paypalBtn.isEnabled()).toBe(false);
+      await expect(pageObject.paypalBtn.isEnabled()).toBe(false);
     });
 
-    it('should be able to process a payment', () => {
-      pageObject.waitForPaypalSimBtn();
-      pageObject.termsAcceptedChkBx.click();
-      pageObject.triggerPaypalPayment();
-      NavigationPageObject.statusPageTab.click();
-      browser.wait(() => {
+    it('should be able to process a payment', async () => {
+      await pageObject.waitForPaypalSimBtn();
+      await pageObject.termsAcceptedChkBx.click();
+      await pageObject.triggerPaypalPayment();
+      await NavigationPageObject.statusPageTab.click();
+      await browser.wait(() => {
         return pageObject.getTableCellText(1, TransactionTableCells.Status)
           .then((status) => status === 'Completed', () => false);
       }, 10000, 'Payment could not be compleatly processed');
     });
 
-    it('should show subscription active when show subscription end date when subscribed', () => {
+    it('should show subscription active when show subscription end date when subscribed', async () => {
       function diffMonth(start: IParsedDate, end: IParsedDate): number {
         if (start.year === end.year) {
           return end.month - start.month;
@@ -113,58 +117,58 @@ describe('Payments', () => {
         throw 'Date invalid';
       }
 
-      const monthDiffP = pageObject.getPageDates()
+      const monthDiff = await pageObject.getPageDates()
         .then(dates => diffMonth(dates.firstTrxDate, dates.validUntil));
 
-      expect(pageObject.getStatusMsgFieldValue()).toEqual('active');
-      expect(monthDiffP).toEqual(6);
+      await expect(pageObject.getStatusMsgFieldValue()).toEqual('active');
+      await expect(monthDiff).toEqual(6);
     });
   });
 
   describe('xlsx export', () => {
 
-    it('should return 401 if not logged to export data', () => {
+    it('should return 401 if not logged to export data', async () => {
       const includeLoginSession = false;
-      const statusCodeP = makeRequest(exportServiceUrl, includeLoginSession)
-        .then((resp) => resp.statusCode);
+      const resp = await makeRequest(exportServiceUrl, includeLoginSession);
 
-      expect(statusCodeP).toBe(401);
+      await expect(resp.statusCode).toBe(401);
     });
 
-    it('should return 401 if user does not have admin rights', () => {
+    it('should return 401 if user does not have admin rights', async () => {
       const includeLoginSession = true;
-      const statusCodeP = makeRequest(exportServiceUrl, includeLoginSession)
-        .then((resp) => resp.statusCode);
+      const resp = await makeRequest(exportServiceUrl, includeLoginSession);
 
-      expect(statusCodeP).toBe(401);
+      await expect(resp.statusCode).toBe(401);
     });
 
-    it('should be possible to download an xlsx with active subscriptions', () => {
-      new DataStoreManipulator().makeUserAdmin(userInfo.email).destroy();
+    it('should be possible to download an xlsx with active subscriptions', async () => {
+      await DataStoreManipulator.init();
+      await DataStoreManipulator.makeUserAdmin(userInfo.email);
+      await DataStoreManipulator.destroy();
 
-      const pageDatesP = getPageDatesAsExportedRow(userInfo.accessId, userInfo.email);
-      const userRowsP = downloadXsltTransactionExport()
-        .then(rows => rows.filter(row => row.Comments === userInfo.email));
-      const userRowP = userRowsP.then(u => u[0]);
+      const pageDates = await getPageDatesAsExportedRow(userInfo.accessId, userInfo.email);
+      const userRows = (await downloadXsltTransactionExport())
+        .filter(row => row.Comments === userInfo.email);
+      const userRow = userRows[0];
 
-      expect(userRowsP.then(u => u.length)).toBe(1);
-      expect(pageDatesP).toEqual(userRowP);
+      await expect(userRows.length).toBe(1);
+      await expect(pageDates).toEqual(userRow);
     });
 
-    it('test', () => {
+    it('test', async () => {
       // payment_date: '00:40:46 Jan 01, 2018 CET',
-      sendPayment(userInfo.email, '15:40:46 Dec 31, 2017 PST');
+      await sendPayment(userInfo.email, '15:40:46 Dec 31, 2017 PST');
 
-      NavigationPageObject.mainPageTab.click();
-      NavigationPageObject.statusPageTab.click();
+      await NavigationPageObject.mainPageTab.click();
+      await NavigationPageObject.statusPageTab.click();
 
-      const pageDatesP = getPageDatesAsExportedRow(userInfo.accessId, userInfo.email);
-      const userRowsP = downloadXsltTransactionExport()
-        .then(rows => rows.filter(row => row.Comments === userInfo.email));
-      const userRowP = userRowsP.then(u => u[0]);
+      const pageDates = await getPageDatesAsExportedRow(userInfo.accessId, userInfo.email);
+      const userRows = (await downloadXsltTransactionExport())
+        .filter(row => row.Comments === userInfo.email);
+      const userRow = userRows[0];
 
-      expect(userRowsP.then(u => u.length)).toBe(1);
-      expect(pageDatesP).toEqual(userRowP);
+      expect(userRows.length).toBe(1);
+      expect(pageDates).toEqual(userRow);
     });
   });
 });

@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "e2e"
+		},
+		{
+			"path": "websrc"
+		},
+		{
+			"path": "ipn-simulator"
+		}
+	],
+	"settings": {
+		"typescript.tsdk": "./node_modules/typescript/lib/"
+	}
+}

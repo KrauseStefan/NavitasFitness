@@ -1,39 +1,40 @@
 import { retryCall } from '../utility';
 import { $, ElementFinder } from 'protractor';
-import { promise as wdp } from 'selenium-webdriver';
-
 export type formNameValuesMap = { [name: string]: string }
 
 export class DialogPageObject {
 
-  private static fillField(field: ElementFinder, value): wdp.Promise<string> {
-    field.clear();
-    field.sendKeys(value);
+  private static async fillField(field: ElementFinder, value: string): Promise<string> {
+    await field.clear();
+    await field.sendKeys(value);
 
-    return field.getAttribute('value').then(text => {
-      if (value === text) {
-        return wdp.fullyResolved(value);
-      }
+    return new Promise<string>((resolve, reject) => {
+      field.getAttribute('value').then(text => {
+        if (value === text) {
+          return resolve(value);
+        }
 
-      return wdp.rejected(`expected value: "${value}" did not equal field value: "${text}"`);
+        return reject(`expected value: "${value}" did not equal field value: "${text}"`);
+      }, reject);
     });
   }
 
   public formContainer = $('md-dialog');
 
-  public fillForm(formValues: formNameValuesMap) {
-    Object.keys(formValues).forEach(name => {
+  public fillForm(formValues: formNameValuesMap): Promise<void> {
+    const promises = Object.keys(formValues).map(name => {
       const field = this.formContainer.$(`input[name="${name}"]`);
       // Sometimes form fields fail to sendKeys (one might be missing)
       // https://github.com/angular/protractor/issues/698
-      retryCall(() => DialogPageObject.fillField(field, formValues[name]), 3);
+      return retryCall(() => DialogPageObject.fillField(field, formValues[name]), 3);
     });
+    return (<any>Promise.all(promises));
   }
 
-  public safeClick(element: ElementFinder): wdp.Promise<any> {
-    const resolved = wdp.fullyResolved(null);
-    return element.isDisplayed().then<any>((isDisplayed) => {
+  public safeClick(element: ElementFinder): Promise<any> {
+    const resolved = Promise.resolve(null);
+    return Promise.resolve(element.isDisplayed().then<any>((isDisplayed) => {
       return !isDisplayed ? resolved : element.click();
-    }, () => {/* */ });
+    }, () => {/* */ }));
   }
 }

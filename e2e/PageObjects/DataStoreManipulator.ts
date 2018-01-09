@@ -1,4 +1,4 @@
-import { retryCall } from '../utility';
+import { retryCall, waitForPageToLoad } from '../utility';
 import * as http from 'http';
 import { ElementFinder, ProtractorBrowser, browser as mainBrowser, by } from 'protractor';
 import { promise as wdp } from 'selenium-webdriver';
@@ -11,58 +11,50 @@ const resetSecretCol = 11;
 
 export class DataStoreManipulator {
 
-  public static sendValidationRequest(email: string): wdp.Promise<void> {
-    const dataStoreManipulator = new DataStoreManipulator();
-    const key = dataStoreManipulator.getUserEntityIdFromEmail(email);
-    dataStoreManipulator.destroy();
+  public static async sendValidationRequest(email: string): Promise<void> {
+    await DataStoreManipulator.init();
+    const key = await DataStoreManipulator.getUserEntityIdFromEmail(email);
+    await DataStoreManipulator.destroy();
 
-    return DataStoreManipulator.sendValidationRequestFromKey(key);
+    await DataStoreManipulator.sendValidationRequestFromKey(key);
   }
 
-  public static sendValidationRequestFromKey(key: wdp.Promise<string>): wdp.Promise<void> {
+  public static sendValidationRequestFromKey(key: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const url = '/rest/user/verify?code=' + key;
+      return http.get({
+        port: '8080',
+        path: url,
+      }, (response: http.ClientResponse) => {
+        const location = response.headers.location;
+        if (location && location.includes('Verified=true')) {
+          resolve();
+          return;
+        }
 
-    return key.then((keyStr) => {
-      return new wdp.Promise<void>((resolve, reject) => {
-        const url = '/rest/user/verify?code=' + keyStr;
-        return http.get({
-          port: '8080',
-          path: url,
-        }, (response: http.ClientResponse) => {
-          if (response.headers['location'].includes('Verified=true')) {
-            resolve(void {});
-          } else {
-            reject(void {});
-          }
-        });
+        reject();
       });
-
     });
-
   }
 
-  private deleteBtn: ElementFinder;
+  public static async init(): Promise<void> {
+    browser = await mainBrowser.forkNewDriverInstance(false, false, false);
+    await browser.waitForAngularEnabled(false);
+    await browser.get('http://localhost:8000/datastore?kind=User');
+    await browser.ready;
 
-  constructor() {
-    // mainBrowser.waitForAngular();
-    browser = mainBrowser.forkNewDriverInstance(false, false, false);
-    browser.ignoreSynchronization = true;
-    browser.get('http://localhost:8000/datastore?kind=User');
-    browser.ready.then(() => {
-      // Bug workaround: syncronisation is reenabled when ready event is fired
-      browser.ignoreSynchronization = true;
-    });
-    browser.sleep(200);
+    await browser.waitForAngularEnabled(false);
 
-    this.deleteBtn = browser.$('#delete_button');
+    this.deleteBtn = await browser.$('#delete_button');
   }
 
-  public destroy() {
-    browser.sleep(200);
-    browser.close();
-    browser.quit();
+  public static async destroy() {
+    await waitForPageToLoad();
+    await browser.close();
+    await browser.quit();
   }
 
-  public getUserEntityIdFromEmail(email: string): wdp.Promise<string> {
+  public static getUserEntityIdFromEmail(email: string): wdp.Promise<string> {
     const queryStr = `
       const row = $('.ae-table.ae-settings-block tr')
         .slice(1)
@@ -84,7 +76,7 @@ export class DataStoreManipulator {
     });
   }
 
-  public getUserEntityResetSecretFromEmail(email: string): wdp.Promise<string> {
+  public static getUserEntityResetSecretFromEmail(email: string): wdp.Promise<string> {
     const queryStr = `
       const row = $('.ae-table.ae-settings-block tr')
         .slice(1)
@@ -100,48 +92,45 @@ export class DataStoreManipulator {
       if (secret) {
         return secret;
       }
-      // console.log('failed script:', queryStr);
+
       throw `Unable to lookup reset secret, email used: ${email}`;
     });
   }
 
-  public removeUserByAccessId(accessId: string): DataStoreManipulator {
-    this.selecteItem(accessIdCol, accessId);
-    this.deleteSelected();
-
-    return this;
+  public static async removeUserByAccessId(accessId: string): Promise<void> {
+    const elementSelected = await DataStoreManipulator.selecteItem(accessIdCol, accessId);
+    if (elementSelected) {
+      await DataStoreManipulator.deleteSelected();
+    }
   }
 
-  public removeUserByEmail(email: string): DataStoreManipulator {
-    this.selecteItem(emailCol, email);
-    this.deleteSelected();
+  public static async removeUserByEmail(email: string): Promise<void> {
+    const elementSelected = await DataStoreManipulator.selecteItem(emailCol, email);
 
-    return this;
+    if (elementSelected) {
+      await DataStoreManipulator.deleteSelected();
+    }
   }
 
-  public makeUserAdmin(email: string): DataStoreManipulator {
-    this.openItem(emailCol, email);
+  public static async makeUserAdmin(email: string): Promise<void> {
+    await DataStoreManipulator.openItem(emailCol, email);
 
     const selectAdmin = `document.querySelector('select[name="bool|IsAdmin"]').value = 1;`;
-    browser.driver.executeScript(selectAdmin);
-    browser.$('input[value="Save Changes"]').click();
-    return this;
+    await browser.driver.executeScript(selectAdmin);
+    await browser.$('input[value="Save Changes"]').click();
   }
 
-  private deleteSelected() {
-    this.deleteBtn.isPresent()
-      .then(isPresent => isPresent ? this.deleteBtn.isEnabled() : wdp.fullyResolved<boolean>(false))
-      .then(isEnabled => {
-        if (isEnabled) {
-          this.deleteBtn.click();
-          return retryCall(() => browser.switchTo().alert().accept(), 10);
-        } else {
-          return wdp.fullyResolved<void>({});
-        }
-      });
+  private static deleteBtn: ElementFinder;
+
+  private static async deleteSelected(): Promise<void> {
+    await this.deleteBtn.click();
+
+    await retryCall(() => {
+      return browser.switchTo().alert().accept();
+    }, 10);
   }
 
-  private openItem(column: number, value: string) {
+  private static async openItem(column: number, value: string): Promise<void> {
     const clientSideScript = `
       const row = $('.ae-table.ae-settings-block tr')
         .slice(1)
@@ -149,17 +138,16 @@ export class DataStoreManipulator {
 
       return row.find('a')[0];
     `;
-    const itemLink = browser.element(by.js(clientSideScript));
-    return itemLink.isPresent().then(isPresent => {
-      if (isPresent) {
-        return itemLink.click();
-      }
 
-      return wdp.fullyResolved<void>({});
-    });
+    const itemLink = await browser.element(by.js(clientSideScript));
+    const isPresent = await itemLink.isPresent();
+
+    if (isPresent) {
+      await itemLink.click();
+    }
   }
 
-  private selecteItem(column: number, value: string) {
+  private static async selecteItem(column: number, value: string): Promise<boolean> {
     const clientSideScript = `
       const row = $('.ae-table.ae-settings-block tr')
         .slice(1)
@@ -167,13 +155,12 @@ export class DataStoreManipulator {
 
       return row.find('input[type="checkbox"]');
     `;
-    const itemChkBox = browser.element(by.js(clientSideScript));
-    return itemChkBox.isPresent().then(isPresent => {
-      if (isPresent) {
-        return itemChkBox.click();
-      }
-
-      return wdp.fullyResolved<void>({});
-    });
+    const itemChkBox = await browser.element(by.js(clientSideScript));
+    const isPresent = await itemChkBox.isPresent();
+    if (isPresent) {
+      await itemChkBox.click();
+      return true;
+    }
+    return false;
   }
 }

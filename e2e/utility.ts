@@ -11,7 +11,7 @@ export interface IBrowserLog {
   type: string;
 }
 
-export function verifyBrowserLog(expectedEntries: string[] = []) {
+export function verifyBrowserLog(expectedEntries: string[] = []): wdp.Promise<void> {
   return (<any>browser).manage().logs().get('browser').then((browserLogs: IBrowserLog[]) => {
 
     const filteredLog = browserLogs.filter((logEntry) => {
@@ -53,12 +53,13 @@ export function waitForPageToLoad(): wdp.Promise<{}> {
       callback(false);
     });
   }
+  console.log('waitForPageToLoad');
 
   return browser.wait(hasPageLoaded, 10000, 'Page did not load');
 }
 
-export function retryCall<T>(fn: () => wdp.Promise<T>, count: number): wdp.Promise<T> {
-  return new wdp.Promise((resolve, reject) => {
+export function retryCall<T>(fn: () => wdp.IThenable<T>, count: number): Promise<T> {
+  return new Promise((resolve, reject) => {
     function doCall(actualCount: number) {
       fn().then((value) => resolve(value), (error) => {
         if (count > 0) {

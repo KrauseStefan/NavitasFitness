@@ -194,7 +194,7 @@ function sendIpnDataMessage(clientReq: IncomingMessage, serverRes: ServerRespons
 
 
 const paypalSampleIpnMsg = {
-  "mc_gross": "300.00",
+  "mc_gross": "315.00",
   "protection_eligibility": "Eligible",
   "address_status": "confirmed",
   "payer_id": "LPLWNMTBWMFAY",

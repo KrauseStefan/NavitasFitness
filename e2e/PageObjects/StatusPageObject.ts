@@ -57,22 +57,22 @@ export class StatusPageObject {
     return this.getTableCellText(1, TransactionTableCells.PaymentDate);
   }
 
-  public static waitForPaypalSimBtn() {
+  public static async waitForPaypalSimBtn(): wdp.Promise<void> {
     const btnIsDisplayed = () => StatusPageObject.paypalBtn.isDisplayed();
     return browser.wait(btnIsDisplayed, 5 * 1000, 'Paypall button did not display in time');
   }
 
-  public static triggerPaypalPayment() {
-    browser.waitForAngularEnabled(false);
-    StatusPageObject.paypalBtn.click();
+  public static async triggerPaypalPayment(): Promise<void> {
+    await browser.waitForAngularEnabled(false);
+    await StatusPageObject.paypalBtn.click();
 
-    waitForPageToLoad();
+    await waitForPageToLoad();
 
-    $('a').click();
+    await $('a').click();
 
-    waitForPageToLoad();
+    await waitForPageToLoad();
 
-    return browser.waitForAngularEnabled(true);
+    await browser.waitForAngularEnabled(true);
   }
 
   public static getPageDates() {

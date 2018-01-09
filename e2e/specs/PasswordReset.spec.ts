@@ -6,7 +6,6 @@ import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
 import { verifyBrowserLog } from '../utility';
 import { browser } from 'protractor';
 import { stringify } from 'querystring';
-import { promise as wdp } from 'selenium-webdriver';
 
 describe('Reset password', () => {
 
@@ -20,84 +19,82 @@ describe('Reset password', () => {
 
   afterEach(() => verifyBrowserLog());
 
-  it('[META] create user', () => {
-    new DataStoreManipulator().removeUserByEmail(userInfo.email).destroy();
-    browser.get('/');
+  it('[META] create user', async () => {
+    await DataStoreManipulator.init();
+    await DataStoreManipulator.removeUserByEmail(userInfo.email);
+    await DataStoreManipulator.destroy();
+    await browser.get('/');
 
-    const regDialog = NavigationPageObject.openRegistrationDialog();
+    const regDialog = await NavigationPageObject.openRegistrationDialog();
 
-    regDialog.fillForm({
+    await regDialog.fillForm({
       name: userInfo.name,
       email: userInfo.email,
       accessId: userInfo.accessId,
       password: userInfo.password,
       passwordRepeat: userInfo.password,
     });
-    regDialog.buttonRegister.click();
-    AlerDialogPageObject.mainButton.click();
+    await regDialog.buttonRegister.click();
+    await AlerDialogPageObject.mainButton.click();
   });
 
-  it('should be request a password rest', () => {
-    const loginDialog = NavigationPageObject.openLoginDialog();
-    const resetDialog = loginDialog.openResetForm();
+  it('should be request a password rest', async () => {
+    const loginDialog = await NavigationPageObject.openLoginDialog();
+    const resetDialog = await loginDialog.openResetForm();
 
-    resetDialog.fillForm({
+    await resetDialog.fillForm({
       email: userInfo.email,
     });
 
-    resetDialog.resetButton.click();
-    AlerDialogPageObject.mainButton.click();
+    await resetDialog.resetButton.click();
+    await AlerDialogPageObject.mainButton.click();
   });
 
-  it('should be able to reset password', () => {
-    const ds = new DataStoreManipulator();
+  it('should be able to reset password', async () => {
+    await DataStoreManipulator.init();
 
-    const passwordResetKey = ds.getUserEntityIdFromEmail(userInfo.email);
-    const passwordResetSecret = ds.getUserEntityResetSecretFromEmail(userInfo.email);
+    const passwordResetKeyP = DataStoreManipulator.getUserEntityIdFromEmail(userInfo.email);
+    const passwordResetSecretP = DataStoreManipulator.getUserEntityResetSecretFromEmail(userInfo.email);
 
-    wdp.all([passwordResetKey, passwordResetSecret]).then((array) => {
-      const parms = stringify({
-        passwordResetKey: array[0],
-        passwordResetSecret: array[1],
-      });
-      ds.destroy();
-      browser.get('/main-page/?' + parms);
-      const resetPasswordDialog = new ResetPasswordDialogPageObject();
-      resetPasswordDialog.fillForm({
-        password: newPassword,
-        passwordRepeat: newPassword,
-      });
-
-      resetPasswordDialog.resetButton.click();
+    const [passwordResetKey, passwordResetSecret] = await Promise.all([passwordResetKeyP, passwordResetSecretP]);
+    const parms = stringify({ passwordResetKey, passwordResetSecret });
+    await DataStoreManipulator.destroy();
+    await browser.get('/main-page/?' + parms);
+    const resetPasswordDialog = new ResetPasswordDialogPageObject();
+    await resetPasswordDialog.fillForm({
+      password: newPassword,
+      passwordRepeat: newPassword,
     });
+
+    await resetPasswordDialog.resetButton.click();
   });
 
-  it('should fail login with old password', () => {
-    DataStoreManipulator.sendValidationRequest(userInfo.email);
-    const loginDialog = NavigationPageObject.openLoginDialog();
+  it('should fail login with old password', async () => {
+    await DataStoreManipulator.sendValidationRequest(userInfo.email);
+    const loginDialog = await NavigationPageObject.openLoginDialog();
 
-    loginDialog.fillForm({
+    await loginDialog.fillForm({
       accessId: userInfo.accessId,
       password: userInfo.password,
     });
-    loginDialog.loginButton.click();
+    await loginDialog.loginButton.click();
 
-    expect(loginDialog.formContainer.isDisplayed()).toBe(true);
-    expect(loginDialog.errorCredentialsInvalid.isDisplayed()).toBe(true);
+    await expect(loginDialog.formContainer.isDisplayed()).toBe(true);
+    await expect(loginDialog.errorCredentialsInvalid.isDisplayed()).toBe(true);
 
-    loginDialog.safeClick(loginDialog.cancelButton);
+    await loginDialog.safeClick(loginDialog.cancelButton);
   });
 
-  it('should be able to login with new password', () => {
-    const loginDialog = NavigationPageObject.openLoginDialog();
+  it('should be able to login with new password', async () => {
+    const loginDialog = await NavigationPageObject.openLoginDialog();
 
-    loginDialog.fillForm({
+    await loginDialog.fillForm({
       accessId: userInfo.accessId,
       password: newPassword,
     });
-    loginDialog.loginButton.click();
+    await loginDialog.loginButton.click();
 
-    expect(loginDialog.formContainer.isPresent()).toBe(false);
+    await expect(loginDialog.formContainer.isPresent()).toBe(false);
   });
 
 });
