@@ -5,6 +5,7 @@ import { UserService } from './PageComponents/UserService';
 
 import { AppComponent } from './AppComponent';
 import { CkEditor } from './Components/CkEditor/CkEditor';
+import { AdminPageComponent, adminRouterState } from './PageComponents/AdminPage/AdminPageComponent';
 import { MainPageComponent, mainPageRouterState } from './PageComponents/MainPage/MainPage';
 import { nfResetOnChange } from './PageComponents/RegistrationForm/nfResetOnChange';
 import { nfShouldEqual } from './PageComponents/RegistrationForm/nfShouldEqual';
@@ -42,7 +43,8 @@ export const NavitasFitnessModule = module('NavitasFitness', [
 
     $stateProvider
       .state('MainPage', mainPageRouterState)
-      .state('Status', statusRouterState);
+      .state('Status', statusRouterState)
+      .state('Admin', adminRouterState);
 
     $sceDelegateProvider.resourceUrlWhitelist([
       // Allow same origin resource loads.
@@ -60,6 +62,7 @@ export const NavitasFitnessModule = module('NavitasFitness', [
   .component('ckEditor', CkEditor)
   .component('mainPage', MainPageComponent)
   .component('userStatus', UserStatusComponent)
+  .component('adminPage', AdminPageComponent)
   .component('appComponent', AppComponent)
 
   .directive(nfResetOnChange.name, nfResetOnChange.factory)

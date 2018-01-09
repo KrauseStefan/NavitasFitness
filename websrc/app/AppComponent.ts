@@ -44,7 +44,9 @@ class AppComponentController {
 
   public updateSelectedTab() {
     let index = this.tabs.findIndex(i => i.id === this.$state.current.name);
-    if (!this.tabs[index].disabled()) {
+    if (index === -1) {
+      this.selectedTabIndex = undefined;
+    } else if (!this.tabs[index].disabled()) {
       this.$scope.$applyAsync(() => {
         // Selection cannot be changed while the tab is disabled, it takes a digest cycle before it is unlocked
         this.selectedTabIndex = index;
