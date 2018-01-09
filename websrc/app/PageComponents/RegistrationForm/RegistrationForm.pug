@@ -28,11 +28,10 @@ md-dialog
       md-input-container
         label Repeat Password
         md-icon lock_outline
-        input(name="passwordRepeat", type="password", ng-model="model.passwordRepeat", required, nf-should-equal="model.password")
+        input(name="passwordRepeat", type="password", ng-model="model.passwordRepeat", required, nf-should-equal="password")
         div(ng-messages="RegistrationForm.passwordRepeat.$error", md-auto-hide="true")
           div(ng-message="nfShouldEqual").
             The two passwords do not match
-
 
       md-input-container
         md-tooltip.unrestrict-height(md-direction="Bottom")

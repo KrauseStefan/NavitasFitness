@@ -8,16 +8,18 @@ const directiveName = 'nfShouldEqual';
 
 const directiveFactoryFn: IDirectiveFactory = ($parse: angular.IParseService) => {
   return {
-    link: (scope: IScope, iElement: IJQuery, attr: {[att: string]: string}, ngModel: INgModelController) => {
+    link: (scope: IScope, iElement: IJQuery, attr: { [att: string]: string }, ngModel: INgModelController) => {
       const otherValue = attr[directiveName];
-      const parsedExp = $parse(otherValue);
+      const otherFormCtrl: INgModelController = (<any>ngModel).$$parentForm[otherValue];
+
       ngModel.$validators[directiveName] = (modelValue: string, viewValue: string) => {
-          return modelValue === parsedExp(scope);
+        return modelValue === otherFormCtrl.$viewValue;
       };
 
-      scope.$watch(otherValue, () => {
-          ngModel.$validate();
-      });
+      otherFormCtrl.$validators[directiveName] = (modelValue: string, viewValue: string) => {
+        ngModel.$validate();
+        return true;
+      };
 
     },
     require: 'ngModel',
