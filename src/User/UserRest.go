@@ -59,6 +59,22 @@ func IntegrateRoutes(router *mux.Router) {
 		Name("ChangePassword").
 		HandlerFunc(resetUserPasswordHandler)
 
+	router.
+		Methods("GET").
+		Path(path + "/all").
+		Name("Retrive all users").
+		HandlerFunc(UserService.AsAdmin(getAllUsersHandler))
+
+}
+
+func getAllUsersHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
+	ctx := appengine.NewContext(r)
+
+	users, err := UserService.GetAllUsers(ctx)
+
+	if err == nil {
+		_, err = AppEngineHelper.WriteJSON(w, users)
+	}
 }
 
 type UserSessionDto struct {
