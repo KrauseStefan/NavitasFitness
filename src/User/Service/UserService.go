@@ -65,6 +65,11 @@ func getUserFromSession(ctx context.Context, r *http.Request) (*UserDao.UserDTO,
 	return userDao.GetUserFromSessionUUID(ctx, sessionData.UserKey, sessionData.Uuid)
 }
 
+func GetAllUsers(ctx context.Context) ([]UserDao.UserDTO, error) {
+	_, users, err := userDao.GetAll(ctx)
+	return users, err
+}
+
 // This function tries its best to validate and ensure no user is created with duplicated accessId or email
 func CreateUser(ctx context.Context, r *http.Request, sessionData Auth.SessionData) (*UserDao.UserDTO, error) {
 	user := &UserDao.UserDTO{}
