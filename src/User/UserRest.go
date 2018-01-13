@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/datastore"
+	"google.golang.org/appengine/log"
 
 	"github.com/gorilla/mux"
 
@@ -13,10 +15,10 @@ import (
 	"DAOHelper"
 	"User/Dao"
 	"User/Service"
-	"google.golang.org/appengine/log"
 )
 
 const emailKey = "email"
+const userKey = "userKey"
 
 var accessIdValidator = AccessIdValidator.GetInstance()
 
@@ -34,6 +36,12 @@ func IntegrateRoutes(router *mux.Router) {
 		Path(path + "/transactions").
 		Name("Get Latest Transactions").
 		HandlerFunc(UserService.AsUser(getCurrentUserTransactionsHandler))
+
+	router.
+		Methods("GET").
+		Path(path + "/transactions/{" + userKey + "}").
+		Name("Get Latest Transactions").
+		HandlerFunc(UserService.AsAdmin(getUserTransactionsHandler))
 
 	router.
 		Methods("POST").
@@ -62,18 +70,28 @@ func IntegrateRoutes(router *mux.Router) {
 	router.
 		Methods("GET").
 		Path(path + "/all").
-		Name("Retrive all users").
+		Name("Retrieve all users").
 		HandlerFunc(UserService.AsAdmin(getAllUsersHandler))
 
 }
 
-func getAllUsersHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
+func getAllUsersHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserDTO) {
+	type UserAndKeys struct {
+		Keys []string          `json:"keys"`
+		User []UserDao.UserDTO `json:"users"`
+	}
+
 	ctx := appengine.NewContext(r)
 
-	users, err := UserService.GetAllUsers(ctx)
+	keys, users, err := UserService.GetAllUsers(ctx)
+
+	data := &UserAndKeys{
+		keys,
+		users,
+	}
 
 	if err == nil {
-		_, err = AppEngineHelper.WriteJSON(w, users)
+		_, err = AppEngineHelper.WriteJSON(w, data)
 	}
 }
 
@@ -118,6 +136,22 @@ func getCurrentUserTransactionsHandler(w http.ResponseWriter, r *http.Request, u
 
 	if err == nil {
 		_, err = AppEngineHelper.WriteJSON(w, txnClientDtoList)
+	}
+
+	DAOHelper.ReportError(ctx, w, err)
+}
+
+func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserDTO) {
+	ctx := appengine.NewContext(r)
+
+	userKeyStr := mux.Vars(r)[userKey]
+	userKey, err := datastore.DecodeKey(userKeyStr)
+	if err == nil {
+		txnClientDtoList, err := UserService.GetUserTransactions(ctx, userKey)
+
+		if err == nil {
+			_, err = AppEngineHelper.WriteJSON(w, txnClientDtoList)
+		}
 	}
 
 	DAOHelper.ReportError(ctx, w, err)
