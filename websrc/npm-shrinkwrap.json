@@ -2214,13 +2214,6 @@
       "resolved": "https://registry.npmjs.org/symbol-observable/-/symbol-observable-1.0.1.tgz",
       "integrity": "sha1-g0D8RwLDEi310iKI+IKD9RPT/dQ="
     },
-    "systemjs": {
-      "version": "https://registry.npmjs.org/systemjs/-/systemjs-0.19.46.tgz",
-      "integrity": "sha1-wEV0szNfBSoOPHoA7kGIxuTB444=",
-      "requires": {
-        "when": "https://registry.npmjs.org/when/-/when-3.7.8.tgz"
-      }
-    },
     "tar": {
       "version": "2.2.1",
       "resolved": "https://registry.npmjs.org/tar/-/tar-2.2.1.tgz",
@@ -2429,10 +2422,6 @@
       "version": "https://registry.npmjs.org/void-elements/-/void-elements-2.0.1.tgz",
       "integrity": "sha1-wGavtYK7HLQSjWDqkjkulNXp2+w=",
       "dev": true
-    },
-    "when": {
-      "version": "https://registry.npmjs.org/when/-/when-3.7.8.tgz",
-      "integrity": "sha1-xxMLan6gRpPoQs3J56Hyqjmjn4I="
     },
     "which": {
       "version": "https://registry.npmjs.org/which/-/which-1.2.12.tgz",

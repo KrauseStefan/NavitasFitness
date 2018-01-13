@@ -11,56 +11,7 @@ html
     link(rel="shortcut icon" href="/favicon.ico?v=2")
 
     script(src="/libs/es6-shim/es6-shim.min.js")
-
-    script(src="libs/systemjs/dist/system.src.js")
     script(src="/app.js")
-    script.
-      window.waitForAngular = true;
-      // set our baseURL reference path
-      var angularModules = [
-        'angular-cookies',
-        'angular-aria',
-        'angular-animate',
-        'angular-messages',
-        'angular-material'
-      ];
-      window.CKEDITOR_BASEPATH = '/libs/ckeditor/';
-      var systemjsConfig = {
-        meta: {
-          'angular': { format: 'global', exports: 'angular' },
-          'angular-ui-router': { format: 'global', exports: 'angular', deps: [ 'angular' ] },
-          'rxjs': { format: 'global', exports: 'Rx' },
-        },
-        baseURL: '/',
-        map: {
-          'angular': '/libs/angular/angular.js',
-          'angular-ui-router': '/libs/angular-ui-router/release/angular-ui-router.js',
-          'rxjs': '/libs/rxjs/bundles/Rx.js',
-          'moment': '/libs/moment/min/moment.min.js',
-          'ckeditor': CKEDITOR_BASEPATH +'ckeditor.js',
-        }
-      };
-
-      angularModules.forEach(function(module) {
-          systemjsConfig.meta[module] = { format: 'global', exports: 'angular', deps: [ 'angular' ] };
-          systemjsConfig.map[module] = '/libs/' + module + '/' + module + '.js';
-        });
-
-      System.config(systemjsConfig);
-
-      angularModules.forEach(function(module) {
-        System.import(module);
-      });
-
-      System.import('angular-ui-router');
-      System.import('ckeditor');
-
-      System.import('NavitasFitnessModule').then(function() {
-        angular.element(document).ready(function () {
-          angular.bootstrap(document, ['NavitasFitness']);
-        });
-      });
-
 
     link(href="https://fonts.googleapis.com/icon?family=Material+Icons", rel="stylesheet")
 
