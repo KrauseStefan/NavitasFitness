@@ -7,11 +7,24 @@ export const adminRouterState: angular.ui.IState = {
 
 export class AdminPageCtrl {
 
-  constructor() {
+  public users: any[] = [];
+  public transaction: any = null;
 
-    // Retrive user and their transactions
+  constructor(private $http: ng.IHttpService) {
+    $http.get<any>('/rest/user/all').then((res) => {
+      this.users = res.data.users;
+      res.data.keys.forEach((key: string, i: number) => {
+        this.users[i].key = key;
+      });
+    });
   }
 
+  public getTransactions(key: string) {
+    this.transaction = '';
+    this.$http.get(`/rest/user/transactions/${key}`).then(res => {
+      this.transaction = res.data;
+    });
+  }
 }
 
 export const AdminPageComponent: IComponentOptions = {

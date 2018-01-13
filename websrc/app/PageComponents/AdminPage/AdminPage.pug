@@ -1,3 +1,33 @@
+div
 
+  h3.md-title Users
 
-div Hidden page
+  table.md-whiteframe-2dp(style="padding: 0")
+    thead
+      th Name
+      th Email
+      th AccessId
+      th Transactions
+    tbody
+      tr(ng-repeat="user in $ctrl.users")
+        td {{ user.name }}
+        td {{ user.email }}
+        td {{ user.accessId }}
+        td
+          a(ng-click="$ctrl.getTransactions(user.key)") View
+
+  h3.md-title Transactions
+  table.md-whiteframe-2dp(style="padding: 0")
+    thead
+      th Amount
+      th Currency
+      th Date
+      th status
+      th isActive
+    tbody
+      tr(ng-repeat="txn in $ctrl.transaction")
+        td {{ txn.amount }}
+        td {{ txn.currency }}
+        td {{ txn.paymentDate }}
+        td {{ txn.status }}
+        td {{ txn.isActive }}
