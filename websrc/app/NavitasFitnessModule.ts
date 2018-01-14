@@ -12,6 +12,13 @@ import { UserStatusComponent, statusRouterState } from './PageComponents/UserSta
 
 import { DefaultErrorHandlingModule } from './DefaultErrorHandling';
 
+import 'angular-animate';
+import 'angular-aria';
+import 'angular-cookies';
+import 'angular-material';
+import 'angular-messages';
+import 'angular-ui-router';
+
 import ngMat = ng.material;
 
 export const NavitasFitnessModule = module('NavitasFitness', [

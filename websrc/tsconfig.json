@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "module": "system",
+    "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
     "sourceRoot": "http://localhost:9000/src",
@@ -11,7 +11,7 @@
     "pretty": true,
     "listFiles": false,
     "rootDir": "./app/",
-    "outFile": "../src/NavitasFitness/webapp/app.js",
+    "outDir": "./dist",
     "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true
   },

@@ -1,11 +1,6 @@
 import { IUserDTO, UserService } from '../UserService';
 import * as moment from 'moment';
 
-const momentFn: (
-  inp?: moment.MomentInput, format?: moment.MomentFormatSpecification,
-  language?: string, strict?: boolean
-) => moment.Moment = (<any>moment).default;
-
 export const statusRouterState: angular.ui.IState = {
   template: '<user-status></user-status>',
   url: '/status/',
@@ -83,15 +78,15 @@ class UserStatus {
   public getTransactionsUpdate() {
     this.$http.get<ITransactionEntry[]>('/rest/user/transactions').then((res) => {
       this.model.transactionHistory = res.data.map(txn => {
-        txn.paymentDateParsed = momentFn(txn.paymentDate).format(this.dateFormat);
+        txn.paymentDateParsed = moment(txn.paymentDate).format(this.dateFormat);
         return txn;
       });
       const validTxn = this.model.transactionHistory
-        .filter((i) => momentFn(i.paymentDate).add({ month: 6 }).isSameOrAfter(momentFn()))
-        .sort((a, b) => momentFn(a.paymentDate).unix())[0];
+        .filter((i) => moment(i.paymentDate).add({ month: 6 }).isSameOrAfter(moment()))
+        .sort((a, b) => moment(a.paymentDate).unix())[0];
 
       if (!!validTxn) {
-        this.model.validUntill = momentFn(validTxn.paymentDate)
+        this.model.validUntill = moment(validTxn.paymentDate)
           .add(6, 'months')
           .format(this.dateFormat);
         this.model.statusMsgKey = 'active';

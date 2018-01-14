@@ -1,5 +1,7 @@
 import { IComponentOptions, noop } from 'angular';
 
+import 'ckeditor';
+
 export class CkEditorComponent {
 
   public content: string;
@@ -19,7 +21,7 @@ export class CkEditorComponent {
 
     this.getEditordiv().contentEditable = 'true';
 
-    this.editor = CKEDITOR.inline(<any> this.getEditordiv(), {customConfig: ''});
+    this.editor = CKEDITOR.inline(<any>this.getEditordiv(), { customConfig: '' });
     this.editor.on('change', (event) => {
       this.$scope.$apply(() => this.content = event.editor.getData());
     });
