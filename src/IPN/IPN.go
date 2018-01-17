@@ -132,7 +132,7 @@ func ipnDoResponseTaskHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ipnDoResponseTask(ctx context.Context, r *http.Request) error {
-	const expectedAmount = 315 // kr
+	const expectedAmount = 300 // kr
 
 	content, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -169,7 +169,7 @@ func ipnDoResponseTask(ctx context.Context, r *http.Request) error {
 		log.Debugf(ctx, "IpnSaved: %q", js)
 
 		if savedTransaction.PaymentIsCompleted() {
-			if savedTransaction.GetAmount() != expectedAmount {
+			if savedTransaction.GetAmount() < expectedAmount {
 				log.Warningf(ctx, "The amount for the transaction was wrong, recived %f expected %f", savedTransaction.GetAmount(), expectedAmount)
 			}
 		}
