@@ -53,7 +53,6 @@ export function waitForPageToLoad(): wdp.Promise<{}> {
       callback(false);
     });
   }
-  console.log('waitForPageToLoad');
 
   return browser.wait(hasPageLoaded, 10000, 'Page did not load');
 }
