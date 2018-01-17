@@ -16,13 +16,39 @@ export class AdminPageCtrl {
       res.data.keys.forEach((key: string, i: number) => {
         this.users[i].key = key;
       });
+
+      this.sortBy('accessId');
     });
   }
 
-  public getTransactions(key: string) {
+  public makeUsersUnique(testValue: string) {
+    let prev: any = {};
+    this.users = this.users.reduce((acc, value) => {
+      if (prev[testValue] === value[testValue]) {
+        if (acc.length > 0 && acc[acc.length - 1] !== prev) {
+          acc.push(prev);
+        }
+
+        acc.push(value);
+      }
+
+      prev = value;
+      return acc;
+    }, []);
+
+    return this.users;
+  }
+
+  public sortBy(testValue: string) {
+    this.users = this.users.sort((a, b) => a[testValue].localeCompare(b[testValue]));
+    return this.users;
+  }
+
+  public getTransactions(key: string): ng.IPromise<any> {
     this.transaction = '';
-    this.$http.get(`/rest/user/transactions/${key}`).then(res => {
+    return this.$http.get(`/rest/user/transactions/${key}`).then(res => {
       this.transaction = res.data;
+      return res.data;
     });
   }
 }
