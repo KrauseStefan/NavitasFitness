@@ -42,7 +42,6 @@ func IntegrateRoutes(router *mux.Router) {
 		Name("Create User Info").
 		HandlerFunc(createUserHandler)
 
-
 	router.
 		Methods("GET").
 		Path(path + "/verify").
@@ -139,7 +138,6 @@ func createUserHandlerInternal(w http.ResponseWriter, r *http.Request) (interfac
 
 	return user, nil
 }
-
 
 func verifyUserRequestHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)

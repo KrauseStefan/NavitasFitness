@@ -26,7 +26,7 @@ var (
 
 func AsAdmin(f func(http.ResponseWriter, *http.Request, *UserDao.UserDTO)) func(http.ResponseWriter, *http.Request) {
 	return AsUser(func(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
-		if !user.IsAdmin {
+		if user == nil || !user.IsAdmin {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}

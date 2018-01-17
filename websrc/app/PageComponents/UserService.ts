@@ -64,7 +64,6 @@ export class UserService {
       this.currentUserSubject.next(userDto);
     }, (error) => {
       this.currentUserSubject.next(null);
-      return this.$q.reject(error);
     });
   }
 }
