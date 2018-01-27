@@ -101,9 +101,10 @@ func getActiveTransactionList(ctx context.Context) ([]UserTxnTuple, error) {
 	usersWithActiveSubscription := make([]UserTxnTuple, 0, len(userKeys))
 
 	for i, userKey := range userKeys {
-		isValid, err := accessIdValidator.ValidateAccessIdPrimary(ctx, []byte(users[i].AccessId))
+		user := users[i]
+		isValid, err := accessIdValidator.ValidateAccessIdPrimary(ctx, []byte(user.AccessId))
 		if err != nil || !isValid {
-			log.Infof(ctx, "%s has paid for access but ID is not valid, skipped in csv export", users[i].AccessId)
+			log.Infof(ctx, "%s has paid for access but ID is not valid, skipped in csv export", user.AccessId)
 			continue // Skip uses with invalid access ids they are not allowed access
 		}
 
@@ -115,7 +116,7 @@ func getActiveTransactionList(ctx context.Context) ([]UserTxnTuple, error) {
 		if !firstDate.IsZero() && !lastDate.IsZero() {
 
 			tuple := UserTxnTuple{
-				user:      users[i],
+				user:      user,
 				firstDate: firstDate,
 				lastDate:  lastDate,
 			}
