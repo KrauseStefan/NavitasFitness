@@ -89,8 +89,8 @@ func CreateUser(ctx context.Context, r *http.Request, sessionData Auth.SessionDa
 	return user, nil
 }
 
-func GetUserTransactions(ctx context.Context, user *UserDao.UserDTO) ([]*TransactionMsgClientDTO, error) {
-	transactions, err := transactionDao.GetTransactionsByUser(ctx, user.Key)
+func GetUserTransactions(ctx context.Context, userKey *datastore.Key) ([]*TransactionMsgClientDTO, error) {
+	transactions, err := transactionDao.GetTransactionsByUser(ctx, userKey)
 	if err != nil {
 		return nil, err
 	}

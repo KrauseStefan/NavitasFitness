@@ -16,7 +16,6 @@ import (
 	"google.golang.org/appengine/log"
 )
 
-const accessIdKey = "accessId"
 const emailKey = "email"
 
 var accessIdValidator = AccessIdValidator.GetInstance()
@@ -34,7 +33,7 @@ func IntegrateRoutes(router *mux.Router) {
 		Methods("GET").
 		Path(path + "/transactions").
 		Name("Get Latest Transactions").
-		HandlerFunc(UserService.AsUser(getUserTransactionsHandler))
+		HandlerFunc(UserService.AsUser(getCurrentUserTransactionsHandler))
 
 	router.
 		Methods("POST").
@@ -96,10 +95,10 @@ func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request, user *Use
 	}
 }
 
-func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
+func getCurrentUserTransactionsHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
 	ctx := appengine.NewContext(r)
 
-	txnClientDtoList, err := UserService.GetUserTransactions(ctx, user)
+	txnClientDtoList, err := UserService.GetUserTransactions(ctx, user.Key)
 
 	if err == nil {
 		_, err = AppEngineHelper.WriteJSON(w, txnClientDtoList)
