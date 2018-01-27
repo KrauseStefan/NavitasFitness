@@ -97,22 +97,13 @@ func (u *DefaultUserDAO) GetAll(ctx context.Context) ([]*datastore.Key, []UserDT
 	query := datastore.NewQuery(USER_KIND).
 		Ancestor(userCollectionParentKey(ctx))
 
-	count, err := query.Count(ctx)
+	users := new([]UserDTO)
+	keys, err := query.GetAll(ctx, users)
 	if err != nil {
 		return nil, nil, err
 	}
-	if count <= 0 {
-		return nil, nil, nil
-	}
 
-	users := make([]UserDTO, 0, count)
-	keys, err := query.GetAll(ctx, &users)
-	if err != nil {
-		log.Criticalf(ctx, "error in txn 2")
-		return nil, nil, err
-	}
-
-	return keys, users, nil
+	return keys, *users, nil
 }
 
 // This function tries its best to ensure no user is created with duplicated accessId or email
@@ -160,7 +151,7 @@ func (u *DefaultUserDAO) Create(ctx context.Context, user *UserDTO, keyHint *dat
 }
 
 func (u *DefaultUserDAO) GetByKey(ctx context.Context, key *datastore.Key) (*UserDTO, error) {
-	var user *UserDTO = &UserDTO{}
+	var user = &UserDTO{}
 
 	if err := datastore.Get(ctx, key, user); err != nil {
 		return nil, err
