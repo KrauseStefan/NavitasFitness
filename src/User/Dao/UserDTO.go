@@ -20,6 +20,7 @@ type UserDTO struct {
 	Email               string         `json:"email" validate:"email"`
 	AccessId            string         `json:"accessId"`
 	Password            string         `json:"password,omitempty" datastore:"-"`
+	CreationDate        time.Time      `json:"-" datastore:",noindex"`
 	PasswordHash        []byte         `json:"-" datastore:",noindex"`
 	PasswordSalt        []byte         `json:"-" datastore:",noindex"`
 	Key                 *datastore.Key `json:"-" datastore:"-"`

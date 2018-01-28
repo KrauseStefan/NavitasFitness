@@ -5,7 +5,6 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
 
 	"AppEngineHelper"
 	"DAOHelper"
@@ -178,6 +177,10 @@ func (u *DefaultUserDAO) SaveUser(ctx context.Context, user *UserDTO) error {
 	}
 	user.Key = key
 	return nil
+}
+
+func (u *DefaultUserDAO) DeleteUsers(ctx context.Context, keys []*datastore.Key) error {
+	return datastore.DeleteMulti(ctx, keys)
 }
 
 func (u *DefaultUserDAO) SetSessionUUID(ctx context.Context, user *UserDTO, uuid string) error {
