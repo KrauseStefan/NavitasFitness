@@ -2,6 +2,7 @@ package UserDao
 
 import (
 	"errors"
+	"time"
 
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
@@ -138,6 +139,7 @@ func (u *DefaultUserDAO) Create(ctx context.Context, user *UserDTO, keyHint *dat
 		return err
 	}
 
+	user.CreationDate = time.Now()
 	key := datastore.NewIncompleteKey(ctx, USER_KIND, userCollectionParentKey(ctx))
 	newKey, err := datastore.Put(ctx, key, user)
 	if err != nil {
