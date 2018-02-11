@@ -10,11 +10,11 @@ import (
 	"net/http"
 
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 
-	"AppEngineHelper"
-	"User/Dao"
-	"google.golang.org/appengine/datastore"
+	"../AppEngineHelper"
+	"../User/Dao"
 )
 
 var userDAO = UserDao.GetInstance()

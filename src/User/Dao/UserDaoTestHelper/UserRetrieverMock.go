@@ -4,7 +4,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
 
-	"User/Dao"
+	".."
 )
 
 type UserRetrieverMock struct {

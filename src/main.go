@@ -11,13 +11,13 @@ import (
 	"github.com/gorilla/mux"
 	"gopkg.in/validator.v2"
 
-	"Auth"
-	"DropboxService"
-	"Export/csv"
-	"Export/xlsx"
-	"IPN"
-	"MainPage"
-	"User"
+	"../Auth"
+	"../DropboxService"
+	"../Export/csv"
+	"../Export/xlsx"
+	"../IPN"
+	"../MainPage"
+	"../User"
 )
 
 const emailRegStr = `^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$`

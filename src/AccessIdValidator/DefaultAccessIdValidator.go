@@ -8,7 +8,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/log"
 
-	"Dropbox"
+	"../Dropbox"
 )
 
 type DefaultAccessIdValidator struct{}

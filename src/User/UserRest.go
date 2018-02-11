@@ -4,16 +4,16 @@ import (
 	"net/http"
 
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 
 	"github.com/gorilla/mux"
 
-	"AccessIdValidator"
-	"AppEngineHelper"
-	"Auth"
-	"DAOHelper"
-	"User/Dao"
-	"User/Service"
-	"google.golang.org/appengine/log"
+	"../AccessIdValidator"
+	"../AppEngineHelper"
+	"../Auth"
+	"../DAOHelper"
+	"./Dao"
+	"./Service"
 )
 
 const emailKey = "email"

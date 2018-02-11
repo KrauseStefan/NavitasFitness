@@ -10,13 +10,13 @@ import (
 
 	"google.golang.org/appengine/datastore"
 
-	"IPN/Transaction"
-	"User/Dao"
+	"../../IPN/Transaction"
+	"../../User/Dao"
 
-	"AccessIdValidator/AccessIdValidatorTestHelper"
-	"IPN/Transaction/TransactionDaoTestHelper"
-	"TestHelper"
-	"User/Dao/UserDaoTestHelper"
+	"../../AccessIdValidator/AccessIdValidatorTestHelper"
+	"../../IPN/Transaction/TransactionDaoTestHelper"
+	"../../TestHelper"
+	"../../User/Dao/UserDaoTestHelper"
 )
 
 var (

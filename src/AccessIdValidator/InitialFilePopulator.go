@@ -1,8 +1,9 @@
 package AccessIdValidator
 
 import (
-	"DAOHelper"
-	"Dropbox"
+	"../DAOHelper"
+	"../Dropbox"
+
 	"bytes"
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/log"

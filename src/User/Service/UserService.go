@@ -13,10 +13,10 @@ import (
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 
-	"Auth"
-	"DAOHelper"
-	"IPN/Transaction"
-	"User/Dao"
+	"../../Auth"
+	"../../DAOHelper"
+	"../../IPN/Transaction"
+	"../Dao"
 )
 
 var (

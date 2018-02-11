@@ -10,9 +10,9 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/urlfetch"
 
-	"AppEngineHelper"
-	"ConfigurationReader"
-	"SystemSettingDAO"
+	"../AppEngineHelper"
+	"../ConfigurationReader"
+	"../SystemSettingDAO"
 )
 
 var (

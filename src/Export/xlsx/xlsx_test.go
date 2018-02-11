@@ -10,12 +10,12 @@ import (
 
 	"github.com/tealeg/xlsx"
 
-	"IPN/Transaction"
-	"User/Dao"
+	"../../IPN/Transaction"
+	"../../User/Dao"
 
-	"IPN/Transaction/TransactionDaoTestHelper"
-	"TestHelper"
-	"User/Dao/UserDaoTestHelper"
+	"../../IPN/Transaction/TransactionDaoTestHelper"
+	"../../TestHelper"
+	"../../User/Dao/UserDaoTestHelper"
 )
 
 var (

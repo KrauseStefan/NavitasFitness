@@ -10,7 +10,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
 
-	"AccessIdValidator"
+	"../../AccessIdValidator"
 )
 
 var accessIdValidator = AccessIdValidator.GetInstance()

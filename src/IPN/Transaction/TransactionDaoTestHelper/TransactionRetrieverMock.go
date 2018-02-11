@@ -6,7 +6,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
 
-	"IPN/Transaction"
+	"../../../IPN/Transaction"
 )
 
 type CallArgs struct {

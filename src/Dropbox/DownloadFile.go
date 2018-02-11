@@ -8,9 +8,10 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"DAOHelper"
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/urlfetch"
+
+	"../DAOHelper"
 )
 
 const serviceUrl = "https://content.dropboxapi.com/2/files/download"

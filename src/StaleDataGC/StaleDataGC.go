@@ -2,7 +2,9 @@ package StaleDataGC
 
 import (
 	"../IPN/Transaction"
+
 	//"IPN/Transaction"
+
 	//"User/Dao"
 	"../User/Dao"
 	"golang.org/x/net/context"

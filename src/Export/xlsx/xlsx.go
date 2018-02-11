@@ -11,9 +11,9 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 
-	"IPN/Transaction"
-	"User/Dao"
-	"User/Service"
+	"../../IPN/Transaction"
+	"../../User/Dao"
+	"../../User/Service"
 )
 
 var (

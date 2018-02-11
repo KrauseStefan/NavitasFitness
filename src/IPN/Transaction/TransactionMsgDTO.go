@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
 
-	"AppEngineHelper"
-	"strings"
+	"../../AppEngineHelper"
 )
 
 const (

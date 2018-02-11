@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -13,12 +14,11 @@ import (
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 
-	"AccessIdValidator"
-	"Dropbox"
-	"IPN/Transaction"
-	"User/Dao"
-	"User/Service"
-	"strings"
+	"../../AccessIdValidator"
+	"../../Dropbox"
+	"../../IPN/Transaction"
+	"../../User/Dao"
+	"../../User/Service"
 )
 
 var (

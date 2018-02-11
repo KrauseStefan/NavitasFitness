@@ -3,7 +3,7 @@ package Auth
 import (
 	"github.com/gorilla/securecookie"
 
-	"ConfigurationReader"
+	"../ConfigurationReader"
 )
 
 func GetSecureCookieInst() (*securecookie.SecureCookie, error) {

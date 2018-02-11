@@ -8,7 +8,7 @@ import (
 	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/mail"
 
-	"User/Dao"
+	"../Dao"
 )
 
 const confirmMessage = `

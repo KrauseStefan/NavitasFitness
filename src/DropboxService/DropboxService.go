@@ -9,13 +9,13 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 
-	"AccessIdValidator"
-	"AppEngineHelper"
-	"ConfigurationReader"
-	"Dropbox"
-	"Export/csv"
-	"User/Dao"
-	"User/Service"
+	"../AccessIdValidator"
+	"../AppEngineHelper"
+	"../ConfigurationReader"
+	"../Dropbox"
+	"../Export/csv"
+	"../User/Dao"
+	"../User/Service"
 )
 
 const (

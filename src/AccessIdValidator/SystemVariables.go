@@ -2,9 +2,9 @@ package AccessIdValidator
 
 import (
 	"golang.org/x/net/context"
-
-	"SystemSettingDAO"
 	"google.golang.org/appengine/log"
+
+	"../SystemSettingDAO"
 )
 
 const (

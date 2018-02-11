@@ -17,6 +17,6 @@ module.exports = {
   },
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, '../src/NavitasFitness/webapp/')
+    path: path.resolve(__dirname, '../src/webapp/')
   }
 };
