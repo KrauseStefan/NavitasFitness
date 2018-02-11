@@ -20,11 +20,9 @@ describe('Reset password', () => {
   afterEach(() => verifyBrowserLog());
 
   it('[META] create user', async () => {
-    await DataStoreManipulator.init();
-    await DataStoreManipulator.removeUserByEmail(userInfo.email);
-    await DataStoreManipulator.destroy();
     await browser.get('/');
-
+    await DataStoreManipulator.loadUserKinds();
+    await DataStoreManipulator.removeUserByEmail(userInfo.email);
     const regDialog = await NavigationPageObject.openRegistrationDialog();
 
     await regDialog.fillForm({
@@ -34,8 +32,10 @@ describe('Reset password', () => {
       password: userInfo.password,
       passwordRepeat: userInfo.password,
     });
+
     await regDialog.buttonRegister.click();
     await AlerDialogPageObject.mainButton.click();
+    await expect(regDialog.formContainer.isPresent()).toBe(false);
   });
 
   it('should be request a password rest', async () => {
@@ -51,14 +51,13 @@ describe('Reset password', () => {
   });
 
   it('should be able to reset password', async () => {
-    await DataStoreManipulator.init();
-
+    await DataStoreManipulator.loadUserKinds();
     const passwordResetKeyP = DataStoreManipulator.getUserEntityIdFromEmail(userInfo.email);
     const passwordResetSecretP = DataStoreManipulator.getUserEntityResetSecretFromEmail(userInfo.email);
 
     const [passwordResetKey, passwordResetSecret] = await Promise.all([passwordResetKeyP, passwordResetSecretP]);
     const parms = stringify({ passwordResetKey, passwordResetSecret });
-    await DataStoreManipulator.destroy();
+
     await browser.get('/main-page/?' + parms);
     const resetPasswordDialog = new ResetPasswordDialogPageObject();
     await resetPasswordDialog.fillForm({
@@ -70,6 +69,7 @@ describe('Reset password', () => {
   });
 
   it('should fail login with old password', async () => {
+    await DataStoreManipulator.loadUserKinds();
     await DataStoreManipulator.sendValidationRequest(userInfo.email);
     const loginDialog = await NavigationPageObject.openLoginDialog();
 

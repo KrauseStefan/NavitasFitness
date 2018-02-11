@@ -2,13 +2,14 @@ import * as commandLineArgs from 'command-line-args';
 import { Config, ProtractorBy, browser } from 'protractor';
 import { PluginConfig } from 'protractor/built/plugins';
 
+import { DataStoreManipulator } from './PageObjects/DataStoreManipulator';
+
 const optionDefinitions = [
   { name: 'parallel', type: Boolean, defaultOption: false },
 ];
 
 const cmdOpts = commandLineArgs(optionDefinitions);
 
-// const timeoutMils = 1000 * 60 * 10;
 const timeoutMils = 1000 * 60;
 
 declare const angular: any;
@@ -80,12 +81,11 @@ export const config: Config = {
     //     marionette: true,
     //     shardTestFiles: cmdOpts.parallel,
   }],
-  onPrepare: () => {
-    const disableNgAnimate = () => {
-      angular.module('disableNgAnimate', []).run(['$animate', ($animate) => {
-        $animate.enabled(false);
-      }]);
-    };
+  onPrepare: async () => {
+    function disableNgAnimate() {
+      angular.module('disableNgAnimate', []).run(['$animate', ($animate) => $animate.enabled(false)]);
+    }
+
     browser.addMockModule('disableNgAnimate', disableNgAnimate);
     by.addLocator('linkUiSref', (toState: string, optParentElement: HTMLElement) => {
       const using = optParentElement || document;
@@ -98,6 +98,11 @@ export const config: Config = {
       }
       return null;
     });
+
+    await DataStoreManipulator.init();
+  },
+  onComplete: async () => {
+    await DataStoreManipulator.destroy();
   },
   plugins: [utilsPlugin],
   // seleniumArgs: [

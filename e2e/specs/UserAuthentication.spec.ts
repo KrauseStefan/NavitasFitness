@@ -24,12 +24,11 @@ describe('User Autentication', () => {
 
   it('[META] ensure test user does not exist', async () => {
     await browser.get('/');
-    await DataStoreManipulator.init();
+    await DataStoreManipulator.loadUserKinds();
     await DataStoreManipulator.removeUserByEmail(userInfo.email);
     await DataStoreManipulator.removeUserByAccessId(userInfo.accessId);
     await DataStoreManipulator.removeUserByEmail(alternateUserInfo.email);
     await DataStoreManipulator.removeUserByAccessId(alternateUserInfo.accessId);
-    await DataStoreManipulator.destroy();
   });
 
   it('[META] ensure user is not logged in', async () => {
@@ -84,9 +83,8 @@ describe('User Autentication', () => {
       await regDialog.buttonRegister.click();
       await AlerDialogPageObject.mainButton.click();
 
-      await DataStoreManipulator.init();
+      await DataStoreManipulator.loadUserKinds();
       keyUserDifferntEmail = await DataStoreManipulator.getUserEntityIdFromEmail(alternateUserInfo.email);
-      await DataStoreManipulator.destroy();
 
       await expect(regDialog.formContainer.isPresent()).toBe(false);
     });
@@ -102,9 +100,8 @@ describe('User Autentication', () => {
       await regDialog.buttonRegister.click();
       await AlerDialogPageObject.mainButton.click();
 
-      await DataStoreManipulator.init();
+      await DataStoreManipulator.loadUserKinds();
       keyUserDifferntAccessId = await DataStoreManipulator.getUserEntityIdFromEmail(userInfo.email);
-      await DataStoreManipulator.destroy();
 
       await expect(regDialog.formContainer.isPresent()).toBe(false);
     });
@@ -120,9 +117,8 @@ describe('User Autentication', () => {
       await regDialog.buttonRegister.click();
       await AlerDialogPageObject.mainButton.click();
 
-      await DataStoreManipulator.init();
+      await DataStoreManipulator.loadUserKinds();
       keyUser = await DataStoreManipulator.getUserEntityIdFromEmail(userInfo.email);
-      await DataStoreManipulator.destroy();
 
       await expect(regDialog.formContainer.isPresent()).toBe(false);
     });
