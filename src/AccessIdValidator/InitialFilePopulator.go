@@ -28,9 +28,8 @@ func uploadFileIfMissing(ctx context.Context, accessToken string, path string) e
 	}
 	log.Infof(ctx, "%s is missing uploading empty file", path)
 
-	Dropbox.UploadDoc(ctx, accessToken, path, &bytes.Buffer{})
-
-	return nil
+	_, err = Dropbox.UploadDoc(ctx, accessToken, path, &bytes.Buffer{})
+	return err
 }
 
 func CheckFileExistence(ctx context.Context, accessToken string, path string) (bool, error) {
