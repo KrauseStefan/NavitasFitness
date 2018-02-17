@@ -10,7 +10,7 @@ queue:
   rate: 5/s #One task per second (put one token in bucket each second)
   mode: push
   retry_parameters:
-      task_retry_limit: 1
+      task_retry_limit: 5
       task_age_limit: 2d
       min_backoff_seconds: 10
       max_backoff_seconds: 1000
