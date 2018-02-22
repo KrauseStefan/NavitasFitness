@@ -149,6 +149,10 @@ func (u *DefaultUserDAO) Create(ctx context.Context, user *UserDTO, keyHint *dat
 	return nil
 }
 
+func (u *DefaultUserDAO) DeleteUsers(ctx context.Context, ids []*datastore.Key) error {
+	return datastore.DeleteMulti(ctx, ids)
+}
+
 func (u *DefaultUserDAO) GetByKey(ctx context.Context, key *datastore.Key) (*UserDTO, error) {
 	var user = &UserDTO{}
 

@@ -22,6 +22,7 @@ type UsersRetriever interface {
 type UserModifier interface {
 	SaveUser(ctx context.Context, user *UserDTO) error
 	SetSessionUUID(ctx context.Context, user *UserDTO, uuid string) error
+	DeleteUsers(ctx context.Context, ids []*datastore.Key) error
 }
 
 type UserSessionRetriever interface {
