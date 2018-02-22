@@ -100,6 +100,20 @@ func CreateUser(ctx context.Context, r *http.Request, sessionData Auth.SessionDa
 	return user, nil
 }
 
+func DeleteUsers(ctx context.Context, ids []string) error {
+	idKeys := make([]*datastore.Key, len(ids))
+
+	for i, id := range ids {
+		key, err := datastore.DecodeKey(id)
+		if err != nil {
+			return err
+		}
+		idKeys[i] = key
+	}
+
+	return userDao.DeleteUsers(ctx, idKeys)
+}
+
 func GetUserTransactions(ctx context.Context, userKey *datastore.Key) ([]*TransactionMsgClientDTO, error) {
 	transactions, err := transactionDao.GetTransactionsByUser(ctx, userKey)
 	if err != nil {

@@ -1,6 +1,8 @@
 package UserRest
 
 import (
+	"encoding/json"
+	"golang.org/x/net/context"
 	"net/http"
 
 	"google.golang.org/appengine"
@@ -30,6 +32,12 @@ func IntegrateRoutes(router *mux.Router) {
 		Path(path).
 		Name("Get User Current User Info").
 		HandlerFunc(UserService.AsUser(getUserFromSessionHandler))
+
+	router.
+		Methods("DELETE").
+		Path(path).
+		Name("Delete Users").
+		HandlerFunc(UserService.AsAdmin(deleteUsersHandler))
 
 	router.
 		Methods("GET").
@@ -127,6 +135,26 @@ func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request, user *Use
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func deleteUsersHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
+	ctx := appengine.NewContext(r)
+
+	err := deleteUsersInternal(ctx, r)
+
+	DAOHelper.ReportError(ctx, w, err)
+}
+
+func deleteUsersInternal(ctx context.Context, r *http.Request) error {
+
+	ids := new([]string)
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(ids); err != nil {
+		return err
+	}
+
+	return UserService.DeleteUsers(ctx, *ids)
 }
 
 func getCurrentUserTransactionsHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
