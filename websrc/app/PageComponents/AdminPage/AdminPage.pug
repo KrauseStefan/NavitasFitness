@@ -14,7 +14,8 @@ div
         td {{ user.email }}
         td {{ user.accessId }}
         td
-          a(ng-click="$ctrl.getTransactions(user.key)") View
+          a(ng-click="$ctrl.getTransactions(user.key)", style="cursor: pointer;").
+            View
 
   h3.md-title Transactions
   table.md-whiteframe-2dp(style="padding: 0")
