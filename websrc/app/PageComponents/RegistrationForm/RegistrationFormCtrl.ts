@@ -17,7 +17,7 @@ export class RegistrationFormModel implements IUserDTO {
   public accessId = '';
 }
 
-export class RegistrationForm {
+export class RegistrationForm implements ng.IController {
 
   constructor(
     private $scope: {
@@ -34,6 +34,17 @@ export class RegistrationForm {
     $scope.submit = () => this.submit();
     $scope.cancel = () => this.cancel();
     $scope.model = new RegistrationFormModel();
+  }
+
+  private getFieldMap(): { [key: string]: string } {
+    const initial: { [key: string]: string } = {};
+
+    return Object.keys(this.$scope.RegistrationForm)
+      .filter(i => i[0] != '$')
+      .reduce((acc, i) => {
+        acc[i.toLowerCase()] = i;
+        return acc;
+      }, initial);
   }
 
   public toUserDTO(formModel: RegistrationFormModel): IUserDTO {
@@ -54,10 +65,11 @@ export class RegistrationForm {
       this.displayCheckEmailNotice();
     }, (err: ng.IHttpPromiseCallbackArg<IRegistrationError>) => {
       if (err.data.field && err.data.field.length > 0) {
+        const formCtrl = this.getFormFieldCtrl(err.data);
         if (err.data.type) {
-          this.$scope.RegistrationForm[err.data.field].$setValidity(err.data.type, false);
+          formCtrl.$setValidity(err.data.type, false);
         } else {
-          this.$scope.RegistrationForm[err.data.field].$setValidity('serverValidation', false);
+          formCtrl.$setValidity('serverValidation', false);
         }
       }
     }).finally(() => this.$scope.RegistrationForm.$pending = false);
@@ -65,6 +77,16 @@ export class RegistrationForm {
 
   public cancel() {
     this.$mdDialog.cancel();
+  }
+
+  private getFormFieldCtrl(err: IRegistrationError): ng.INgModelController {
+    if (!this.$scope.RegistrationForm[err.field]) {
+      const errField = err.field.toLowerCase();
+      const fieldMap = this.getFieldMap();
+      return this.$scope.RegistrationForm[fieldMap[errField]];
+    }
+
+    return this.$scope.RegistrationForm[err.field];
   }
 
   private displayCheckEmailNotice() {
