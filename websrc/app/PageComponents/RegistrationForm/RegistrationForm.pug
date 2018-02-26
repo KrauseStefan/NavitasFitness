@@ -15,10 +15,12 @@ md-dialog
       md-input-container
         label E-Mail
         md-icon email
-        input(name="email", type="email", ng-model="model.email", required, nf-reset-on-change="unique_constraint")
+        input(name="email", type="email", ng-model="model.email", required, nf-reset-on-change="unique_constraint, invalid")
         div(ng-messages="RegistrationForm.email.$error", md-auto-hide="true")
           div(ng-message="unique_constraint").
             This e-mail address has already been registred
+          div(ng-message="invalid").
+            E-mail address is invalid
 
       md-input-container
         label Password
