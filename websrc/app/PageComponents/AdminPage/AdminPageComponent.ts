@@ -1,4 +1,4 @@
-import { IComponentOptions } from 'angular';
+import { IComponentOptions, copy } from 'angular';
 
 export const adminRouterState: angular.ui.IState = {
   template: '<admin-page></admin-page>',
@@ -7,12 +7,15 @@ export const adminRouterState: angular.ui.IState = {
 
 export class AdminPageCtrl {
 
+  public usersBackup: any[] = [];
   public users: any[] = [];
   public transaction: any = null;
 
   constructor(private $http: ng.IHttpService) {
     $http.get<any>('/rest/user/all').then((res) => {
       this.users = res.data.users;
+      this.usersBackup = copy(this.users);
+
       res.data.keys.forEach((key: string, i: number) => {
         this.users[i].key = key;
       });
