@@ -18,12 +18,13 @@ import 'angular-aria';
 import 'angular-cookies';
 import 'angular-material';
 import 'angular-messages';
+import 'angular-ui-grid';
 import 'angular-ui-router';
 
 import ngMat = ng.material;
 
 export const NavitasFitnessModule = module('NavitasFitness', [
-  'ngMaterial', 'ui.router', 'ngCookies', 'ngMessages',
+  'ngMaterial', 'ui.router', 'ngCookies', 'ngMessages', 'ui.grid',
   DefaultErrorHandlingModule.name,
 ])
   .config(($mdThemingProvider: ngMat.IThemingProvider) => {
