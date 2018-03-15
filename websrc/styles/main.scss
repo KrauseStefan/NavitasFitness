@@ -2,6 +2,7 @@
 @import '../node_modules/angular-material/angular-material.scss';
 @import 'palette';
 @import 'paper-typografi';
+@import '../node_modules/angular-ui-grid/ui-grid';
 
 // Remove old workaround that prevented displaing error messages with ng-messages in angular 1.6.3
 // Bug was fixed in 1.6.3 but workaround has not been reverted yet (ng-material 1.1.3)

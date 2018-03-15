@@ -10,6 +10,12 @@ export class AdminPageCtrl {
   public users: any[] = [];
   public transaction: any = null;
 
+  public gridOptions: uiGrid.IGridOptionsOf<any> = {
+    data: [],
+    enableColumnMenus: false,
+    enableFiltering: true,
+  }
+
   constructor(private $http: ng.IHttpService) {
     $http.get<any>('/rest/user/all').then((res) => {
       this.users = res.data.users;
