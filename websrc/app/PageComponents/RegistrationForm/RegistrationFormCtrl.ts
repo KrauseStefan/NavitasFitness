@@ -36,17 +36,6 @@ export class RegistrationForm implements ng.IController {
     $scope.model = new RegistrationFormModel();
   }
 
-  private getFieldMap(): { [key: string]: string } {
-    const initial: { [key: string]: string } = {};
-
-    return Object.keys(this.$scope.RegistrationForm)
-      .filter(i => i[0] != '$')
-      .reduce((acc, i) => {
-        acc[i.toLowerCase()] = i;
-        return acc;
-      }, initial);
-  }
-
   public toUserDTO(formModel: RegistrationFormModel): IUserDTO {
     return {
       name: formModel.name,
@@ -77,6 +66,17 @@ export class RegistrationForm implements ng.IController {
 
   public cancel() {
     this.$mdDialog.cancel();
+  }
+
+  private getFieldMap(): { [key: string]: string } {
+    const initial: { [key: string]: string } = {};
+
+    return Object.keys(this.$scope.RegistrationForm)
+      .filter(i => i[0] !== '$')
+      .reduce((acc, i) => {
+        acc[i.toLowerCase()] = i;
+        return acc;
+      }, initial);
   }
 
   private getFormFieldCtrl(err: IRegistrationError): ng.INgModelController {

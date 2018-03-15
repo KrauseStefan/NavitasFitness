@@ -17,6 +17,8 @@ div
           a(ng-click="$ctrl.getTransactions(user.key)", style="cursor: pointer;").
             View
 
+  div(ui-grid="$ctrl.gridOptions", style="width: 600px")
+
   h3.md-title Transactions
   table.md-whiteframe-2dp(style="padding: 0")
     thead
