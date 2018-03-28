@@ -1,0 +1,43 @@
+.ui-grid {
+  border: 0;
+  border-radius: 0 0 2px 2px;
+}
+
+.ui-grid-canvas {
+  padding-top: 0;
+}
+
+.ui-grid-header-cell {
+  background-color: $primary-color;
+  color: $primary-color-text;
+  border-color: $primary-color;
+}
+
+.ui-grid-header-cell:first-child {
+  border-radius: 2px 0 0 0;
+}
+
+.ui-grid-header-cell:last-child {
+  border-radius: 0 2px 0 0;
+}
+
+.ui-grid-row .ui-grid-cell {
+  cursor: pointer;
+}
+
+.ui-grid-row:nth-child(odd) .ui-grid-cell {
+  background-color: #E3ECF5;
+}
+
+.ui-grid-row:nth-child(even) .ui-grid-cell {
+  background-color: $primary-color-text;
+}
+
+.ui-grid-cell {
+  border-color: transparent;
+  border-radius: 2px 2px 0 0;
+}
+
+.ui-grid-cell-contents {
+  padding: 12px 16px 0 16px;
+}

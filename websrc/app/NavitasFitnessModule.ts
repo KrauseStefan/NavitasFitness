@@ -24,7 +24,9 @@ import 'angular-ui-router';
 import ngMat = ng.material;
 
 export const NavitasFitnessModule = module('NavitasFitness', [
-  'ngMaterial', 'ui.router', 'ngCookies', 'ngMessages', 'ui.grid',
+  'ngMaterial', 'ngCookies', 'ngMessages',
+  'ui.router',
+  'ui.grid', 'ui.grid.selection',
   DefaultErrorHandlingModule.name,
 ])
   .config(($mdThemingProvider: ngMat.IThemingProvider) => {
