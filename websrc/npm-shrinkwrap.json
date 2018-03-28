@@ -65,9 +65,9 @@
       "dev": true
     },
     "@types/ui-grid": {
-      "version": "0.0.38",
-      "resolved": "https://registry.npmjs.org/@types/ui-grid/-/ui-grid-0.0.38.tgz",
-      "integrity": "sha512-xOe0ySy+PlaBf1lD9VQY9KRT3zpegDb80ivTj9lzwaQA4/mnA4tk9aFJQu4eKdKlivczA91WzFR53SyPCyTQvg==",
+      "version": "0.0.40",
+      "resolved": "https://registry.npmjs.org/@types/ui-grid/-/ui-grid-0.0.40.tgz",
+      "integrity": "sha512-+kI681+s9aUOD66qiWhzlT9RN/BlBgd03LDxmGVEoh0mn3HxvikOYCuZ5ydenEHdvZ/q2UrkH0BoYufvIiduGA==",
       "dev": true,
       "requires": {
         "@types/angular": "*",

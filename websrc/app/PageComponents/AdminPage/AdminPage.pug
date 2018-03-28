@@ -2,22 +2,8 @@ div
 
   h3.md-title Users
 
-  table.md-whiteframe-2dp(style="padding: 0")
-    thead
-      th Name
-      th Email
-      th AccessId
-      th Transactions
-    tbody
-      tr(ng-repeat="user in $ctrl.users")
-        td {{ user.name }}
-        td {{ user.email }}
-        td {{ user.accessId }}
-        td
-          a(ng-click="$ctrl.getTransactions(user.key)", style="cursor: pointer;").
-            View
-
-  div(ui-grid="$ctrl.gridOptions", style="width: 600px")
+  div(ng-if="$ctrl.users.length > 0")
+    div.md-whiteframe-2dp(ui-grid="$ctrl.gridOptions", ui-grid-selection)
 
   h3.md-title Transactions
   table.md-whiteframe-2dp(style="padding: 0")
