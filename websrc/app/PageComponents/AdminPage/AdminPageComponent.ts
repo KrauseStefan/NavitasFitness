@@ -47,6 +47,7 @@ export class AdminPageCtrl {
   };
 
   constructor(
+    private $q: ng.IQService,
     private $scope: ng.IScope,
     private $http: ng.IHttpService,
     private uiGridConstants: uiGrid.IUiGridConstants
@@ -103,6 +104,13 @@ export class AdminPageCtrl {
     return this.$http.get<ITransaction[]>(`/rest/user/transactions/${key}`).then(res => {
       this.transaction = res.data;
       return res.data;
+    }, (resp: ng.IHttpResponse<string>) => {
+
+      if (resp.status >= 400 && resp.status < 500) {
+        return this.$q.resolve([]);
+      }
+
+      return this.$q.reject(resp.data);
     });
   }
 }
