@@ -14,7 +14,7 @@ div
       th status
       th isActive
     tbody
-      tr(ng-repeat="txn in $ctrl.transaction")
+      tr(ng-repeat="txn in $ctrl.transactions")
         td {{ txn.amount }}
         td {{ txn.currency }}
         td {{ txn.paymentDate }}

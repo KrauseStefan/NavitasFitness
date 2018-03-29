@@ -24,7 +24,7 @@ export class AdminPageCtrl {
 
   public usersBackup: IUser[] = [];
   public users: IUser[] = [];
-  public transaction: ITransaction[] = [];
+  public transactions: ITransaction[] = [];
 
   public gridOptions: uiGrid.IGridOptionsOf<IUser> = {
     data: [],
@@ -35,16 +35,29 @@ export class AdminPageCtrl {
     enableRowHeaderSelection: false,
     enableRowSelection: true,
     modifierKeysToMultiSelect: false,
-    multiSelect: false,
-    noUnselect: true,
+    multiSelect: true,
+    noUnselect: false,
     onRegisterApi: (gridApi) => {
+
+      const displayTransactions = () => {
+        this.displayTransactions(gridApi.selection.getSelectedRows());
+      };
+
       gridApi.selection.on.rowSelectionChanged(
         this.$scope,
-        row => this.getTransactions(row.entity.key)
+        () => displayTransactions()
+      );
+
+      gridApi.selection.on.rowSelectionChangedBatch(
+        this.$scope,
+        () => displayTransactions()
       );
     },
     rowHeight: 42,
   };
+
+  private transactionsCache: { [key: string]: ITransaction[] } = {};
+  private selectedUsers: IUser[] = [];
 
   constructor(
     private $q: ng.IQService,
@@ -100,9 +113,9 @@ export class AdminPageCtrl {
   }
 
   public getTransactions(key: string): ng.IPromise<ITransaction[]> {
-    this.transaction = [];
+    this.transactions = [];
     return this.$http.get<ITransaction[]>(`/rest/user/transactions/${key}`).then(res => {
-      this.transaction = res.data;
+      this.transactionsCache[key] = res.data;
       return res.data;
     }, (resp: ng.IHttpResponse<string>) => {
 
@@ -112,6 +125,22 @@ export class AdminPageCtrl {
 
       return this.$q.reject(resp.data);
     });
+  }
+
+  public async displayTransactions(selectedUsers: IUser[]) {
+    this.selectedUsers = selectedUsers;
+    const transactionsPromises = selectedUsers
+      .map(row => row.key)
+      .map((key) => {
+        const cacheHit = this.transactionsCache[key];
+        if (cacheHit) {
+          return this.$q.resolve(cacheHit);
+        }
+        return this.getTransactions(key);
+      });
+
+    const transactions = await this.$q.all(transactionsPromises);
+    this.transactions = transactions.reduce((acc, val) => acc.concat(val), []); // flatten
   }
 }
 
