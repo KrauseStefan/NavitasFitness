@@ -34,3 +34,7 @@ func (mock *UserRetrieverMock) GetAll(ctx context.Context) ([]*datastore.Key, []
 func (mock *UserRetrieverMock) GetByKey(ctx context.Context, key *datastore.Key) (*UserDao.UserDTO, error) {
 	panic("not implemented")
 }
+
+func (mock *UserRetrieverMock) GetByKeys(ctx context.Context, keys []*datastore.Key) ([]UserDao.UserDTO, error) {
+	panic("not implemented")
+}
