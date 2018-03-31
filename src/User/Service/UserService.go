@@ -100,7 +100,7 @@ func CreateUser(ctx context.Context, r *http.Request, sessionData Auth.SessionDa
 	return user, nil
 }
 
-func DeleteUsers(ctx context.Context, ids []string) error {
+func DeleteInactiveUsers(ctx context.Context, ids []string) error {
 	idKeys := make([]*datastore.Key, len(ids))
 
 	for i, id := range ids {
@@ -109,6 +109,17 @@ func DeleteUsers(ctx context.Context, ids []string) error {
 			return err
 		}
 		idKeys[i] = key
+	}
+
+	users, err := userDao.GetByKeys(ctx, idKeys)
+	if err != nil {
+		return err
+	}
+
+	for i, user := range users {
+		if user.Verified {
+			return errors.New("User is already verifyed, deleting aborted, userId: " + ids[i])
+		}
 	}
 
 	return userDao.DeleteUsers(ctx, idKeys)

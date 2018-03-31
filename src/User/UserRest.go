@@ -1,9 +1,9 @@
 package UserRest
 
 import (
-	"encoding/json"
 	"golang.org/x/net/context"
 	"net/http"
+	"strings"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
@@ -35,7 +35,7 @@ func IntegrateRoutes(router *mux.Router) {
 
 	router.
 		Methods("DELETE").
-		Path(path).
+		Path(path + "/{" + userKey + "}").
 		Name("Delete Users").
 		HandlerFunc(UserService.AsAdmin(deleteUsersHandler))
 
@@ -147,14 +147,12 @@ func deleteUsersHandler(w http.ResponseWriter, r *http.Request, user *UserDao.Us
 
 func deleteUsersInternal(ctx context.Context, r *http.Request) error {
 
-	ids := new([]string)
+	userKeyStr := mux.Vars(r)[userKey]
 
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(ids); err != nil {
-		return err
-	}
+	ids := strings.Split(userKeyStr, ",")
 
-	return UserService.DeleteUsers(ctx, *ids)
+	log.Errorf(ctx, "len: %d", len(ids))
+	return UserService.DeleteInactiveUsers(ctx, ids)
 }
 
 func getCurrentUserTransactionsHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
