@@ -95,3 +95,7 @@ func (user *UserDTO) UpdatePasswordHash(password string) error {
 func (user *UserDTO) VerifyPassword(password string) error {
 	return bcrypt.CompareHashAndPassword(user.PasswordHash, user.getPasswordWithSalt([]byte(password)))
 }
+
+func (user *UserDTO) IsEquivalent(other *UserDTO) bool {
+	return user.AccessId == other.AccessId || user.Email == other.Email
+}

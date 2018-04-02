@@ -6,6 +6,7 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	"sort"
 	"time"
 
 	"golang.org/x/net/context"
@@ -74,6 +75,37 @@ func GetAllUsers(ctx context.Context) ([]string, []UserDao.UserDTO, error) {
 	}
 
 	return keyStrings, users, err
+}
+
+func GetDoublicatedUsers(ctx context.Context) ([]string, []UserDao.UserDTO, error) {
+	keys, users, err := userDao.GetAll(ctx)
+
+	sort.Sort(UserDao.ByAccessId(users))
+
+	prev := users[0]
+	prevKey := keys[0]
+
+	filteredUsers := make([]UserDao.UserDTO, 0, len(users))
+	keyStrings := make([]string, 0, len(keys))
+
+	for i, user := range users[1:] {
+		key := keys[i+1]
+
+		if user.IsEquivalent(&prev) {
+			previousIndex := len(filteredUsers) - 1
+
+			if previousIndex < 0 || !filteredUsers[previousIndex].IsEquivalent(&prev) {
+				keyStrings = append(keyStrings, prevKey.Encode())
+				filteredUsers = append(filteredUsers, prev)
+			}
+
+			keyStrings = append(keyStrings, key.Encode())
+			filteredUsers = append(filteredUsers, user)
+		}
+		prev = user
+	}
+
+	return keyStrings, filteredUsers, err
 }
 
 // This function tries its best to validate and ensure no user is created with duplicated accessId or email
