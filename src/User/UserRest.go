@@ -81,6 +81,12 @@ func IntegrateRoutes(router *mux.Router) {
 		Name("Retrieve all users").
 		HandlerFunc(UserService.AsAdmin(getAllUsersHandler))
 
+	router.
+		Methods("GET").
+		Path(path + "/dublicated").
+		Name("Retrieve dublicated users").
+		HandlerFunc(UserService.AsAdmin(getDoublicatedUsersHandler))
+
 }
 
 func getAllUsersHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserDTO) {
@@ -92,6 +98,26 @@ func getAllUsersHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserD
 	ctx := appengine.NewContext(r)
 
 	keys, users, err := UserService.GetAllUsers(ctx)
+
+	data := &UserAndKeys{
+		keys,
+		users,
+	}
+
+	if err == nil {
+		_, err = AppEngineHelper.WriteJSON(w, data)
+	}
+}
+
+func getDoublicatedUsersHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserDTO) {
+	type UserAndKeys struct {
+		Keys []string          `json:"keys"`
+		User []UserDao.UserDTO `json:"users"`
+	}
+
+	ctx := appengine.NewContext(r)
+
+	keys, users, err := UserService.GetDoublicatedUsers(ctx)
 
 	data := &UserAndKeys{
 		keys,

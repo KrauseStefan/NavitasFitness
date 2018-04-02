@@ -67,7 +67,9 @@ export class AdminPageCtrl {
   ) {
     const headerHeight = 33;
     const filterHeight = 28;
-    $http.get<{ users: IUser[], keys: string[] }>('/rest/user/all').then((res) => {
+
+    // $http.get<{ users: IUser[], keys: string[] }>('/rest/user/all').then((res) => {
+    $http.get<{ users: IUser[], keys: string[] }>('/rest/user/dublicated').then((res) => {
       this.users = res.data.users;
       this.usersBackup = copy(this.users);
       this.gridOptions.data = this.users;
