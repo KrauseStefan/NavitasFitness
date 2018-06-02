@@ -3,7 +3,6 @@ import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
 import { verifyBrowserLog } from '../utility';
 import { browser } from 'protractor';
-
 import { IParsedDate, StatusPageObject, TransactionTableCells} from '../PageObjects/StatusPageObject';
 
 describe('Payments', () => {
