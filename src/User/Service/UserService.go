@@ -6,6 +6,7 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	"sort"
 	"time"
 
 	"golang.org/x/net/context"
@@ -13,6 +14,7 @@ import (
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 
+	"AppEngineHelper"
 	"Auth"
 	"DAOHelper"
 	"IPN/Transaction"
@@ -65,6 +67,48 @@ func getUserFromSession(ctx context.Context, r *http.Request) (*UserDao.UserDTO,
 	return userDao.GetUserFromSessionUUID(ctx, sessionData.UserKey, sessionData.Uuid)
 }
 
+func GetAllUsers(ctx context.Context) ([]string, []UserDao.UserDTO, error) {
+	keys, users, err := userDao.GetAll(ctx)
+	keyStrings := make([]string, len(keys))
+
+	for i, key := range keys {
+		keyStrings[i] = key.Encode()
+	}
+
+	return keyStrings, users, err
+}
+
+func GetDuplicatedUsers(ctx context.Context) ([]string, []UserDao.UserDTO, error) {
+	keys, users, err := userDao.GetAll(ctx)
+
+	sort.Sort(UserDao.ByAccessId(users))
+
+	prev := users[0]
+	prevKey := keys[0]
+
+	filteredUsers := make([]UserDao.UserDTO, 0, len(users))
+	keyStrings := make([]string, 0, len(keys))
+
+	for i, user := range users[1:] {
+		key := keys[i+1]
+
+		if user.IsEquivalent(&prev) {
+			previousIndex := len(filteredUsers) - 1
+
+			if previousIndex < 0 || !filteredUsers[previousIndex].IsEquivalent(&prev) {
+				keyStrings = append(keyStrings, prevKey.Encode())
+				filteredUsers = append(filteredUsers, prev)
+			}
+
+			keyStrings = append(keyStrings, key.Encode())
+			filteredUsers = append(filteredUsers, user)
+		}
+		prev = user
+	}
+
+	return keyStrings, filteredUsers, err
+}
+
 // This function tries its best to validate and ensure no user is created with duplicated accessId or email
 func CreateUser(ctx context.Context, r *http.Request, sessionData Auth.SessionData) (*UserDao.UserDTO, error) {
 	user := &UserDao.UserDTO{}
@@ -87,6 +131,95 @@ func CreateUser(ctx context.Context, r *http.Request, sessionData Auth.SessionDa
 	}
 
 	return user, nil
+}
+
+func GetDuplicatedInactiveUsers(ctx context.Context, ids []string) ([]string, error) {
+	createError := func(msg string) ([]string, error) {
+		return nil, &DAOHelper.DefaultHttpError{
+			InnerError: errors.New(msg),
+			StatusCode: http.StatusBadRequest,
+		}
+	}
+
+	idKeys, err := AppEngineHelper.StringIdsToDsKeys(ids)
+	if err != nil {
+		return nil, err
+	}
+
+	users, err := userDao.GetByKeys(ctx, idKeys)
+	if err != nil {
+		return nil, err
+	}
+
+	accessId := users[0].AccessId
+	email := users[0].Email
+	name := users[0].Name
+	sessionId := users[0].CurrentSessionUUID
+	// verified := users[0].Verified
+
+	usersIdsToDelete := make([]string, 0, len(users)-1)
+
+	transactions, err := transactionDao.GetTransactionsByUser(ctx, idKeys[0])
+	if err != nil {
+		return nil, err
+	}
+
+	if len(transactions) <= 0 && !users[0].Verified {
+		log.Errorf(ctx, "Marking for deletion %v", users[0])
+		usersIdsToDelete = append(usersIdsToDelete, idKeys[0].Encode())
+	}
+
+	for i, user := range users[1:] {
+		key := idKeys[i+1]
+		if accessId != user.AccessId || email != user.Email || name != user.Name {
+			return createError("All the ides does not match in terms of AccessId, Email and Name, aborting")
+		}
+
+		if len(sessionId) == 0 && len(user.CurrentSessionUUID) != 0 {
+			sessionId = user.CurrentSessionUUID
+		} else if len(sessionId) != 0 && len(user.CurrentSessionUUID) != 0 {
+			return createError("Multiple users has active user sessions, aborting")
+		}
+
+		userTransactions, err := transactionDao.GetTransactionsByUser(ctx, key)
+		if err != nil {
+			return nil, err
+		}
+
+		log.Errorf(ctx, "Transactions - prev: %d - current: %d", len(transactions), len(userTransactions))
+		if len(transactions) != 0 && len(userTransactions) != 0 {
+			return createError("Multiple users to be merged had transactions, aborting")
+		} else {
+			transactions = userTransactions
+		}
+
+		if len(transactions) <= 0 {
+			log.Errorf(ctx, "Marking for deletion %v", user)
+			usersIdsToDelete = append(usersIdsToDelete, key.Encode())
+		}
+	}
+
+	return usersIdsToDelete, nil
+}
+
+func DeleteInactiveUsers(ctx context.Context, ids []string) error {
+	idKeys, err := AppEngineHelper.StringIdsToDsKeys(ids)
+	if err != nil {
+		return err
+	}
+
+	for i, idKey := range idKeys {
+		userTransactions, err := transactionDao.GetTransactionsByUser(ctx, idKey)
+		if err != nil {
+			return err
+		}
+
+		if len(userTransactions) > 0 {
+			return errors.New("User has transactions, deletion aborted, userId: " + ids[i])
+		}
+	}
+
+	return userDao.DeleteUsers(ctx, idKeys)
 }
 
 func GetUserTransactions(ctx context.Context, userKey *datastore.Key) ([]*TransactionMsgClientDTO, error) {
@@ -217,7 +350,7 @@ func ResetUserPassword(ctx context.Context, respBody io.ReadCloser) error {
 	if user.PasswordResetSecret == "" || user.PasswordResetSecret != dto.Secret || !user.PasswordResetTime.After(maxAge) {
 		log.Infof(ctx, "serects user: %q", user.PasswordResetSecret)
 		log.Infof(ctx, "serects dto : %q", dto.Secret)
-		log.Infof(ctx, "serects qeuals: %v", dto.Secret == user.PasswordResetSecret)
+		log.Infof(ctx, "serects equals: %v", dto.Secret == user.PasswordResetSecret)
 		log.Infof(ctx, "PasswordResetTime: %v, should be after Maxage: %v", user.PasswordResetTime.Format(time.Stamp), maxAge.Format(time.Stamp))
 		log.Infof(ctx, "PasswordResetTime ok: %v", user.PasswordResetTime.After(maxAge))
 		return resetInputInvalidError

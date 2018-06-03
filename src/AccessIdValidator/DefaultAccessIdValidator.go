@@ -107,8 +107,10 @@ func validateAccessId(ctx context.Context, accessId []byte, validIdList *[][]byt
 		}
 	}
 
+	n := len(accessId)
 	log.Infof(ctx, "Id not validated")
-	log.Infof(ctx, "length %v - hex: %X", len(accessId), accessId)
+	log.Infof(ctx, "length %v - hex: %X", n, accessId)
+	log.Infof(ctx, "length %v - str: %q", n, accessId)
 
 	return false, nil
 }

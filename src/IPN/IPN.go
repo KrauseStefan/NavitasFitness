@@ -36,7 +36,7 @@ const (
 
 	basePath          = "/rest/paypal"
 	ipnUrl            = basePath + "/ipn"
-	ipnRespondTaskUrl = basePath + "/ipnDoRespone"
+	ipnRespondTaskUrl = basePath + "/ipnDoResponse"
 
 	FromEncodedContentType = "application/x-www-form-urlencoded"
 

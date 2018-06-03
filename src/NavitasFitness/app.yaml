@@ -16,9 +16,9 @@ handlers:
 - url: /rest/.*
   script: _go_app
 
-- url: /(.*\.(js|html|css|gif|png|jpg|map|json|ico))$
+- url: /(.*\.(js|html|css|gif|png|jpg|map|json|ico|woff))$
   static_files: webapp/\1
-  upload: webapp/.*\.(js|html|css|gif|png|jpg|json|ico)$
+  upload: webapp/.*\.(js|html|css|gif|png|jpg|json|ico|woff)$
 
 - url: /.*
   static_files: webapp/index.html

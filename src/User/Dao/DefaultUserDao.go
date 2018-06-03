@@ -5,7 +5,6 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
 
 	"AppEngineHelper"
 	"DAOHelper"
@@ -106,6 +105,16 @@ func (u *DefaultUserDAO) GetAll(ctx context.Context) ([]*datastore.Key, []UserDT
 	return keys, *users, nil
 }
 
+func (u *DefaultUserDAO) GetByKeys(ctx context.Context, keys []*datastore.Key) ([]UserDTO, error) {
+	dst := make([]UserDTO, len(keys))
+
+	if err := datastore.GetMulti(ctx, keys, dst); err != nil {
+		return nil, err
+	}
+
+	return dst, nil
+}
+
 // This function tries its best to ensure no user is created with duplicated accessId or email
 func (u *DefaultUserDAO) Create(ctx context.Context, user *UserDTO, keyHint *datastore.Key) error {
 
@@ -148,6 +157,10 @@ func (u *DefaultUserDAO) Create(ctx context.Context, user *UserDTO, keyHint *dat
 	user.Key = newKey
 
 	return nil
+}
+
+func (u *DefaultUserDAO) DeleteUsers(ctx context.Context, ids []*datastore.Key) error {
+	return datastore.DeleteMulti(ctx, ids)
 }
 
 func (u *DefaultUserDAO) GetByKey(ctx context.Context, key *datastore.Key) (*UserDTO, error) {

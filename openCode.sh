@@ -3,4 +3,4 @@
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export GOPATH="$GOPATH:$ROOT"
 
-code $ROOT/src
+code $ROOT/CodeWS.code-workspace

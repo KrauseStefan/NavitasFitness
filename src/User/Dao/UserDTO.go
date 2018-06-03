@@ -1,6 +1,7 @@
 package UserDao
 
 import (
+	"DAOHelper"
 	"crypto/rand"
 	"time"
 
@@ -44,7 +45,22 @@ func (user *UserDTO) ValidateUser(ctx context.Context) error {
 		return Invalid_accessId
 	}
 
-	return validator.Validate(user)
+	err = validator.Validate(user)
+	if err != nil {
+		err, isErrorMap := err.(validator.ErrorMap)
+
+		if isErrorMap {
+			for k, errs := range err {
+				if len(errs) > 0 {
+					return &DAOHelper.ConstraintError{Field: k, Type: DAOHelper.Invalid, Message: errs.Error()}
+				}
+			}
+		} else {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (user *UserDTO) hasKey() bool {
@@ -61,7 +77,10 @@ func (user *UserDTO) UpdatePasswordHash(password string) error {
 	}
 	// https://crackstation.net/hashing-security.htm
 	user.PasswordSalt = make([]byte, PW_SALT_BYTES)
-	rand.Read(user.PasswordSalt)
+	_, err := rand.Read(user.PasswordSalt)
+	if err != nil {
+		return err
+	}
 
 	passwordHash, err := bcrypt.GenerateFromPassword(user.getPasswordWithSalt([]byte(password)), bcrypt.DefaultCost)
 	if err != nil {
@@ -75,4 +94,8 @@ func (user *UserDTO) UpdatePasswordHash(password string) error {
 
 func (user *UserDTO) VerifyPassword(password string) error {
 	return bcrypt.CompareHashAndPassword(user.PasswordHash, user.getPasswordWithSalt([]byte(password)))
+}
+
+func (user *UserDTO) IsEquivalent(other *UserDTO) bool {
+	return user.AccessId == other.AccessId || user.Email == other.Email
 }
