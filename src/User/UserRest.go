@@ -23,6 +23,12 @@ const userKey = "userKey"
 
 var accessIdValidator = AccessIdValidator.GetInstance()
 
+type UserSessionDto struct {
+	User          *UserDao.UserDTO `json:"user"`
+	IsAdmin       bool             `json:"isAdmin"`
+	ValidAccessId bool             `json:"validAccessId"`
+}
+
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/user"
 
@@ -132,12 +138,6 @@ func getDuplicatedUsersHandler(w http.ResponseWriter, r *http.Request, _ *UserDa
 	if err == nil {
 		_, err = AppEngineHelper.WriteJSON(w, data)
 	}
-}
-
-type UserSessionDto struct {
-	User          *UserDao.UserDTO `json:"user"`
-	IsAdmin       bool             `json:"isAdmin"`
-	ValidAccessId bool             `json:"validAccessId"`
 }
 
 func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
