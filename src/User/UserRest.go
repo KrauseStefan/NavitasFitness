@@ -1,7 +1,6 @@
 package UserRest
 
 import (
-	"golang.org/x/net/context"
 	"net/http"
 	"strings"
 
@@ -83,9 +82,15 @@ func IntegrateRoutes(router *mux.Router) {
 
 	router.
 		Methods("GET").
-		Path(path + "/dublicated").
-		Name("Retrieve dublicated users").
-		HandlerFunc(UserService.AsAdmin(getDoublicatedUsersHandler))
+		Path(path + "/duplicated").
+		Name("Retrieve duplicated users").
+		HandlerFunc(UserService.AsAdmin(getDuplicatedUsersHandler))
+
+	router.
+		Methods("GET").
+		Path(path + "/duplicated-inactive/{" + userKey + "}").
+		Name("Merge users with same information").
+		HandlerFunc(UserService.AsAdmin(getDuplicatedInactiveUsersHandler))
 
 }
 
@@ -109,7 +114,7 @@ func getAllUsersHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserD
 	}
 }
 
-func getDoublicatedUsersHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserDTO) {
+func getDuplicatedUsersHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserDTO) {
 	type UserAndKeys struct {
 		Keys []string          `json:"keys"`
 		User []UserDao.UserDTO `json:"users"`
@@ -117,7 +122,7 @@ func getDoublicatedUsersHandler(w http.ResponseWriter, r *http.Request, _ *UserD
 
 	ctx := appengine.NewContext(r)
 
-	keys, users, err := UserService.GetDoublicatedUsers(ctx)
+	keys, users, err := UserService.GetDuplicatedUsers(ctx)
 
 	data := &UserAndKeys{
 		keys,
@@ -163,22 +168,32 @@ func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request, user *Use
 	}
 }
 
-func deleteUsersHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
+func getDuplicatedInactiveUsersHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserDTO) {
 	ctx := appengine.NewContext(r)
 
-	err := deleteUsersInternal(ctx, r)
+	userKeyStr := mux.Vars(r)[userKey]
+
+	ids := strings.Split(userKeyStr, ";")
+
+	ids, err := UserService.GetDuplicatedInactiveUsers(ctx, ids)
+
+	if err == nil {
+		_, err = AppEngineHelper.WriteJSON(w, ids)
+	}
 
 	DAOHelper.ReportError(ctx, w, err)
 }
 
-func deleteUsersInternal(ctx context.Context, r *http.Request) error {
+func deleteUsersHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
+	ctx := appengine.NewContext(r)
 
 	userKeyStr := mux.Vars(r)[userKey]
 
-	ids := strings.Split(userKeyStr, ",")
+	ids := strings.Split(userKeyStr, ";")
 
-	log.Errorf(ctx, "len: %d", len(ids))
-	return UserService.DeleteInactiveUsers(ctx, ids)
+	err := UserService.DeleteInactiveUsers(ctx, ids)
+
+	DAOHelper.ReportError(ctx, w, err)
 }
 
 func getCurrentUserTransactionsHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
