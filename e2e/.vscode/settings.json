@@ -1,9 +1,9 @@
 {
-    "typescript.tsdk": "./node_modules/typescript/lib/",
-    "files.exclude": {
-        "**/.git": true,
-        "**/*.js": true,
-        "**/*.js.map": true,
-        ".vscode/*.db*": true
-    }
+  "typescript.tsdk": "./node_modules/typescript/lib/",
+  "files.exclude": {
+    "**/.git": true,
+    "**/*.js": true,
+    "**/*.js.map": true,
+    ".vscode/*.db*": true
+  }
 }

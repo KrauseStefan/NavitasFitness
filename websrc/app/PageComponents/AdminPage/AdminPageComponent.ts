@@ -1,4 +1,7 @@
-import { IComponentOptions, copy } from 'angular';
+import { IComponentOptions, copy, material } from 'angular';
+import { selection } from 'ui-grid';
+
+type IGridOptions = selection.IGridOptions & uiGrid.IGridOptionsOf<IUser>;
 
 interface IUser {
   name: string;
@@ -26,7 +29,7 @@ export class AdminPageCtrl {
   public users: IUser[] = [];
   public transactions: ITransaction[] = [];
 
-  public gridOptions: uiGrid.IGridOptionsOf<IUser> = {
+  public gridOptions: IGridOptions = {
     data: [],
     enableColumnMenus: false,
     enableFiltering: true,
@@ -34,10 +37,11 @@ export class AdminPageCtrl {
     enableVerticalScrollbar: this.uiGridConstants.scrollbars.WHEN_NEEDED,
     enableRowHeaderSelection: false,
     enableRowSelection: true,
-    modifierKeysToMultiSelect: false,
+    modifierKeysToMultiSelect: true,
     multiSelect: true,
     noUnselect: false,
     onRegisterApi: (gridApi) => {
+      this.gridApiDefered.resolve(gridApi);
 
       const displayTransactions = () => {
         this.displayTransactions(gridApi.selection.getSelectedRows());
@@ -58,23 +62,24 @@ export class AdminPageCtrl {
 
   private transactionsCache: { [key: string]: ITransaction[] } = {};
   private selectedUsers: IUser[] = [];
+  private gridApiDefered = this.$q.defer<uiGrid.IGridApiOf<IUser>>();
+  private gridApiPromise = this.gridApiDefered.promise;
 
   constructor(
     private $q: ng.IQService,
     private $scope: ng.IScope,
     private $http: ng.IHttpService,
-    private uiGridConstants: uiGrid.IUiGridConstants
+    private uiGridConstants: uiGrid.IUiGridConstants,
+    private $mdToast: material.IToastService
   ) {
     const headerHeight = 33;
     const filterHeight = 28;
 
-    // $http.get<{ users: IUser[], keys: string[] }>('/rest/user/all').then((res) => {
-    $http.get<{ users: IUser[], keys: string[] }>('/rest/user/dublicated').then((res) => {
+    $http.get<{ users: IUser[], keys: string[] }>('/rest/user/all').then((res) => {
       this.users = res.data.users;
-      this.usersBackup = copy(this.users);
       this.gridOptions.data = this.users;
 
-      // small hack, I suspect this should have been public
+      // small hack, I suspect headerRowHeight should have been public in the typings
       (<any>this.gridOptions).headerRowHeight = Math.ceil((filterHeight + headerHeight) / 2);
 
       this.gridOptions.minRowsToShow = 10;
@@ -87,14 +92,15 @@ export class AdminPageCtrl {
         this.users[i].key = key;
       });
 
+      this.usersBackup = copy(this.users);
       this.sortBy('accessId');
     });
   }
 
   public makeUsersUnique(testValue: keyof IUser) {
-    let prev: IUser;
+    let prev: IUser = <any>{};
     this.users = this.users.reduce((acc, value) => {
-      if (prev[testValue] === value[testValue]) {
+      if (prev && prev[testValue] === value[testValue]) {
         if (acc.length > 0 && acc[acc.length - 1] !== prev) {
           acc.push(prev);
         }
@@ -144,6 +150,76 @@ export class AdminPageCtrl {
     const transactions = await this.$q.all(transactionsPromises);
     this.transactions = transactions.reduce((acc, val) => acc.concat(val), []); // flatten
   }
+
+  public showMessage(message: string) {
+    const toast = this.$mdToast
+      .simple()
+      .hideDelay(0)
+      .textContent(message)
+      .highlightAction(true)
+      .action('Dismiss');
+
+    this.$mdToast.show(toast);
+  }
+
+  public mergeSelected() {
+    const userKeys = this.selectedUsers.map(i => i.key).join(';');
+
+    this.$http.post(`/rest/user/merge/${userKeys}`, {})
+      .then(resp => this.$mdToast.show(this.$mdToast.simple().textContent('Success')))
+      .catch(resp => {
+        this.showMessage(resp.data);
+        return this.$q.resolve();
+      });
+  }
+
+  public deleteInactiveUsers() {
+    this.filterInactiveUsers()
+      .then(keys => {
+        if (keys.length > 0) {
+          const usersToDelete = keys.join(';');
+          return this.$http.delete(`/rest/user/${usersToDelete}`)
+            .then(resp => resp.data);
+        } else {
+          return "No duplicated users found";
+        }
+      })
+      .then(data => this.showMessage(JSON.stringify(data)))
+      .catch(data => {
+        this.showMessage(data);
+        return this.$q.resolve();
+      });
+  }
+
+  public deselectActiveUsers() {
+    this.$q.all({ keys: this.filterInactiveUsers(), gridApi: this.gridApiPromise })
+      .then(data => {
+        const selectionGridApi = data.gridApi.selection;
+        const keys = data.keys;
+        const usersToSelect = this.selectedUsers
+          .filter(user => keys.indexOf(user.key) !== -1);
+
+        selectionGridApi.clearSelectedRows();
+
+        usersToSelect.forEach((user) => {
+          selectionGridApi.selectRow(user);
+        });
+
+        this.displayTransactions(usersToSelect);
+      })
+      .catch(data => {
+        this.showMessage(data);
+        return this.$q.resolve();
+      });
+  }
+
+  private filterInactiveUsers(): ng.IPromise<string[]> {
+    const keys = this.selectedUsers.map(i => i.key).join(';');
+
+    return this.$http.get<string[]>(`/rest/user/duplicated-inactive/${keys}`)
+      .then(resp => resp.data);
+  }
+
 }
 
 export const AdminPageComponent: IComponentOptions = {
