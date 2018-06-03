@@ -59,6 +59,10 @@ export const NavitasFitnessModule = module('NavitasFitness', [
 
   })
 
+  .run(($window: ng.IWindowService, $q: ng.IQService) => {
+    $window["Promise"] = $q;
+  })
+
   .service('userService', UserService)
   .service('mainPageService', MainPageService)
 
