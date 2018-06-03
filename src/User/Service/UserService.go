@@ -14,6 +14,7 @@ import (
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 
+	"AppEngineHelper"
 	"Auth"
 	"DAOHelper"
 	"IPN/Transaction"
@@ -77,7 +78,7 @@ func GetAllUsers(ctx context.Context) ([]string, []UserDao.UserDTO, error) {
 	return keyStrings, users, err
 }
 
-func GetDoublicatedUsers(ctx context.Context) ([]string, []UserDao.UserDTO, error) {
+func GetDuplicatedUsers(ctx context.Context) ([]string, []UserDao.UserDTO, error) {
 	keys, users, err := userDao.GetAll(ctx)
 
 	sort.Sort(UserDao.ByAccessId(users))
@@ -132,25 +133,89 @@ func CreateUser(ctx context.Context, r *http.Request, sessionData Auth.SessionDa
 	return user, nil
 }
 
-func DeleteInactiveUsers(ctx context.Context, ids []string) error {
-	idKeys := make([]*datastore.Key, len(ids))
-
-	for i, id := range ids {
-		key, err := datastore.DecodeKey(id)
-		if err != nil {
-			return err
+func GetDuplicatedInactiveUsers(ctx context.Context, ids []string) ([]string, error) {
+	createError := func(msg string) ([]string, error) {
+		return nil, &DAOHelper.DefaultHttpError{
+			InnerError: errors.New(msg),
+			StatusCode: http.StatusBadRequest,
 		}
-		idKeys[i] = key
+	}
+
+	idKeys, err := AppEngineHelper.StringIdsToDsKeys(ids)
+	if err != nil {
+		return nil, err
 	}
 
 	users, err := userDao.GetByKeys(ctx, idKeys)
 	if err != nil {
+		return nil, err
+	}
+
+	accessId := users[0].AccessId
+	email := users[0].Email
+	name := users[0].Name
+	sessionId := users[0].CurrentSessionUUID
+	// verified := users[0].Verified
+
+	usersIdsToDelete := make([]string, 0, len(users)-1)
+
+	transactions, err := transactionDao.GetTransactionsByUser(ctx, idKeys[0])
+	if err != nil {
+		return nil, err
+	}
+
+	if len(transactions) <= 0 && !users[0].Verified {
+		log.Errorf(ctx, "Marking for deletion %v", users[0])
+		usersIdsToDelete = append(usersIdsToDelete, idKeys[0].Encode())
+	}
+
+	for i, user := range users[1:] {
+		key := idKeys[i+1]
+		if accessId != user.AccessId || email != user.Email || name != user.Name {
+			return createError("All the ides does not match in terms of AccessId, Email and Name, aborting")
+		}
+
+		if len(sessionId) == 0 && len(user.CurrentSessionUUID) != 0 {
+			sessionId = user.CurrentSessionUUID
+		} else if len(sessionId) != 0 && len(user.CurrentSessionUUID) != 0 {
+			return createError("Multiple users has active user sessions, aborting")
+		}
+
+		userTransactions, err := transactionDao.GetTransactionsByUser(ctx, key)
+		if err != nil {
+			return nil, err
+		}
+
+		log.Errorf(ctx, "Transactions - prev: %d - current: %d", len(transactions), len(userTransactions))
+		if len(transactions) != 0 && len(userTransactions) != 0 {
+			return createError("Multiple users to be merged had transactions, aborting")
+		} else {
+			transactions = userTransactions
+		}
+
+		if len(transactions) <= 0 {
+			log.Errorf(ctx, "Marking for deletion %v", user)
+			usersIdsToDelete = append(usersIdsToDelete, key.Encode())
+		}
+	}
+
+	return usersIdsToDelete, nil
+}
+
+func DeleteInactiveUsers(ctx context.Context, ids []string) error {
+	idKeys, err := AppEngineHelper.StringIdsToDsKeys(ids)
+	if err != nil {
 		return err
 	}
 
-	for i, user := range users {
-		if user.Verified {
-			return errors.New("User is already verifyed, deleting aborted, userId: " + ids[i])
+	for i, idKey := range idKeys {
+		userTransactions, err := transactionDao.GetTransactionsByUser(ctx, idKey)
+		if err != nil {
+			return err
+		}
+
+		if len(userTransactions) > 0 {
+			return errors.New("User has transactions, deletion aborted, userId: " + ids[i])
 		}
 	}
 

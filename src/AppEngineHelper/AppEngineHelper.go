@@ -51,3 +51,16 @@ func CreateQueryParamString(params map[string]string) string {
 	}
 	return paramStr
 }
+
+func StringIdsToDsKeys(ids []string) ([]*datastore.Key, error) {
+	idKeys := make([]*datastore.Key, len(ids))
+
+	for i, id := range ids {
+		key, err := datastore.DecodeKey(id)
+		if err != nil {
+			return nil, err
+		}
+		idKeys[i] = key
+	}
+	return idKeys, nil
+}
