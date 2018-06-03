@@ -12,13 +12,16 @@ div
     div.md-whiteframe-2dp(ui-grid="$ctrl.gridOptions", ui-grid-selection)
 
   h3.md-title Transactions
+
   table.md-whiteframe-2dp(style="padding: 0")
     thead
-      th Amount
-      th Currency
-      th Date
-      th status
-      th isActive
+      tr
+        th Amount
+        th Currency
+        th Date
+        th status
+        th isActive
+
     tbody
       tr(ng-repeat="txn in $ctrl.transactions")
         td {{ txn.amount }}
