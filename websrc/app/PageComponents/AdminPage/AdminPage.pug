@@ -1,5 +1,11 @@
 div
 
+  md-button.md-raised(ng-click="$ctrl.mergeSelected()") Merge
+
+  md-button.md-raised(ng-click="$ctrl.deselectActiveUsers()") Deselect Active Users only
+
+  md-button.md-raised(ng-click="$ctrl.deleteInactiveUsers()") Delete Inactive Users
+
   h3.md-title Users
 
   div(ng-if="$ctrl.users.length > 0")
