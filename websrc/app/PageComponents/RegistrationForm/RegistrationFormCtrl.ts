@@ -25,7 +25,7 @@ export class RegistrationForm {
       cancel: () => void,
       model: RegistrationFormModel,
       errorMsg: any,
-      RegistrationForm: {[field in keyof RegistrationFormModel]: ng.INgModelController } & ng.IFormController
+      RegistrationForm: { [field in keyof RegistrationFormModel]: ng.INgModelController } & ng.IFormController
     } & ng.IScope,
     private userService: UserService,
     private $mdDialog: IDialogService,
