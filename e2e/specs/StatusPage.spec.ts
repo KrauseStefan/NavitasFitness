@@ -14,7 +14,7 @@ import {
   TransactionTableCells,
 } from '../PageObjects/StatusPageObject';
 
-export async function getPageDatesAsExportedRow(id: string, email: string): wdp.Promise<IExcelRow> {
+async function getPageDatesAsExportedRow(id: string, email: string): wdp.Promise<IExcelRow> {
   const dates = await pageObject.getPageDates();
 
   return <IExcelRow>{
