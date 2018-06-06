@@ -43,9 +43,9 @@ export const NavitasFitnessModule = module('NavitasFitness', [
     $urlRouterProvider.otherwise('/main-page/');
 
     $stateProvider
+      .state('Admin', adminRouterState)
       .state('MainPage', mainPageRouterState)
-      .state('Status', statusRouterState)
-      .state('Admin', adminRouterState);
+      .state('Status', statusRouterState);
 
     $sceDelegateProvider.resourceUrlWhitelist([
       // Allow same origin resource loads.
