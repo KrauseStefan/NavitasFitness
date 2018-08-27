@@ -85,8 +85,25 @@ export const config: Config = {
     function disableNgAnimate() {
       angular.module('disableNgAnimate', []).run(['$animate', ($animate) => $animate.enabled(false)]);
     }
-
     browser.addMockModule('disableNgAnimate', disableNgAnimate);
+
+    function disableCssAnimate() {
+      angular.module('disableCssAnimate', [])
+        .run(() => {
+          const style = document.createElement('style');
+          style.type = 'text/css';
+          style.innerHTML = '* {' +
+            '-webkit-transition: none !important;' +
+            '-moz-transition: none !important' +
+            '-o-transition: none !important' +
+            '-ms-transition: none !important' +
+            'transition: none !important' +
+            '}';
+          document.getElementsByTagName('head')[0].appendChild(style);
+        });
+    };
+    browser.addMockModule('disableCssAnimate', disableCssAnimate);
+
     by.addLocator('linkUiSref', (toState: string, optParentElement: HTMLElement) => {
       const using = optParentElement || document;
       const tabs = using.querySelectorAll('md-tab-item');
@@ -99,11 +116,10 @@ export const config: Config = {
       return null;
     });
 
+
     await DataStoreManipulator.init();
   },
-  onComplete: async () => {
-    await DataStoreManipulator.destroy();
-  },
+  onComplete: async () => await DataStoreManipulator.destroy(),
   plugins: [utilsPlugin],
   // seleniumArgs: [
   // '-Dwebdriver.gecko.driver=./node_modules/protractor/node_modules/webdriver-manager/selenium/geckodriver-v0.11.1',

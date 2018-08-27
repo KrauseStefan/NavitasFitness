@@ -5,7 +5,6 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
 
 	"AppEngineHelper"
 	"DAOHelper"
