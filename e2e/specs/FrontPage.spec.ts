@@ -46,7 +46,7 @@ describe('Frontpage tests', () => {
   it('[META] login user', async () => {
     const loginDialog = await NavigationPageObject.openLoginDialog();
     await DataStoreManipulator.loadUserKinds();
-    await DataStoreManipulator.sendValidationRequest(userInfo.email);
+    await DataStoreManipulator.performEmailVerification(userInfo.email);
 
     await loginDialog.fillForm({
       accessId: userInfo.accessId,

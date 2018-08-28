@@ -143,6 +143,8 @@ func MarkUserVerified(ctx context.Context, encodedKey string) error {
 		return err
 	}
 
+	log.Infof(ctx, "Verified email: %s for user with accessId: %s", userDto.Email, userDto.AccessId)
+
 	return nil
 }
 

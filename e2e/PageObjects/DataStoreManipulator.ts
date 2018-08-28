@@ -33,8 +33,9 @@ export class DataStoreManipulator {
     await browser.quit();
   }
 
-  public static async sendValidationRequest(email: string): Promise<void> {
+  public static async performEmailVerification(email: string): Promise<void> {
     const key = await DataStoreManipulator.getUserEntityIdFromEmail(email);
+    await browser.sleep(500); // below call might fail silently without a delay here
     await DataStoreManipulator.sendValidationRequestFromKey(key);
   }
 
@@ -51,7 +52,7 @@ export class DataStoreManipulator {
           return;
         }
 
-        reject();
+        reject('User email could not be verified using URL: ' + url);
       });
     });
   }

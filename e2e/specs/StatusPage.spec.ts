@@ -69,7 +69,7 @@ describe('Payments', () => {
     it('[META] login user', async () => {
       const loginDialog = await NavigationPageObject.openLoginDialog();
       await DataStoreManipulator.loadUserKinds();
-      await DataStoreManipulator.sendValidationRequest(userInfo.email);
+      await DataStoreManipulator.performEmailVerification(userInfo.email);
 
       await loginDialog.fillForm({
         accessId: userInfo.accessId,
@@ -85,24 +85,24 @@ describe('Payments', () => {
     });
 
     it('should report an inactive subscription when no payment is made', async () => {
-      await expect(pageObject.getStatusMsgFieldValue()).toEqual('inActive');
-      await expect(pageObject.getValidUntilFieldValue()).toEqual('-');
+      await expect(StatusPageObject.getStatusMsgFieldValue()).toEqual('inActive');
+      await expect(StatusPageObject.getValidUntilFieldValue()).toEqual('-');
     });
 
     it('should not be able to process a payment before terms has been accepted', async () => {
-      await pageObject.waitForPaypalSimBtn();
+      await StatusPageObject.waitForPaypalSimBtn();
       await NavigationPageObject.statusPageTab.click();
 
-      await expect(pageObject.paypalBtn.isEnabled()).toBe(false);
+      await expect(StatusPageObject.paypalBtn.isEnabled()).toBe(false);
     });
 
     it('should be able to process a payment', async () => {
-      await pageObject.waitForPaypalSimBtn();
-      await pageObject.termsAcceptedChkBx.click();
-      await pageObject.triggerPaypalPayment();
+      await StatusPageObject.waitForPaypalSimBtn();
+      await StatusPageObject.termsAcceptedChkBx.click();
+      await StatusPageObject.triggerPaypalPayment();
       await NavigationPageObject.statusPageTab.click();
       await browser.wait(() => {
-        return pageObject.getTableCellText(1, TransactionTableCells.Status)
+        return StatusPageObject.getTableCellText(1, TransactionTableCells.Status)
           .then((status) => status === 'Completed', () => false);
       }, 10000, 'Payment could not be compleatly processed');
     });
@@ -117,10 +117,10 @@ describe('Payments', () => {
         throw 'Date invalid';
       }
 
-      const monthDiff = await pageObject.getPageDates()
+      const monthDiff = await StatusPageObject.getPageDates()
         .then(dates => diffMonth(dates.firstTrxDate, dates.validUntil));
 
-      await expect(pageObject.getStatusMsgFieldValue()).toEqual('active');
+      await expect(StatusPageObject.getStatusMsgFieldValue()).toEqual('active');
       await expect(monthDiff).toEqual(6);
     });
   });
