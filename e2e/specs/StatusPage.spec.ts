@@ -3,30 +3,8 @@ import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
 import { verifyBrowserLog } from '../utility';
 import { browser } from 'protractor';
-import { promise as wdp } from 'selenium-webdriver';
 
-import {
-  IExcelRow, downloadXsltTransactionExport, exportServiceUrl, makeRequest, sendPayment,
-} from '../PageObjects/ExportServieHelper';
-import {
-  IParsedDate,
-  StatusPageObject as pageObject,
-  TransactionTableCells,
-} from '../PageObjects/StatusPageObject';
-
-export async function getPageDatesAsExportedRow(id: string, email: string): wdp.Promise<IExcelRow> {
-  const dates = await pageObject.getPageDates();
-
-  return <IExcelRow>{
-    SysID: id,
-    DateActivation: dates.firstTrxDate,
-    SysID2: id,
-    DateStart: dates.firstTrxDate,
-    DateEnd: dates.validUntil,
-    TimeScheme: "24 Timers",
-    Comments: email,
-  };
-}
+import { IParsedDate, StatusPageObject, TransactionTableCells} from '../PageObjects/StatusPageObject';
 
 describe('Payments', () => {
 
@@ -125,49 +103,4 @@ describe('Payments', () => {
     });
   });
 
-  describe('xlsx export', () => {
-
-    it('should return 401 if not logged to export data', async () => {
-      const includeLoginSession = false;
-      const resp = await makeRequest(exportServiceUrl, includeLoginSession);
-
-      await expect(resp.statusCode).toBe(401);
-    });
-
-    it('should return 401 if user does not have admin rights', async () => {
-      const includeLoginSession = true;
-      const resp = await makeRequest(exportServiceUrl, includeLoginSession);
-
-      await expect(resp.statusCode).toBe(401);
-    });
-
-    it('should be possible to download an xlsx with active subscriptions', async () => {
-      await DataStoreManipulator.loadUserKinds();
-      await DataStoreManipulator.makeUserAdmin(userInfo.email);
-
-      const pageDates = await getPageDatesAsExportedRow(userInfo.accessId, userInfo.email);
-      const userRows = (await downloadXsltTransactionExport())
-        .filter(row => row.Comments === userInfo.email);
-      const userRow = userRows[0];
-
-      await expect(userRows.length).toBe(1);
-      await expect(pageDates).toEqual(userRow);
-    });
-
-    it('test', async () => {
-      // payment_date: '00:40:46 Jan 01, 2018 CET',
-      await sendPayment(userInfo.email, '15:40:46 Dec 31, 2017 PST');
-
-      await NavigationPageObject.mainPageTab.click();
-      await NavigationPageObject.statusPageTab.click();
-
-      const pageDates = await getPageDatesAsExportedRow(userInfo.accessId, userInfo.email);
-      const userRows = (await downloadXsltTransactionExport())
-        .filter(row => row.Comments === userInfo.email);
-      const userRow = userRows[0];
-
-      expect(userRows.length).toBe(1);
-      expect(pageDates).toEqual(userRow);
-    });
-  });
 });

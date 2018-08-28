@@ -14,7 +14,6 @@ import (
 	"Auth"
 	"DropboxService"
 	"Export/csv"
-	"Export/xlsx"
 	"IPN"
 	"MainPage"
 	"User"
@@ -47,7 +46,6 @@ func init() {
 	UserRest.IntegrateRoutes(router)
 	Auth.IntegrateRoutes(router)
 	IPN.IntegrateRoutes(router)
-	xlsx.IntegrateRoutes(router)
 	csv.IntegrateRoutes(router)
 	DropboxService.IntegrateRoutes(router)
 	http.Handle("/", router)

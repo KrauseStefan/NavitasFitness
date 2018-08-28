@@ -189,7 +189,7 @@ func ipnDoResponseTask(ctx context.Context, r *http.Request) error {
 			return errors.New("User does not exist")
 		}
 
-		var userKey *datastore.Key = nil
+		var userKey *datastore.Key
 		if user != nil {
 			log.Debugf(ctx, fmt.Sprintf("User key: %q", user.Key.Encode()))
 			userKey = user.Key
