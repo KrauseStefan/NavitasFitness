@@ -15,9 +15,9 @@
       "integrity": "sha512-fsOOY6tMQ3jCB2wD51XFDmmpgm4wVKkJECdcVRqapbJEa7awJDcr+SaH8toz+4r4KW8YQ3M7ybXMoSDo1QGewA=="
     },
     "lodash": {
-      "version": "4.17.4",
-      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz",
-      "integrity": "sha1-eCA6TRwyiuHYbcpkYONptX9AVa4="
+      "version": "4.17.10",
+      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.10.tgz",
+      "integrity": "sha512-UejweD1pDoXu+AD825lWwp4ZGtSwgnpZxb3JDViD7StjQz+Nb/6l093lx4OQ0foGWNRoc19mWy7BzL+UAK2iVg=="
     },
     "moment": {
       "version": "2.20.1",
@@ -29,7 +29,7 @@
       "resolved": "https://registry.npmjs.org/moment-timezone/-/moment-timezone-0.5.14.tgz",
       "integrity": "sha1-TrOP+VOLgBCLpGekWPPtQmjM/LE=",
       "requires": {
-        "moment": "2.20.1"
+        "moment": ">= 2.9.0"
       }
     },
     "typescript": {
