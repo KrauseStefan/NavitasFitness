@@ -3,7 +3,6 @@ import { DataStoreClientScripts } from './DataStoreClientScripts';
 
 import * as http from 'http';
 import { ElementFinder, ProtractorBrowser, browser as mainBrowser } from 'protractor';
-import { promise as wdp } from 'selenium-webdriver';
 
 let browser: ProtractorBrowser;
 let clientScriptsProxy: DataStoreClientScripts;
@@ -57,7 +56,7 @@ export class DataStoreManipulator {
     });
   }
 
-  public static async getUserEntityIdFromEmail(email: string): wdp.Promise<string> {
+  public static async getUserEntityIdFromEmail(email: string): Promise<string> {
     const key = await clientScriptsProxy.getValue('email', email, 'key');
     if (key) {
       return key;
@@ -66,7 +65,7 @@ export class DataStoreManipulator {
     throw `Unable to lookup user DB key, email used: ${email}`;
   }
 
-  public static async getUserEntityResetSecretFromEmail(email: string): wdp.Promise<string> {
+  public static async getUserEntityResetSecretFromEmail(email: string): Promise<string> {
     const secret = await clientScriptsProxy.getValue('email', email, 'PasswordResetSecret');
     if (secret) {
       return secret;
@@ -112,7 +111,7 @@ export class DataStoreManipulator {
     await this.deleteBtn.click();
 
     await retryCall(() => {
-      return browser.switchTo().alert().accept();
+      return Promise.resolve(browser.switchTo().alert().accept());
     }, 10);
   }
 

@@ -31,10 +31,10 @@ export class DialogPageObject {
     return (<any>Promise.all(promises));
   }
 
-  public safeClick(element: ElementFinder): Promise<any> {
-    const resolved = Promise.resolve(null);
-    return Promise.resolve(element.isDisplayed().then<any>((isDisplayed) => {
+  public safeClick(element: ElementFinder): Promise<void> {
+    const resolved = Promise.resolve(<void>undefined);
+    return Promise.resolve(element.isDisplayed().then((isDisplayed) => {
       return !isDisplayed ? resolved : element.click();
-    }, () => {/* */ }));
+    }, () => Promise.resolve<void>(<void>undefined)));
   }
 }

@@ -1,5 +1,4 @@
 import { browser } from 'protractor';
-import { promise as wdp } from 'selenium-webdriver';
 
 export interface IBrowserLog {
   level: {
@@ -11,7 +10,7 @@ export interface IBrowserLog {
   type: string;
 }
 
-export function verifyBrowserLog(expectedEntries: string[] = []): wdp.Promise<void> {
+export function verifyBrowserLog(expectedEntries: string[] = []): Promise<void> {
   return (<any>browser).manage().logs().get('browser').then((browserLogs: IBrowserLog[]) => {
 
     const filteredLog = browserLogs.filter((logEntry) => {
@@ -33,9 +32,9 @@ export function verifyBrowserLog(expectedEntries: string[] = []): wdp.Promise<vo
   });
 }
 
-export function waitForPageToLoad(): wdp.Promise<{}> {
-  function hasPageLoaded(): wdp.Promise<{}> {
-    return browser.executeAsyncScript(() => {
+export function waitForPageToLoad(): Promise<{}> {
+  function hasPageLoaded(): Promise<{}> {
+    return Promise.resolve(browser.executeAsyncScript(() => {
       const callback = arguments[arguments.length - 1];
 
       if ((<any>window).waitForAngular) {
@@ -51,13 +50,13 @@ export function waitForPageToLoad(): wdp.Promise<{}> {
       }
 
       callback(false);
-    });
+    }));
   }
 
-  return browser.wait(hasPageLoaded, 10000, 'Page did not load');
+  return Promise.resolve(browser.wait(hasPageLoaded, 10000, 'Page did not load'));
 }
 
-export function retryCall<T>(fn: () => wdp.IThenable<T>, count: number): Promise<T> {
+export function retryCall<T>(fn: () => Promise<T>, count: number): Promise<T> {
   return new Promise((resolve, reject) => {
     function doCall(actualCount: number) {
       fn().then((value) => resolve(value), (error) => {

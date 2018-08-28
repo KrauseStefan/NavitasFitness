@@ -1,6 +1,5 @@
 import { waitForPageToLoad } from '../utility';
 import { $, browser, by, element } from 'protractor';
-import { promise as wdp } from 'selenium-webdriver';
 
 export enum TransactionTableCells {
   Amount = 1,
@@ -23,7 +22,7 @@ function byModel(model: string) {
   return element(by.model(model));
 }
 
-function getModelValue(model: string): wdp.Promise<string> {
+function getModelValue(model: string): Promise<string> {
   return <any>byModel(model).evaluate(model);
 }
 
@@ -33,31 +32,31 @@ export class StatusPageObject {
 
   public static termsAcceptedChkBx = $('[name="termsAccepted"]');
 
-  public static getStatusMsgFieldValue(): wdp.Promise<string> {
+  public static getStatusMsgFieldValue(): Promise<string> {
     return <any>byModel('$ctrl.statusMessages[$ctrl.model.statusMsgKey]')
       .evaluate('$ctrl.model.statusMsgKey');
   }
 
-  public static getValidUntilFieldValue(): wdp.Promise<string> {
+  public static getValidUntilFieldValue(): Promise<string> {
     return getModelValue(this.subscriptionEndFieldModel);
   }
 
-  public static getTableCellText(row: number, cell: TransactionTableCells): wdp.Promise<string> {
+  public static getTableCellText(row: number, cell: TransactionTableCells): Promise<string> {
     if (row === 0) {
       throw "0 is an invalid index";
     }
     if (row > 0) {
-      return $(`tr:nth-child(${row}) td:nth-child(${cell})`).getText();
+      return Promise.resolve($(`tr:nth-child(${row}) td:nth-child(${cell})`).getText());
     } else {
-      return $(`tr:nth-last-child(${row * -1}) td:nth-child(${cell})`).getText();
+      return Promise.resolve($(`tr:nth-last-child(${row * -1}) td:nth-child(${cell})`).getText());
     }
   }
 
-  public static getFirstTransactionDate(): wdp.Promise<string> {
+  public static getFirstTransactionDate(): Promise<string> {
     return this.getTableCellText(1, TransactionTableCells.PaymentDate);
   }
 
-  public static async waitForPaypalSimBtn(): wdp.Promise<void> {
+  public static async waitForPaypalSimBtn(): Promise<boolean> {
     const btnIsDisplayed = () => StatusPageObject.paypalBtn.isDisplayed();
     return browser.wait(btnIsDisplayed, 5 * 1000, 'Paypall button did not display in time');
   }
@@ -75,8 +74,8 @@ export class StatusPageObject {
     await browser.waitForAngularEnabled(true);
   }
 
-  public static getPageDates() {
-    return wdp.all([
+  public static getPageDates(): Promise<{firstTrxDate: IParsedDate, validUntil:IParsedDate }> {
+    return Promise.all([
       this.getFirstTransactionDate(),
       this.getValidUntilFieldValue(),
     ]).then((values: string[]) => {
