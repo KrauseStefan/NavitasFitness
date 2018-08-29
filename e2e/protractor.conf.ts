@@ -101,7 +101,7 @@ export const config: Config = {
             '}';
           document.getElementsByTagName('head')[0].appendChild(style);
         });
-    };
+    }
     browser.addMockModule('disableCssAnimate', disableCssAnimate);
 
     by.addLocator('linkUiSref', (toState: string, optParentElement: HTMLElement) => {
@@ -115,7 +115,6 @@ export const config: Config = {
       }
       return null;
     });
-
 
     await DataStoreManipulator.init();
   },

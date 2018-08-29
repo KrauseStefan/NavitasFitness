@@ -74,7 +74,7 @@ export class StatusPageObject {
     await browser.waitForAngularEnabled(true);
   }
 
-  public static getPageDates(): Promise<{firstTrxDate: IParsedDate, validUntil:IParsedDate }> {
+  public static getPageDates(): Promise<{firstTrxDate: IParsedDate, validUntil: IParsedDate }> {
     return Promise.all([
       this.getFirstTransactionDate(),
       this.getValidUntilFieldValue(),
