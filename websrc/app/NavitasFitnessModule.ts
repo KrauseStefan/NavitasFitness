@@ -9,7 +9,7 @@ import { AdminPageComponent, adminRouterState } from './PageComponents/AdminPage
 import { MainPageComponent, mainPageRouterState } from './PageComponents/MainPage/MainPage';
 import { nfResetOnChange } from './PageComponents/RegistrationForm/nfResetOnChange';
 import { nfShouldEqual } from './PageComponents/RegistrationForm/nfShouldEqual';
-import { UserStatusComponent, statusRouterState } from './PageComponents/UserStatus/UserStatus';
+import { statusRouterState, UserStatusComponent } from './PageComponents/UserStatus/UserStatus';
 
 import { DefaultErrorHandlingModule } from './DefaultErrorHandling';
 
@@ -39,7 +39,7 @@ export const NavitasFitnessModule = module('NavitasFitness', [
     $stateProvider: ng.ui.IStateProvider,
     $urlRouterProvider: ng.ui.IUrlRouterProvider,
     $locationProvider: ng.ILocationProvider,
-    $sceDelegateProvider: ng.ISCEDelegateProvider
+    $sceDelegateProvider: ng.ISCEDelegateProvider,
   ) => {
     $locationProvider.html5Mode(true);
     $urlRouterProvider.otherwise('/main-page/');
@@ -60,7 +60,7 @@ export const NavitasFitnessModule = module('NavitasFitness', [
   })
 
   .run(($window: ng.IWindowService, $q: ng.IQService) => {
-    $window["Promise"] = $q;
+    $window['Promise'] = $q;
   })
 
   .service('userService', UserService)

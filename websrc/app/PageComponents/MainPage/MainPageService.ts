@@ -1,4 +1,5 @@
 import '../../Components/CkEditor/CkEditor';
+import { MainPageDTO } from './MainPageDTO';
 
 export class MainPageService {
 
@@ -20,11 +21,4 @@ export class MainPageService {
     return this.$http.put(this.serviceUrl, data);
   }
 
-}
-
-export class MainPageDTO {
-  public content: String;
-  public date: String;
-  public key: String;
-  public lastEditedBy: String;
 }

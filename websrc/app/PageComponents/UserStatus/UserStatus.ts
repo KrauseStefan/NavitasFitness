@@ -1,5 +1,5 @@
-import { IUserDTO, UserService } from '../UserService';
 import * as moment from 'moment';
+import { IUserDTO, UserService } from '../UserService';
 
 export const statusRouterState: angular.ui.IState = {
   template: '<user-status></user-status>',
@@ -37,7 +37,7 @@ class UserStatus {
     this.moniterUserCredentials();
   }
 
-  public isLocalhost(): Boolean {
+  public isLocalhost(): boolean {
     return this.$location.host().indexOf('localhost') !== -1;
   }
 
@@ -53,7 +53,7 @@ class UserStatus {
     const storedTimeStamp = parseInt(localStorage.getItem(this.paymentStorageKey), 10);
 
     if (!isNaN(storedTimeStamp) && storedTimeStamp > new Date().getTime()) {
-      let confirmDialog = this.$mdDialog
+      const confirmDialog = this.$mdDialog
         .confirm()
         .title('Possible of multiple payments')
         .textContent(`A payment has been started recently from this browser.
@@ -77,7 +77,7 @@ class UserStatus {
 
   public getTransactionsUpdate() {
     this.$http.get<ITransactionEntry[]>('/rest/user/transactions').then((res) => {
-      this.model.transactionHistory = res.data.map(txn => {
+      this.model.transactionHistory = res.data.map((txn) => {
         txn.paymentDateParsed = moment(txn.paymentDate).format(this.dateFormat);
         return txn;
       });
@@ -112,7 +112,7 @@ interface IUserStatusModel {
   userNameStr: string;
   userEmail: string;
   statusMsgKey: string;
-  transactionHistory: Array<ITransactionEntry>;
+  transactionHistory: ITransactionEntry[];
   validUntill: string;
 }
 

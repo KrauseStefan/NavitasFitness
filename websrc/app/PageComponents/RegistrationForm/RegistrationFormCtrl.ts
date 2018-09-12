@@ -1,4 +1,5 @@
 import { IUserDTO, UserService } from '../UserService';
+import { RegistrationFormModel } from './RegistrationFormModel';
 
 import IDialogService = ng.material.IDialogService;
 import IToastService = ng.material.IToastService;
@@ -9,14 +10,6 @@ interface IRegistrationError {
   type: 'invalid' | 'unique_constraint';
 }
 
-export class RegistrationFormModel implements IUserDTO {
-  public name = '';
-  public email = '';
-  public password = '';
-  public passwordRepeat = '';
-  public accessId = '';
-}
-
 export class RegistrationForm implements ng.IController {
 
   constructor(
@@ -25,7 +18,7 @@ export class RegistrationForm implements ng.IController {
       cancel: () => void,
       model: RegistrationFormModel,
       errorMsg: any,
-      RegistrationForm: {[field in keyof RegistrationFormModel]: ng.INgModelController } & ng.IFormController
+      RegistrationForm: {[field in keyof RegistrationFormModel]: ng.INgModelController } & ng.IFormController,
     } & ng.IScope,
     private userService: UserService,
     private $mdDialog: IDialogService,
@@ -72,7 +65,7 @@ export class RegistrationForm implements ng.IController {
     const initial: { [key: string]: string } = {};
 
     return Object.keys(this.$scope.RegistrationForm)
-      .filter(i => i[0] !== '$')
+      .filter((i) => i[0] !== '$')
       .reduce((acc, i) => {
         acc[i.toLowerCase()] = i;
         return acc;
@@ -96,7 +89,6 @@ export class RegistrationForm implements ng.IController {
         .title('Confirmation e-mail sent')
         .textContent(`Please check your e-mail inbox to compleate registration`)
         .ariaLabel('Confirmation e-mail sent')
-        .ok('OK')
-    );
+        .ok('OK'));
   }
 }

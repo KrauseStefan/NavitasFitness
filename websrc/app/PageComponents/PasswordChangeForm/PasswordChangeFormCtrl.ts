@@ -45,8 +45,7 @@ export class PasswordChangeFormCtrl {
           this.$scope.ResetPasswordForm.password.$setValidity('UnknownError', false);
           this.$scope.ResetPasswordForm.passwordRepeat.$setValidity('UnknownError', false);
         }
-      }
-    );
+      });
   }
 
   public cancel() {

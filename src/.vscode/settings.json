@@ -1,5 +1,9 @@
 {
   "search.exclude": {
     "**/webapp": true
-  }
+  },
+  "editor.tabSize": 2,
+  "go.autocompleteUnimportedPackages": true,
+  "go.formatTool": "gofmt",
+  "go.lintTool": "gometalinter"
 }

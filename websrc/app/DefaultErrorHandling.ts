@@ -20,9 +20,9 @@ export const DefaultErrorHandlingModule = module('DefaultErrorHandling', ['ngMat
             const toast = $mdToast
               .simple()
               .hideDelay(0)
-              .textContent("Oops! An error occurred :(")
+              .textContent('Oops! An error occurred :(')
               .highlightAction(true)
-              .action("Dismiss");
+              .action('Dismiss');
 
             $mdToast.show(toast);
           }

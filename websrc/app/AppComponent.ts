@@ -1,8 +1,8 @@
+import { element, isDefined, isObject } from 'angular';
 import { LoginForm } from './PageComponents/LoginForm/LoginForm';
 import { KeyFieldName, PasswordChangeFormCtrl } from './PageComponents/PasswordChangeForm/PasswordChangeFormCtrl';
 import { RegistrationForm } from './PageComponents/RegistrationForm/RegistrationFormCtrl';
 import { IUserDTO, UserService } from './PageComponents/UserService';
-import { element, isDefined, isObject } from 'angular';
 
 class AppComponentController {
 
@@ -23,7 +23,6 @@ class AppComponentController {
 
   constructor(
     private $mdDialog: ng.material.IDialogService,
-    private $mdMedia: ng.material.IMedia,
     private $location: ng.ILocationService,
     private $scope: ng.IScope,
     private $state: ng.ui.IStateService,
@@ -43,7 +42,7 @@ class AppComponentController {
   }
 
   public updateSelectedTab() {
-    let index = this.tabs.findIndex(i => i.id === this.$state.current.name);
+    const index = this.tabs.findIndex((i) => i.id === this.$state.current.name);
     if (index === -1) {
       this.selectedTabIndex = undefined;
     } else if (!this.tabs[index].disabled()) {

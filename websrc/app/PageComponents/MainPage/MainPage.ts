@@ -1,5 +1,6 @@
 import { IUserDTO, UserService } from '../UserService';
-import { MainPageDTO, MainPageService } from './MainPageService';
+import { MainPageEntry } from './MainPageEntry';
+import { MainPageService } from './MainPageService';
 
 export const mainPageRouterState: angular.ui.IState = {
   template: '<main-page></main-page>',
@@ -26,7 +27,7 @@ export class MainPage {
     });
 
     mainPageService.getMainPage()
-      .then(mainPage => this.entry = new MainPageEntry(mainPage));
+      .then((mainPage) => this.entry = new MainPageEntry(mainPage));
   }
 
   public saveEntry(entry: MainPageEntry) {
@@ -39,13 +40,3 @@ export const MainPageComponent = {
   controller: MainPage,
   templateUrl: '/PageComponents/MainPage/MainPage.html',
 };
-
-export class MainPageEntry {
-
-  public mainPage: MainPageDTO;
-  public enabled = false;
-
-  constructor(mainPage: MainPageDTO = new MainPageDTO()) {
-    this.mainPage = mainPage;
-  }
-}

@@ -1,6 +1,6 @@
+import { element } from 'angular';
 import { ResetPasswordFormController } from '../ResetPasswordForm/ResetPasswordForm';
 import { IBaseUserDTO, UserService } from '../UserService';
-import { element } from 'angular';
 
 import IDialogService = angular.material.IDialogService;
 import IHttpPromiseCallbackArg = angular.IHttpPromiseCallbackArg;

@@ -42,8 +42,7 @@ export class ResetPasswordFormController {
         .title('Password rest e-mail sent')
         .textContent(`Please check your e-mail inbox for instructions on how to complete the password reset procedure.`)
         .ariaLabel('Confirmation e-mail sent')
-        .ok('OK')
-    );
+        .ok('OK'));
   }
 
 }

@@ -1,4 +1,5 @@
-import { IComponentOptions, copy, material } from 'angular';
+import { copy, IComponentOptions, material } from 'angular';
+// tslint:disable-next-line no-implicit-dependencies
 import { selection } from 'ui-grid';
 
 type IGridOptions = selection.IGridOptions & uiGrid.IGridOptionsOf<IUser>;
@@ -49,12 +50,12 @@ export class AdminPageCtrl {
 
       gridApi.selection.on.rowSelectionChanged(
         this.$scope,
-        () => displayTransactions()
+        () => displayTransactions(),
       );
 
       gridApi.selection.on.rowSelectionChangedBatch(
         this.$scope,
-        () => displayTransactions()
+        () => displayTransactions(),
       );
     },
     rowHeight: 42,
@@ -70,7 +71,7 @@ export class AdminPageCtrl {
     private $scope: ng.IScope,
     private $http: ng.IHttpService,
     private uiGridConstants: uiGrid.IUiGridConstants,
-    private $mdToast: material.IToastService
+    private $mdToast: material.IToastService,
   ) {
     const headerHeight = 33;
     const filterHeight = 28;
@@ -122,7 +123,7 @@ export class AdminPageCtrl {
 
   public getTransactions(key: string): ng.IPromise<ITransaction[]> {
     this.transactions = [];
-    return this.$http.get<ITransaction[]>(`/rest/user/transactions/${key}`).then(res => {
+    return this.$http.get<ITransaction[]>(`/rest/user/transactions/${key}`).then((res) => {
       this.transactionsCache[key] = res.data;
       return res.data;
     }, (resp: ng.IHttpResponse<string>) => {
@@ -138,7 +139,7 @@ export class AdminPageCtrl {
   public async displayTransactions(selectedUsers: IUser[]) {
     this.selectedUsers = selectedUsers;
     const transactionsPromises = selectedUsers
-      .map(row => row.key)
+      .map((row) => row.key)
       .map((key) => {
         const cacheHit = this.transactionsCache[key];
         if (cacheHit) {
@@ -163,11 +164,11 @@ export class AdminPageCtrl {
   }
 
   public mergeSelected() {
-    const userKeys = this.selectedUsers.map(i => i.key).join(';');
+    const userKeys = this.selectedUsers.map((i) => i.key).join(';');
 
     this.$http.post(`/rest/user/merge/${userKeys}`, {})
-      .then(resp => this.$mdToast.show(this.$mdToast.simple().textContent('Success')))
-      .catch(resp => {
+      .then(() => this.$mdToast.show(this.$mdToast.simple().textContent('Success')))
+      .catch((resp) => {
         this.showMessage(resp.data);
         return this.$q.resolve();
       });
@@ -175,17 +176,17 @@ export class AdminPageCtrl {
 
   public deleteInactiveUsers() {
     this.filterInactiveUsers()
-      .then(keys => {
+      .then((keys) => {
         if (keys.length > 0) {
           const usersToDelete = keys.join(';');
           return this.$http.delete(`/rest/user/${usersToDelete}`)
-            .then(resp => resp.data);
+            .then((resp) => resp.data);
         } else {
-          return "No duplicated users found";
+          return 'No duplicated users found';
         }
       })
-      .then(data => this.showMessage(JSON.stringify(data)))
-      .catch(data => {
+      .then((data) => this.showMessage(JSON.stringify(data)))
+      .catch((data) => {
         this.showMessage(data);
         return this.$q.resolve();
       });
@@ -193,11 +194,11 @@ export class AdminPageCtrl {
 
   public deselectActiveUsers() {
     this.$q.all({ keys: this.filterInactiveUsers(), gridApi: this.gridApiPromise })
-      .then(data => {
+      .then((data) => {
         const selectionGridApi = data.gridApi.selection;
         const keys = data.keys;
         const usersToSelect = this.selectedUsers
-          .filter(user => keys.indexOf(user.key) !== -1);
+          .filter((user) => keys.indexOf(user.key) !== -1);
 
         selectionGridApi.clearSelectedRows();
 
@@ -207,17 +208,17 @@ export class AdminPageCtrl {
 
         this.displayTransactions(usersToSelect);
       })
-      .catch(data => {
+      .catch((data) => {
         this.showMessage(data);
         return this.$q.resolve();
       });
   }
 
   private filterInactiveUsers(): ng.IPromise<string[]> {
-    const keys = this.selectedUsers.map(i => i.key).join(';');
+    const keys = this.selectedUsers.map((i) => i.key).join(';');
 
     return this.$http.get<string[]>(`/rest/user/duplicated-inactive/${keys}`)
-      .then(resp => resp.data);
+      .then((resp) => resp.data);
   }
 
 }

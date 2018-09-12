@@ -11,7 +11,7 @@
      * Any rules specified here will override those from the base config we are extending
      */
     "quotemark": [
-      "single"
+      true, "single"
     ],
     "no-string-literal": false,
     "whitespace": [
@@ -22,7 +22,8 @@
       "check-separator",
       "check-type"
     ],
-    "object-literal-sort-keys": false
+    "object-literal-sort-keys": false,
+    "no-angle-bracket-type-assertion": false
   },
   "rulesDirectory": [
     /*

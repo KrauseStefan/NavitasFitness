@@ -6,7 +6,7 @@ export class CkEditorComponent {
 
   public content: string;
   public isEditable: boolean = false;
-  public unsubscribe: Function = noop;
+  public unsubscribe = noop;
   public editor: CKEDITOR.editor = null;
 
   constructor(private $scope: ng.IScope, private $element: ng.IAugmentedJQuery) {

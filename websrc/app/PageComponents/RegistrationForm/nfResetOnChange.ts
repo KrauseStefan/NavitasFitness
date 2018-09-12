@@ -22,7 +22,7 @@ const directiveFactoryFn: IDirectiveFactory = () => {
       const errorsToReset = errorsToResetStr
         .substring(start, end)
         .split(',')
-        .map(error => error.trim());
+        .map((error) => error.trim());
 
       errorsToReset.forEach((error) => {
         ngModel.$validators[error] = (modelValue: string, viewValue: string) => {
