@@ -29,15 +29,15 @@ export class DataStoreClientScripts {
 
   public getRow(columnToMatch: string, matchValue: string): HTMLTableRowElement {
     const columnIndex = this.getColumnNumber(columnToMatch);
-    const tdElm = $(`.ae-table.ae-settings-block td:nth-child(${columnIndex + 1})`)
-      .toArray()
+    const tdElements = document.querySelectorAll(`.ae-table.ae-settings-block td:nth-child(${columnIndex + 1})`);
+    const tdElement =  Array.prototype.slice.call(tdElements)
       .find((col) => col.innerHTML.trim() === matchValue);
 
-    if (!tdElm) {
+    if (!tdElement) {
       throw new Error('Datarow does not exist');
     }
 
-    return tdElm.parentElement as HTMLTableRowElement;
+    return tdElement.parentElement as HTMLTableRowElement;
   }
 
   public getValue(columnToMatch: string, matchValue: string, columnToGet: string) {
@@ -72,9 +72,9 @@ export class DataStoreClientScripts {
   }
 
   private getColumnCache(): string[] {
-    if (!this.columnCache) {
-      this.columnCache = $('.ae-table.ae-settings-block th')
-        .toArray()
+    if (this.columnCache === null) {
+      const columnHeaders = document.querySelectorAll('.ae-table.ae-settings-block th');
+      return this.columnCache = Array.prototype.slice.call(columnHeaders)
         .map(this.getFieldText)
         .map((str) => str.toLowerCase());
     }

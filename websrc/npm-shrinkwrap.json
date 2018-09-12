@@ -53,9 +53,9 @@
       "dev": true
     },
     "@types/es6-shim": {
-      "version": "0.31.35",
-      "resolved": "https://registry.npmjs.org/@types/es6-shim/-/es6-shim-0.31.35.tgz",
-      "integrity": "sha512-jecKfIChNeUKKaQ5tWSzK69FDhW/hegDdJIkLXHJfLVDNjoJOdDtNbCnmK8V2IPTgVVEOi+FLhljbvDix8EDtA==",
+      "version": "0.31.37",
+      "resolved": "https://registry.npmjs.org/@types/es6-shim/-/es6-shim-0.31.37.tgz",
+      "integrity": "sha512-D9BRx0HXsIpa9Ldh/NcHYgL/PtfchL4CC0MtbGliWsTYDuzm9vl6/QeTigNxIhbSBai7QIuv+etQ9BtlFN7Uqw==",
       "dev": true
     },
     "@types/jquery": {
@@ -5311,9 +5311,9 @@
       "optional": true
     },
     "typescript": {
-      "version": "2.6.2",
-      "resolved": "https://registry.npmjs.org/typescript/-/typescript-2.6.2.tgz",
-      "integrity": "sha1-PFtv1/beCRQmkCfwPAlGdY92c6Q=",
+      "version": "3.0.3",
+      "resolved": "https://registry.npmjs.org/typescript/-/typescript-3.0.3.tgz",
+      "integrity": "sha512-kk80vLW9iGtjMnIv11qyxLqZm20UklzuR2tL0QAnDIygIUIemcZMxlMWudl9OOt76H3ntVzcTiddQ1/pAAJMYg==",
       "dev": true
     },
     "uglify-to-browserify": {

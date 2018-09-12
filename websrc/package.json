@@ -15,7 +15,7 @@
     "copy:libs": "node buildenv/copyLibs.js",
     "copy:ui-grid-fonts": "shx mkdir ../src/NavitasFitness/webapp/styles && shx cp node_modules/angular-ui-grid/ui-grid.woff ../src/NavitasFitness/webapp/styles/",
     "test": "npm-run-all test:*",
-    "test:tslint": "tslint --project . --type-check",
+    "test:tslint": "tslint --project .",
     "clean": "shx rm -rf ../src/NavitasFitness/webapp/* && npm run creatWebappDir",
     "webserver": "node buildenv/connect.server.js"
   },
@@ -28,7 +28,7 @@
     "@types/angular-material": "^1.1.57",
     "@types/angular-ui-router": "^1.1.40",
     "@types/ckeditor": "0.0.34",
-    "@types/es6-shim": "^0.31.35",
+    "@types/es6-shim": "^0.31.37",
     "@types/ui-grid": "0.0.40",
     "connect": "^3.6.0",
     "connect-modrewrite": "^0.9.0",
@@ -41,7 +41,7 @@
     "shx": "^0.2.2",
     "ts-loader": "^3.2.0",
     "tslint": "^5.11.0",
-    "typescript": "^2.6.2",
+    "typescript": "^3.0.3",
     "webpack": "^3.10.0"
   },
   "dependencies": {
