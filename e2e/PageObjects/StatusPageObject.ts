@@ -1,5 +1,5 @@
-import { waitForPageToLoad } from '../utility';
 import { $, browser, by, element } from 'protractor';
+import { waitForPageToLoad } from '../utility';
 
 export enum TransactionTableCells {
   Amount = 1,
@@ -43,7 +43,7 @@ export class StatusPageObject {
 
   public static getTableCellText(row: number, cell: TransactionTableCells): Promise<string> {
     if (row === 0) {
-      throw "0 is an invalid index";
+      throw new Error('0 is an invalid index');
     }
     if (row > 0) {
       return Promise.resolve($(`tr:nth-child(${row}) td:nth-child(${cell})`).getText());

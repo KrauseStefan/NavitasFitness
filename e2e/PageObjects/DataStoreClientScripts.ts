@@ -3,14 +3,14 @@ import { ElementFinder, ProtractorBrowser } from 'protractor';
 export class DataStoreClientScripts {
 
   public static getProxy(browser: ProtractorBrowser): DataStoreClientScripts {
-    this.proxy = {} as DataStoreClientScripts;
-    Object.getOwnPropertyNames(DataStoreClientScripts.prototype)
-      .forEach(name => {
-        (<any>this.proxy)[name] = (...args) => {
+    this.proxy = Object.getOwnPropertyNames(DataStoreClientScripts.prototype)
+      .reduce((acc, name) => {
+        acc[name] = (...args) => {
           // console.log(`clientScripts.${name}.apply(clientScripts, `, args, ')');
           return browser.executeScript(`return clientScripts.${name}.apply(clientScripts, arguments)`, ...args);
         };
-      });
+        return acc;
+      }, <DataStoreClientScripts><any>{});
 
     return this.proxy;
   }
@@ -21,7 +21,7 @@ export class DataStoreClientScripts {
   public getColumnNumber(columnToMatch: string): number {
     const index = this.getColumnCache().indexOf(columnToMatch.toLowerCase());
     if (index < 0) {
-      throw `Could not lookup column: ${columnToMatch}`;
+      throw new Error(`Could not lookup column: ${columnToMatch}`);
     }
 
     return index;
@@ -31,10 +31,10 @@ export class DataStoreClientScripts {
     const columnIndex = this.getColumnNumber(columnToMatch);
     const tdElm = $(`.ae-table.ae-settings-block td:nth-child(${columnIndex + 1})`)
       .toArray()
-      .find(col => col.innerHTML.trim() === matchValue);
+      .find((col) => col.innerHTML.trim() === matchValue);
 
     if (!tdElm) {
-      throw "Datarow does not exist";
+      throw new Error('Datarow does not exist');
     }
 
     return tdElm.parentElement as HTMLTableRowElement;
@@ -76,7 +76,7 @@ export class DataStoreClientScripts {
       this.columnCache = $('.ae-table.ae-settings-block th')
         .toArray()
         .map(this.getFieldText)
-        .map(str => str.toLowerCase());
+        .map((str) => str.toLowerCase());
     }
     return this.columnCache;
   }

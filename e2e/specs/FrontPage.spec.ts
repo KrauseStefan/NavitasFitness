@@ -3,8 +3,8 @@ import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { FrontPageObject } from '../PageObjects/FrontPageObject';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
 
+import { browser, Key } from 'protractor';
 import { verifyBrowserLog } from '../utility';
-import { Key, browser } from 'protractor';
 
 const userInfo = {
   name: 'front-a',

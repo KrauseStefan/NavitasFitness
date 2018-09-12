@@ -1,6 +1,9 @@
-import { retryCall } from '../utility';
 import { $, ElementFinder } from 'protractor';
-export type formNameValuesMap = { [name: string]: string }
+import { retryCall } from '../utility';
+
+export interface IFormNameValuesMap {
+  [name: string]: string;
+}
 
 export class DialogPageObject {
 
@@ -9,7 +12,7 @@ export class DialogPageObject {
     await field.sendKeys(value);
 
     return new Promise<string>((resolve, reject) => {
-      field.getAttribute('value').then(text => {
+      field.getAttribute('value').then((text) => {
         if (value === text) {
           return resolve(value);
         }
@@ -21,8 +24,8 @@ export class DialogPageObject {
 
   public formContainer = $('md-dialog');
 
-  public fillForm(formValues: formNameValuesMap): Promise<void> {
-    const promises = Object.keys(formValues).map(name => {
+  public fillForm(formValues: IFormNameValuesMap): Promise<void> {
+    const promises = Object.keys(formValues).map((name) => {
       const field = this.formContainer.$(`input[name="${name}"]`);
       // Sometimes form fields fail to sendKeys (one might be missing)
       // https://github.com/angular/protractor/issues/698

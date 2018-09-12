@@ -3,8 +3,8 @@ import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
 import { RegistrationDialogPageObject } from '../PageObjects/RegistrationDialogPageObject';
 
-import { verifyBrowserLog } from '../utility';
 import { browser, protractor } from 'protractor';
+import { verifyBrowserLog } from '../utility';
 
 const userInfo = {
   name: 'test',
@@ -126,14 +126,14 @@ describe('User Autentication', () => {
     it('should not be able to verify overriden user with different email', async () => {
       await DataStoreManipulator.sendValidationRequestFromKey(keyUserDifferntEmail).then(
         () => { fail(); },
-        () => { /* success */ }
+        () => { /* success */ },
       );
     });
 
     it('should not be able to verify overriden user with different accessId', async () => {
       await DataStoreManipulator.sendValidationRequestFromKey(keyUserDifferntAccessId).then(
         () => { fail(); },
-        () => { /* success */ }
+        () => { /* success */ },
       );
     });
 

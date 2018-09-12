@@ -1,6 +1,6 @@
+import { $, by, element } from 'protractor';
 import { LoginDialogPageObject } from './LoginDialogPageObject';
 import { RegistrationDialogPageObject } from './RegistrationDialogPageObject';
-import { $, by, element } from 'protractor';
 
 export class NavigationPageObject {
 

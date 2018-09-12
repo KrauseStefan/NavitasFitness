@@ -3,7 +3,7 @@ import { browser } from 'protractor';
 export interface IBrowserLog {
   level: {
     name: string, // SERVERE
-    value: number
+    value: number,
   };
   message: string;
   timestamp: number;
@@ -23,11 +23,11 @@ export function verifyBrowserLog(expectedEntries: string[] = []): Promise<void> 
     if (filteredLog.length > 0) {
       const entries = filteredLog
         .map((entry) => `[${browserLogs[0].type}][${browserLogs[0].level.name}] ${browserLogs[0].message}`);
-      throw `Error was thrown during test execution:\n [${entries.join('\n')}`;
+      throw new Error(`Error was thrown during test execution:\n [${entries.join('\n')}`);
     }
 
     if (expectedEntries.length > 0) {
-      throw `[Expected log to contain entry, but it did not: ${expectedEntries.join(', ')}]`;
+      throw new Error(`[Expected log to contain entry, but it did not: ${expectedEntries.join(', ')}]`);
     }
   });
 }

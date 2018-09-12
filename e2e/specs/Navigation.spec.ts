@@ -1,6 +1,6 @@
+import { browser } from 'protractor';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
 import { verifyBrowserLog } from '../utility';
-import { browser } from 'protractor';
 
 describe('Navigation tests', () => {
 

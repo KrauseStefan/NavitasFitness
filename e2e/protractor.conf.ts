@@ -1,6 +1,5 @@
 import * as commandLineArgs from 'command-line-args';
-import { Config, ProtractorBy, browser } from 'protractor';
-import { PluginConfig } from 'protractor/built/plugins';
+import { browser, Config, PluginConfig, ProtractorBy } from 'protractor';
 
 import { DataStoreManipulator } from './PageObjects/DataStoreManipulator';
 
@@ -66,7 +65,7 @@ export const config: Config = {
     browserName: 'chrome',
     maxInstances: 5,
     shardTestFiles: cmdOpts.parallel,
-    chromeOptions: { args: ["--headless", "--disable-gpu", "--window-size=1920,1080"] },
+    chromeOptions: { args: ['--headless', '--disable-gpu', '--window-size=1920,1080'] },
     // }, {
     // browserName: 'edge',
     // maxInstances: 1,
@@ -118,7 +117,7 @@ export const config: Config = {
 
     await DataStoreManipulator.init();
   },
-  onComplete: async () => await DataStoreManipulator.destroy(),
+  onComplete: () => DataStoreManipulator.destroy(),
   plugins: [utilsPlugin],
   // seleniumArgs: [
   // '-Dwebdriver.gecko.driver=./node_modules/protractor/node_modules/webdriver-manager/selenium/geckodriver-v0.11.1',

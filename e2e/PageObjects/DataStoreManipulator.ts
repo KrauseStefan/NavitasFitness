@@ -2,7 +2,7 @@ import { retryCall, waitForPageToLoad } from '../utility';
 import { DataStoreClientScripts } from './DataStoreClientScripts';
 
 import * as http from 'http';
-import { ElementFinder, ProtractorBrowser, browser as mainBrowser } from 'protractor';
+import { browser as mainBrowser, ElementFinder, ProtractorBrowser } from 'protractor';
 
 let browser: ProtractorBrowser;
 let clientScriptsProxy: DataStoreClientScripts;
@@ -62,7 +62,7 @@ export class DataStoreManipulator {
       return key;
     }
 
-    throw `Unable to lookup user DB key, email used: ${email}`;
+    throw new Error(`Unable to lookup user DB key, email used: ${email}`);
   }
 
   public static async getUserEntityResetSecretFromEmail(email: string): Promise<string> {
@@ -71,7 +71,7 @@ export class DataStoreManipulator {
       return secret;
     }
 
-    throw `Unable to lookup reset secret, email used: ${email}`;
+    throw new Error(`Unable to lookup reset secret, email used: ${email}`);
   }
 
   public static async removeUserByAccessId(accessId: string): Promise<void> {

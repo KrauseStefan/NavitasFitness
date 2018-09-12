@@ -6,4 +6,4 @@ export class FrontPageObject {
   public static adminSaveBtn = $('button[ng-click="$ctrl.saveEntry($ctrl.entry)"]');
 
   public static editableArea = $('ck-editor .editorContent');
-};
+}

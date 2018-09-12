@@ -1,11 +1,11 @@
 import { AlerDialogPageObject } from '../PageObjects/AlertDialogPageObject';
 import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
-import { ResetPasswordDialogPageObject } from '../PageObjects/LoginDialogPageObject';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
+import { ResetPasswordDialogPageObject } from '../PageObjects/ResetPasswordDialogPageObject';
 
-import { verifyBrowserLog } from '../utility';
 import { browser } from 'protractor';
 import { stringify } from 'querystring';
+import { verifyBrowserLog } from '../utility';
 
 describe('Reset password', () => {
 

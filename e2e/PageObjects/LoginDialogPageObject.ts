@@ -1,4 +1,5 @@
 import { DialogPageObject } from './DialogPageObject';
+import { ResetPasswordDialogPageObject } from './ResetPasswordDialogPageObject';
 
 export class LoginDialogPageObject extends DialogPageObject {
 
@@ -15,8 +16,4 @@ export class LoginDialogPageObject extends DialogPageObject {
     this.resetButton.click();
     return new ResetPasswordDialogPageObject();
   }
-}
-
-export class ResetPasswordDialogPageObject extends DialogPageObject {
-  public resetButton = this.formContainer.$('.md-primary');
 }

@@ -1,9 +1,9 @@
+import { browser } from 'protractor';
 import { AlerDialogPageObject } from '../PageObjects/AlertDialogPageObject';
 import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
-import { verifyBrowserLog } from '../utility';
-import { browser } from 'protractor';
 import { IParsedDate, StatusPageObject, TransactionTableCells} from '../PageObjects/StatusPageObject';
+import { verifyBrowserLog } from '../utility';
 
 describe('Payments', () => {
 
@@ -91,11 +91,11 @@ describe('Payments', () => {
         } else if (start.year + 1 === end.year) {
           return (end.month + 12) - start.month;
         }
-        throw 'Date invalid';
+        throw new Error('Date invalid');
       }
 
       const monthDiff = await StatusPageObject.getPageDates()
-        .then(dates => diffMonth(dates.firstTrxDate, dates.validUntil));
+        .then((dates) => diffMonth(dates.firstTrxDate, dates.validUntil));
 
       await expect(StatusPageObject.getStatusMsgFieldValue()).toEqual('active');
       await expect(monthDiff).toEqual(6);
