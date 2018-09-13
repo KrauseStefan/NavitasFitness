@@ -1,7 +1,6 @@
 
 export class MainPageDTO {
-  public content: string;
-  public date: string;
-  public key: string;
-  public lastEditedBy: string;
+  public content = '';
+  public date = '';
+  public lastEditedBy = '';
 }

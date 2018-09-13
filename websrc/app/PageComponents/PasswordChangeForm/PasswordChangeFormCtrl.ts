@@ -2,7 +2,7 @@ import { UserService } from '../UserService';
 
 import IDialogService = angular.material.IDialogService;
 
-export const KeyFieldName = 'passwordResetKey';
+export const keyFieldName = 'passwordResetKey';
 export const secretFieldName = 'passwordResetSecret';
 
 export class PasswordChangeFormCtrl {
@@ -17,7 +17,7 @@ export class PasswordChangeFormCtrl {
     private $mdDialog: IDialogService) {
 
     const searchParams = this.$location.search();
-    this.resetKey = searchParams[KeyFieldName];
+    this.resetKey = searchParams[keyFieldName];
     this.resetSecret = searchParams[secretFieldName];
 
     $scope.model = {

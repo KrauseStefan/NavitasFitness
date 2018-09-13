@@ -1,6 +1,6 @@
 import { element, isDefined, isObject } from 'angular';
 import { LoginForm } from './PageComponents/LoginForm/LoginForm';
-import { KeyFieldName, PasswordChangeFormCtrl } from './PageComponents/PasswordChangeForm/PasswordChangeFormCtrl';
+import { keyFieldName, PasswordChangeFormCtrl } from './PageComponents/PasswordChangeForm/PasswordChangeFormCtrl';
 import { RegistrationForm } from './PageComponents/RegistrationForm/RegistrationFormCtrl';
 import { IUserDTO, UserService } from './PageComponents/UserService';
 
@@ -18,8 +18,8 @@ class AppComponentController {
     disabled: () => !this.isLoggedIn(),
   }];
 
-  public selectedTabIndex: number;
-  private loggedInUser: IUserDTO;
+  public selectedTabIndex: number = 0;
+  private loggedInUser: IUserDTO | null = null;
 
   constructor(
     private $mdDialog: ng.material.IDialogService,
@@ -31,11 +31,11 @@ class AppComponentController {
     this.updateSelectedTab();
 
     const searchParams = this.$location.search();
-    if (isDefined(searchParams[KeyFieldName])) {
+    if (isDefined(searchParams[keyFieldName])) {
       this.openPasswordChangeDialog();
     }
 
-    userService.getLoggedinUser$().subscribe((user: IUserDTO) => {
+    userService.getLoggedinUser$().subscribe((user) => {
       this.loggedInUser = user;
       this.updateSelectedTab();
     });
@@ -44,7 +44,7 @@ class AppComponentController {
   public updateSelectedTab() {
     const index = this.tabs.findIndex((i) => i.id === this.$state.current.name);
     if (index === -1) {
-      this.selectedTabIndex = undefined;
+      this.selectedTabIndex = 0;
     } else if (!this.tabs[index].disabled()) {
       this.$scope.$applyAsync(() => {
         // Selection cannot be changed while the tab is disabled, it takes a digest cycle before it is unlocked
@@ -103,7 +103,7 @@ class AppComponentController {
 
 }
 
-export const AppComponent = {
+export const appComponent = {
   controller: AppComponentController,
   templateUrl: './AppComponent.html',
 };

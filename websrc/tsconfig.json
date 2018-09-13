@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "strict": true,
     "target": "es5",
     "module": "commonjs",
     "moduleResolution": "node",
@@ -13,7 +14,9 @@
     "rootDir": "./app/",
     "outDir": "./dist",
     "noImplicitReturns": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "files": [
     "./app/NavitasFitnessModule.ts"

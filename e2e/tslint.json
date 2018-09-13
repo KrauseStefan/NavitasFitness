@@ -11,9 +11,7 @@
     /*
      * Any rules specified here will override those from the base config we are extending
      */
-    "quotemark": [
-      true, "single"
-    ],
+    "quotemark": [true, "single"],
     "no-string-literal": false,
     "whitespace": [
       true,

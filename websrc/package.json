@@ -22,7 +22,7 @@
   "author": "Stefan Krause-Kjær",
   "license": "ISC",
   "devDependencies": {
-    "@types/angular": "^1.6.39",
+    "@types/angular": "^1.6.50",
     "@types/angular-animate": "^1.5.9",
     "@types/angular-cookies": "^1.4.5",
     "@types/angular-material": "^1.1.57",

@@ -1,5 +1,5 @@
 import * as moment from 'moment';
-import { IUserDTO, UserService } from '../UserService';
+import { UserService } from '../UserService';
 
 export const statusRouterState: angular.ui.IState = {
   template: '<user-status></user-status>',
@@ -24,8 +24,7 @@ class UserStatus {
     private $http: ng.IHttpService,
     private $location: ng.ILocationService,
     private $mdDialog: ng.material.IDialogService,
-    private $state: ng.ui.IStateService,
-    private $q: ng.IQService) {
+    private $state: ng.ui.IStateService) {
 
     this.model = {
       userNameStr: '',
@@ -50,9 +49,9 @@ class UserStatus {
   }
 
   public onSubmit($event: Event) {
-    const storedTimeStamp = parseInt(localStorage.getItem(this.paymentStorageKey), 10);
+    const storedTimeStamp = this.getPaymentStorage();
 
-    if (!isNaN(storedTimeStamp) && storedTimeStamp > new Date().getTime()) {
+    if (storedTimeStamp !== null && storedTimeStamp > new Date().getTime()) {
       const confirmDialog = this.$mdDialog
         .confirm()
         .title('Possible of multiple payments')
@@ -83,7 +82,7 @@ class UserStatus {
       });
       const validTxn = this.model.transactionHistory
         .filter((i) => moment(i.paymentDate).add({ month: 6 }).isSameOrAfter(moment()))
-        .sort((a, b) => moment(a.paymentDate).unix())[0];
+        .sort((a) => moment(a.paymentDate).unix())[0];
 
       if (!!validTxn) {
         this.model.validUntill = moment(validTxn.paymentDate)
@@ -94,8 +93,16 @@ class UserStatus {
     });
   }
 
+  private getPaymentStorage() {
+    const paymentStorage = localStorage.getItem(this.paymentStorageKey);
+    if (paymentStorage) {
+      return parseInt(paymentStorage, 10);
+    }
+    return null;
+  }
+
   private moniterUserCredentials(): void {
-    this.userService.getLoggedinUser$().subscribe((user: IUserDTO) => {
+    this.userService.getLoggedinUser$().subscribe((user) => {
       if (user) {
         this.model.userNameStr = ' - ' + user.name + ' - ' + user.accessId;
         this.model.userEmail = user.email;
@@ -124,7 +131,7 @@ interface ITransactionEntry {
   status: string;
 }
 
-export const UserStatusComponent = {
+export const userStatusComponent = {
   controller: UserStatus,
   templateUrl: '/PageComponents/UserStatus/UserStatus.html',
 };

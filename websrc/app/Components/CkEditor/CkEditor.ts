@@ -4,10 +4,10 @@ import 'ckeditor';
 
 export class CkEditorComponent {
 
-  public content: string;
+  public content = '';
   public isEditable: boolean = false;
   public unsubscribe = noop;
-  public editor: CKEDITOR.editor = null;
+  public editor: CKEDITOR.editor | null = null;
 
   constructor(private $scope: ng.IScope, private $element: ng.IAugmentedJQuery) {
     this.$scope.$watch('$ctrl.isEditable', () => {
@@ -39,8 +39,14 @@ export class CkEditorComponent {
     }));
   }
 
-  public getEditordiv(): HTMLDivElement {
-    return (<HTMLElement>(<any>this.$element)[0]).querySelector('.editorContent');
+  public getEditordiv(): HTMLElement {
+    const div = (<HTMLElement>(<any>this.$element)[0]).querySelector('.editorContent');
+
+    if (div && div instanceof HTMLElement) {
+      return div;
+    }
+
+    throw new Error('Unable to find Ckeditor div');
   }
 
   public updateContent(content: string) {
@@ -48,12 +54,14 @@ export class CkEditorComponent {
   }
 
   public resetEditor() {
-    this.editor.resetDirty();
+    if (this.editor) {
+      this.editor.resetDirty();
+    }
   }
 
 }
 
-export const CkEditor: IComponentOptions = {
+export const ckEditor: IComponentOptions = {
   bindings: {
     content: '=',
     isEditable: '=',

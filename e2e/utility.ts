@@ -22,7 +22,7 @@ export function verifyBrowserLog(expectedEntries: string[] = []): Promise<void> 
 
     if (filteredLog.length > 0) {
       const entries = filteredLog
-        .map((entry) => `[${browserLogs[0].type}][${browserLogs[0].level.name}] ${browserLogs[0].message}`);
+        .map(() => `[${browserLogs[0].type}][${browserLogs[0].level.name}] ${browserLogs[0].message}`);
       throw new Error(`Error was thrown during test execution:\n [${entries.join('\n')}`);
     }
 

@@ -5,9 +5,9 @@
   "requires": true,
   "dependencies": {
     "@types/angular": {
-      "version": "1.6.39",
-      "resolved": "https://registry.npmjs.org/@types/angular/-/angular-1.6.39.tgz",
-      "integrity": "sha512-fRj26foAwYbjOwnGSpIaY05+jRxZevHWwzcSrQIsJgh5Xrosbu4fX99+obJH4YFFS8+EkYRwsSpf2vpVddSNVw==",
+      "version": "1.6.50",
+      "resolved": "https://registry.npmjs.org/@types/angular/-/angular-1.6.50.tgz",
+      "integrity": "sha512-D3KB0PdaxdwtA44yOpK+NtptTscKWgUzXmf8fiLaaVxnX+b7QQ+dUMsyeVDweCQ6VX4PMwkd6x2hJ0X+ISIsoQ==",
       "dev": true
     },
     "@types/angular-animate": {

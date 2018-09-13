@@ -2,15 +2,16 @@ import { IUserDTO, UserService } from '../UserService';
 import { RegistrationFormModel } from './RegistrationFormModel';
 
 import IDialogService = ng.material.IDialogService;
-import IToastService = ng.material.IToastService;
 
 interface IRegistrationError {
-  field?: keyof RegistrationFormModel;
+  field: keyof RegistrationFormModel;
   message: string;
   type: 'invalid' | 'unique_constraint';
 }
 
 export class RegistrationForm implements ng.IController {
+
+  private submittingUser = false;
 
   constructor(
     private $scope: {
@@ -21,8 +22,7 @@ export class RegistrationForm implements ng.IController {
       RegistrationForm: {[field in keyof RegistrationFormModel]: ng.INgModelController } & ng.IFormController,
     } & ng.IScope,
     private userService: UserService,
-    private $mdDialog: IDialogService,
-    private $mdToast: IToastService) {
+    private $mdDialog: IDialogService) {
 
     $scope.submit = () => this.submit();
     $scope.cancel = () => this.cancel();
@@ -39,7 +39,7 @@ export class RegistrationForm implements ng.IController {
   }
 
   public submit() {
-    this.$scope.RegistrationForm.$pending = true;
+    this.submittingUser = true;
 
     this.userService.createUser(this.toUserDTO(this.$scope.model)).then(() => {
       this.$scope.model = new RegistrationFormModel();
@@ -54,7 +54,7 @@ export class RegistrationForm implements ng.IController {
           formCtrl.$setValidity('serverValidation', false);
         }
       }
-    }).finally(() => this.$scope.RegistrationForm.$pending = false);
+  }).finally(() => this.submittingUser = false);
   }
 
   public cancel() {

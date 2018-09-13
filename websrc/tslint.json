@@ -10,9 +10,7 @@
     /*
      * Any rules specified here will override those from the base config we are extending
      */
-    "quotemark": [
-      true, "single"
-    ],
+    "quotemark": [true, "single"],
     "no-string-literal": false,
     "whitespace": [
       true,
@@ -23,7 +21,9 @@
       "check-type"
     ],
     "object-literal-sort-keys": false,
-    "no-angle-bracket-type-assertion": false
+    "no-angle-bracket-type-assertion": false,
+    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"]
+
   },
   "rulesDirectory": [
     /*

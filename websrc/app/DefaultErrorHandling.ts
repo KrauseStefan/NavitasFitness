@@ -1,12 +1,12 @@
 import { element, module } from 'angular';
 
-export const DefaultErrorHandlingModule = module('DefaultErrorHandling', ['ngMaterial'])
+export const defaultErrorHandlingModule = module('DefaultErrorHandling', ['ngMaterial'])
   .config(($httpProvider: ng.IHttpProvider) => {
 
-    let instance: ng.material.IToastService = null;
+    let instance: ng.material.IToastService;
 
     function get$mdToast(): ng.material.IToastService {
-      if (instance === null) {
+      if (!instance) {
         instance = <ng.material.IToastService>element(document).injector().get('$mdToast');
       }
       return instance;

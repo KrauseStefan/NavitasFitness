@@ -111,7 +111,7 @@ export class AdminPageCtrl {
 
       prev = value;
       return acc;
-    }, []);
+    }, <IUser[]>[]);
 
     return this.users;
   }
@@ -223,7 +223,7 @@ export class AdminPageCtrl {
 
 }
 
-export const AdminPageComponent: IComponentOptions = {
+export const adminPageComponent: IComponentOptions = {
   controller: AdminPageCtrl,
   templateUrl: '/PageComponents/AdminPage/AdminPage.html',
 };

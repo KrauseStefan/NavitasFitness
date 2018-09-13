@@ -1,22 +1,21 @@
 
-import IScope = angular.IScope;
-import IJQuery = angular.IAugmentedJQuery;
 import IDirectiveFactory = angular.IDirectiveFactory;
 import INgModelController = angular.INgModelController;
 
 const directiveName = 'nfShouldEqual';
 
-const directiveFactoryFn: IDirectiveFactory = ($parse: angular.IParseService) => {
+const directiveFactoryFn: IDirectiveFactory = () => {
   return {
-    link: (scope: IScope, iElement: IJQuery, attr: { [att: string]: string }, ngModel: INgModelController) => {
+    link: (_scope, _iElement, attr, controller) => {
+      const ngModel = controller as INgModelController;
       const otherValue = attr[directiveName];
       const otherFormCtrl: INgModelController = (<any>ngModel).$$parentForm[otherValue];
 
-      ngModel.$validators[directiveName] = (modelValue: string, viewValue: string) => {
+      ngModel.$validators[directiveName] = (modelValue: string) => {
         return modelValue === otherFormCtrl.$viewValue;
       };
 
-      otherFormCtrl.$validators[directiveName] = (modelValue: string, viewValue: string) => {
+      otherFormCtrl.$validators[directiveName] = () => {
         ngModel.$validate();
         return true;
       };

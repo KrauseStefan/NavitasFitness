@@ -5,10 +5,9 @@ export class UserService {
   private userServiceUrl = 'rest/user';
   private authServiceUrl = 'rest/auth';
 
-  private currentUserSubject = new ReplaySubject<IUserDTO>(1);
+  private currentUserSubject = new ReplaySubject<IUserDTO | null>(1);
 
   constructor(
-    private $cookies: ng.cookies.ICookiesService,
     private $http: ng.IHttpService,
     private $q: ng.IQService,
     private $log: ng.ILogService) {
@@ -36,7 +35,7 @@ export class UserService {
     });
   }
 
-  public getLoggedinUser$(): Observable<IUserDTO> {
+  public getLoggedinUser$(): Observable<IUserDTO | null> {
     return this.currentUserSubject.asObservable();
   }
 
@@ -50,7 +49,7 @@ export class UserService {
 
   private getUserFromSessionData(): void {
     this.$http.get<IUserSessionDto>(this.userServiceUrl).then((res) => {
-      return this.$q<IUserDTO>((resolve, reject) => {
+      return this.$q<IUserDTO | null>((resolve) => {
         if (!res.data || !res.data.user) {
           this.$log.debug('No User Session');
           return resolve(null);
@@ -62,7 +61,7 @@ export class UserService {
       });
     }).then((userDto) => {
       this.currentUserSubject.next(userDto);
-    }, (error) => {
+    }, () => {
       this.currentUserSubject.next(null);
     });
   }

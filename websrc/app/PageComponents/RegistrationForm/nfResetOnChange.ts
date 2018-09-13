@@ -1,14 +1,12 @@
 
-import IScope = angular.IScope;
-import IJQuery = angular.IAugmentedJQuery;
-import IDirectiveFactory = angular.IDirectiveFactory;
-import INgModelController = angular.INgModelController;
-
 const directiveName = 'nfResetOnChange';
 
-const directiveFactoryFn: IDirectiveFactory = () => {
+function directiveFactoryFn(): ng.IDirective {
+
   return {
-    link: (scope: IScope, iElement: IJQuery, iAttrs: { [att: string]: string }, ngModel: INgModelController) => {
+    link: (_scope, _iElement, iAttrs, controller) => {
+      const ngModel = controller as ng.INgModelController;
+
       const errorsToResetStr = iAttrs[directiveName];
       let start = 0;
       let end = errorsToResetStr.length;
@@ -19,20 +17,19 @@ const directiveFactoryFn: IDirectiveFactory = () => {
         end = end - 1;
       }
 
-      const errorsToReset = errorsToResetStr
+      errorsToResetStr
         .substring(start, end)
         .split(',')
-        .map((error) => error.trim());
-
-      errorsToReset.forEach((error) => {
-        ngModel.$validators[error] = (modelValue: string, viewValue: string) => {
+        .map((error: string) => error.trim())
+        .forEach((error: string) => {
+        ngModel.$validators[error] = () => {
           return true;
         };
       });
     },
     require: 'ngModel',
   };
-};
+}
 
 export const nfResetOnChange = {
   factory: directiveFactoryFn,

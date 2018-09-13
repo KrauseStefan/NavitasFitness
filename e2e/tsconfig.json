@@ -14,9 +14,9 @@
         "noImplicitThis": true,
         "noUnusedLocals": true,
         "pretty": true,
-        "strictNullChecks": true,
-        "target": "es2016"
-    },
+        "target": "es2016",
+        "noUnusedParameters": true
+        },
     "exclude": [
         "node_modules"
     ]

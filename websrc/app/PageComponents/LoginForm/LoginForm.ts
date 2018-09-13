@@ -5,8 +5,8 @@ import { IBaseUserDTO, UserService } from '../UserService';
 import IDialogService = angular.material.IDialogService;
 import IHttpPromiseCallbackArg = angular.IHttpPromiseCallbackArg;
 
-const HttpUnauthorized = 401;
-const StatusForbidden = 403;
+const httpUnauthorized = 401;
+const statusForbidden = 403;
 
 export class LoginForm {
 
@@ -46,9 +46,9 @@ export class LoginForm {
       this.resetForm();
       this.$mdDialog.hide();
     }, (errorResponse: IHttpPromiseCallbackArg<string>) => {
-      if (errorResponse.status === HttpUnauthorized) {
+      if (errorResponse.status === httpUnauthorized) {
         this.$scope.LoginForm.password.$setValidity('credentialsInvalid', false);
-      } else if (errorResponse.status === StatusForbidden) {
+      } else if (errorResponse.status === statusForbidden) {
         this.$scope.LoginForm.accessId.$setValidity('emailNotVerified', false);
       }
     });
