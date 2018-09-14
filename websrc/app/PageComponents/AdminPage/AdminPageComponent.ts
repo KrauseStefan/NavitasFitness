@@ -62,9 +62,7 @@ export class AdminPageCtrl {
   };
 
   private transactionsCache: { [key: string]: ITransaction[] } = {};
-  private selectedUsers: IUser[] = [];
   private gridApiDefered = this.$q.defer<uiGrid.IGridApiOf<IUser>>();
-  private gridApiPromise = this.gridApiDefered.promise;
 
   constructor(
     private $q: ng.IQService,
@@ -136,8 +134,7 @@ export class AdminPageCtrl {
     });
   }
 
-  public async displayTransactions(selectedUsers: IUser[]) {
-    this.selectedUsers = selectedUsers;
+  public async displayTransactions(selectedUsers: ReadonlyArray<IUser>) {
     const transactionsPromises = selectedUsers
       .map((row) => row.key)
       .map((key) => {
@@ -161,64 +158,6 @@ export class AdminPageCtrl {
       .action('Dismiss');
 
     this.$mdToast.show(toast);
-  }
-
-  public mergeSelected() {
-    const userKeys = this.selectedUsers.map((i) => i.key).join(';');
-
-    this.$http.post(`/rest/user/merge/${userKeys}`, {})
-      .then(() => this.$mdToast.show(this.$mdToast.simple().textContent('Success')))
-      .catch((resp) => {
-        this.showMessage(resp.data);
-        return this.$q.resolve();
-      });
-  }
-
-  public deleteInactiveUsers() {
-    this.filterInactiveUsers()
-      .then((keys) => {
-        if (keys.length > 0) {
-          const usersToDelete = keys.join(';');
-          return this.$http.delete(`/rest/user/${usersToDelete}`)
-            .then((resp) => resp.data);
-        } else {
-          return 'No duplicated users found';
-        }
-      })
-      .then((data) => this.showMessage(JSON.stringify(data)))
-      .catch((data) => {
-        this.showMessage(data);
-        return this.$q.resolve();
-      });
-  }
-
-  public deselectActiveUsers() {
-    this.$q.all({ keys: this.filterInactiveUsers(), gridApi: this.gridApiPromise })
-      .then((data) => {
-        const selectionGridApi = data.gridApi.selection;
-        const keys = data.keys;
-        const usersToSelect = this.selectedUsers
-          .filter((user) => keys.indexOf(user.key) !== -1);
-
-        selectionGridApi.clearSelectedRows();
-
-        usersToSelect.forEach((user) => {
-          selectionGridApi.selectRow(user);
-        });
-
-        this.displayTransactions(usersToSelect);
-      })
-      .catch((data) => {
-        this.showMessage(data);
-        return this.$q.resolve();
-      });
-  }
-
-  private filterInactiveUsers(): ng.IPromise<string[]> {
-    const keys = this.selectedUsers.map((i) => i.key).join(';');
-
-    return this.$http.get<string[]>(`/rest/user/duplicated-inactive/${keys}`)
-      .then((resp) => resp.data);
   }
 
 }
