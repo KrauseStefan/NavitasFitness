@@ -67,7 +67,6 @@ func ensureUpdatedIds(ctx context.Context) error {
 		return err
 	}
 
-	log.Infof(ctx, "length primary: %d, secondary: %d", len(primaryIds), len(secondaryIds))
 	lastDownload = time.Now()
 
 	return nil
@@ -75,16 +74,23 @@ func ensureUpdatedIds(ctx context.Context) error {
 
 func updateTokenCache(ctx context.Context, settingKey string, currentCache [][]byte) ([][]byte, error) {
 	token, err := Dropbox.GetAccessToken(ctx, settingKey)
+	if err != nil {
+		return nil, err
+	}
 	if token == "" {
+		log.Warningf(ctx, "No valid Dropbox access token found, please configure dropbox integration")
 		return nil, nil
 	}
 
-	if err != nil || !(len(currentCache) <= 0 || lastDownload.Add(4*time.Hour).Before(time.Now())) {
-		return currentCache, err
+	if len(currentCache) > 0 && lastDownload.Add(4*time.Hour).After(time.Now()) {
+		return currentCache, nil
 	}
+
+	log.Infof(ctx, "Cache expired downloading accessId list with settingKey: %s", settingKey)
 
 	ids, err := downloadValidAccessIds(ctx, token)
 	if err != nil {
+		log.Warningf(ctx, "Unable to download valid accessIds, old Ids will be used, error: %s", err.Error())
 		return currentCache, err
 	}
 
@@ -107,16 +113,12 @@ func validateAccessId(ctx context.Context, accessId []byte, validIdList *[][]byt
 		}
 	}
 
-	n := len(accessId)
-	log.Infof(ctx, "Id not validated")
-	log.Infof(ctx, "length %v - hex: %X", n, accessId)
-	log.Infof(ctx, "length %v - str: %q", n, accessId)
+	log.Infof(ctx, "accessId not valid - str length: %v, str: '%q', hex: %X", len(accessId), accessId, accessId)
 
 	return false, nil
 }
 
 func (v *DefaultAccessIdValidator) ValidateAccessIdPrimary(ctx context.Context, accessId []byte) (bool, error) {
-	log.Infof(ctx, "primaryIds: %d", len(primaryIds))
 	return validateAccessId(ctx, accessId, &primaryIds)
 }
 
