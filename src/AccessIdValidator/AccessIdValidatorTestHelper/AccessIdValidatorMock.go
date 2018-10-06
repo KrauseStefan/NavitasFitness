@@ -44,6 +44,3 @@ func (mock *AccessIdValidatorMock) ValidateAccessIdPrimary(ctx context.Context, 
 	return false, nil
 }
 
-func (mock *AccessIdValidatorMock) ValidateAccessIdSecondary(ctx context.Context, accessId []byte) (bool, error) {
-	panic("Not Implemented")
-}

@@ -23,8 +23,7 @@ const (
 	baseUrl  = "https://content.dropboxapi.com"
 	tokenUrl = "https://api.dropboxapi.com/oauth2/token"
 
-	PrimaryAccessTokenSystemSettingKey   = "PrimaryAccessToken"
-	SecondaryAccessTokenSystemSettingKey = "SecondaryAccessToken"
+	PrimaryAccessTokenSystemSettingKey = "PrimaryAccessToken"
 )
 
 type TokenRspDTO struct {
@@ -60,9 +59,6 @@ func GetAccessTokens(ctx context.Context) ([]string, error) {
 	)
 
 	if tokens, err = appendAccessToken(ctx, PrimaryAccessTokenSystemSettingKey, tokens); err != nil {
-		return nil, err
-	}
-	if tokens, err = appendAccessToken(ctx, SecondaryAccessTokenSystemSettingKey, tokens); err != nil {
 		return nil, err
 	}
 

@@ -16,7 +16,6 @@ type DefaultAccessIdValidator struct{}
 var (
 	bomPrefix             = []byte{0xef, 0xbb, 0xbf}
 	primaryIds   [][]byte = nil
-	secondaryIds [][]byte = nil
 	lastDownload time.Time
 )
 
@@ -26,7 +25,7 @@ func GetInstance() AccessIdValidator {
 	return &instance
 }
 
-func downloadValidAccessIds(ctx context.Context, dropboxAccessToken string) ([][]byte, error) {
+func (v *DefaultAccessIdValidator) downloadValidAccessIds(ctx context.Context, dropboxAccessToken string) ([][]byte, error) {
 	log.Infof(ctx, "Downloading AccessIds: %s", dropboxAccessToken)
 	resp, _, err := Dropbox.DownloadFile(ctx, dropboxAccessToken, GetAccessIdPath(ctx))
 	if err != nil {
@@ -55,24 +54,30 @@ func downloadValidAccessIds(ctx context.Context, dropboxAccessToken string) ([][
 	return idsNoSpace, nil
 }
 
-func ensureUpdatedIds(ctx context.Context) error {
+func (v *DefaultAccessIdValidator) ensureUpdatedIds(ctx context.Context) error {
 	var err error
-	primaryIds, err = updateTokenCache(ctx, Dropbox.PrimaryAccessTokenSystemSettingKey, primaryIds)
+	primaryIds, err = v.updateTokenCache(ctx, Dropbox.PrimaryAccessTokenSystemSettingKey, primaryIds)
 	if err != nil {
 		return err
 	}
-
-	secondaryIds, err = updateTokenCache(ctx, Dropbox.SecondaryAccessTokenSystemSettingKey, secondaryIds)
-	if err != nil {
-		return err
-	}
-
-	lastDownload = time.Now()
 
 	return nil
 }
 
-func updateTokenCache(ctx context.Context, settingKey string, currentCache [][]byte) ([][]byte, error) {
+func (v *DefaultAccessIdValidator) updateTokenCache(ctx context.Context, settingKey string, currentCache [][]byte) ([][]byte, error) {
+	cacheExpirationTime := lastDownload.Add(4 * time.Hour)
+	if len(currentCache) > 0 && cacheExpirationTime.Before(time.Now()) {
+		return currentCache, nil
+	}
+	if len(currentCache) > 0 {
+		log.Infof(ctx, "Cache is empty")
+	} else {
+		cacheExpirationTimeStr := cacheExpirationTime.Format("02-01-06 15:04:05")
+		nowStr := time.Now().Format("02-01-06 15:04:05")
+		log.Infof(ctx, "Cache expired cacheExpirationTime is %s, current time is: %s", cacheExpirationTimeStr, nowStr)
+		lastDownload = time.Now()
+	}
+
 	token, err := Dropbox.GetAccessToken(ctx, settingKey)
 	if err != nil {
 		return nil, err
@@ -82,23 +87,20 @@ func updateTokenCache(ctx context.Context, settingKey string, currentCache [][]b
 		return nil, nil
 	}
 
-	if len(currentCache) > 0 && lastDownload.Add(4*time.Hour).After(time.Now()) {
-		return currentCache, nil
-	}
-
-	log.Infof(ctx, "Cache expired downloading accessId list with settingKey: %s", settingKey)
-
-	ids, err := downloadValidAccessIds(ctx, token)
+	ids, err := v.downloadValidAccessIds(ctx, token)
 	if err != nil {
 		log.Warningf(ctx, "Unable to download valid accessIds, old Ids will be used, error: %s", err.Error())
 		return currentCache, err
 	}
 
+	dateStr := lastDownload.Format("02-01-06 15:04:05")
+	log.Infof(ctx, "lastDownload: %s", dateStr)
+
 	return ids, nil
 }
 
-func validateAccessId(ctx context.Context, accessId []byte, validIdList *[][]byte) (bool, error) {
-	if err := ensureUpdatedIds(ctx); err != nil {
+func (v *DefaultAccessIdValidator) validateAccessId(ctx context.Context, accessId []byte, validIdList *[][]byte) (bool, error) {
+	if err := v.ensureUpdatedIds(ctx); err != nil {
 		return false, err
 	}
 
@@ -119,9 +121,5 @@ func validateAccessId(ctx context.Context, accessId []byte, validIdList *[][]byt
 }
 
 func (v *DefaultAccessIdValidator) ValidateAccessIdPrimary(ctx context.Context, accessId []byte) (bool, error) {
-	return validateAccessId(ctx, accessId, &primaryIds)
-}
-
-func (v *DefaultAccessIdValidator) ValidateAccessIdSecondary(ctx context.Context, accessId []byte) (bool, error) {
-	return validateAccessId(ctx, accessId, &secondaryIds)
+	return v.validateAccessId(ctx, accessId, &primaryIds)
 }

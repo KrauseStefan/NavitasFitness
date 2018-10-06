@@ -34,10 +34,6 @@ type UserDTO struct {
 func (user *UserDTO) ValidateUser(ctx context.Context) error {
 	isValid, err := accessIdValidator.ValidateAccessIdPrimary(ctx, []byte(user.AccessId))
 
-	if !isValid && err == nil {
-		isValid, err = accessIdValidator.ValidateAccessIdSecondary(ctx, []byte(user.AccessId))
-	}
-
 	if err != nil {
 		return err
 	}

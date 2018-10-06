@@ -108,10 +108,6 @@ func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request, user *Use
 	}
 	isValid, err := accessIdValidator.ValidateAccessIdPrimary(ctx, []byte(user.AccessId))
 
-	if !isValid && err == nil {
-		isValid, err = accessIdValidator.ValidateAccessIdSecondary(ctx, []byte(user.AccessId))
-	}
-
 	us := UserSessionDto{
 		User:          user,
 		IsAdmin:       user.IsAdmin,
