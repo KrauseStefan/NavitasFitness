@@ -1,6 +1,7 @@
 package UserRest
 
 import (
+	"context"
 	"net/http"
 
 	"google.golang.org/appengine"
@@ -103,25 +104,38 @@ func getAllUsersHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserD
 func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
 	ctx := appengine.NewContext(r)
 	if user == nil {
-		log.Infof(ctx, "User is not logged in")
+		log.Debugf(ctx, "User is not logged in")
 		return
 	}
-	isValid, err := accessIdValidator.ValidateAccessIdPrimary(ctx, []byte(user.AccessId))
 
-	us := UserSessionDto{
-		User:          user,
-		IsAdmin:       user.IsAdmin,
-		ValidAccessId: isValid,
-	}
+	userSessionDto, err := getUserFromSession(ctx, user)
 
 	if err == nil {
-		_, err = AppEngineHelper.WriteJSON(w, us)
+		_, err = AppEngineHelper.WriteJSON(w, userSessionDto)
 	}
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func getUserFromSession(ctx context.Context, user *UserDao.UserDTO) (*UserSessionDto, error) {
+	if err := accessIdValidator.EnsureUpdatedIds(ctx); err != nil {
+		return nil, err
+	}
+
+	isValid, err := accessIdValidator.ValidateAccessId(ctx, []byte(user.AccessId))
+	if err != nil {
+		return nil, err
+	}
+
+	userSessionDto := UserSessionDto{
+		User:          user,
+		IsAdmin:       user.IsAdmin,
+		ValidAccessId: isValid,
+	}
+	return &userSessionDto, err
 }
 
 func getCurrentUserTransactionsHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {

@@ -32,11 +32,12 @@ type UserDTO struct {
 }
 
 func (user *UserDTO) ValidateUser(ctx context.Context) error {
-	isValid, err := accessIdValidator.ValidateAccessIdPrimary(ctx, []byte(user.AccessId))
-
+	accessIdValidator.EnsureUpdatedIds(ctx)
+	isValid, err := accessIdValidator.ValidateAccessId(ctx, []byte(user.AccessId))
 	if err != nil {
 		return err
 	}
+
 	if !isValid {
 		return Invalid_accessId
 	}

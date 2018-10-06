@@ -26,7 +26,7 @@ func NewAccessIdValidatorMock(validAccessIds []string, err error) *AccessIdValid
 	return mock
 }
 
-func (mock *AccessIdValidatorMock) ValidateAccessIdPrimary(ctx context.Context, accessId []byte) (bool, error) {
+func (mock *AccessIdValidatorMock) ValidateAccessId(ctx context.Context, accessId []byte) (bool, error) {
 	mock.CallCount++
 	mock.CallArgs = append(mock.CallArgs, CallArgs{ctx, accessId})
 
@@ -44,3 +44,6 @@ func (mock *AccessIdValidatorMock) ValidateAccessIdPrimary(ctx context.Context, 
 	return false, nil
 }
 
+func (mock *AccessIdValidatorMock) EnsureUpdatedIds(ctx context.Context) error {
+	return nil
+}

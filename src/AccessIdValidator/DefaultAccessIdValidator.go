@@ -54,11 +54,15 @@ func (v *DefaultAccessIdValidator) downloadValidAccessIds(ctx context.Context, d
 	return idsNoSpace, nil
 }
 
-func (v *DefaultAccessIdValidator) ensureUpdatedIds(ctx context.Context) error {
+func (v *DefaultAccessIdValidator) EnsureUpdatedIds(ctx context.Context) error {
 	var err error
 	primaryIds, err = v.updateTokenCache(ctx, Dropbox.PrimaryAccessTokenSystemSettingKey, primaryIds)
 	if err != nil {
 		return err
+	}
+
+	if len(primaryIds) <= 0 {
+		log.Warningf(ctx, "No valid access Ids, list is empty!")
 	}
 
 	return nil
@@ -99,17 +103,8 @@ func (v *DefaultAccessIdValidator) updateTokenCache(ctx context.Context, setting
 	return ids, nil
 }
 
-func (v *DefaultAccessIdValidator) validateAccessId(ctx context.Context, accessId []byte, validIdList *[][]byte) (bool, error) {
-	if err := v.ensureUpdatedIds(ctx); err != nil {
-		return false, err
-	}
-
-	if len(*validIdList) <= 0 {
-		log.Warningf(ctx, "No valid access Ids, list is empty!")
-		return false, nil
-	}
-
-	for _, validId := range *validIdList {
+func (v *DefaultAccessIdValidator) ValidateAccessId(ctx context.Context, accessId []byte) (bool, error) {
+	for _, validId := range primaryIds {
 		if bytes.Equal(validId, accessId) {
 			return true, nil
 		}
@@ -118,8 +113,4 @@ func (v *DefaultAccessIdValidator) validateAccessId(ctx context.Context, accessI
 	log.Infof(ctx, "accessId not valid - str length: %v, str: '%q', hex: %X", len(accessId), accessId, accessId)
 
 	return false, nil
-}
-
-func (v *DefaultAccessIdValidator) ValidateAccessIdPrimary(ctx context.Context, accessId []byte) (bool, error) {
-	return v.validateAccessId(ctx, accessId, &primaryIds)
 }

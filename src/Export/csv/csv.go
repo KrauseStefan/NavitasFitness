@@ -92,6 +92,9 @@ func getExtrema(txns []*TransactionDao.TransactionMsgDTO) (*TransactionDao.Trans
 }
 
 func getActiveTransactionList(ctx context.Context) ([]UserTxnTuple, error) {
+	if err := accessIdValidator.EnsureUpdatedIds(ctx); err != nil {
+		return nil, err
+	}
 
 	userKeys, users, err := userDAO.GetAll(ctx)
 	if err != nil {
@@ -103,7 +106,7 @@ func getActiveTransactionList(ctx context.Context) ([]UserTxnTuple, error) {
 
 	for i, userKey := range userKeys {
 		user := users[i]
-		isValid, err := accessIdValidator.ValidateAccessIdPrimary(ctx, []byte(user.AccessId))
+		isValid, err := accessIdValidator.ValidateAccessId(ctx, []byte(user.AccessId))
 		if err != nil || !isValid {
 			usersWithActiveSubscriptionButInvalidIds = append(usersWithActiveSubscriptionButInvalidIds, user.AccessId)
 			continue // Skip uses with invalid access ids they are not allowed access

@@ -3,5 +3,7 @@ package AccessIdValidator
 import "golang.org/x/net/context"
 
 type AccessIdValidator interface {
-	ValidateAccessIdPrimary(ctx context.Context, accessId []byte) (bool, error)
+	ValidateAccessId(ctx context.Context, accessId []byte) (bool, error)
+
+	EnsureUpdatedIds(ctx context.Context) error
 }
