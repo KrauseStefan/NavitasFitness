@@ -110,7 +110,5 @@ func (v *DefaultAccessIdValidator) ValidateAccessId(ctx context.Context, accessI
 		}
 	}
 
-	log.Infof(ctx, "accessId not valid - str length: %v, str: '%q', hex: %X", len(accessId), accessId, accessId)
-
 	return false, nil
 }
