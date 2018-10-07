@@ -220,7 +220,10 @@ func TestShouldNotIncludeUsersWithInvalidAccessIds(t *testing.T) {
 	userDaoMock := mockUserRetriever(keys, users, nil)
 	mockAccessIdValidator()
 
-	txnDaoMock := mockTransactionRetriever(createMessages([]time.Time{now}), nil)
+	plusFive := now.AddDate(0, 0, 5)
+
+	txnDaoMock := mockTransactionRetriever(createMessages([]time.Time{now}), nil).
+		AddReturn(createMessages([]time.Time{plusFive}), nil)
 
 	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
 	csvBytes, _ := ioutil.ReadAll(buffer)
@@ -232,7 +235,7 @@ func TestShouldNotIncludeUsersWithInvalidAccessIds(t *testing.T) {
 		fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline))
 	assert(t, userDaoMock.CallCount).Equals(1)
 	assert(t, accessIdValidatorMock.CallCount).Equals(2)
-	assert(t, txnDaoMock.CallCount).Equals(1)
+	assert(t, txnDaoMock.CallCount).Equals(2)
 }
 
 func TestShouldBeAbleToCreateCsvWithTreeEntries(t *testing.T) {
