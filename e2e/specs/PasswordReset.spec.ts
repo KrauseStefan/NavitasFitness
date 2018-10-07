@@ -96,4 +96,9 @@ describe('Reset password', () => {
     await expect(loginDialog.formContainer.isPresent()).toBe(false);
   });
 
+  it('[META] should be able to logout', async () => {
+    await NavigationPageObject.menuButton.click();
+    await NavigationPageObject.menuLogout.click();
+  });
+
 });
