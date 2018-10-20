@@ -28,40 +28,14 @@ var (
 )
 
 const (
-	csvDateFormat = "02-01-2006"
+	csvDateFormat           = "02-01-2006"
+	subscriptionPeriodMonth = 6
 )
-
-func getFirstAndLastTxn(ctx context.Context, userKey *datastore.Key, date time.Time) (time.Time, time.Time, error) {
-	activeSubscriptions, err := transactionDao.GetCurrentTransactionsAfter(ctx, userKey, date)
-	if err != nil {
-		return time.Time{}, time.Time{}, err
-	}
-	validationEmails := strings.Split(AccessIdValidator.GetPaypalValidationEmail(ctx), ":")
-
-	validActiveSubscriptions := make([]*TransactionDao.TransactionMsgDTO, 0, len(activeSubscriptions))
-	for _, txn := range activeSubscriptions {
-		email := txn.GetReceiverEmail()
-		for _, validationEmail := range validationEmails {
-			if email == validationEmail {
-				validActiveSubscriptions = append(validActiveSubscriptions, txn)
-				break
-			}
-		}
-	}
-
-	if len(validActiveSubscriptions) >= 1 {
-		firstTxn, lastTxn := getExtrema(validActiveSubscriptions)
-
-		return firstTxn.GetPaymentDate(), lastTxn.GetPaymentDate(), nil
-	}
-
-	return time.Time{}, time.Time{}, nil
-}
 
 type UserTxnTuple struct {
 	user      UserDao.UserDTO
-	firstDate time.Time
-	lastDate  time.Time
+	startDate time.Time
+	endDate   time.Time
 }
 
 func IntegrateRoutes(router *mux.Router) {
@@ -74,72 +48,155 @@ func IntegrateRoutes(router *mux.Router) {
 		HandlerFunc(UserService.AsAdmin(exportCsvHandler))
 }
 
-func getExtrema(txns []*TransactionDao.TransactionMsgDTO) (*TransactionDao.TransactionMsgDTO, *TransactionDao.TransactionMsgDTO) {
-	firstTxn := txns[0]
-	lastTxn := txns[0]
+type UserTransactionMap map[*datastore.Key][]*TransactionDao.TransactionMsgDTO
 
+func validateTransactions(ctx context.Context, txns []*TransactionDao.TransactionMsgDTO) ([]*TransactionDao.TransactionMsgDTO, []*TransactionDao.TransactionMsgDTO) {
+	validationEmails := strings.Split(AccessIdValidator.GetPaypalValidationEmail(ctx), ":")
+	validationEmailsLendth := len(validationEmails)
+	validTxns := make([]*TransactionDao.TransactionMsgDTO, 0, len(txns))
+	invalidTxns := make([]*TransactionDao.TransactionMsgDTO, 0, 5)
 	for _, txn := range txns {
-		if txn.GetPaymentDate().Before(firstTxn.GetPaymentDate()) {
-			firstTxn = txn
-		}
-
-		if txn.GetPaymentDate().After(lastTxn.GetPaymentDate()) {
-			lastTxn = txn
+		email := txn.GetReceiverEmail()
+		for i, validationEmail := range validationEmails {
+			if email == validationEmail {
+				validTxns = append(validTxns, txn)
+				break
+			} else if i == validationEmailsLendth {
+				invalidTxns = append(invalidTxns, txn)
+			}
 		}
 	}
 
-	return firstTxn, lastTxn
+	return validTxns, invalidTxns
+}
+
+func getAllActiveSubscriptionsTxns(ctx context.Context) ([]*TransactionDao.TransactionMsgDTO, error) {
+	expiredTransactionDate := time.Now().AddDate(0, -subscriptionPeriodMonth, 0)
+	return transactionDao.GetCurrentTransactionsAfter(ctx, expiredTransactionDate)
+}
+
+func getLatestTxnByUser(txns []*TransactionDao.TransactionMsgDTO) UserTransactionMap {
+	userTransactionMap := make(UserTransactionMap)
+
+	for _, txn := range txns {
+		userTxns := userTransactionMap[txn.GetUser()]
+
+		if userTxns == nil {
+			userTxns = make([]*TransactionDao.TransactionMsgDTO, 1, 2)
+		}
+
+		userTxns = append(userTxns, txn)
+	}
+	return userTransactionMap
+}
+
+func getUsers(ctx context.Context, usersTxnMap UserTransactionMap) ([]UserDao.UserDTO, error) {
+	userKeys := make([]*datastore.Key, 0, len(usersTxnMap))
+	for userKey, _ := range usersTxnMap {
+		userKeys = append(userKeys, userKey)
+	}
+
+	return userDAO.GetByKeys(ctx, userKeys)
+}
+
+func partitionUsersByValidity(ctx context.Context, users []UserDao.UserDTO) ([]UserDao.UserDTO, []UserDao.UserDTO, error) {
+	if err := accessIdValidator.EnsureUpdatedIds(ctx); err != nil {
+		return nil, nil, err
+	}
+
+	validUsers := make([]UserDao.UserDTO, 0, len(users))
+	invalidUsers := make([]UserDao.UserDTO, 0, 10)
+	for _, user := range users {
+		isValid, err := accessIdValidator.ValidateAccessId(ctx, []byte(user.AccessId))
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if isValid {
+			validUsers = append(validUsers, user)
+		} else {
+			invalidUsers = append(invalidUsers, user)
+		}
+	}
+
+	return validUsers, invalidUsers, nil
+}
+
+func mapToUserNames(users []UserDao.UserDTO) []string {
+	var userNames = make([]string, len(users))
+	for i, user := range users {
+		userNames[i] = user.Name
+	}
+	return userNames
+}
+
+func mapTxnToDate(txns []*TransactionDao.TransactionMsgDTO) []time.Time {
+	dates := make([]time.Time, len(txns))
+	for i, txn := range txns {
+		dates[i] = txn.GetPaymentDate()
+	}
+
+	return dates
+}
+
+func findMinMax(dates []time.Time) (time.Time, time.Time) {
+	min := dates[0]
+	max := dates[0]
+	for _, date := range dates {
+		if date.Before(min) {
+			min = date
+		} else if date.After(max) {
+			max = date
+		}
+	}
+	return min, max
+}
+
+func mapUsersToActivePeriod(validUsers []UserDao.UserDTO, usersWithActiveSubscriptions UserTransactionMap) []UserTxnTuple {
+	usersWithPeroid := make([]UserTxnTuple, len(validUsers))
+
+	for i, user := range validUsers {
+		txnDates := mapTxnToDate(usersWithActiveSubscriptions[user.Key])
+		min, max := findMinMax(txnDates)
+
+		userWithPeroid := usersWithPeroid[i]
+		userWithPeroid.user = user
+		userWithPeroid.startDate = min
+		userWithPeroid.endDate = max.AddDate(0, subscriptionPeriodMonth, 0)
+	}
+
+	return usersWithPeroid
 }
 
 func getActiveTransactionList(ctx context.Context) ([]UserTxnTuple, error) {
-	if err := accessIdValidator.EnsureUpdatedIds(ctx); err != nil {
+	txns, err := getAllActiveSubscriptionsTxns(ctx)
+	if err != nil {
 		return nil, err
 	}
+	validTxns, _ := validateTransactions(ctx, txns)
 
-	userKeys, users, err := userDAO.GetAll(ctx)
+	usersWithActiveSubscriptions := getLatestTxnByUser(validTxns)
+
+	users, err := getUsers(ctx, usersWithActiveSubscriptions)
 	if err != nil {
 		return nil, err
 	}
 
-	usersWithActiveSubscription := make([]UserTxnTuple, 0, len(userKeys))
-	usersWithActiveSubscriptionButInvalidIds := make([]string, 0, 0)
-
-	for i, userKey := range userKeys {
-		user := users[i]
-		isValid, err := accessIdValidator.ValidateAccessId(ctx, []byte(user.AccessId))
-		if err != nil {
-			return nil, err
-		}
-
-		firstDate, lastDate, err := getFirstAndLastTxn(ctx, userKey, time.Now().AddDate(0, -6, 0))
-		if err != nil {
-			return nil, err
-		}
-
-		if !firstDate.IsZero() && !lastDate.IsZero() {
-
-			if !isValid {
-				usersWithActiveSubscriptionButInvalidIds = append(usersWithActiveSubscriptionButInvalidIds, user.AccessId)
-				continue // Skip uses with invalid access ids they are not allowed access
-			}
-
-			tuple := UserTxnTuple{
-				user:      user,
-				firstDate: firstDate,
-				lastDate:  lastDate,
-			}
-			usersWithActiveSubscription = append(usersWithActiveSubscription, tuple)
-		}
+	validUsers, invalidUsers, err := partitionUsersByValidity(ctx, users)
+	if err != nil {
+		return nil, err
 	}
 
-	usersWithActiveSubscriptionButInvalidIdsStr := strings.Join(usersWithActiveSubscriptionButInvalidIds, ", ")
+	activeUsersWithPariod := mapUsersToActivePeriod(validUsers, usersWithActiveSubscriptions)
+
+	usersWithActiveSubscriptionButInvalidIdsStr := strings.Join(mapToUserNames(invalidUsers), ", ")
 	log.Infof(ctx, "%s has paid for access but ID is not valid, skipped in csv export", usersWithActiveSubscriptionButInvalidIdsStr)
 
-	return usersWithActiveSubscription, nil
+	return activeUsersWithPariod, nil
 }
 
 func createCsvFile(ctx context.Context, w io.Writer) error {
-	userTxnTuple, err := getActiveTransactionList(ctx)
+	activeUsersWithPariod, err := getActiveTransactionList(ctx)
 	if err != nil {
 		return err
 	}
@@ -153,13 +210,13 @@ func createCsvFile(ctx context.Context, w io.Writer) error {
 	//AAMS-asa,27-06-2016,03-01-2017
 	//201505600,27-06-2016,03-01-2017
 
-	for _, user := range userTxnTuple {
-		log.Infof(ctx, "%s, %s, %s", user.user.AccessId, user.firstDate.String(), user.lastDate.String())
+	for _, user := range activeUsersWithPariod {
+		log.Infof(ctx, "%s, %s, %s", user.user.AccessId, user.startDate.String(), user.endDate.String())
 		w.Write([]byte(user.user.AccessId))
 		w.Write(comma)
-		w.Write([]byte(user.firstDate.Format(csvDateFormat)))
+		w.Write([]byte(user.startDate.Format(csvDateFormat)))
 		w.Write(comma)
-		w.Write([]byte(user.lastDate.AddDate(0, 6, 0).Format(csvDateFormat)))
+		w.Write([]byte(user.endDate.AddDate(0, 6, 0).Format(csvDateFormat)))
 		w.Write([]byte(windowsNewline))
 	}
 

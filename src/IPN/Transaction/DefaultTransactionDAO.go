@@ -2,12 +2,10 @@ package TransactionDao
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
 )
 
 type DefaultTransactionDao struct{}
@@ -99,10 +97,8 @@ func (t *DefaultTransactionDao) GetTransactionsByUser(ctx context.Context, paren
 	return NewTransactionMsgDTOList(txnDsDtoList, keys), nil
 }
 
-func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx context.Context, userKey *datastore.Key, date time.Time) ([]*TransactionMsgDTO, error) {
-
+func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx context.Context, date time.Time) ([]*TransactionMsgDTO, error) {
 	q := datastore.NewQuery(TXN_KIND).
-		Ancestor(userKey).
 		Filter("PaymentDate>=", date)
 
 	count, err := q.Count(ctx)
@@ -117,9 +113,6 @@ func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx context.Context,
 		return nil, err
 	}
 
-	if count > 1 {
-		log.Criticalf(ctx, fmt.Sprintf("User has multiple (%d) active subscriptions, key: %s", count, userKey.String()))
-	}
 
 	return NewTransactionMsgDTOList(txnDsDtoList, keys), nil
 }

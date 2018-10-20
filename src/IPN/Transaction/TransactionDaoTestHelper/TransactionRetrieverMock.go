@@ -62,12 +62,11 @@ func (mock *TransactionRetrieverMock) GetTransactionsByUser(ctx context.Context,
 	return rtnValues.messages, rtnValues.err
 }
 
-func (mock *TransactionRetrieverMock) GetCurrentTransactionsAfter(ctx context.Context, userKey *datastore.Key, date time.Time) ([]*TransactionDao.TransactionMsgDTO, error) {
+func (mock *TransactionRetrieverMock) GetCurrentTransactionsAfter(ctx context.Context, date time.Time) ([]*TransactionDao.TransactionMsgDTO, error) {
 	rtnValues := mock.returnValues[mock.CallCount]
 	mock.CallCount++
 	mock.CallArgs = append(mock.CallArgs, CallArgs{
 		Ctx:  ctx,
-		Key:  userKey,
 		Date: date,
 	})
 	return rtnValues.messages, rtnValues.err

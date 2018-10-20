@@ -18,7 +18,7 @@ type TransactionRetriever interface {
 
 	GetTransactionsByUser(ctx context.Context, parentUserKey *datastore.Key) ([]*TransactionMsgDTO, error)
 
-	GetCurrentTransactionsAfter(ctx context.Context, userKey *datastore.Key, date time.Time) ([]*TransactionMsgDTO, error)
+	GetCurrentTransactionsAfter(ctx context.Context, date time.Time) ([]*TransactionMsgDTO, error)
 }
 
 type TransactionDao interface {
