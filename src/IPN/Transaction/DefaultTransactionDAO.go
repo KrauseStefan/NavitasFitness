@@ -20,12 +20,13 @@ var (
 	TxnDuplicateTxnMsg = errors.New("Doublicate message recived, this is likely not a programming error")
 )
 
-func (t *DefaultTransactionDao) UpdateIpnMessage(ctx context.Context, ipnTxn *TransactionMsgDTO) error {
+func (t *DefaultTransactionDao) UpdateIpnMessage(ctx context.Context, ipnTxn *TransactionMsgDTO, userKey *datastore.Key) error {
 
 	key := ipnTxn.GetDataStoreKey(ctx)
 
 	// Make sure indexed fields are updated
 	ipnTxn.parseMessage()
+	ipnTxn.dsDto.User = userKey
 
 	if _, err := datastore.Put(ctx, key, ipnTxn.dsDto); err != nil {
 		return err
@@ -45,6 +46,7 @@ func (t *DefaultTransactionDao) PersistNewIpnMessage(ctx context.Context, ipnTxn
 	if userKey == nil {
 		newKey = datastore.NewIncompleteKey(ctx, TXN_KIND, txnCollectionParentKey(ctx))
 	} else {
+		ipnTxn.dsDto.User = userKey
 		newKey = datastore.NewIncompleteKey(ctx, TXN_KIND, userKey)
 	}
 
@@ -97,6 +99,22 @@ func (t *DefaultTransactionDao) GetTransactionsByUser(ctx context.Context, paren
 	return NewTransactionMsgDTOList(txnDsDtoList, keys), nil
 }
 
+func handleMissingFieldsError(ctx context.Context, txnDsDtos []transactionMsgDsDTO, err error) error {
+	missMatchErr, ok := err.(*datastore.ErrFieldMismatch)
+	if ok && missMatchErr.FieldName == "User" {
+		for _, txnDto := range txnDsDtos {
+			if txnDto.User == nil {
+				log.Warningf(ctx, err.Error())
+				// TODO Add transactions ????
+				// Maybie it needs to be outside the scope of this dao
+
+			}
+		}
+		return nil
+	}
+	return err
+}
+
 func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx context.Context, date time.Time) ([]*TransactionMsgDTO, error) {
 	q := datastore.NewQuery(TXN_KIND).
 		Filter("PaymentDate>=", date)
@@ -109,10 +127,14 @@ func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx context.Context,
 	txnDsDtoList := make([]transactionMsgDsDTO, 0, count)
 
 	keys, err := q.GetAll(ctx, &txnDsDtoList)
+	err = handleMissingFieldsError(ctx, keys, txnDsDtoList, err)
 	if err != nil {
 		return nil, err
 	}
 
+	// if count > 1 {
+	// 	log.Criticalf(ctx, fmt.Sprintf("User has multiple (%d) active subscriptions, key: %s", count, userKey.String()))
+	// }
 
 	return NewTransactionMsgDTOList(txnDsDtoList, keys), nil
 }

@@ -142,6 +142,17 @@ func ipnDoResponseTask(ctx context.Context, r *http.Request) error {
 	transaction := TransactionDao.NewTransactionMsgDTOFromIpn(string(content))
 	testIpnField := transaction.GetField(TransactionDao.FIELD_TEST_IPN)
 	email := transaction.GetField(TransactionDao.FIELD_CUSTOM) //The custom field should contain the email
+	user, err := userDAO.GetByEmail(ctx, email)
+	if err != nil {
+		return err
+	}
+
+	var userKey *datastore.Key
+	if user != nil {
+		userKey = user.Key
+	} else {
+		log.Errorf(ctx, "Recived paypal IPN message for unknown user")
+	}
 
 	if err := verifyMassageWithPaypal(ctx, string(content), testIpnField); err != nil {
 		return err
@@ -174,27 +185,15 @@ func ipnDoResponseTask(ctx context.Context, r *http.Request) error {
 			}
 		}
 
-		if err := transactionDao.UpdateIpnMessage(ctx, savedTransaction); err != nil {
+		if err := transactionDao.UpdateIpnMessage(ctx, savedTransaction, userKey); err != nil {
 			return err
 		}
 	} else {
 		log.Infof(ctx, fmt.Sprintf("No previus transaction with ID: %q", transaction.GetField(TransactionDao.FIELD_TXN_ID)))
 		log.Infof(ctx, fmt.Sprintf("Recived transaction from: %q", email))
 
-		user, err := userDAO.GetByEmail(ctx, email)
-		if err != nil {
-			return err
-		}
 		if user == nil && savedTransaction == nil {
 			return errors.New("User does not exist")
-		}
-
-		var userKey *datastore.Key
-		if user != nil {
-			log.Debugf(ctx, fmt.Sprintf("User key: %q", user.Key.Encode()))
-			userKey = user.Key
-		} else {
-			log.Errorf(ctx, "Recived paypal IPN message for unknown user")
 		}
 
 		js, _ := json.Marshal(transaction)

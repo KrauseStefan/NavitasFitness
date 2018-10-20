@@ -61,8 +61,9 @@ func NewTransactionMsgDTOList(dtos []transactionMsgDsDTO, keys []*datastore.Key)
 type transactionMsgDsDTO struct {
 	IpnMessages []string `json:"ipn_messages" datastore:",noindex"` // History of IpnMessages
 
-	PaymentDate time.Time `json:"payment_date"` // Included so that it can be indexed
-	TxnId       string    `json:"txn_id"`
+	PaymentDate time.Time      `json:"payment_date"` // Included so that it can be indexed
+	TxnId       string         `json:"txn_id"`
+	User        *datastore.Key `json:"-" datastore:",noindex"`
 }
 
 type TransactionMsgDTO struct {
@@ -81,7 +82,7 @@ func (txDto *TransactionMsgDTO) GetDataStoreKey(ctx context.Context) *datastore.
 }
 
 func (txDto *TransactionMsgDTO) GetUser() *datastore.Key {
-	return txDto.key.Parent()
+	return txDto.dsDto.User
 }
 
 func (txDto *TransactionMsgDTO) parseMessage() *url.Values {

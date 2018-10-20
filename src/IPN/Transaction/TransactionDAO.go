@@ -8,7 +8,7 @@ import (
 )
 
 type TransactionIpnManipulator interface {
-	UpdateIpnMessage(ctx context.Context, ipnTxn *TransactionMsgDTO) error
+	UpdateIpnMessage(ctx context.Context, ipnTxn *TransactionMsgDTO, userKey *datastore.Key) error
 
 	PersistNewIpnMessage(ctx context.Context, ipnTxn *TransactionMsgDTO, userKey *datastore.Key) error
 }
