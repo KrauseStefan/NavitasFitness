@@ -20,14 +20,13 @@ func GetInstance() TransactionDao {
 
 var (
 	TxnDuplicateTxnMsg = errors.New("Doublicate message recived, this is likely not a programming error")
-	//txnUnableToVerify = errors.New("Unable to verify message")
 )
 
 func (t *DefaultTransactionDao) UpdateIpnMessage(ctx context.Context, ipnTxn *TransactionMsgDTO) error {
 
 	key := ipnTxn.GetDataStoreKey(ctx)
 
-	//Make sure indexed fields are updated
+	// Make sure indexed fields are updated
 	ipnTxn.parseMessage()
 
 	if _, err := datastore.Put(ctx, key, ipnTxn.dsDto); err != nil {

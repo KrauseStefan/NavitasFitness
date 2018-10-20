@@ -28,8 +28,8 @@ var (
 )
 
 const (
-	localIpn         = "http://localhost:8081/cgi-bin/webscr"          //(Will behave like a live IPN)
-	PaypalIpn        = "https://www.paypal.com/cgi-bin/webscr"         //(for live IPNs)
+	localIpn         = "http://localhost:8081/cgi-bin/webscr"          // (Will behave like a live IPN)
+	PaypalIpn        = "https://www.paypal.com/cgi-bin/webscr"         // (for live IPNs)
 	PaypalIpnSandBox = "https://www.sandbox.paypal.com/cgi-bin/webscr" // (for Sandbox IPNs)
 
 	IpnQueueName = "paypalIpn"
