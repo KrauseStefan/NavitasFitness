@@ -5,3 +5,5 @@ export GOPATH="$GOPATH:$root"
 
 gcloud app deploy $root/src/NavitasFitness/app.yaml -v beta --no-promote --no-stop-previous-version
 # gcloud app deploy $root/src/NavitasFitness/app.yaml -v 1-4
+# git tag -f v1.4.0
+# git push origin --tags
