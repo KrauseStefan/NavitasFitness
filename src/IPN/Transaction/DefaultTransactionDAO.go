@@ -113,6 +113,5 @@ func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx context.Context,
 		return nil, err
 	}
 
-
 	return NewTransactionMsgDTOList(txnDsDtoList, keys), nil
 }
