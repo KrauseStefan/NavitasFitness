@@ -60,18 +60,19 @@ func mockTransactionRetriever(messages []*TransactionDao.TransactionMsgDTO, err 
 	return txnDaoMock
 }
 
-func createMessages(dates []time.Time) []*TransactionDao.TransactionMsgDTO {
-	return createMessagesWithEmail(dates, "gpmac_1231902686_biz@paypal.com")
+func createMessages(dates []time.Time, userKeys []*datastore.Key) []*TransactionDao.TransactionMsgDTO {
+	return createMessagesWithEmail(dates, userKeys, "gpmac_1231902686_biz@paypal.com")
 }
 
-func createMessagesWithEmail(dates []time.Time, email string) []*TransactionDao.TransactionMsgDTO {
+func createMessagesWithEmail(dates []time.Time, userKeys []*datastore.Key, email string) []*TransactionDao.TransactionMsgDTO {
 	const layout = "15:04:05 Jan 02, 2006 MST"
 	messages := make([]*TransactionDao.TransactionMsgDTO, 0, 5)
-	for _, date := range dates {
+	for i, date := range dates {
+		txnKey := datastore.NewKey(ctx, "txn", "", int64(i)+1, userKeys[i])
 		dateStr := date.In(utc).Format(layout)
 		dateIpnMsg := TransactionDao.FIELD_PAYMENT_DATE + "=" + dateStr
 		receiverEmail := TransactionDao.FIELD_RECEIVER_EMAIL + "=" + email
-		dateTxnMsg := TransactionDao.NewTransactionMsgDTOFromIpn(dateIpnMsg + "&" + receiverEmail)
+		dateTxnMsg := TransactionDao.NewTransactionMsgDTOFromIpnWithKey(dateIpnMsg+"&"+receiverEmail, txnKey)
 		messages = append(messages, dateTxnMsg)
 	}
 
@@ -81,9 +82,10 @@ func createMessagesWithEmail(dates []time.Time, email string) []*TransactionDao.
 func createUsers(accessIds []string) ([]*datastore.Key, []UserDao.UserDTO) {
 	keys := make([]*datastore.Key, 0, 6)
 	users := make([]UserDao.UserDTO, 0, 5)
-	for _, accessId := range accessIds {
-		users = append(users, UserDao.UserDTO{AccessId: accessId})
-		keys = append(keys, &datastore.Key{})
+	for i, accessId := range accessIds {
+		userKey := datastore.NewKey(ctx, "user", "", int64(i)+1, nil)
+		users = append(users, UserDao.UserDTO{AccessId: accessId, Key: userKey})
+		keys = append(keys, userKey)
 	}
 	return keys, users
 }
@@ -101,16 +103,16 @@ func convertDates(dates []time.Time) [][]string {
 func TestShouldBeAbleToCreateAnEmptyCsvFileWithBom(t *testing.T) {
 	buffer := &bytes.Buffer{}
 	mockUserRetriever(nil, nil, nil)
-	//mockAccessIdValidator()
 	mockTransactionRetriever(nil, nil)
 
 	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
 	doc, _ := ioutil.ReadAll(buffer)
 
+	txnDate := txnDaoMock.CallArgs[0].Date
+	assert(t, txnDate.Before(now.AddDate(0, -6, 1)))
+	assert(t, txnDate.After(now.AddDate(0, -6, -1)))
+	assert(t, userDaoMock.CallCount).Equals(0)
 	assert(t, doc).Equals([]byte{})
-	//assert(t, userDaoMock.CallCount).Equals(1)
-	assert(t, txnDaoMock.CallCount).Equals(0)
-	assert(t, userDaoMock.LatestCallCtxArg).Equals(ctx)
 }
 
 func TestShouldReturnPassErrorFromUserDaoThrough(t *testing.T) {
@@ -120,63 +122,55 @@ func TestShouldReturnPassErrorFromUserDaoThrough(t *testing.T) {
 	mockTransactionRetriever(nil, nil)
 
 	assert(t, createCsvFile(ctx, &bytes.Buffer{})).Equals(err)
-
-	assert(t, userDaoMock.CallCount).Equals(1)
-	assert(t, txnDaoMock.CallCount).Equals(0)
 }
 
-func TestShouldCreateEmptyCsvIfNoUserHasAnyTxn(t *testing.T) {
-	buffer := &bytes.Buffer{}
-	keys, users := createUsers([]string{"AccessId1"})
-	mockUserRetriever(keys, users, nil)
-	mockAccessIdValidator()
-	mockTransactionRetriever(nil, nil)
+// func TestShouldCreateEmptyCsvIfNoUserHasAnyTxn(t *testing.T) {
+// 	buffer := &bytes.Buffer{}
+// 	keys, users := createUsers([]string{"AccessId1"})
+// 	mockUserRetriever(keys, users, nil)
+// 	mockAccessIdValidator()
+// 	mockTransactionRetriever(nil, nil)
 
-	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
-	csv, _ := ioutil.ReadAll(buffer)
+// 	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
+// 	csv, _ := ioutil.ReadAll(buffer)
 
-	assert(t, csv).Equals([]byte{})
-	assert(t, accessIdValidatorMock.CallCount).Equals(1)
-	assert(t, txnDaoMock.CallCount).Equals(1)
-}
+// 	assert(t, csv).Equals([]byte{})
+// 	// assert(t, accessIdValidatorMock.CallCount).Equals(1)
+// 	assert(t, txnDaoMock.CallCount).Equals(1)
+// }
 
 func TestShouldReturnPassErrorFromTxnDaoThrough(t *testing.T) {
 	buffer := &bytes.Buffer{}
 	err := errors.New("Some User Error")
-	keys, users := createUsers([]string{"AccessId1"})
-	mockUserRetriever(keys, users, nil)
+	mockUserRetriever(nil, nil, nil)
 	mockAccessIdValidator()
-	txnDaoMock := mockTransactionRetriever(nil, err)
+	mockTransactionRetriever(nil, err)
 
 	assert(t, createCsvFile(ctx, buffer)).Equals(err)
-
-	assert(t, userDaoMock.CallCount).Equals(1)
-	assert(t, accessIdValidatorMock.CallCount).Equals(1)
-	assert(t, txnDaoMock.CallCount).Equals(1)
 }
 
 func TestShouldNotBeAbleToCreateCsvWhenTxnHasWrongEmail(t *testing.T) {
 	buffer := &bytes.Buffer{}
-	keys, users := createUsers([]string{"AccessId1"})
-	mockUserRetriever(keys, users, nil)
+	userKeys, users := createUsers([]string{"AccessId1"})
+	mockUserRetriever(userKeys, users, nil)
 	mockAccessIdValidator()
-	txnDaoMock := mockTransactionRetriever(createMessagesWithEmail([]time.Time{now}, "bad@email.com"), nil)
+	txnDaoMock := mockTransactionRetriever(createMessagesWithEmail([]time.Time{now}, userKeys, "bad@email.com"), nil)
 
 	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
 	csvBytes, _ := ioutil.ReadAll(buffer)
 	csvString := string(csvBytes)
 
 	assert(t, csvString).Equals("")
-	assert(t, accessIdValidatorMock.CallCount).Equals(1)
+	assert(t, userDaoMock.CallCount).Equals(0)
 	assert(t, txnDaoMock.CallCount).Equals(1)
 }
 
 func TestShouldBeAbleToCreateCsvWithOneEntry(t *testing.T) {
 	buffer := &bytes.Buffer{}
-	keys, users := createUsers([]string{"AccessId1"})
-	mockUserRetriever(keys, users, nil)
+	userKeys, users := createUsers([]string{"AccessId1"})
+	mockUserRetriever(userKeys, users, nil)
 	mockAccessIdValidator()
-	txnDaoMock := mockTransactionRetriever(createMessages([]time.Time{now}), nil)
+	txnDaoMock := mockTransactionRetriever(createMessages([]time.Time{now}, userKeys), nil)
 
 	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
 	csvBytes, _ := ioutil.ReadAll(buffer)
@@ -191,14 +185,13 @@ func TestShouldBeAbleToCreateCsvWithOneEntry(t *testing.T) {
 
 func TestShouldBeAbleToCreateCsvWithTwoEntries(t *testing.T) {
 	buffer := &bytes.Buffer{}
-	keys, users := createUsers([]string{"AccessId1", "AccessId2"})
-	userDaoMock := mockUserRetriever(keys, users, nil)
+	userKeys, users := createUsers([]string{"AccessId1", "AccessId2"})
+	userDaoMock := mockUserRetriever(userKeys, users, nil)
 	mockAccessIdValidator()
 
 	plusFive := now.AddDate(0, 0, 5)
 
-	txnDaoMock := mockTransactionRetriever(createMessages([]time.Time{now}), nil).
-		AddReturn(createMessages([]time.Time{plusFive}), nil)
+	mockTransactionRetriever(createMessages([]time.Time{now, plusFive}, userKeys), nil)
 
 	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
 	csvBytes, _ := ioutil.ReadAll(buffer)
@@ -211,19 +204,18 @@ func TestShouldBeAbleToCreateCsvWithTwoEntries(t *testing.T) {
 			fmt.Sprintf("%s,%s,%s%s", users[1].AccessId, dateStrs[1][0], dateStrs[1][1], windowsNewline))
 	assert(t, userDaoMock.CallCount).Equals(1)
 	assert(t, accessIdValidatorMock.CallCount).Equals(2)
-	assert(t, txnDaoMock.CallCount).Equals(2)
 }
 
 func TestShouldNotIncludeUsersWithInvalidAccessIds(t *testing.T) {
 	buffer := &bytes.Buffer{}
-	keys, users := createUsers([]string{"AccessId1", "InvalidId"})
-	userDaoMock := mockUserRetriever(keys, users, nil)
+	userKeys, users := createUsers([]string{"AccessId1", "InvalidId"})
+	userDaoMock := mockUserRetriever(userKeys, users, nil)
 	mockAccessIdValidator()
 
 	plusFive := now.AddDate(0, 0, 5)
 
-	txnDaoMock := mockTransactionRetriever(createMessages([]time.Time{now}), nil).
-		AddReturn(createMessages([]time.Time{plusFive}), nil)
+	mockTransactionRetriever(createMessages([]time.Time{now}, userKeys[:1]), nil).
+		AddReturn(createMessages([]time.Time{plusFive}, userKeys[1:2]), nil)
 
 	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
 	csvBytes, _ := ioutil.ReadAll(buffer)
@@ -235,27 +227,27 @@ func TestShouldNotIncludeUsersWithInvalidAccessIds(t *testing.T) {
 		fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline))
 	assert(t, userDaoMock.CallCount).Equals(1)
 	assert(t, accessIdValidatorMock.CallCount).Equals(2)
-	assert(t, txnDaoMock.CallCount).Equals(2)
 }
 
 func TestShouldBeAbleToCreateCsvWithTreeEntries(t *testing.T) {
 	buffer := &bytes.Buffer{}
-	keys, users := createUsers([]string{"AccessId1", "AccessId2", "AccessId3"})
-	userDaoMock := mockUserRetriever(keys, users, nil)
+	userKeys, users := createUsers([]string{"AccessId1", "AccessId2", "AccessId3"})
+	userDaoMock := mockUserRetriever(userKeys, users, nil)
 	mockAccessIdValidator()
 
-	plusFive := now.AddDate(0, 0, 5)
-	plusFour := now.AddDate(0, 0, 6)
+	dates := []time.Time{
+		now,
+		now.AddDate(0, 0, 5),
+		now.AddDate(0, 0, 6),
+	}
 
-	txnDaoMock := mockTransactionRetriever(createMessages([]time.Time{now}), nil).
-		AddReturn(createMessages([]time.Time{plusFive}), nil).
-		AddReturn(createMessages([]time.Time{plusFour}), nil)
+	mockTransactionRetriever(createMessages(dates, userKeys), nil)
 
 	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
 	csvBytes, _ := ioutil.ReadAll(buffer)
 	csvString := string(csvBytes)
 
-	dateStrs := convertDates([]time.Time{now, plusFive, plusFour})
+	dateStrs := convertDates(dates)
 
 	assert(t, csvString).Equals(
 		fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline) +
@@ -263,34 +255,39 @@ func TestShouldBeAbleToCreateCsvWithTreeEntries(t *testing.T) {
 			fmt.Sprintf("%s,%s,%s%s", users[2].AccessId, dateStrs[2][0], dateStrs[2][1], windowsNewline))
 	assert(t, userDaoMock.CallCount).Equals(1)
 	assert(t, accessIdValidatorMock.CallCount).Equals(3)
-	assert(t, txnDaoMock.CallCount).Equals(3)
 }
 
 func TestShouldBeAbleToCreateCsvWithMultipleTxnEntries(t *testing.T) {
 	buffer := &bytes.Buffer{}
-	keys, users := createUsers([]string{"AccessId1", "AccessId2"})
-	userDaoMock := mockUserRetriever(keys, users, nil)
+	userKeys, users := createUsers([]string{"AccessId1", "AccessId2"})
+	userDaoMock := mockUserRetriever(userKeys, users, nil)
 	mockAccessIdValidator()
 
-	plusA := now.AddDate(0, 0, 5)
-	plusB := now.AddDate(0, 6, 0)
-	plusC := now.AddDate(0, 9, 6)
-	extremeHigh := now.AddDate(1, 0, 6)
-	extremeLow := now.AddDate(0, 0, -3)
+	dates := []time.Time{
+		now,                   // User 1
+		now.AddDate(0, 0, 5),  // User 2 A
+		now.AddDate(0, 6, 0),  // User 2 B
+		now.AddDate(0, 9, 6),  // User 2 C
+		now.AddDate(1, 0, 6),  // User 2 extremeHigh
+		now.AddDate(0, 0, -3), // User 2 extremeLow
+	}
 
-	txnDaoMock := mockTransactionRetriever(createMessages([]time.Time{now}), nil).
-		AddReturn(createMessages([]time.Time{plusA, plusB, plusC, extremeHigh, extremeLow}), nil)
+	txnUserKeys := []*datastore.Key{
+		userKeys[0],
+		userKeys[1], userKeys[1], userKeys[1], userKeys[1], userKeys[1],
+	}
+
+	mockTransactionRetriever(createMessages(dates, txnUserKeys), nil)
 
 	assert(t, createCsvFile(ctx, buffer)).Equals(nil)
 	csvBytes, _ := ioutil.ReadAll(buffer)
 	csvString := string(csvBytes)
 
-	dateStrs := convertDates([]time.Time{now, plusA, plusB, plusC, extremeHigh, extremeLow})
+	dateStrs := convertDates(dates)
 
 	assert(t, csvString).Equals(
 		fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline) +
 			fmt.Sprintf("%s,%s,%s%s", users[1].AccessId, dateStrs[5][0], dateStrs[4][1], windowsNewline))
 	assert(t, userDaoMock.CallCount).Equals(1)
 	assert(t, accessIdValidatorMock.CallCount).Equals(2)
-	assert(t, txnDaoMock.CallCount).Equals(2)
 }

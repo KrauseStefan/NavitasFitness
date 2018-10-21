@@ -40,6 +40,13 @@ func printLineAndFunction(t *testing.T) {
 func (a *AssertObj) Equals(rightSide interface{}) {
 	leftSide := a.leftSide
 
+	valueLeft := reflect.ValueOf(leftSide)
+	if valueLeft.Kind() == reflect.Bool {
+		printLineAndFunction(a.t)
+		logError(a.t, "Do not use .Equals with boolean expressions")
+		a.t.FailNow()
+	}
+
 	// nil does not equal nil (nil == nil) => false
 	if !reflect.DeepEqual(leftSide, rightSide) && (leftSide != nil && rightSide != nil) {
 		logError(a.t, fmt.Sprintln("Fail:", leftSide, "did not equal", rightSide))
@@ -72,7 +79,6 @@ func Assert(t *testing.T, leftSide interface{}) *AssertObj {
 			logError(t, "Assert value was not true")
 			t.FailNow()
 		}
-		return nil
 	}
 
 	assertObj := new(AssertObj)

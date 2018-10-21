@@ -25,8 +25,12 @@ var (
 )
 
 func NewTransactionMsgDTOFromIpn(ipnMessage string) *TransactionMsgDTO {
+	return NewTransactionMsgDTOFromIpnWithKey(ipnMessage, nil)
+}
+
+func NewTransactionMsgDTOFromIpnWithKey(ipnMessage string, key *datastore.Key) *TransactionMsgDTO {
 	t := TransactionMsgDTO{
-		key:   nil,
+		key:   key,
 		dsDto: *new(transactionMsgDsDTO),
 	}
 
@@ -82,6 +86,10 @@ func (txDto *TransactionMsgDTO) GetDataStoreKey(ctx context.Context) *datastore.
 
 func (txDto *TransactionMsgDTO) GetUser() *datastore.Key {
 	return txDto.key.Parent()
+}
+
+func (txDto *TransactionMsgDTO) GetTxnId() string {
+	return txDto.dsDto.TxnId
 }
 
 func (txDto *TransactionMsgDTO) parseMessage() *url.Values {

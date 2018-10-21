@@ -61,7 +61,8 @@ func validateTransactions(ctx context.Context, txns []*TransactionDao.Transactio
 			if email == validationEmail {
 				validTxns = append(validTxns, txn)
 				break
-			} else if i == validationEmailsLendth {
+			} else if i == validationEmailsLendth-1 {
+				log.Warningf(ctx, "Invalid Email used to validate Txn entry: %s, txnId: %s", txn.GetReceiverEmail(), txn.GetTxnId())
 				invalidTxns = append(invalidTxns, txn)
 			}
 		}
@@ -79,18 +80,22 @@ func getLatestTxnByUser(txns []*TransactionDao.TransactionMsgDTO) UserTransactio
 	userTransactionMap := make(UserTransactionMap)
 
 	for _, txn := range txns {
-		userTxns := userTransactionMap[txn.GetUser()]
+		userKey := txn.GetUser()
+		userTxns := userTransactionMap[userKey]
 
 		if userTxns == nil {
-			userTxns = make([]*TransactionDao.TransactionMsgDTO, 1, 2)
+			userTxns = make([]*TransactionDao.TransactionMsgDTO, 0, 2)
 		}
 
-		userTxns = append(userTxns, txn)
+		userTransactionMap[userKey] = append(userTxns, txn)
 	}
 	return userTransactionMap
 }
 
 func getUsers(ctx context.Context, usersTxnMap UserTransactionMap) ([]UserDao.UserDTO, error) {
+	if len(usersTxnMap) == 0 {
+		return nil, nil
+	}
 	userKeys := make([]*datastore.Key, 0, len(usersTxnMap))
 	for userKey, _ := range usersTxnMap {
 		userKeys = append(userKeys, userKey)
@@ -159,10 +164,11 @@ func mapUsersToActivePeriod(validUsers []UserDao.UserDTO, usersWithActiveSubscri
 		txnDates := mapTxnToDate(usersWithActiveSubscriptions[user.Key])
 		min, max := findMinMax(txnDates)
 
-		userWithPeroid := usersWithPeroid[i]
-		userWithPeroid.user = user
-		userWithPeroid.startDate = min
-		userWithPeroid.endDate = max.AddDate(0, subscriptionPeriodMonth, 0)
+		usersWithPeroid[i] = UserTxnTuple{
+			user:      user,
+			startDate: min,
+			endDate:   max.AddDate(0, subscriptionPeriodMonth, 0),
+		}
 	}
 
 	return usersWithPeroid
@@ -189,8 +195,10 @@ func getActiveTransactionList(ctx context.Context) ([]UserTxnTuple, error) {
 
 	activeUsersWithPariod := mapUsersToActivePeriod(validUsers, usersWithActiveSubscriptions)
 
-	usersWithActiveSubscriptionButInvalidIdsStr := strings.Join(mapToUserNames(invalidUsers), ", ")
-	log.Infof(ctx, "%s has paid for access but ID is not valid, skipped in csv export", usersWithActiveSubscriptionButInvalidIdsStr)
+	if len(invalidUsers) > 0 {
+		usersWithActiveSubscriptionButInvalidIdsStr := strings.Join(mapToUserNames(invalidUsers), ", ")
+		log.Infof(ctx, "%s has paid for access but ID is not valid, skipped in csv export", usersWithActiveSubscriptionButInvalidIdsStr)
+	}
 
 	return activeUsersWithPariod, nil
 }
@@ -216,7 +224,7 @@ func createCsvFile(ctx context.Context, w io.Writer) error {
 		w.Write(comma)
 		w.Write([]byte(user.startDate.Format(csvDateFormat)))
 		w.Write(comma)
-		w.Write([]byte(user.endDate.AddDate(0, 6, 0).Format(csvDateFormat)))
+		w.Write([]byte(user.endDate.Format(csvDateFormat)))
 		w.Write([]byte(windowsNewline))
 	}
 
