@@ -2,6 +2,7 @@ package csv
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"net/http"
 	"time"
@@ -33,7 +34,7 @@ const (
 )
 
 type UserTxnTuple struct {
-	user      UserDao.UserDTO
+	user      *UserDao.UserDTO
 	startDate time.Time
 	endDate   time.Time
 }
@@ -92,25 +93,48 @@ func getLatestTxnByUser(txns []*TransactionDao.TransactionMsgDTO) UserTransactio
 	return userTransactionMap
 }
 
-func getUsers(ctx context.Context, usersTxnMap UserTransactionMap) ([]UserDao.UserDTO, error) {
+func getUsers(ctx context.Context, usersTxnMap UserTransactionMap) ([]*UserDao.UserDTO, []*TransactionDao.TransactionMsgDTO, error) {
 	if len(usersTxnMap) == 0 {
-		return nil, nil
+		return nil, nil, nil
 	}
 	userKeys := make([]*datastore.Key, 0, len(usersTxnMap))
 	for userKey, _ := range usersTxnMap {
 		userKeys = append(userKeys, userKey)
 	}
 
-	return userDAO.GetByKeys(ctx, userKeys)
+	users, err := userDAO.GetByKeys(ctx, userKeys)
+	if multiErr, ok := err.(appengine.MultiError); ok {
+		txnsWithNoUser := make([]*TransactionDao.TransactionMsgDTO, 0, len(usersTxnMap))
+		foundUsers := make([]*UserDao.UserDTO, 0, len(usersTxnMap))
+		foundOtherError := false
+		for i, e := range multiErr {
+			if e == nil {
+				foundUsers = append(foundUsers, users[i])
+			} else if e == datastore.ErrNoSuchEntity {
+				txnsWithNoUser = append(txnsWithNoUser, usersTxnMap[userKeys[i]]...)
+			} else {
+				foundOtherError = true
+				return nil, nil, err
+			}
+		}
+
+		if foundOtherError {
+			return foundUsers, txnsWithNoUser, err
+		} else {
+			return foundUsers, txnsWithNoUser, nil
+		}
+	}
+
+	return users, nil, err
 }
 
-func partitionUsersByValidity(ctx context.Context, users []UserDao.UserDTO) ([]UserDao.UserDTO, []UserDao.UserDTO, error) {
+func partitionUsersByValidity(ctx context.Context, users []*UserDao.UserDTO) ([]*UserDao.UserDTO, []*UserDao.UserDTO, error) {
 	if err := accessIdValidator.EnsureUpdatedIds(ctx); err != nil {
 		return nil, nil, err
 	}
 
-	validUsers := make([]UserDao.UserDTO, 0, len(users))
-	invalidUsers := make([]UserDao.UserDTO, 0, 10)
+	validUsers := make([]*UserDao.UserDTO, 0, len(users))
+	invalidUsers := make([]*UserDao.UserDTO, 0, 10)
 	for _, user := range users {
 		isValid, err := accessIdValidator.ValidateAccessId(ctx, []byte(user.AccessId))
 		if err != nil {
@@ -127,7 +151,7 @@ func partitionUsersByValidity(ctx context.Context, users []UserDao.UserDTO) ([]U
 	return validUsers, invalidUsers, nil
 }
 
-func mapToUserNames(users []UserDao.UserDTO) []string {
+func mapToUserNames(users []*UserDao.UserDTO) []string {
 	var userNames = make([]string, len(users))
 	for i, user := range users {
 		userNames[i] = user.Name
@@ -157,7 +181,7 @@ func findMinMax(dates []time.Time) (time.Time, time.Time) {
 	return min, max
 }
 
-func mapUsersToActivePeriod(validUsers []UserDao.UserDTO, usersWithActiveSubscriptions UserTransactionMap) []UserTxnTuple {
+func mapUsersToActivePeriod(validUsers []*UserDao.UserDTO, usersWithActiveSubscriptions UserTransactionMap) []UserTxnTuple {
 	usersWithPeroid := make([]UserTxnTuple, len(validUsers))
 
 	for i, user := range validUsers {
@@ -174,18 +198,33 @@ func mapUsersToActivePeriod(validUsers []UserDao.UserDTO, usersWithActiveSubscri
 	return usersWithPeroid
 }
 
-func getActiveTransactionList(ctx context.Context) ([]UserTxnTuple, error) {
+func getActiveTransactionList(ctx context.Context, newTxn *TransactionDao.TransactionMsgDTO) ([]UserTxnTuple, error) {
 	txns, err := getAllActiveSubscriptionsTxns(ctx)
 	if err != nil {
 		return nil, err
 	}
+	if newTxn != nil {
+		txns = append(txns, newTxn)
+	}
 	validTxns, _ := validateTransactions(ctx, txns)
 
 	usersWithActiveSubscriptions := getLatestTxnByUser(validTxns)
-
-	users, err := getUsers(ctx, usersWithActiveSubscriptions)
+	users, badTxns, err := getUsers(ctx, usersWithActiveSubscriptions)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(users) == 0 {
+		log.Errorf(ctx, "No users cannot generate csv")
+	}
+	if len(badTxns) > 0 {
+		log.Errorf(ctx, "Txns without user: %d", len(badTxns))
+		badTxnIds := make([]string, len(badTxns))
+		for i, txn := range badTxns {
+			badTxnIds[i] = txn.GetTxnId() + " - " + txn.GetPayerEmail()
+		}
+
+		log.Errorf(ctx, "Bad transactions id - email: %s", strings.Join(badTxnIds, ", "))
 	}
 
 	validUsers, invalidUsers, err := partitionUsersByValidity(ctx, users)
@@ -203,8 +242,8 @@ func getActiveTransactionList(ctx context.Context) ([]UserTxnTuple, error) {
 	return activeUsersWithPariod, nil
 }
 
-func createCsvFile(ctx context.Context, w io.Writer) error {
-	activeUsersWithPariod, err := getActiveTransactionList(ctx)
+func createCsvFile(ctx context.Context, w io.Writer, newTxn *TransactionDao.TransactionMsgDTO) error {
+	activeUsersWithPariod, err := getActiveTransactionList(ctx, newTxn)
 	if err != nil {
 		return err
 	}
@@ -234,13 +273,14 @@ func createCsvFile(ctx context.Context, w io.Writer) error {
 func exportCsvHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
 	ctx := appengine.NewContext(r)
 
-	if err := CreateAndUploadFile(ctx); err != nil {
+	if err := CreateAndUploadFile(ctx, nil); err != nil {
+		log.Errorf(ctx, err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
 
-func CreateAndUploadFile(ctx context.Context) error {
+func CreateAndUploadFile(ctx context.Context, newTxn *TransactionDao.TransactionMsgDTO) error {
 	var buffer bytes.Buffer
 
 	tokens, err := Dropbox.GetAccessTokens(ctx)
@@ -248,8 +288,8 @@ func CreateAndUploadFile(ctx context.Context) error {
 		return err
 	}
 
-	if err := createCsvFile(ctx, &buffer); err != nil {
-		return err
+	if err := createCsvFile(ctx, &buffer, newTxn); err != nil {
+		return errors.New("Error generating CSV file: " + err.Error())
 	}
 
 	for _, token := range tokens {

@@ -50,6 +50,7 @@ func (t *DefaultTransactionDao) PersistNewIpnMessage(ctx context.Context, ipnTxn
 
 	//Make sure indexed fields are updated
 	ipnTxn.parseMessage()
+	ipnTxn.key = newKey
 	if _, err := datastore.Put(ctx, newKey, &ipnTxn.dsDto); err != nil {
 		return err
 	}

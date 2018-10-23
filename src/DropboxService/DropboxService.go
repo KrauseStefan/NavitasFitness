@@ -101,5 +101,5 @@ func authorizationCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	// Below would be best as a real callback but will cause cyclic dependencies
 	// For now this will do
 	AccessIdValidator.PushMissingSampleData(ctx, token)
-	csv.CreateAndUploadFile(ctx)
+	csv.CreateAndUploadFile(ctx, nil)
 }

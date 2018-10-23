@@ -92,27 +92,31 @@ func (u *DefaultUserDAO) GetByAccessId(ctx context.Context, accessId string) (*U
 	return &userDtoList[0], nil
 }
 
-func (u *DefaultUserDAO) GetAll(ctx context.Context) ([]*datastore.Key, []UserDTO, error) {
+func (u *DefaultUserDAO) GetAll(ctx context.Context) ([]*datastore.Key, []*UserDTO, error) {
 	query := datastore.NewQuery(USER_KIND).
 		Ancestor(userCollectionParentKey(ctx))
 
-	users := new([]UserDTO)
+	users := new([]*UserDTO)
 	keys, err := query.GetAll(ctx, users)
 	if err != nil {
-		return nil, nil, err
+		return keys, *users, err
 	}
 
 	return keys, *users, nil
 }
 
-func (u *DefaultUserDAO) GetByKeys(ctx context.Context, keys []*datastore.Key) ([]UserDTO, error) {
-	dst := make([]UserDTO, len(keys))
+func (u *DefaultUserDAO) GetByKeys(ctx context.Context, keys []*datastore.Key) ([]*UserDTO, error) {
+	dst := make([]*UserDTO, len(keys))
 
-	if err := datastore.GetMulti(ctx, keys, dst); err != nil {
-		return nil, err
+	err := datastore.GetMulti(ctx, keys, dst)
+
+	for i, user := range dst {
+		if user != nil {
+			user.Key = keys[i]
+		}
 	}
 
-	return dst, nil
+	return dst, err
 }
 
 // This function tries its best to ensure no user is created with duplicated accessId or email

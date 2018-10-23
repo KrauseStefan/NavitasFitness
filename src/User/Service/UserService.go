@@ -65,7 +65,7 @@ func getUserFromSession(ctx context.Context, r *http.Request) (*UserDao.UserDTO,
 	return userDao.GetUserFromSessionUUID(ctx, sessionData.UserKey, sessionData.Uuid)
 }
 
-func GetAllUsers(ctx context.Context) ([]string, []UserDao.UserDTO, error) {
+func GetAllUsers(ctx context.Context) ([]string, []*UserDao.UserDTO, error) {
 	keys, users, err := userDao.GetAll(ctx)
 	keyStrings := make([]string, len(keys))
 

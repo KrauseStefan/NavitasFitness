@@ -14,7 +14,7 @@ type CallArgs struct {
 
 type ReturnValues struct {
 	keys     []*datastore.Key
-	userDtos []UserDao.UserDTO
+	userDtos []*UserDao.UserDTO
 	err      error
 }
 
@@ -25,14 +25,14 @@ type UserRetrieverMock struct {
 	CallArgs     []CallArgs
 }
 
-func NewUserRetrieverMock(keys []*datastore.Key, users []UserDao.UserDTO, err error) *UserRetrieverMock {
+func NewUserRetrieverMock(keys []*datastore.Key, users []*UserDao.UserDTO, err error) *UserRetrieverMock {
 	mock := &UserRetrieverMock{}
 	mock.AddReturn(keys, users, err)
 
 	return mock
 }
 
-func (mock *UserRetrieverMock) AddReturn(keys []*datastore.Key, userDtos []UserDao.UserDTO, err error) *UserRetrieverMock {
+func (mock *UserRetrieverMock) AddReturn(keys []*datastore.Key, userDtos []*UserDao.UserDTO, err error) *UserRetrieverMock {
 	mock.returnValues = append(mock.returnValues, ReturnValues{
 		keys:     keys,
 		userDtos: userDtos,
@@ -41,7 +41,7 @@ func (mock *UserRetrieverMock) AddReturn(keys []*datastore.Key, userDtos []UserD
 	return mock
 }
 
-func (mock *UserRetrieverMock) GetAll(ctx context.Context) ([]*datastore.Key, []UserDao.UserDTO, error) {
+func (mock *UserRetrieverMock) GetAll(ctx context.Context) ([]*datastore.Key, []*UserDao.UserDTO, error) {
 	rtnValues := mock.returnValues[mock.CallCount]
 	mock.CallCount++
 	mock.CallArgs = append(mock.CallArgs, CallArgs{
@@ -54,7 +54,7 @@ func (mock *UserRetrieverMock) GetByKey(ctx context.Context, key *datastore.Key)
 	panic("not implemented")
 }
 
-func (mock *UserRetrieverMock) GetByKeys(ctx context.Context, keys []*datastore.Key) ([]UserDao.UserDTO, error) {
+func (mock *UserRetrieverMock) GetByKeys(ctx context.Context, keys []*datastore.Key) ([]*UserDao.UserDTO, error) {
 	rtnValues := mock.returnValues[mock.CallCount]
 	mock.CallCount++
 	mock.CallArgs = append(mock.CallArgs, CallArgs{

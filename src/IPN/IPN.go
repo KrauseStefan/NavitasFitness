@@ -139,9 +139,9 @@ func ipnDoResponseTask(ctx context.Context, r *http.Request) error {
 		return err
 	}
 
-	transaction := TransactionDao.NewTransactionMsgDTOFromIpn(string(content))
-	testIpnField := transaction.GetField(TransactionDao.FIELD_TEST_IPN)
-	email := transaction.GetField(TransactionDao.FIELD_CUSTOM) //The custom field should contain the email
+	txn := TransactionDao.NewTransactionMsgDTOFromIpn(string(content))
+	testIpnField := txn.GetField(TransactionDao.FIELD_TEST_IPN)
+	email := txn.GetField(TransactionDao.FIELD_CUSTOM) //The custom field should contain the email
 
 	if err := verifyMassageWithPaypal(ctx, string(content), testIpnField); err != nil {
 		return err
@@ -149,14 +149,14 @@ func ipnDoResponseTask(ctx context.Context, r *http.Request) error {
 
 	//message is now verified and should be persisted
 
-	log.Debugf(ctx, fmt.Sprintf("%s: %q", TransactionDao.FIELD_PAYMENT_STATUS, transaction.GetField(TransactionDao.FIELD_PAYMENT_STATUS)))
+	log.Debugf(ctx, fmt.Sprintf("%s: %q", TransactionDao.FIELD_PAYMENT_STATUS, txn.GetField(TransactionDao.FIELD_PAYMENT_STATUS)))
 
-	savedTransaction, err := transactionDao.GetTransaction(ctx, transaction.GetField(TransactionDao.FIELD_TXN_ID))
+	savedTransaction, err := transactionDao.GetTransaction(ctx, txn.GetField(TransactionDao.FIELD_TXN_ID))
 	if err != nil {
 		return err
 	}
 	if savedTransaction != nil {
-		if transaction.GetPaymentStatus() == savedTransaction.GetPaymentStatus() {
+		if txn.GetPaymentStatus() == savedTransaction.GetPaymentStatus() {
 			//Verify that the IPN is not a duplicate. To do this, save the transaction ID and last payment status in each IPN message in a database and verify that the current IPN's values for these fields are not already in this database.
 			//Duplicate txnMsg
 			//Persist anyway?, with status duplicate?
@@ -178,7 +178,7 @@ func ipnDoResponseTask(ctx context.Context, r *http.Request) error {
 			return err
 		}
 	} else {
-		log.Infof(ctx, fmt.Sprintf("No previus transaction with ID: %q", transaction.GetField(TransactionDao.FIELD_TXN_ID)))
+		log.Infof(ctx, fmt.Sprintf("No previus transaction with ID: %q", txn.GetField(TransactionDao.FIELD_TXN_ID)))
 		log.Infof(ctx, fmt.Sprintf("Recived transaction from: %q", email))
 
 		user, err := userDAO.GetByEmail(ctx, email)
@@ -197,21 +197,21 @@ func ipnDoResponseTask(ctx context.Context, r *http.Request) error {
 			log.Errorf(ctx, "Recived paypal IPN message for unknown user")
 		}
 
-		js, _ := json.Marshal(transaction)
+		js, _ := json.Marshal(txn)
 		log.Debugf(ctx, "IpnSaved: %q", js)
 
-		if transaction.PaymentIsCompleted() {
-			if transaction.GetAmount() != expectedAmount {
-				log.Warningf(ctx, "The amount for the transaction was wrong, recived %f expected %f", transaction.GetAmount(), expectedAmount)
+		if txn.PaymentIsCompleted() {
+			if txn.GetAmount() != expectedAmount {
+				log.Warningf(ctx, "The amount for the transaction was wrong, recived %f expected %f", txn.GetAmount(), expectedAmount)
 			}
 		}
 
-		if err := transactionDao.PersistNewIpnMessage(ctx, transaction, userKey); err != nil {
+		if err := transactionDao.PersistNewIpnMessage(ctx, txn, userKey); err != nil {
 			return err
 		}
 	}
 
-	if err := csv.CreateAndUploadFile(ctx); err != nil {
+	if err := csv.CreateAndUploadFile(ctx, txn); err != nil {
 		return err
 	}
 

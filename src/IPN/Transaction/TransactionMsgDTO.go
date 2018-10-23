@@ -92,6 +92,10 @@ func (txDto *TransactionMsgDTO) GetTxnId() string {
 	return txDto.dsDto.TxnId
 }
 
+func (txDto *TransactionMsgDTO) GetPayerEmail() string {
+	return txDto.GetField(FIELD_PAYER_EMAIL)
+}
+
 func (txDto *TransactionMsgDTO) parseMessage() *url.Values {
 	if txDto.parsedIpnMessage == nil {
 		parsedIpnMessage, _ := url.ParseQuery(txDto.getLatestIPNMessage())

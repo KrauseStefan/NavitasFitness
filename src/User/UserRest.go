@@ -83,8 +83,8 @@ func IntegrateRoutes(router *mux.Router) {
 
 func getAllUsersHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserDTO) {
 	type UserAndKeys struct {
-		Keys []string          `json:"keys"`
-		User []UserDao.UserDTO `json:"users"`
+		Keys []string           `json:"keys"`
+		User []*UserDao.UserDTO `json:"users"`
 	}
 
 	ctx := appengine.NewContext(r)
