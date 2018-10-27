@@ -5,7 +5,7 @@ import { UserService } from './PageComponents/UserService';
 
 import { appComponent } from './AppComponent';
 import { ckEditor } from './Components/CkEditor/CkEditor';
-import { adminPageComponent, adminRouterState } from './PageComponents/AdminPage/AdminPageComponent';
+import { adminPageModule, adminRouterState } from './PageComponents/AdminPage/AdminPageModule';
 import { mainPageComponent, mainPageRouterState } from './PageComponents/MainPage/MainPage';
 import { nfResetOnChange } from './PageComponents/RegistrationForm/nfResetOnChange';
 import { nfShouldEqual } from './PageComponents/RegistrationForm/nfShouldEqual';
@@ -18,7 +18,6 @@ import 'angular-aria';
 import 'angular-cookies';
 import 'angular-material';
 import 'angular-messages';
-import 'angular-ui-grid';
 import 'angular-ui-router';
 
 import ngMat = ng.material;
@@ -26,8 +25,8 @@ import ngMat = ng.material;
 export const navitasFitnessModule = module('NavitasFitness', [
   'ngMaterial', 'ngCookies', 'ngMessages',
   'ui.router',
-  'ui.grid', 'ui.grid.selection',
   defaultErrorHandlingModule.name,
+  adminPageModule.name,
 ])
   .config(($mdThemingProvider: ngMat.IThemingProvider) => {
     $mdThemingProvider.theme('default')
@@ -69,7 +68,6 @@ export const navitasFitnessModule = module('NavitasFitness', [
   .component('ckEditor', ckEditor)
   .component('mainPage', mainPageComponent)
   .component('userStatus', userStatusComponent)
-  .component('adminPage', adminPageComponent)
   .component('appComponent', appComponent)
 
   .directive(nfResetOnChange.name, nfResetOnChange.factory)

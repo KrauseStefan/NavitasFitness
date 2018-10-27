@@ -1,0 +1,18 @@
+h3.md-title Transactions
+
+table.md-whiteframe-2dp(style="padding: 0")
+  thead
+    tr
+      th Amount
+      th Currency
+      th Date
+      th status
+      th isActive
+
+  tbody
+    tr(ng-repeat="txn in $ctrl.transactions")
+      td {{ txn.amount }}
+      td {{ txn.currency }}
+      td {{ txn.paymentDate }}
+      td {{ txn.status }}
+      td {{ txn.isActive }}

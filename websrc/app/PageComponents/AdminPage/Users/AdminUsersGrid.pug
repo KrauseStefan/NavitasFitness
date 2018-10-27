@@ -1,0 +1,6 @@
+h3.md-title Users
+
+//- md-checkbox(ng-model="$ctrl.displayAll") Display all users
+
+div(ng-if="$ctrl.users.length > 0")
+  div.md-whiteframe-2dp(ui-grid="$ctrl.gridOptionsUsers", ui-grid-selection)
