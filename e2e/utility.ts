@@ -1,6 +1,6 @@
 import { browser } from 'protractor';
 
-export interface IBrowserLog {
+export interface BrowserLog {
   level: {
     name: string, // SERVERE
     value: number,
@@ -11,7 +11,7 @@ export interface IBrowserLog {
 }
 
 export function verifyBrowserLog(expectedEntries: string[] = []): Promise<void> {
-  return (<any>browser).manage().logs().get('browser').then((browserLogs: IBrowserLog[]) => {
+  return (<any>browser).manage().logs().get('browser').then((browserLogs: BrowserLog[]) => {
 
     const filteredLog = browserLogs.filter((logEntry) => {
       const index = expectedEntries.findIndex((i) => i === logEntry.message);

@@ -1,6 +1,6 @@
 import { element } from 'angular';
 import { ResetPasswordFormController } from '../ResetPasswordForm/ResetPasswordForm';
-import { IBaseUserDTO, UserService } from '../UserService';
+import { BaseUserDTO, UserService } from '../UserService';
 
 import IDialogService = angular.material.IDialogService;
 import IHttpPromiseCallbackArg = angular.IHttpPromiseCallbackArg;
@@ -22,7 +22,7 @@ export class LoginForm {
   }
 
   public resetForm() {
-    const model: IBaseUserDTO = {
+    const model: BaseUserDTO = {
       accessId: '',
       password: '',
     };

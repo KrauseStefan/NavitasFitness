@@ -1,9 +1,9 @@
-import { IUserDTO, UserService } from '../UserService';
+import { UserDTO, UserService } from '../UserService';
 import { RegistrationFormModel } from './RegistrationFormModel';
 
 import IDialogService = ng.material.IDialogService;
 
-interface IRegistrationError {
+interface RegistrationError {
   field: keyof RegistrationFormModel;
   message: string;
   type: 'invalid' | 'unique_constraint';
@@ -11,15 +11,13 @@ interface IRegistrationError {
 
 export class RegistrationForm implements ng.IController {
 
-  private submittingUser = false;
-
   constructor(
     private $scope: {
       submit: () => void,
       cancel: () => void,
       model: RegistrationFormModel,
       errorMsg: any,
-      RegistrationForm: {[field in keyof RegistrationFormModel]: ng.INgModelController } & ng.IFormController,
+      RegistrationForm: { [field in keyof RegistrationFormModel]: ng.INgModelController } & ng.IFormController,
     } & ng.IScope,
     private userService: UserService,
     private $mdDialog: IDialogService) {
@@ -29,7 +27,7 @@ export class RegistrationForm implements ng.IController {
     $scope.model = new RegistrationFormModel();
   }
 
-  public toUserDTO(formModel: RegistrationFormModel): IUserDTO {
+  public toUserDTO(formModel: RegistrationFormModel): UserDTO {
     return {
       name: formModel.name,
       email: formModel.email,
@@ -39,13 +37,11 @@ export class RegistrationForm implements ng.IController {
   }
 
   public submit() {
-    this.submittingUser = true;
-
     this.userService.createUser(this.toUserDTO(this.$scope.model)).then(() => {
       this.$scope.model = new RegistrationFormModel();
       this.$mdDialog.hide();
       this.displayCheckEmailNotice();
-    }, (err: ng.IHttpPromiseCallbackArg<IRegistrationError>) => {
+    }, (err: ng.IHttpPromiseCallbackArg<RegistrationError>) => {
       if (err.data.field && err.data.field.length > 0) {
         const formCtrl = this.getFormFieldCtrl(err.data);
         if (err.data.type) {
@@ -54,7 +50,7 @@ export class RegistrationForm implements ng.IController {
           formCtrl.$setValidity('serverValidation', false);
         }
       }
-  }).finally(() => this.submittingUser = false);
+    });
   }
 
   public cancel() {
@@ -72,7 +68,7 @@ export class RegistrationForm implements ng.IController {
       }, initial);
   }
 
-  private getFormFieldCtrl(err: IRegistrationError): ng.INgModelController {
+  private getFormFieldCtrl(err: RegistrationError): ng.INgModelController {
     if (!this.$scope.RegistrationForm[err.field]) {
       const errField = err.field.toLowerCase();
       const fieldMap = this.getFieldMap();

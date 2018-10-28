@@ -7,9 +7,9 @@ export enum TransactionTableCells {
   Status,
 }
 
-export interface IParsedDate { day: number; month: number; year: number; }
+export interface ParsedDate { day: number; month: number; year: number; }
 
-export function dateParts(date: string): IParsedDate {
+export function dateParts(date: string): ParsedDate {
   const seperator = '.';
   // format 'DD-MM-YYYY'
   const [day, month, year] = date
@@ -74,7 +74,7 @@ export class StatusPageObject {
     await browser.waitForAngularEnabled(true);
   }
 
-  public static getPageDates(): Promise<{firstTrxDate: IParsedDate, validUntil: IParsedDate }> {
+  public static getPageDates(): Promise<{firstTrxDate: ParsedDate, validUntil: ParsedDate }> {
     return Promise.all([
       this.getFirstTransactionDate(),
       this.getValidUntilFieldValue(),

@@ -1,7 +1,7 @@
 import { $, ElementFinder } from 'protractor';
 import { retryCall } from '../utility';
 
-export interface IFormNameValuesMap {
+export interface FormNameValuesMap {
   [name: string]: string;
 }
 
@@ -24,7 +24,7 @@ export class DialogPageObject {
 
   public formContainer = $('md-dialog');
 
-  public fillForm(formValues: IFormNameValuesMap): Promise<void> {
+  public fillForm(formValues: FormNameValuesMap): Promise<void> {
     const promises = Object.keys(formValues).map((name) => {
       const field = this.formContainer.$(`input[name="${name}"]`);
       // Sometimes form fields fail to sendKeys (one might be missing)

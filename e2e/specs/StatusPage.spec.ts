@@ -2,7 +2,7 @@ import { browser } from 'protractor';
 import { AlerDialogPageObject } from '../PageObjects/AlertDialogPageObject';
 import { DataStoreManipulator } from '../PageObjects/DataStoreManipulator';
 import { NavigationPageObject } from '../PageObjects/NavigationPageObject';
-import { IParsedDate, StatusPageObject, TransactionTableCells} from '../PageObjects/StatusPageObject';
+import { ParsedDate, StatusPageObject, TransactionTableCells} from '../PageObjects/StatusPageObject';
 import { verifyBrowserLog } from '../utility';
 
 describe('Payments', () => {
@@ -85,7 +85,7 @@ describe('Payments', () => {
     });
 
     it('should show subscription active when show subscription end date when subscribed', async () => {
-      function diffMonth(start: IParsedDate, end: IParsedDate): number {
+      function diffMonth(start: ParsedDate, end: ParsedDate): number {
         if (start.year === end.year) {
           return end.month - start.month;
         } else if (start.year + 1 === end.year) {

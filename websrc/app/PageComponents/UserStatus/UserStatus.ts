@@ -8,7 +8,7 @@ export const statusRouterState: angular.ui.IState = {
 
 class UserStatus {
 
-  public model: IUserStatusModel;
+  public model: UserStatusModel;
   public statusMessages: { [key: string]: string } = {
     active: 'Subscription Active',
     inActive: 'No Active Subscription',
@@ -75,7 +75,7 @@ class UserStatus {
   }
 
   public getTransactionsUpdate() {
-    this.$http.get<ITransactionEntry[]>('/rest/user/transactions').then((res) => {
+    this.$http.get<TransactionEntry[]>('/rest/user/transactions').then((res) => {
       this.model.transactionHistory = res.data.map((txn) => {
         txn.paymentDateParsed = moment(txn.paymentDate).format(this.dateFormat);
         return txn;
@@ -115,15 +115,15 @@ class UserStatus {
 
 }
 
-interface IUserStatusModel {
+interface UserStatusModel {
   userNameStr: string;
   userEmail: string;
   statusMsgKey: string;
-  transactionHistory: ITransactionEntry[];
+  transactionHistory: TransactionEntry[];
   validUntill: string;
 }
 
-interface ITransactionEntry {
+interface TransactionEntry {
   amount: number;
   currency: string;
   paymentDate: string;

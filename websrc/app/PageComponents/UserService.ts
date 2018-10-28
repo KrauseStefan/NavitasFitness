@@ -5,7 +5,7 @@ export class UserService {
   private userServiceUrl = 'rest/user';
   private authServiceUrl = 'rest/auth';
 
-  private currentUserSubject = new ReplaySubject<IUserDTO | null>(1);
+  private currentUserSubject = new ReplaySubject<UserDTO | null>(1);
 
   constructor(
     private $http: ng.IHttpService,
@@ -15,13 +15,13 @@ export class UserService {
     this.getUserFromSessionData();
   }
 
-  public createUser(user: IUserDTO): ng.IPromise<IUserDTO> {
-    return this.$http.post<IUserDTO>(this.userServiceUrl, user)
+  public createUser(user: UserDTO): ng.IPromise<UserDTO> {
+    return this.$http.post<UserDTO>(this.userServiceUrl, user)
       .then((res) => res.data);
   }
 
-  public doUserLogin(user: IBaseUserDTO): ng.IPromise<IUserDTO> {
-    return this.$http.post<IUserDTO>(`${this.authServiceUrl}/login`, user)
+  public doUserLogin(user: BaseUserDTO): ng.IPromise<UserDTO> {
+    return this.$http.post<UserDTO>(`${this.authServiceUrl}/login`, user)
       .then((res) => {
         const currentUser = res.data;
         this.currentUserSubject.next(currentUser);
@@ -35,7 +35,7 @@ export class UserService {
     });
   }
 
-  public getLoggedinUser$(): Observable<IUserDTO | null> {
+  public getLoggedinUser$(): Observable<UserDTO | null> {
     return this.currentUserSubject.asObservable();
   }
 
@@ -43,13 +43,13 @@ export class UserService {
     return this.$http.post<string>(`${this.userServiceUrl}/resetPassword/${email}`, undefined);
   }
 
-  public sendPasswordChangeRequest(dto: IChangePasswordDTO) {
+  public sendPasswordChangeRequest(dto: ChangePasswordDTO) {
     return this.$http.post(`${this.userServiceUrl}/changePassword`, dto);
   }
 
   private getUserFromSessionData(): void {
-    this.$http.get<IUserSessionDto>(this.userServiceUrl).then((res) => {
-      return this.$q<IUserDTO | null>((resolve) => {
+    this.$http.get<UserSessionDto>(this.userServiceUrl).then((res) => {
+      return this.$q<UserDTO | null>((resolve) => {
         if (!res.data || !res.data.user) {
           this.$log.debug('No User Session');
           return resolve(null);
@@ -67,24 +67,24 @@ export class UserService {
   }
 }
 
-export interface IChangePasswordDTO {
+export interface ChangePasswordDTO {
   password: string;
   key: string;
   secret: string;
 }
 
-export interface IBaseUserDTO {
+export interface BaseUserDTO {
   accessId: string;
   password: string;
 }
 
-export interface IUserDTO extends IBaseUserDTO {
+export interface UserDTO extends BaseUserDTO {
   email: string;
   name: string;
   isAdmin?: boolean;
 }
 
-export interface IUserSessionDto {
-  user: IUserDTO;
+export interface UserSessionDto {
+  user: UserDTO;
   isAdmin: boolean;
 }

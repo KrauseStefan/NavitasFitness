@@ -3,18 +3,18 @@ import 'angular-ui-grid';
 // tslint:disable-next-line no-implicit-dependencies
 import { selection } from 'ui-grid';
 import { AdminUiGridConstants } from '../AdminUiGridsConstants';
-import { IUser } from './IUser';
+import { User } from './User';
 
-type IUserGridOptions = selection.IGridOptions & uiGrid.IGridOptionsOf<IUser> & { data: IUser[] };
+type IUserGridOptions = selection.IGridOptions & uiGrid.IGridOptionsOf<User> & { data: User[] };
 
 export class AdminUsersGridCtrl {
 
-  public usersBackup: IUser[] = [];
-  public users: IUser[] = [];
+  public usersBackup: User[] = [];
+  public users: User[] = [];
 
   public readonly gridOptionsUsers: IUserGridOptions;
 
-  private gridApiDefered = this.$q.defer<uiGrid.IGridApiOf<IUser>>();
+  private gridApiDefered = this.$q.defer<uiGrid.IGridApiOf<User>>();
 
   private readonly gridOptionsUsersSpecific: uiGrid.IGridOptions = {
     enableRowSelection: true,
@@ -39,7 +39,7 @@ export class AdminUsersGridCtrl {
 
     this.gridOptionsUsers = <any>Object.assign({}, options, this.gridOptionsUsersSpecific);
 
-    $http.get<{ users: IUser[], keys: string[] }>('/rest/user/all').then((res) => {
+    $http.get<{ users: User[], keys: string[] }>('/rest/user/all').then((res) => {
       this.users = res.data.users;
       this.gridOptionsUsers.data = this.users;
 
@@ -58,8 +58,8 @@ export class AdminUsersGridCtrl {
     });
   }
 
-  public makeUsersUnique(testValue: keyof IUser) {
-    let prev: IUser = <any>{};
+  public makeUsersUnique(testValue: keyof User) {
+    let prev: User = <any>{};
     this.users = this.users.reduce((acc, value) => {
       if (prev && prev[testValue] === value[testValue]) {
         if (acc.length > 0 && acc[acc.length - 1] !== prev) {
@@ -71,17 +71,17 @@ export class AdminUsersGridCtrl {
 
       prev = value;
       return acc;
-    }, <IUser[]>[]);
+    }, <User[]>[]);
 
     return this.users;
   }
 
-  public sortBy(testValue: keyof IUser) {
+  public sortBy(testValue: keyof User) {
     this.users = this.users.sort((a, b) => a[testValue].localeCompare(b[testValue]));
     return this.users;
   }
 
-  private configureSelectionListeners(gridApi: uiGrid.IGridApiOf<IUser>): void {
+  private configureSelectionListeners(gridApi: uiGrid.IGridApiOf<User>): void {
     const displayTransactions = () => {
       this.userSelectionUpdated({
         users: gridApi.selection.getSelectedRows(),
@@ -99,7 +99,7 @@ export class AdminUsersGridCtrl {
     );
   }
 
-  private userSelectionUpdated: (values: { users: IUser[] }) => void = () => { throw new Error('Not implemented'); };
+  private userSelectionUpdated: (values: { users: User[] }) => void = () => { throw new Error('Not implemented'); };
 
 }
 

@@ -1,4 +1,4 @@
-import { IUser } from './Users/IUser';
+import { User } from './Users/User';
 
 export const adminRouterState: angular.ui.IState = {
   template: '<admin-page></admin-page>',
@@ -6,10 +6,9 @@ export const adminRouterState: angular.ui.IState = {
 };
 
 export class AdminPageCtrl implements ng.IComponentController {
-
   public selectedUserKeys: ReadonlyArray<string> = [];
 
-  public userSelectionUpdated(selectedUsers: ReadonlyArray<IUser>) {
+  public userSelectionUpdated(selectedUsers: ReadonlyArray<User>) {
     this.selectedUserKeys = selectedUsers.map((row) => row.key);
   }
 }

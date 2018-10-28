@@ -14,7 +14,7 @@ const timeoutMils = 1000 * 60;
 declare const angular: any;
 declare const by: ProtractorBy;
 
-interface IJasmine2ProtractorUtilsConfig extends PluginConfig {
+interface Jasmine2ProtractorUtilsConfig extends PluginConfig {
   clearFoldersBeforeTest?: boolean;
   disableHTMLReport?: boolean;
   disableScreenshot?: boolean;
@@ -28,7 +28,7 @@ interface IJasmine2ProtractorUtilsConfig extends PluginConfig {
   screenshotPath?: string;
 }
 
-const utilsPlugin: IJasmine2ProtractorUtilsConfig = {
+const utilsPlugin: Jasmine2ProtractorUtilsConfig = {
   clearFoldersBeforeTest: true,
   disableHTMLReport: true,
   disableScreenshot: false,

@@ -2,7 +2,7 @@ import { element, isDefined, isObject } from 'angular';
 import { LoginForm } from './PageComponents/LoginForm/LoginForm';
 import { keyFieldName, PasswordChangeFormCtrl } from './PageComponents/PasswordChangeForm/PasswordChangeFormCtrl';
 import { RegistrationForm } from './PageComponents/RegistrationForm/RegistrationFormCtrl';
-import { IUserDTO, UserService } from './PageComponents/UserService';
+import { UserDTO, UserService } from './PageComponents/UserService';
 
 class AppComponentController {
 
@@ -19,7 +19,7 @@ class AppComponentController {
   }];
 
   public selectedTabIndex: number = 0;
-  private loggedInUser: IUserDTO | null = null;
+  private loggedInUser: UserDTO | null = null;
 
   constructor(
     private $mdDialog: ng.material.IDialogService,

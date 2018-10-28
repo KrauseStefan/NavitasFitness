@@ -1,6 +1,6 @@
 import {} from 'angular';
 
-interface ITransaction {
+interface Transaction {
   amount: number;
   currency: string;
   isActive: boolean;
@@ -10,9 +10,9 @@ interface ITransaction {
 
 class AdminTransactionGridCtrl implements ng.IComponentController {
 
-  public transactions: ITransaction[] = [];
+  public transactions: Transaction[] = [];
 
-  private transactionsCache: { [key: string]: ITransaction[] } = {};
+  private transactionsCache: { [key: string]: Transaction[] } = {};
 
   constructor(
     private $q: ng.IQService,
@@ -25,9 +25,9 @@ class AdminTransactionGridCtrl implements ng.IComponentController {
     }
   }
 
-  public getTransactions(key: string): ng.IPromise<ITransaction[]> {
+  public getTransactions(key: string): ng.IPromise<Transaction[]> {
     this.transactions = [];
-    return this.$http.get<ITransaction[]>(`/rest/user/transactions/${key}`).then((res) => {
+    return this.$http.get<Transaction[]>(`/rest/user/transactions/${key}`).then((res) => {
       this.transactionsCache[key] = res.data;
       return res.data;
     }, (resp: ng.IHttpResponse<string>) => {

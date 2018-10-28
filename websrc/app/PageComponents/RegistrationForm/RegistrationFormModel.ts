@@ -1,6 +1,6 @@
-import { IUserDTO } from '../UserService';
+import { UserDTO } from '../UserService';
 
-export class RegistrationFormModel implements IUserDTO {
+export class RegistrationFormModel implements UserDTO {
   public name = '';
   public email = '';
   public password = '';
