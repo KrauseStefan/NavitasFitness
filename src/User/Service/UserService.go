@@ -77,13 +77,7 @@ func GetAllUsers(ctx context.Context) ([]string, []*UserDao.UserDTO, error) {
 }
 
 // This function tries its best to validate and ensure no user is created with duplicated accessId or email
-func CreateUser(ctx context.Context, r *http.Request, sessionData Auth.SessionData) (*UserDao.UserDTO, error) {
-	user := &UserDao.UserDTO{}
-
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(user); err != nil {
-		return nil, err
-	}
+func CreateUser(ctx context.Context, user *UserDao.UserDTO, sessionData Auth.SessionData) (*UserDao.UserDTO, error) {
 
 	if err := user.ValidateUser(ctx); err != nil {
 		return nil, err
@@ -170,7 +164,6 @@ func RandString(n int) string {
 }
 
 func RequestResetUserPassword(ctx context.Context, email string) error {
-
 	rndStr := RandString(10)
 
 	user, err := userDao.GetByEmail(ctx, email)

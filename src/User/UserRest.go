@@ -2,6 +2,7 @@ package UserRest
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"google.golang.org/appengine"
@@ -179,22 +180,28 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func createUserHandlerInternal(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	ctx := appengine.NewContext(r)
+	user := &UserDao.UserDTO{}
 
 	sessionData, err := Auth.GetSessionData(r)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := UserService.CreateUser(ctx, r, sessionData)
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(user); err != nil {
+		return nil, err
+	}
+
+	createdUser, err := UserService.CreateUser(ctx, user, sessionData)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := Auth.UpdateSessionDataUserKey(r, w, user.Key); err != nil {
+	if err := Auth.UpdateSessionDataUserKey(r, w, createdUser.Key); err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return createdUser, nil
 }
 
 func verifyUserRequestHandler(w http.ResponseWriter, r *http.Request) {
