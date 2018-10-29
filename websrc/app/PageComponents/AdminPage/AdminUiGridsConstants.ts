@@ -11,7 +11,6 @@ export class AdminUiGridConstants {
     enableVerticalScrollbar: this.uiGridConstants.scrollbars.WHEN_NEEDED,
     rowHeight: 42,
     enableRowHeaderSelection: false,
-    enableRowSelection: false,
   };
 
   constructor(private uiGridConstants: uiGrid.IUiGridConstants) {

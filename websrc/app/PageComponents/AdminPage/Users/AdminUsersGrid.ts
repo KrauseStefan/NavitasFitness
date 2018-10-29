@@ -11,7 +11,6 @@ export class AdminUsersGridCtrl {
 
   public usersBackup: User[] = [];
   public users: User[] = [];
-
   public readonly gridOptionsUsers: IUserGridOptions;
 
   private gridApiDefered = this.$q.defer<uiGrid.IGridApiOf<User>>();

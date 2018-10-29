@@ -1,0 +1,9 @@
+h3.md-title Access Overrides
+
+md-card-actions
+  md-button(ng-click="", ) Add
+  //- md-button(ng-click="", ng-if="!$ctrl.entry.enabled") Edit
+  md-button(ng-click="", ng-if="!$ctrl.entry.enabled") remove
+
+div(ng-if="$ctrl.accessOverrides.length > 0")
+  div.md-whiteframe-2dp(ui-grid="$ctrl.gridOptions", ui-grid-edit="", ui-grid-cellnav="")

@@ -1,3 +1,5 @@
+@import 'palette';
+
 .ui-grid {
   border: 0;
   border-radius: 0 0 2px 2px;
@@ -40,4 +42,16 @@
 
 .ui-grid-cell-contents {
   padding: 12px 16px 0 16px;
+}
+
+.ui-grid-cell input.ng-valid {
+  padding: 6px 15px;
+  margin: 5px 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ui-grid-cell-focus {
+  outline: unset;
+  background-color: unset;
 }
