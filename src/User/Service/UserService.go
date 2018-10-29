@@ -94,6 +94,25 @@ func CreateUser(ctx context.Context, user *UserDao.UserDTO, sessionData Auth.Ses
 	return user, nil
 }
 
+// This function tries its best to validate and ensure no user is created with duplicated accessId or email
+func UpdateAccessId(ctx context.Context, user *UserDao.UserDTO) error {
+	if err := user.ValidateUser(ctx); err != nil {
+		return err
+	}
+
+	currentUser, err := userDao.GetByKey(ctx, user.Key)
+	if err != nil {
+		return err
+	}
+
+	currentUser.AccessId = user.AccessId
+	if err := userDao.SaveUser(ctx, currentUser); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func GetUserTransactions(ctx context.Context, userKey *datastore.Key) ([]*TransactionMsgClientDTO, error) {
 	transactions, err := transactionDao.GetTransactionsByUser(ctx, userKey)
 	if err != nil {

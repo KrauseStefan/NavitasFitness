@@ -58,6 +58,12 @@ func IntegrateRoutes(router *mux.Router) {
 		HandlerFunc(createUserHandler)
 
 	router.
+		Methods("PUT").
+		Path(path + "/{" + userKey + "}").
+		Name("Update User Info").
+		HandlerFunc(UserService.AsAdmin(updateUserHandler))
+
+	router.
 		Methods("GET").
 		Path(path + "/verify").
 		Name("VerifyEmailCallback").
@@ -202,6 +208,36 @@ func createUserHandlerInternal(w http.ResponseWriter, r *http.Request) (interfac
 	}
 
 	return createdUser, nil
+}
+
+func updateUserHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
+	ctx := appengine.NewContext(r)
+	err := updateUserHandlerInternal(w, r)
+
+	DAOHelper.ReportError(ctx, w, err)
+}
+
+func updateUserHandlerInternal(w http.ResponseWriter, r *http.Request) error {
+	ctx := appengine.NewContext(r)
+	user := &UserDao.UserDTO{}
+
+	userKeyStr := mux.Vars(r)[userKey]
+	userKey, err := datastore.DecodeKey(userKeyStr)
+	if err != nil {
+		return err
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(user); err != nil {
+		return err
+	}
+	user.Key = userKey
+
+	if err := UserService.UpdateAccessId(ctx, user); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func verifyUserRequestHandler(w http.ResponseWriter, r *http.Request) {
