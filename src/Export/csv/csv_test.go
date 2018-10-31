@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strings"
 	"testing"
 	"time"
 
@@ -184,9 +185,10 @@ func TestShouldBeAbleToCreateCsvWithTwoEntries(t *testing.T) {
 
 	dateStrs := convertDates([]time.Time{now, plusFive})
 
-	assert(t, csvString).Equals(
-		fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline) +
-			fmt.Sprintf("%s,%s,%s%s", users[1].AccessId, dateStrs[1][0], dateStrs[1][1], windowsNewline))
+	assert(t, strings.Contains(csvString, fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline)))
+	assert(t, strings.Contains(csvString, fmt.Sprintf("%s,%s,%s%s", users[1].AccessId, dateStrs[1][0], dateStrs[1][1], windowsNewline)))
+	assert(t, strings.Count(csvString, "\n")).Equals(2)
+
 	assert(t, userDaoMock.CallCount).Equals(1)
 	assert(t, accessIdValidatorMock.CallCount).Equals(2)
 }
@@ -234,10 +236,11 @@ func TestShouldBeAbleToCreateCsvWithTreeEntries(t *testing.T) {
 
 	dateStrs := convertDates(dates)
 
-	assert(t, csvString).Equals(
-		fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline) +
-			fmt.Sprintf("%s,%s,%s%s", users[1].AccessId, dateStrs[1][0], dateStrs[1][1], windowsNewline) +
-			fmt.Sprintf("%s,%s,%s%s", users[2].AccessId, dateStrs[2][0], dateStrs[2][1], windowsNewline))
+	assert(t, strings.Contains(csvString, fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline)))
+	assert(t, strings.Contains(csvString, fmt.Sprintf("%s,%s,%s%s", users[1].AccessId, dateStrs[1][0], dateStrs[1][1], windowsNewline)))
+	assert(t, strings.Contains(csvString, fmt.Sprintf("%s,%s,%s%s", users[2].AccessId, dateStrs[2][0], dateStrs[2][1], windowsNewline)))
+	assert(t, strings.Count(csvString, "\n")).Equals(3)
+
 	assert(t, userDaoMock.CallCount).Equals(1)
 	assert(t, accessIdValidatorMock.CallCount).Equals(3)
 }
@@ -271,10 +274,11 @@ func TestShouldBeAbleToCreateCsvWithMultipleTxnEntries(t *testing.T) {
 
 	dateStrs := convertDates(dates)
 
-	assert(t, csvString).Equals(
-		fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline) +
-			fmt.Sprintf("%s,%s,%s%s", users[1].AccessId, dateStrs[5][0], dateStrs[4][1], windowsNewline) +
-			fmt.Sprintf("%s,%s,%s%s", users[2].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline))
+	assert(t, strings.Contains(csvString, fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline)))
+	assert(t, strings.Contains(csvString, fmt.Sprintf("%s,%s,%s%s", users[1].AccessId, dateStrs[5][0], dateStrs[4][1], windowsNewline)))
+	assert(t, strings.Contains(csvString, fmt.Sprintf("%s,%s,%s%s", users[2].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline)))
+	assert(t, strings.Count(csvString, "\n")).Equals(3)
+
 	assert(t, userDaoMock.CallCount).Equals(1)
 	assert(t, accessIdValidatorMock.CallCount).Equals(3)
 }

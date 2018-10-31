@@ -33,8 +33,8 @@ const (
 	subscriptionPeriodMonth = 6
 )
 
-type UserTxnTuple struct {
-	user      *UserDao.UserDTO
+type UserSubscriptionInfo struct {
+	userKey   *datastore.Key
 	startDate time.Time
 	endDate   time.Time
 }
@@ -181,24 +181,34 @@ func findMinMax(dates []time.Time) (time.Time, time.Time) {
 	return min, max
 }
 
-func mapUsersToActivePeriod(validUsers []*UserDao.UserDTO, usersWithActiveSubscriptions UserTransactionMap) []UserTxnTuple {
-	usersWithPeroid := make([]UserTxnTuple, len(validUsers))
+func mapUsersToActivePeriod(ctx context.Context, validUsers []*UserDao.UserDTO, usersWithActiveSubscriptions UserTransactionMap) map[string]*UserSubscriptionInfo {
+	usersWithPeroid := make(map[string]*UserSubscriptionInfo)
 
-	for i, user := range validUsers {
+	for _, user := range validUsers {
 		txnDates := mapTxnToDate(usersWithActiveSubscriptions[user.Key])
 		min, max := findMinMax(txnDates)
 
-		usersWithPeroid[i] = UserTxnTuple{
-			user:      user,
+		newUserSubscriptionInfo := &UserSubscriptionInfo{
+			userKey:   user.Key,
 			startDate: min,
 			endDate:   max.AddDate(0, subscriptionPeriodMonth, 0),
+		}
+
+		prevUserSubscriptionInfo := usersWithPeroid[user.AccessId]
+		if prevUserSubscriptionInfo == nil {
+			usersWithPeroid[user.AccessId] = newUserSubscriptionInfo
+		} else {
+			log.Errorf(ctx, "Doublicated accessId detected %s, key1: %s, key2: %s", user.AccessId, user.Key, prevUserSubscriptionInfo.userKey)
+			if newUserSubscriptionInfo.endDate.After(prevUserSubscriptionInfo.endDate) {
+				usersWithPeroid[user.AccessId] = newUserSubscriptionInfo
+			}
 		}
 	}
 
 	return usersWithPeroid
 }
 
-func getActiveTransactionList(ctx context.Context, newTxn *TransactionDao.TransactionMsgDTO) ([]UserTxnTuple, error) {
+func getActiveTransactionList(ctx context.Context, newTxn *TransactionDao.TransactionMsgDTO) (map[string]*UserSubscriptionInfo, error) {
 	txns, err := getAllActiveSubscriptionsTxns(ctx)
 	if err != nil {
 		return nil, err
@@ -232,7 +242,7 @@ func getActiveTransactionList(ctx context.Context, newTxn *TransactionDao.Transa
 		return nil, err
 	}
 
-	activeUsersWithPariod := mapUsersToActivePeriod(validUsers, usersWithActiveSubscriptions)
+	activeUsersWithPariod := mapUsersToActivePeriod(ctx, validUsers, usersWithActiveSubscriptions)
 
 	if len(invalidUsers) > 0 {
 		usersWithActiveSubscriptionButInvalidIdsStr := strings.Join(mapToUserNames(invalidUsers), ", ")
@@ -257,13 +267,13 @@ func createCsvFile(ctx context.Context, w io.Writer, newTxn *TransactionDao.Tran
 	//AAMS-asa,27-06-2016,03-01-2017
 	//201505600,27-06-2016,03-01-2017
 
-	for _, user := range activeUsersWithPariod {
-		log.Infof(ctx, "%s, %s, %s", user.user.AccessId, user.startDate.String(), user.endDate.String())
-		w.Write([]byte(user.user.AccessId))
+	for accessId, userInfo := range activeUsersWithPariod {
+		log.Infof(ctx, "%s, %s, %s", accessId, userInfo.startDate.String(), userInfo.endDate.String())
+		w.Write([]byte(accessId))
 		w.Write(comma)
-		w.Write([]byte(user.startDate.Format(csvDateFormat)))
+		w.Write([]byte(userInfo.startDate.Format(csvDateFormat)))
 		w.Write(comma)
-		w.Write([]byte(user.endDate.Format(csvDateFormat)))
+		w.Write([]byte(userInfo.endDate.Format(csvDateFormat)))
 		w.Write([]byte(windowsNewline))
 	}
 

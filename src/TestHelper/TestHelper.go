@@ -59,9 +59,6 @@ func (a *AssertObj) Equals(rightSide interface{}) {
 				logError(a.t, "Type of leftside: "+typeLeft)
 				logError(a.t, "Type of rightside: "+typeRight)
 			}
-			//} else {
-			//	a.t.Log("Type of leftside: " + reflect.TypeOf(leftSide).String())
-			//	a.t.Log("Type of rightside: " + reflect.TypeOf(rightSide).String())
 		}
 	}
 
