@@ -278,3 +278,38 @@ func TestShouldBeAbleToCreateCsvWithMultipleTxnEntries(t *testing.T) {
 	assert(t, userDaoMock.CallCount).Equals(1)
 	assert(t, accessIdValidatorMock.CallCount).Equals(3)
 }
+
+func TestShouldNotCreateCsvWithDoublicatedAccessIdEntries(t *testing.T) {
+	buffer := &bytes.Buffer{}
+	userKeys, users := createUsers([]string{"AccessId1"})
+	userDaoMock := mockUserRetriever(userKeys, users, nil)
+	mockAccessIdValidator()
+
+	dates := []time.Time{
+		now,
+		now.AddDate(0, 0, -5),
+		now.AddDate(0, -6, -0),
+		now.AddDate(0, -9, -6),
+		now.AddDate(-1, 0, -6),
+		now.AddDate(0, 0, 3),
+	}
+
+	txnUserKeys := make([]*datastore.Key, len(dates))
+	for i, _ := range dates {
+		txnUserKeys[i] = userKeys[0]
+	}
+
+	mockTransactionRetriever(createMessages(dates, txnUserKeys), nil)
+	newTxn := createMessages([]time.Time{now}, []*datastore.Key{userKeys[0]})[0]
+
+	assert(t, createCsvFile(ctx, buffer, newTxn)).Equals(nil)
+	csvBytes, _ := ioutil.ReadAll(buffer)
+	csvString := string(csvBytes)
+
+	dateStrs := convertDates(dates)
+
+	assert(t, csvString).Equals(
+		fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, dateStrs[4][0], dateStrs[5][1], windowsNewline))
+	assert(t, userDaoMock.CallCount).Equals(1)
+	assert(t, accessIdValidatorMock.CallCount).Equals(1)
+}

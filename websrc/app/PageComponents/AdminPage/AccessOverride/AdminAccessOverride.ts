@@ -56,7 +56,6 @@ export class AdminAccessOverrideCtrl {
     adminUiGridConstants: AdminUiGridConstants,
     private uiGridConstants: uiGrid.IUiGridConstants,
     $q: ng.IQService,
-    private $scope: ng.IScope,
     private $timeout: ng.ITimeoutService,
   ) {
     const options = adminUiGridConstants.options;
