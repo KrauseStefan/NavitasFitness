@@ -49,7 +49,7 @@ func IntegrateRoutes(router *mux.Router) {
 		HandlerFunc(UserService.AsAdmin(exportCsvHandler))
 }
 
-type UserTransactionMap map[*datastore.Key][]*TransactionDao.TransactionMsgDTO
+type UserTransactionMap map[datastore.Key][]*TransactionDao.TransactionMsgDTO
 
 func validateTransactions(ctx context.Context, txns []*TransactionDao.TransactionMsgDTO) ([]*TransactionDao.TransactionMsgDTO, []*TransactionDao.TransactionMsgDTO) {
 	validationEmails := strings.Split(AccessIdValidator.GetPaypalValidationEmail(ctx), ":")
@@ -81,7 +81,7 @@ func getLatestTxnByUser(txns []*TransactionDao.TransactionMsgDTO) UserTransactio
 	userTransactionMap := make(UserTransactionMap)
 
 	for _, txn := range txns {
-		userKey := txn.GetUser()
+		userKey := *txn.GetUser()
 		userTxns := userTransactionMap[userKey]
 
 		if userTxns == nil {
@@ -99,7 +99,7 @@ func getUsers(ctx context.Context, usersTxnMap UserTransactionMap) ([]*UserDao.U
 	}
 	userKeys := make([]*datastore.Key, 0, len(usersTxnMap))
 	for userKey, _ := range usersTxnMap {
-		userKeys = append(userKeys, userKey)
+		userKeys = append(userKeys, &userKey)
 	}
 
 	users, err := userDAO.GetByKeys(ctx, userKeys)
@@ -111,7 +111,7 @@ func getUsers(ctx context.Context, usersTxnMap UserTransactionMap) ([]*UserDao.U
 			if e == nil {
 				foundUsers = append(foundUsers, users[i])
 			} else if e == datastore.ErrNoSuchEntity {
-				txnsWithNoUser = append(txnsWithNoUser, usersTxnMap[userKeys[i]]...)
+				txnsWithNoUser = append(txnsWithNoUser, usersTxnMap[*userKeys[i]]...)
 			} else {
 				foundOtherError = true
 				return nil, nil, err
@@ -185,7 +185,7 @@ func mapUsersToActivePeriod(ctx context.Context, validUsers []*UserDao.UserDTO, 
 	usersWithPeroid := make(map[string]*UserSubscriptionInfo)
 
 	for _, user := range validUsers {
-		txnDates := mapTxnToDate(usersWithActiveSubscriptions[user.Key])
+		txnDates := mapTxnToDate(usersWithActiveSubscriptions[*user.Key])
 		min, max := findMinMax(txnDates)
 
 		newUserSubscriptionInfo := &UserSubscriptionInfo{
