@@ -1,7 +1,9 @@
 package AppEngineHelper
 
 import (
+	"DAOHelper"
 	"encoding/json"
+	"google.golang.org/appengine"
 	"net/http"
 	"strconv"
 
@@ -12,6 +14,21 @@ import (
 type FormDataDecoderFn func(interface{}) error
 
 type httpHandlerWithData func(http.ResponseWriter, *http.Request, FormDataDecoderFn)
+
+type HttpHandler func(http.ResponseWriter, *http.Request) (interface{}, error)
+
+func HandlerW(f HttpHandler) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := appengine.NewContext(r)
+
+		dto, err := f(w, r)
+		if err == nil && dto != nil {
+			_, err = WriteJSON(w, dto)
+		} else if err != nil {
+			DAOHelper.ReportError(ctx, w, err)
+		}
+	}
+}
 
 func WriteJSON(w http.ResponseWriter, data interface{}) ([]byte, error) {
 	w.Header().Set("Content-Type", "application/json")

@@ -1,6 +1,7 @@
 package UserService
 
 import (
+	"AppEngineHelper"
 	"encoding/json"
 	"errors"
 	"io"
@@ -24,28 +25,30 @@ var (
 	transactionDao = TransactionDao.GetInstance()
 )
 
-func AsAdmin(f func(http.ResponseWriter, *http.Request, *UserDao.UserDTO)) func(http.ResponseWriter, *http.Request) {
-	return AsUser(func(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
+type CustomHttpHandler = func(http.ResponseWriter, *http.Request, *UserDao.UserDTO) (interface{}, error)
+
+func AsAdmin(f CustomHttpHandler) func(http.ResponseWriter, *http.Request) {
+	return AsUser(func(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
 		if user == nil || !user.IsAdmin {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
+			return nil, nil
 		}
-		f(w, r, user)
+		return f(w, r, user)
 	})
 }
 
-func AsUser(f func(http.ResponseWriter, *http.Request, *UserDao.UserDTO)) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
+func AsUser(f CustomHttpHandler) func(http.ResponseWriter, *http.Request) {
+	return AppEngineHelper.HandlerW(func(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 		ctx := appengine.NewContext(r)
 
 		user, err := getUserFromSession(ctx, r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
+			return nil, nil
 		}
 
-		f(w, r, user)
-	}
+		return f(w, r, user)
+	})
 }
 
 func getUserFromSession(ctx context.Context, r *http.Request) (*UserDao.UserDTO, error) {

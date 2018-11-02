@@ -280,14 +280,11 @@ func createCsvFile(ctx context.Context, w io.Writer, newTxn *TransactionDao.Tran
 	return nil
 }
 
-func exportCsvHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
+func exportCsvHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
 	ctx := appengine.NewContext(r)
 
-	if err := CreateAndUploadFile(ctx, nil); err != nil {
-		log.Errorf(ctx, err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	err := CreateAndUploadFile(ctx, nil)
+	return nil, err
 }
 
 func CreateAndUploadFile(ctx context.Context, newTxn *TransactionDao.TransactionMsgDTO) error {

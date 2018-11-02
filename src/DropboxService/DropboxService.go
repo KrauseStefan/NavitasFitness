@@ -40,19 +40,18 @@ func IntegrateRoutes(router *mux.Router) {
 		Path(path + tokenCallback).
 		Name("Authenticate with dropbox callback").
 		HandlerFunc(asAdminIfAlreadyConfigured(authorizationCallbackHandler))
-
 }
 
-func asAdminIfAlreadyConfigured(f func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+func asAdminIfAlreadyConfigured(f func(http.ResponseWriter, *http.Request) (interface{}, error)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := appengine.NewContext(r)
 		tokens, err := Dropbox.GetAccessTokens(ctx)
 		if err != nil || len(tokens) > 0 {
-			UserService.AsAdmin(func(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
-				f(w, r)
+			UserService.AsAdmin(func(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
+				return f(w, r)
 			})(w, r)
 		} else {
-			f(w, r)
+			AppEngineHelper.HandlerW(f)(w, r)
 		}
 	}
 }
@@ -65,11 +64,12 @@ func getRedirectUri(r *http.Request) string {
 	}
 }
 
-func authorizeWithDropboxHandler(w http.ResponseWriter, r *http.Request) {
+func authorizeWithDropboxHandler(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+	log.Errorf(appengine.NewContext(r), "I was here!!")
+
 	conf, err := ConfigurationReader.GetConfiguration()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
 	params := map[string]string{
@@ -82,18 +82,17 @@ func authorizeWithDropboxHandler(w http.ResponseWriter, r *http.Request) {
 	paramStr := AppEngineHelper.CreateQueryParamString(params)
 
 	http.Redirect(w, r, authenticateUrl+"?"+paramStr, http.StatusTemporaryRedirect)
+	return nil, nil
 }
 
-func authorizationCallbackHandler(w http.ResponseWriter, r *http.Request) {
+func authorizationCallbackHandler(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	ctx := appengine.NewContext(r)
 	r.ParseForm()
 
 	code := r.Form["code"][0]
 	token, err := Dropbox.RetrieveAccessToken(ctx, code, getRedirectUri(r))
 	if err != nil {
-		log.Errorf(ctx, err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
@@ -101,5 +100,7 @@ func authorizationCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	// Below would be best as a real callback but will cause cyclic dependencies
 	// For now this will do
 	AccessIdValidator.PushMissingSampleData(ctx, token)
-	csv.CreateAndUploadFile(ctx, nil)
+	err = csv.CreateAndUploadFile(ctx, nil)
+
+	return nil, err
 }

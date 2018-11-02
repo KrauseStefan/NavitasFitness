@@ -1,7 +1,6 @@
 package UserRest
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 
@@ -14,7 +13,6 @@ import (
 	"AccessIdValidator"
 	"AppEngineHelper"
 	"Auth"
-	"DAOHelper"
 	"User/Dao"
 	"User/Service"
 )
@@ -55,25 +53,25 @@ func IntegrateRoutes(router *mux.Router) {
 		Methods("POST").
 		Path(path).
 		Name("Create User Info").
-		HandlerFunc(createUserHandler)
+		HandlerFunc(AppEngineHelper.HandlerW(createUserHandler))
 
 	router.
 		Methods("GET").
 		Path(path + "/verify").
 		Name("VerifyEmailCallback").
-		HandlerFunc(verifyUserRequestHandler)
+		HandlerFunc(AppEngineHelper.HandlerW(verifyUserRequestHandler))
 
 	router.
 		Methods("POST").
 		Path(path + "/resetPassword/{" + emailKey + "}").
 		Name("ResetPassword").
-		HandlerFunc(requestResetUserPasswordHandler)
+		HandlerFunc(AppEngineHelper.HandlerW(requestResetUserPasswordHandler))
 
 	router.
 		Methods("POST").
 		Path(path + "/changePassword").
 		Name("ChangePassword").
-		HandlerFunc(resetUserPasswordHandler)
+		HandlerFunc(AppEngineHelper.HandlerW(resetUserPasswordHandler))
 
 	router.
 		Methods("GET").
@@ -82,7 +80,7 @@ func IntegrateRoutes(router *mux.Router) {
 		HandlerFunc(UserService.AsAdmin(getAllUsersHandler))
 }
 
-func getAllUsersHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserDTO) {
+func getAllUsersHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserDTO) (interface{}, error) {
 	type UserAndKeys struct {
 		Keys []string           `json:"keys"`
 		User []*UserDao.UserDTO `json:"users"`
@@ -97,31 +95,16 @@ func getAllUsersHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserD
 		users,
 	}
 
-	if err == nil {
-		_, err = AppEngineHelper.WriteJSON(w, data)
-	}
+	return data, err
 }
 
-func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
+func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
 	ctx := appengine.NewContext(r)
 	if user == nil {
 		log.Debugf(ctx, "User is not logged in")
-		return
+		return nil, nil
 	}
 
-	userSessionDto, err := getUserFromSession(ctx, user)
-
-	if err == nil {
-		_, err = AppEngineHelper.WriteJSON(w, userSessionDto)
-	}
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-func getUserFromSession(ctx context.Context, user *UserDao.UserDTO) (*UserSessionDto, error) {
 	if err := accessIdValidator.EnsureUpdatedIds(ctx); err != nil {
 		return nil, err
 	}
@@ -131,54 +114,33 @@ func getUserFromSession(ctx context.Context, user *UserDao.UserDTO) (*UserSessio
 		return nil, err
 	}
 
-	userSessionDto := UserSessionDto{
+	userSessionDto := &UserSessionDto{
 		User:          user,
 		IsAdmin:       user.IsAdmin,
 		ValidAccessId: isValid,
 	}
-	return &userSessionDto, err
+
+	return userSessionDto, err
 }
 
-func getCurrentUserTransactionsHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
+func getCurrentUserTransactionsHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
 	ctx := appengine.NewContext(r)
 
-	txnClientDtoList, err := UserService.GetUserTransactions(ctx, user.Key)
-
-	if err == nil {
-		_, err = AppEngineHelper.WriteJSON(w, txnClientDtoList)
-	}
-
-	DAOHelper.ReportError(ctx, w, err)
+	return UserService.GetUserTransactions(ctx, user.Key)
 }
 
-func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserDTO) {
+func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserDTO) (interface{}, error) {
 	ctx := appengine.NewContext(r)
 
 	userKeyStr := mux.Vars(r)[userKey]
 	userKey, err := datastore.DecodeKey(userKeyStr)
 	if err == nil {
-		txnClientDtoList, err := UserService.GetUserTransactions(ctx, userKey)
-
-		if err == nil {
-			_, err = AppEngineHelper.WriteJSON(w, txnClientDtoList)
-		}
+		return nil, err
 	}
-
-	DAOHelper.ReportError(ctx, w, err)
+	return UserService.GetUserTransactions(ctx, userKey)
 }
 
-func createUserHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
-	user, err := createUserHandlerInternal(w, r)
-
-	if err == nil {
-		_, err = AppEngineHelper.WriteJSON(w, user)
-	}
-
-	DAOHelper.ReportError(ctx, w, err)
-}
-
-func createUserHandlerInternal(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+func createUserHandler(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	ctx := appengine.NewContext(r)
 	user := &UserDao.UserDTO{}
 
@@ -204,12 +166,11 @@ func createUserHandlerInternal(w http.ResponseWriter, r *http.Request) (interfac
 	return createdUser, nil
 }
 
-func verifyUserRequestHandler(w http.ResponseWriter, r *http.Request) {
+func verifyUserRequestHandler(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	ctx := appengine.NewContext(r)
 
 	if err := r.ParseForm(); err != nil {
-		DAOHelper.ReportError(ctx, w, err)
-		return
+		return nil, err
 	}
 
 	key := r.Form.Get("code")
@@ -218,21 +179,20 @@ func verifyUserRequestHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		http.Redirect(w, r, "/?Verified=true", http.StatusTemporaryRedirect)
 	}
+	return nil, nil
 }
 
-func requestResetUserPasswordHandler(w http.ResponseWriter, r *http.Request) {
+func requestResetUserPasswordHandler(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	ctx := appengine.NewContext(r)
 	email := mux.Vars(r)[emailKey]
 
-	if err := UserService.RequestResetUserPassword(ctx, email); err != nil {
-		DAOHelper.ReportError(ctx, w, err)
-	}
+	err := UserService.RequestResetUserPassword(ctx, email)
+	return nil, err
 }
 
-func resetUserPasswordHandler(w http.ResponseWriter, r *http.Request) {
+func resetUserPasswordHandler(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	ctx := appengine.NewContext(r)
 
-	if err := UserService.ResetUserPassword(ctx, r.Body); err != nil {
-		DAOHelper.ReportError(ctx, w, err)
-	}
+	err := UserService.ResetUserPassword(ctx, r.Body)
+	return nil, err
 }

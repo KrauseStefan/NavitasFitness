@@ -40,17 +40,16 @@ func IntegrateRoutes(router *mux.Router) {
 		Methods("GET").
 		Path(path).
 		Name("GetMainPage").
-		HandlerFunc(getMainPage)
+		HandlerFunc(AppEngineHelper.HandlerW(getMainPage))
 
 	router.
 		Methods("PUT").
 		Path(path).
 		Name("UpdateMainPage").
 		HandlerFunc(UserService.AsAdmin(updateMainPage))
-
 }
 
-func getMainPage(w http.ResponseWriter, r *http.Request) {
+func getMainPage(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	ctx := appengine.NewContext(r)
 	q := datastore.NewQuery(MAIN_PAGE_KIND).Ancestor(mainPageCollectionParentKey(ctx))
 
@@ -58,8 +57,7 @@ func getMainPage(w http.ResponseWriter, r *http.Request) {
 
 	keys, err := q.GetAll(ctx, &frontPageEntries)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
 	for i, key := range keys {
@@ -70,13 +68,10 @@ func getMainPage(w http.ResponseWriter, r *http.Request) {
 		frontPageEntries = append(frontPageEntries, MainPageEntry{})
 	}
 
-	if _, err := AppEngineHelper.WriteJSON(w, frontPageEntries[0]); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	return frontPageEntries[0], err
 }
 
-func updateMainPage(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) {
+func updateMainPage(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
 	ctx := appengine.NewContext(r)
 	var mainPage MainPageEntry
 	var key *datastore.Key
@@ -84,8 +79,7 @@ func updateMainPage(w http.ResponseWriter, r *http.Request, user *UserDao.UserDT
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&mainPage)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
 	if mainPage.hasId() {
@@ -97,13 +91,5 @@ func updateMainPage(w http.ResponseWriter, r *http.Request, user *UserDao.UserDT
 	mainPage.LastEditedBy = user.Email
 
 	key, err = datastore.Put(ctx, key, &mainPage)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if _, err := AppEngineHelper.WriteJSON(w, mainPage); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	return mainPage, err
 }
