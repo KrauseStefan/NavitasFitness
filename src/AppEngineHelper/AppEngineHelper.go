@@ -4,6 +4,7 @@ import (
 	"DAOHelper"
 	"encoding/json"
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 	"net/http"
 	"strconv"
 
@@ -25,6 +26,7 @@ func HandlerW(f HttpHandler) func(http.ResponseWriter, *http.Request) {
 		if err == nil && dto != nil {
 			_, err = WriteJSON(w, dto)
 		} else if err != nil {
+			log.Errorf(ctx, err.Error())
 			DAOHelper.ReportError(ctx, w, err)
 		}
 	}
