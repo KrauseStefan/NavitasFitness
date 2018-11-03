@@ -1,6 +1,7 @@
 package main
 
 import (
+	"AccessIdOverride"
 	"errors"
 	"math/rand"
 	"net/http"
@@ -48,6 +49,7 @@ func init() {
 	IPN.IntegrateRoutes(router)
 	csv.IntegrateRoutes(router)
 	DropboxService.IntegrateRoutes(router)
+	AccessIdOverride.IntegrateRoutes(router)
 	http.Handle("/", router)
 	//	http.HandleFunc("/rest/", root)
 

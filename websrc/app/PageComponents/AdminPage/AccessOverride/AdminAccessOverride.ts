@@ -1,34 +1,35 @@
+import { copy } from 'angular';
 import 'angular-ui-grid';
 import * as moment from 'moment';
-// tslint:disable-next-line no-implicit-dependencies
-// import { selection } from 'ui-grid';
 import { AdminUiGridConstants } from '../AdminUiGridsConstants';
+import { AccessIdOverrideDto, AdminAccessOverrideRest } from './AdminAccessOverrideRest';
 
 interface AccessOverrideRow {
-  dirty?: boolean;
-  id: string;
-  startDate: moment.Moment | null; // Moment;
-  endDate: moment.Moment | null; // Moment;'
+  dto: AccessIdOverrideDto;
+  creationiDateStr: string;
+  prevAccessId: string;
 }
 
-type GridOptions = uiGrid.IGridOptionsOf<AccessOverrideRow>
-  & { data: AccessOverrideRow[] };
+type GridOptions = uiGrid.IGridOptionsOf<AccessOverrideRow>;
 
 export class AdminAccessOverrideCtrl {
 
   public readonly gridOptions: GridOptions;
 
-  public accessOverrides: AccessOverrideRow[] = [
-    { id: 'accessId1', startDate: moment(), endDate: moment().add(6, 'months'), dirty: true },
-    { id: 'accessId2', startDate: moment(), endDate: moment().add(6, 'months') },
-    { id: 'accessId3', startDate: moment(), endDate: moment().add(6, 'months') },
-    { id: '', startDate: null, endDate: null, dirty: true },
-  ];
+  public accessOverrides: AccessOverrideRow[] = [];
+
+  private readonly emptyRow: Readonly<AccessOverrideRow> = {
+    dto: {
+      accessId: '',
+      startDate: moment(),
+    },
+    creationiDateStr: '-',
+    prevAccessId: '',
+  };
 
   private columnDefs: Array<uiGrid.IColumnDefOf<AccessOverrideRow>> = [
-    { name: 'Access Id', field: 'id' },
-    { name: 'Start Date', field: 'startDate' },
-    { name: 'End Date', field: 'endDate' },
+    { name: 'Access Id', field: 'dto.accessId' },
+    { name: 'Creation Date', field: 'creationiDateStr', allowCellFocus: false, enableCellEdit: false },
     {
       field: 'delete',
       enableFiltering: false,
@@ -37,8 +38,12 @@ export class AdminAccessOverrideCtrl {
       width: 52,
       cellTemplate: `
         <md-button class="md-icon-button" ng-click="grid.appScope.$ctrl.rowAction(row)" aria-label="row action">
-          <md-icon ng-if="!row.entity.dirty">delete</md-icon>
-          <md-icon ng-if="row.entity.dirty">done</md-icon>
+          <md-icon ng-if="row.entity.prevAccessId && row.entity.prevAccessId == row.entity.dto.accessId">
+            delete
+          </md-icon>
+          <md-icon ng-if="row.entity.prevAccessId != row.entity.dto.accessId">
+            save
+          </md-icon>
         </md-button>`,
     },
   ];
@@ -46,6 +51,7 @@ export class AdminAccessOverrideCtrl {
   private readonly gridApi: ng.IPromise<uiGrid.IGridApiOf<AccessOverrideRow>>;
 
   private readonly specificGridOptions: GridOptions = {
+    enableMinHeightCheck: false,
     enableCellEditOnFocus: true,
     modifierKeysToMultiSelectCells: true,
     data: this.accessOverrides,
@@ -56,58 +62,80 @@ export class AdminAccessOverrideCtrl {
     adminUiGridConstants: AdminUiGridConstants,
     private uiGridConstants: uiGrid.IUiGridConstants,
     $q: ng.IQService,
-    private $timeout: ng.ITimeoutService,
+    private adminAccessOverrideRest: AdminAccessOverrideRest,
   ) {
     const options = adminUiGridConstants.options;
 
     this.gridOptions = Object.assign({}, options, this.specificGridOptions);
     this.gridApi = $q((resolve) => this.gridOptions.onRegisterApi = resolve);
 
-    this.updateMinRowsToShow();
+    adminAccessOverrideRest.getAllAccessIdOverrrides()
+      .then((accessOverrides) => accessOverrides.map((ao) => {
+        return {
+          dto: ao,
+          creationiDateStr: ao.startDate.format('DD-MM-YYYY'),
+          prevAccessId: ao.accessId,
+        };
+      }))
+      .then((accessOverrides) => {
+        this.accessOverrides = accessOverrides;
+        this.gridOptions.data = this.accessOverrides;
+        this.addEmptyRow();
+        this.updateRowsToShow();
+      });
   }
 
   public rowAction(row: uiGrid.IGridRowOf<AccessOverrideRow>): void {
     const entity = row.entity;
-    if (entity.dirty) {
+    if (entity.prevAccessId !== entity.dto.accessId) {
       this.save(entity);
     } else {
       this.delete(entity);
-      this.updateMinRowsToShow();
+      this.updateRowsToShow();
     }
   }
 
+  private addEmptyRow(): void {
+    const entity = copy(this.emptyRow);
+    entity.dto.startDate = moment();
+
+    this.accessOverrides.unshift(entity);
+  }
+
   private save(entity: AccessOverrideRow) {
-    throw new Error('Save not implemented' + entity.id);
+    entity.dto.startDate = moment();
+
+    this.adminAccessOverrideRest.saveAccessIdOverride(entity.dto).then(() => {
+      if (entity.prevAccessId === '') {
+        this.addEmptyRow();
+        this.updateRowsToShow();
+      }
+      entity.prevAccessId = entity.dto.accessId;
+      entity.creationiDateStr = entity.dto.startDate.format('DD-MM-YYYY');
+
+    });
   }
 
   private delete(entity: AccessOverrideRow) {
     const index = this.accessOverrides.indexOf(entity);
     if (index !== -1) {
-      this.accessOverrides.splice(index, 1);
-      this.updateMinRowsToShow();
-      throw new Error('Delete not implemented yet');
+      this.adminAccessOverrideRest.deleteAccessIdOverride(entity.dto.accessId)
+        .then(() => {
+          this.accessOverrides.splice(index, 1);
+          this.updateRowsToShow();
+        });
     } else {
       throw new Error('Cannot delete row, row not found');
     }
   }
 
-  private updateMinRowsToShow() {
-    this.gridOptions.minRowsToShow = this.gridOptions.minRowsToShow || 10;
-    if (this.accessOverrides.length < this.gridOptions.minRowsToShow) {
-      this.gridOptions.minRowsToShow = this.accessOverrides.length;
-      this.gridOptions.enableVerticalScrollbar = this.uiGridConstants.scrollbars.NEVER;
-      this.reCreateGrid();
-    }
+  private updateRowsToShow() {
+
     this.gridApi.then((api) => {
       api.core.notifyDataChange(this.uiGridConstants.dataChange.ROW);
     });
   }
 
-  private reCreateGrid() {
-    const backup = this.accessOverrides;
-    this.accessOverrides = [];
-    this.$timeout(() => this.accessOverrides = backup);
-  }
 }
 
 export const adminAccessOverrideComponent: ng.IComponentOptions = {
