@@ -69,18 +69,19 @@ func (v *DefaultAccessIdValidator) EnsureUpdatedIds(ctx context.Context) error {
 }
 
 func (v *DefaultAccessIdValidator) updateTokenCache(ctx context.Context, settingKey string, currentCache [][]byte) ([][]byte, error) {
-	cacheExpirationTime := lastDownload.Add(4 * time.Hour)
+	cacheExpirationTime := lastDownload.Add(15 * time.Minute)
+	cacheExpirationTimeStr := cacheExpirationTime.Format("02-01-06 15:04:05")
 	if len(currentCache) > 0 && cacheExpirationTime.Before(time.Now()) {
+		log.Infof(ctx, "Cache update skipped cache will expire: %s", cacheExpirationTimeStr)
 		return currentCache, nil
 	}
 	if len(currentCache) > 0 {
 		log.Infof(ctx, "Cache is empty")
 	} else {
-		cacheExpirationTimeStr := cacheExpirationTime.Format("02-01-06 15:04:05")
 		nowStr := time.Now().Format("02-01-06 15:04:05")
 		log.Infof(ctx, "Cache expired cacheExpirationTime is %s, current time is: %s", cacheExpirationTimeStr, nowStr)
-		lastDownload = time.Now()
 	}
+	lastDownload = time.Now()
 
 	token, err := Dropbox.GetAccessToken(ctx, settingKey)
 	if err != nil {
