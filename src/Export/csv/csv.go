@@ -1,6 +1,7 @@
 package csv
 
 import (
+	"AccessIdOverride/dao"
 	"bytes"
 	"errors"
 	"io"
@@ -208,6 +209,34 @@ func mapUsersToActivePeriod(ctx context.Context, validUsers []*UserDao.UserDTO, 
 	return usersWithPeroid
 }
 
+func getvalidAccessIdOverrides(ctx context.Context) ([]*AccessIdOverrideDao.AccessIdOverride, error) {
+	if err := accessIdValidator.EnsureUpdatedIds(ctx); err != nil {
+		return nil, err
+	}
+
+	// accessIdOverrides, err := AccessIdOverrideDao.GetAllAccessIdOverrides(ctx)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	accessIdOverrides := make([]*AccessIdOverrideDao.AccessIdOverride, 0) // TODO remove this line and enable the above lines
+
+	usedIndex := 0
+	for _, override := range accessIdOverrides {
+		isValid, err := accessIdValidator.ValidateAccessId(ctx, []byte(override.AccessId))
+		if err != nil {
+			return nil, err
+		}
+
+		if isValid {
+			accessIdOverrides[usedIndex] = override
+			usedIndex++
+		}
+	}
+
+	return accessIdOverrides[:usedIndex], nil
+}
+
 func getActiveTransactionList(ctx context.Context, newTxn *TransactionDao.TransactionMsgDTO) (map[string]*UserSubscriptionInfo, error) {
 	txns, err := getAllActiveSubscriptionsTxns(ctx)
 	if err != nil {
@@ -243,6 +272,21 @@ func getActiveTransactionList(ctx context.Context, newTxn *TransactionDao.Transa
 	}
 
 	activeUsersWithPariod := mapUsersToActivePeriod(ctx, validUsers, usersWithActiveSubscriptions)
+
+	accessIdOverrides, err := getvalidAccessIdOverrides(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	overrideEndDate := time.Now().AddDate(0, 2, 0)
+
+	for _, override := range accessIdOverrides {
+		activeUsersWithPariod[override.AccessId] = &UserSubscriptionInfo{
+			userKey:   nil,
+			startDate: override.StartDate,
+			endDate:   overrideEndDate,
+		}
+	}
 
 	if len(invalidUsers) > 0 {
 		usersWithActiveSubscriptionButInvalidIdsStr := strings.Join(mapToUserNames(invalidUsers), ", ")
