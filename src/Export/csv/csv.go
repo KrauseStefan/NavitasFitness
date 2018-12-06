@@ -41,13 +41,20 @@ type UserSubscriptionInfo struct {
 }
 
 func IntegrateRoutes(router *mux.Router) {
-	path := "/rest/export"
+	path := "/rest"
 
 	router.
 		Methods("GET").
-		Path(path + "/csv").
+		Path(path + "/export/csv").
 		Name("export").
 		HandlerFunc(UserService.AsAdmin(exportCsvHandler))
+
+	router.
+		Methods("GET").
+		Path(path + "/download/csv").
+		Name("export").
+		HandlerFunc(UserService.AsAdmin(downloadCsvHandler))
+
 }
 
 type UserTransactionMap map[datastore.Key][]*TransactionDao.TransactionMsgDTO
@@ -322,6 +329,22 @@ func createCsvFile(ctx context.Context, w io.Writer, newTxn *TransactionDao.Tran
 	}
 
 	return nil
+}
+
+func downloadCsvHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
+	ctx := appengine.NewContext(r)
+	var buffer bytes.Buffer
+	var err error
+
+	if err = createCsvFile(ctx, &buffer, nil); err != nil {
+		err = errors.New("Error generating CSV file: " + err.Error())
+	}
+
+	if err == nil {
+		_, err = buffer.WriteTo(w)
+	}
+
+	return nil, err
 }
 
 func exportCsvHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {

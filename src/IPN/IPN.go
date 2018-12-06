@@ -170,7 +170,7 @@ func ipnDoResponseTask(ctx context.Context, r *http.Request) error {
 
 		if savedTransaction.PaymentIsCompleted() {
 			if savedTransaction.GetAmount() < expectedAmount {
-				log.Warningf(ctx, "The amount for the transaction was wrong, recived %f expected %f", savedTransaction.GetAmount(), expectedAmount)
+				log.Warningf(ctx, "The amount for the transaction was wrong, recived %f expected %d", savedTransaction.GetAmount(), expectedAmount)
 			}
 		}
 
@@ -202,7 +202,7 @@ func ipnDoResponseTask(ctx context.Context, r *http.Request) error {
 
 		if txn.PaymentIsCompleted() {
 			if txn.GetAmount() != expectedAmount {
-				log.Warningf(ctx, "The amount for the transaction was wrong, recived %f expected %f", txn.GetAmount(), expectedAmount)
+				log.Warningf(ctx, "The amount for the transaction was wrong, recived %f expected %d", txn.GetAmount(), expectedAmount)
 			}
 		}
 
