@@ -68,6 +68,42 @@ func (a *AssertObj) Equals(rightSide interface{}) {
 	}
 }
 
+func (a *AssertObj) Contains(rightSide interface{}) {
+	leftSide := a.leftSide
+
+	valueLeft := reflect.ValueOf(leftSide)
+	if valueLeft.Kind() != reflect.Slice && valueLeft.Kind() != reflect.Array {
+		printLineAndFunction(a.t)
+		logError(a.t, ".Contains can only be used with slices")
+		a.t.FailNow()
+		return
+	}
+
+	for i := 0; i < valueLeft.Len(); i++ {
+		elem := valueLeft.Index(i).Interface()
+
+		// nil does not equal nil (nil == nil) => false
+		if reflect.DeepEqual(elem, rightSide) || (elem == nil && rightSide == nil) {
+			return
+		}
+	}
+
+	logError(a.t, fmt.Sprintln("Fail:", leftSide, "did not contain", rightSide))
+
+	if leftSide != nil && rightSide != nil {
+		typeLeft := reflect.TypeOf(leftSide).String()
+		typeRight := reflect.TypeOf(rightSide).String()
+
+		if typeLeft != typeRight {
+			logError(a.t, "Type of array/slice: "+typeLeft)
+			logError(a.t, "Type of rightside: "+typeRight)
+		}
+	}
+
+	printLineAndFunction(a.t)
+	a.t.FailNow()
+}
+
 func Assert(t *testing.T, leftSide interface{}) *AssertObj {
 	valueLeft := reflect.ValueOf(leftSide)
 	if leftSide != nil && valueLeft.Kind() == reflect.Bool {

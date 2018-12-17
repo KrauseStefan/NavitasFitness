@@ -280,6 +280,9 @@ func TestShouldBeAbleToCreateCsvWithMultipleTxnEntries(t *testing.T) {
 	assert(t, strings.Count(csvString, "\n")).Equals(3)
 
 	assert(t, userDaoMock.CallCount).Equals(1)
+	assert(t, userDaoMock.CallArgs[0].Keys).Contains(userKeys[0])
+	assert(t, userDaoMock.CallArgs[0].Keys).Contains(userKeys[1])
+	assert(t, userDaoMock.CallArgs[0].Keys).Contains(userKeys[2])
 	assert(t, accessIdValidatorMock.CallCount).Equals(3)
 }
 

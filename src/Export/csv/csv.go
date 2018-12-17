@@ -107,7 +107,12 @@ func getUsers(ctx context.Context, usersTxnMap UserTransactionMap) ([]*UserDao.U
 	}
 	userKeys := make([]*datastore.Key, 0, len(usersTxnMap))
 	for userKey, _ := range usersTxnMap {
-		userKeys = append(userKeys, &userKey)
+		// A copy of the key must be made before a pointer reference is created,
+		// the userKey moemory is reused and therefor we would end with all pointers
+		// pointing to the last version of userKey
+
+		key := userKey
+		userKeys = append(userKeys, &key)
 	}
 
 	users, err := userDAO.GetByKeys(ctx, userKeys)

@@ -106,17 +106,16 @@ func (u *DefaultUserDAO) GetAll(ctx context.Context) ([]*datastore.Key, []*UserD
 }
 
 func (u *DefaultUserDAO) GetByKeys(ctx context.Context, keys []*datastore.Key) ([]*UserDTO, error) {
-	dst := make([]*UserDTO, len(keys))
+	users := make([]*UserDTO, len(keys))
+	err := datastore.GetMulti(ctx, keys, users)
 
-	err := datastore.GetMulti(ctx, keys, dst)
-
-	for i, user := range dst {
+	for i, user := range users {
 		if user != nil {
 			user.Key = keys[i]
 		}
 	}
 
-	return dst, err
+	return users, err
 }
 
 // This function tries its best to ensure no user is created with duplicated accessId or email
