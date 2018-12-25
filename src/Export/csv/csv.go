@@ -358,6 +358,9 @@ func downloadCsvHandler(w http.ResponseWriter, r *http.Request, user *UserDao.Us
 	}
 
 	if err == nil {
+		w.Header().Add("Content-Disposition", "attachment; filename=FitnessAccessList.csv")
+		w.Header().Add("Content-Type", "text/csv")
+
 		_, err = buffer.WriteTo(w)
 	}
 
