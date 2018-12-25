@@ -336,7 +336,7 @@ func createCsvFile(ctx context.Context, w io.Writer, newTxn *TransactionDao.Tran
 	//201505600,27-06-2016,03-01-2017
 
 	for accessId, userInfo := range activeUsersWithPariod {
-		log.Infof(ctx, "%s, %s, %s", accessId, userInfo.startDate.String(), userInfo.endDate.String())
+		// log.Infof(ctx, "%s, %s, %s", accessId, userInfo.startDate.String(), userInfo.endDate.String())
 		w.Write([]byte(accessId))
 		w.Write(comma)
 		w.Write([]byte(userInfo.startDate.Format(csvDateFormat)))
