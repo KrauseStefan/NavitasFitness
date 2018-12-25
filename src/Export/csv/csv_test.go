@@ -1,7 +1,9 @@
 package csv
 
 import (
+	"AccessIdOverride/dao"
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -40,6 +42,7 @@ var (
 		"AccessId2",
 		"AccessId3",
 		"AccessId4",
+		"OverrideId1",
 	}
 )
 
@@ -59,6 +62,35 @@ func mockTransactionRetriever(messages []*TransactionDao.TransactionMsgDTO, err 
 	txnDaoMock = TransactionDaoTestHelper.NewTransactionRetrieverMock(messages, err)
 	transactionDao = txnDaoMock
 	return txnDaoMock
+}
+
+type AccessIdOverrideDaoStub struct {
+	ids []*AccessIdOverrideDao.AccessIdOverride
+}
+
+func (dao *AccessIdOverrideDaoStub) GetAllAccessIdOverrides(ctx context.Context) ([]*AccessIdOverrideDao.AccessIdOverride, error) {
+	return dao.ids, nil
+}
+
+func mockAccessIdOverrideDaoWithIds(strIds []string) {
+	ids := make([]*AccessIdOverrideDao.AccessIdOverride, 0)
+
+	for _, idStr := range strIds {
+		id := AccessIdOverrideDao.AccessIdOverride{
+			AccessId:  idStr,
+			StartDate: time.Now(),
+			Key:       nil,
+		}
+		ids = append(ids, &id)
+	}
+	accessIdOverrideDaoMock := &AccessIdOverrideDaoStub{}
+	accessIdOverrideDao = accessIdOverrideDaoMock
+
+	accessIdOverrideDaoMock.ids = ids
+}
+
+func mockAccessIdOverrideDao() {
+	mockAccessIdOverrideDaoWithIds(nil)
 }
 
 func createMessages(dates []time.Time, userKeys []*datastore.Key) []*TransactionDao.TransactionMsgDTO {
@@ -121,6 +153,7 @@ func TestShouldReturnPassErrorFromUserDaoThrough(t *testing.T) {
 	mockUserRetriever(nil, nil, err)
 	mockAccessIdValidator()
 	mockTransactionRetriever(nil, nil)
+	mockAccessIdOverrideDao()
 
 	assert(t, createCsvFile(ctx, &bytes.Buffer{}, nil)).Equals(err)
 }
@@ -156,6 +189,7 @@ func TestShouldBeAbleToCreateCsvWithOneEntry(t *testing.T) {
 	userKeys, users := createUsers([]string{"AccessId1"})
 	mockUserRetriever(userKeys, users, nil)
 	mockAccessIdValidator()
+	mockAccessIdOverrideDao()
 	txnDaoMock := mockTransactionRetriever(createMessages([]time.Time{now}, userKeys), nil)
 
 	assert(t, createCsvFile(ctx, buffer, nil)).Equals(nil)
@@ -174,6 +208,7 @@ func TestShouldBeAbleToCreateCsvWithTwoEntries(t *testing.T) {
 	userKeys, users := createUsers([]string{"AccessId1", "AccessId2"})
 	userDaoMock := mockUserRetriever(userKeys, users, nil)
 	mockAccessIdValidator()
+	mockAccessIdOverrideDao()
 
 	plusFive := now.AddDate(0, 0, 5)
 
@@ -198,6 +233,7 @@ func TestShouldNotIncludeUsersWithInvalidAccessIds(t *testing.T) {
 	userKeys, users := createUsers([]string{"AccessId1", "InvalidId"})
 	userDaoMock := mockUserRetriever(userKeys, users, nil)
 	mockAccessIdValidator()
+	mockAccessIdOverrideDao()
 
 	plusFive := now.AddDate(0, 0, 5)
 
@@ -221,6 +257,7 @@ func TestShouldBeAbleToCreateCsvWithTreeEntries(t *testing.T) {
 	userKeys, users := createUsers([]string{"AccessId1", "AccessId2", "AccessId3"})
 	userDaoMock := mockUserRetriever(userKeys, users, nil)
 	mockAccessIdValidator()
+	mockAccessIdOverrideDao()
 
 	dates := []time.Time{
 		now,
@@ -250,6 +287,7 @@ func TestShouldBeAbleToCreateCsvWithMultipleTxnEntries(t *testing.T) {
 	userKeys, users := createUsers([]string{"AccessId1", "AccessId2", "AccessId3"})
 	userDaoMock := mockUserRetriever(userKeys, users, nil)
 	mockAccessIdValidator()
+	mockAccessIdOverrideDao()
 
 	dates := []time.Time{
 		now,                   // User 1
@@ -291,6 +329,7 @@ func TestShouldNotCreateCsvWithDoublicatedAccessIdEntries(t *testing.T) {
 	userKeys, users := createUsers([]string{"AccessId1"})
 	userDaoMock := mockUserRetriever(userKeys, users, nil)
 	mockAccessIdValidator()
+	mockAccessIdOverrideDao()
 
 	dates := []time.Time{
 		now,
@@ -319,4 +358,46 @@ func TestShouldNotCreateCsvWithDoublicatedAccessIdEntries(t *testing.T) {
 		fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, dateStrs[4][0], dateStrs[5][1], windowsNewline))
 	assert(t, userDaoMock.CallCount).Equals(1)
 	assert(t, accessIdValidatorMock.CallCount).Equals(1)
+}
+
+func TestShouldBeAbleToCreateCsvWithMultipleTxnEntriesAndAccessIdOverrrides(t *testing.T) {
+	buffer := &bytes.Buffer{}
+	userKeys, users := createUsers([]string{"AccessId1", "AccessId2", "AccessId3"})
+	userDaoMock := mockUserRetriever(userKeys, users, nil)
+	mockAccessIdValidator()
+	mockAccessIdOverrideDaoWithIds([]string{"OverrideId1", "InvalidOverrideId"})
+
+	dates := []time.Time{
+		now,                   // User 1
+		now.AddDate(0, 0, 5),  // User 2 A
+		now.AddDate(0, 6, 0),  // User 2 B
+		now.AddDate(0, 9, 6),  // User 2 C
+		now.AddDate(1, 0, 6),  // User 2 extremeHigh
+		now.AddDate(0, 0, -3), // User 2 extremeLow
+	}
+
+	txnUserKeys := []*datastore.Key{
+		userKeys[0],
+		userKeys[1], userKeys[1], userKeys[1], userKeys[1], userKeys[1],
+	}
+
+	mockTransactionRetriever(createMessages(dates, txnUserKeys), nil)
+	newTxn := createMessages([]time.Time{now}, []*datastore.Key{userKeys[2]})[0]
+
+	assert(t, createCsvFile(ctx, buffer, newTxn)).Equals(nil)
+	csvBytes, _ := ioutil.ReadAll(buffer)
+	csvString := string(csvBytes)
+
+	dateStrs := convertDates(dates)
+
+	assert(t, strings.Contains(csvString, fmt.Sprintf("%s,%s,%s%s", users[0].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline)))
+	assert(t, strings.Contains(csvString, fmt.Sprintf("%s,%s,%s%s", users[1].AccessId, dateStrs[5][0], dateStrs[4][1], windowsNewline)))
+	assert(t, strings.Contains(csvString, fmt.Sprintf("%s,%s,%s%s", users[2].AccessId, dateStrs[0][0], dateStrs[0][1], windowsNewline)))
+	assert(t, strings.Count(csvString, "\n")).Equals(4)
+
+	assert(t, userDaoMock.CallCount).Equals(1)
+	assert(t, userDaoMock.CallArgs[0].Keys).Contains(userKeys[0])
+	assert(t, userDaoMock.CallArgs[0].Keys).Contains(userKeys[1])
+	assert(t, userDaoMock.CallArgs[0].Keys).Contains(userKeys[2])
+	assert(t, accessIdValidatorMock.CallCount).Equals(5)
 }

@@ -23,10 +23,15 @@ import (
 	"strings"
 )
 
+type GetAccessIdOverridesDao interface {
+	GetAllAccessIdOverrides(ctx context.Context) ([]*AccessIdOverrideDao.AccessIdOverride, error)
+}
+
 var (
-	userDAO           UserDao.UsersRetriever              = UserDao.GetInstance()
-	transactionDao    TransactionDao.TransactionRetriever = TransactionDao.GetInstance()
-	accessIdValidator                                     = AccessIdValidator.GetInstance()
+	userDAO             UserDao.UsersRetriever              = UserDao.GetInstance()
+	transactionDao      TransactionDao.TransactionRetriever = TransactionDao.GetInstance()
+	accessIdValidator                                       = AccessIdValidator.GetInstance()
+	accessIdOverrideDao GetAccessIdOverridesDao             = AccessIdOverrideDao.GetInstance()
 )
 
 const (
@@ -226,12 +231,10 @@ func getvalidAccessIdOverrides(ctx context.Context) ([]*AccessIdOverrideDao.Acce
 		return nil, err
 	}
 
-	// accessIdOverrides, err := AccessIdOverrideDao.GetAllAccessIdOverrides(ctx)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	accessIdOverrides := make([]*AccessIdOverrideDao.AccessIdOverride, 0) // TODO remove this line and enable the above lines
+	accessIdOverrides, err := accessIdOverrideDao.GetAllAccessIdOverrides(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	usedIndex := 0
 	for _, override := range accessIdOverrides {

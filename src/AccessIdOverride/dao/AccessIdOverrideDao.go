@@ -8,6 +8,14 @@ import (
 	"time"
 )
 
+type DefaultAccessIdOverrideDao struct{}
+
+var defaultAccessIdOverrideDao = DefaultAccessIdOverrideDao{}
+
+func GetInstance() *DefaultAccessIdOverrideDao {
+	return &defaultAccessIdOverrideDao
+}
+
 type AccessIdOverride struct {
 	AccessId  string         `json:"accessId"`
 	StartDate time.Time      `json:"startDate" datastore:",noindex"`
@@ -26,7 +34,7 @@ var (
 	AccessIdNotFoundError = errors.New("AccessId does not exist in datastore")
 )
 
-func GetAllAccessIdOverrides(ctx context.Context) ([]*AccessIdOverride, error) {
+func (dao *DefaultAccessIdOverrideDao) GetAllAccessIdOverrides(ctx context.Context) ([]*AccessIdOverride, error) {
 	accessIdList := make([]*AccessIdOverride, 0, 1)
 	keys, err := datastore.NewQuery(ACCESS_ID_OVERRIDE_KIND).
 		Ancestor(accessIdOverrideCollectionParentKey(ctx)).
@@ -42,7 +50,7 @@ func GetAllAccessIdOverrides(ctx context.Context) ([]*AccessIdOverride, error) {
 	return accessIdList, err
 }
 
-func CreateOrUpdateAccessIdOverride(ctx context.Context, accessIdOverride *AccessIdOverride) error {
+func (dao *DefaultAccessIdOverrideDao) CreateOrUpdateAccessIdOverride(ctx context.Context, accessIdOverride *AccessIdOverride) error {
 	key := datastore.NewIncompleteKey(ctx, ACCESS_ID_OVERRIDE_KIND, accessIdOverrideCollectionParentKey(ctx))
 	newKey, err := datastore.Put(ctx, key, accessIdOverride)
 
@@ -50,7 +58,7 @@ func CreateOrUpdateAccessIdOverride(ctx context.Context, accessIdOverride *Acces
 	return err
 }
 
-func DeleteAccessIdOverride(ctx context.Context, accessId string) error {
+func (dao *DefaultAccessIdOverrideDao) DeleteAccessIdOverride(ctx context.Context, accessId string) error {
 	accessIdList := make([]AccessIdOverride, 1)
 	keys, err := datastore.NewQuery(ACCESS_ID_OVERRIDE_KIND).
 		Ancestor(accessIdOverrideCollectionParentKey(ctx)).

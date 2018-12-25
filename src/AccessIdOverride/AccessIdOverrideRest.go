@@ -12,6 +12,8 @@ import (
 
 const accessIdKey = "accessId"
 
+var accessIdOverrideDao = AccessIdOverrideDao.GetInstance()
+
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/AccessIdOverride"
 
@@ -37,7 +39,7 @@ func IntegrateRoutes(router *mux.Router) {
 func getAllAccessIdOverrideHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
 	ctx := appengine.NewContext(r)
 
-	return AccessIdOverrideDao.GetAllAccessIdOverrides(ctx)
+	return accessIdOverrideDao.GetAllAccessIdOverrides(ctx)
 }
 
 func createOrUpdateAccessIdOverrideHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
@@ -50,7 +52,7 @@ func createOrUpdateAccessIdOverrideHandler(w http.ResponseWriter, r *http.Reques
 		return nil, err
 	}
 
-	err := AccessIdOverrideDao.CreateOrUpdateAccessIdOverride(ctx, accessId)
+	err := accessIdOverrideDao.CreateOrUpdateAccessIdOverride(ctx, accessId)
 
 	return nil, err
 }
@@ -60,7 +62,7 @@ func deleteAccessIdOverrideHandler(w http.ResponseWriter, r *http.Request, user 
 
 	accessId := mux.Vars(r)[accessIdKey]
 
-	err := AccessIdOverrideDao.DeleteAccessIdOverride(ctx, accessId)
+	err := accessIdOverrideDao.DeleteAccessIdOverride(ctx, accessId)
 
 	return nil, err
 }
