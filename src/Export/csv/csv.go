@@ -226,30 +226,34 @@ func mapUsersToActivePeriod(ctx context.Context, validUsers []*UserDao.UserDTO, 
 	return usersWithPeroid
 }
 
-func getvalidAccessIdOverrides(ctx context.Context) ([]*AccessIdOverrideDao.AccessIdOverride, error) {
+func getValidAccessIdOverrides(ctx context.Context) ([]*AccessIdOverrideDao.AccessIdOverride, []string, error) {
 	if err := accessIdValidator.EnsureUpdatedIds(ctx); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	accessIdOverrides, err := accessIdOverrideDao.GetAllAccessIdOverrides(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
+
+	invalidIds := make([]string, 0, 10)
 
 	usedIndex := 0
 	for _, override := range accessIdOverrides {
 		isValid, err := accessIdValidator.ValidateAccessId(ctx, []byte(override.AccessId))
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		if isValid {
 			accessIdOverrides[usedIndex] = override
 			usedIndex++
+		} else {
+			invalidIds = append(invalidIds, override.AccessId)
 		}
 	}
 
-	return accessIdOverrides[:usedIndex], nil
+	return accessIdOverrides[:usedIndex], invalidIds, nil
 }
 
 func getActiveTransactionList(ctx context.Context, newTxn *TransactionDao.TransactionMsgDTO) (map[string]*UserSubscriptionInfo, error) {
@@ -288,7 +292,7 @@ func getActiveTransactionList(ctx context.Context, newTxn *TransactionDao.Transa
 
 	activeUsersWithPariod := mapUsersToActivePeriod(ctx, validUsers, usersWithActiveSubscriptions)
 
-	accessIdOverrides, err := getvalidAccessIdOverrides(ctx)
+	accessIdOverrides, invalidIds, err := getValidAccessIdOverrides(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -306,6 +310,11 @@ func getActiveTransactionList(ctx context.Context, newTxn *TransactionDao.Transa
 	if len(invalidUsers) > 0 {
 		usersWithActiveSubscriptionButInvalidIdsStr := strings.Join(mapToUserNames(invalidUsers), ", ")
 		log.Infof(ctx, "%s has paid for access but ID is not valid, skipped in csv export", usersWithActiveSubscriptionButInvalidIdsStr)
+	}
+
+	if len(invalidIds) > 0 {
+		invalidAccessIdOverridesd := strings.Join(invalidIds, ", ")
+		log.Infof(ctx, "The following access id overrides are invalid and are skipped in export: %s", invalidAccessIdOverridesd)
 	}
 
 	return activeUsersWithPariod, nil
