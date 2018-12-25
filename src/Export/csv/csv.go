@@ -51,13 +51,13 @@ func IntegrateRoutes(router *mux.Router) {
 	router.
 		Methods("GET").
 		Path(path + "/export/csv").
-		Name("export").
+		Name("export csv").
 		HandlerFunc(UserService.AsAdmin(exportCsvHandler))
 
 	router.
 		Methods("GET").
 		Path(path + "/download/csv").
-		Name("export").
+		Name("downlad csv").
 		HandlerFunc(UserService.AsAdmin(downloadCsvHandler))
 
 }

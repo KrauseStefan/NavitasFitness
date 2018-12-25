@@ -1,5 +1,10 @@
 div
 
+  div(layout="row", layout-align="start")
+    md-button.md-raised(target="_self", href="rest/download/csv/") Download FitnessAccessList.csv
+    md-button.md-raised(ng-click="$ctrl.updateDownboxAccessList()") Force update FitnessAccessList.csv on Dropbox
+    md-progress-circular(md-diameter="24", ng-if="$ctrl.updatingDropbox", style="margin-top: 12px")
+
   admin-access-override
 
   admin-users-grid(user-selection-updated="$ctrl.userSelectionUpdated(users)")
