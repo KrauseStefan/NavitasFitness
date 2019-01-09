@@ -25,7 +25,9 @@ func HandlerW(f HttpHandler) func(http.ResponseWriter, *http.Request) {
 		dto, err := f(w, r)
 		if err == nil && dto != nil {
 			_, err = WriteJSON(w, dto)
-		} else if err != nil {
+		}
+
+		if err != nil {
 			log.Errorf(ctx, err.Error())
 			DAOHelper.ReportError(ctx, w, err)
 		}

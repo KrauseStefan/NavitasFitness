@@ -53,19 +53,12 @@ func AsUser(f CustomHttpHandler) func(http.ResponseWriter, *http.Request) {
 
 func getUserFromSession(ctx context.Context, r *http.Request) (*UserDao.UserDTO, error) {
 	sessionData, err := Auth.GetSessionData(r)
-	if err != nil {
-		return nil, err
+
+	if err == nil && sessionData.HasLoginInfo() {
+		return userDao.GetUserFromSessionUUID(ctx, sessionData.UserKey, sessionData.Uuid)
 	}
 
-	if !sessionData.HasLoginInfo() && err == nil {
-		return nil, nil
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	return userDao.GetUserFromSessionUUID(ctx, sessionData.UserKey, sessionData.Uuid)
+	return nil, err
 }
 
 func GetAllUsers(ctx context.Context) ([]string, []*UserDao.UserDTO, error) {

@@ -134,7 +134,8 @@ func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request, _ *UserD
 
 	userKeyStr := mux.Vars(r)[userKey]
 	userKey, err := datastore.DecodeKey(userKeyStr)
-	if err == nil {
+
+	if err != nil {
 		return nil, err
 	}
 	return UserService.GetUserTransactions(ctx, userKey)
