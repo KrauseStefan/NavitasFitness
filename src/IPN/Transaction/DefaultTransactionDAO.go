@@ -102,12 +102,7 @@ func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx context.Context,
 	q := datastore.NewQuery(TXN_KIND).
 		Filter("PaymentDate>=", date)
 
-	count, err := q.Count(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	txnDsDtoList := make([]transactionMsgDsDTO, 0, count)
+	txnDsDtoList := make([]transactionMsgDsDTO, 0)
 
 	keys, err := q.GetAll(ctx, &txnDsDtoList)
 	if err != nil {
