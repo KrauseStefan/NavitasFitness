@@ -68,7 +68,7 @@ type transactionMsgDsDTO struct {
 	PaymentDate time.Time `json:"payment_date"` // Included so that it can be indexed
 	TxnId       string    `json:"txn_id"`
 
-	ExpirationWarningGiven bool //Needed for compatability with version 1.8
+	ExpirationWarningGiven bool
 }
 
 type TransactionMsgDTO struct {
