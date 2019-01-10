@@ -2,6 +2,7 @@ package main
 
 import (
 	"AccessIdOverride"
+	"SubscribtionExpiration"
 	"errors"
 	"math/rand"
 	"net/http"
@@ -43,6 +44,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 
 	router := mux.NewRouter().StrictSlash(true)
+	subscriptionExpiration.IntegrateRoutes(router)
 	MainPageService.IntegrateRoutes(router)
 	UserRest.IntegrateRoutes(router)
 	Auth.IntegrateRoutes(router)

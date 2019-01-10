@@ -11,6 +11,11 @@ indexes:
 # your application using appcfg.py.
 
 - kind: txn
+  properties:
+  - name: ExpirationWarningGiven
+  - name: PaymentDate
+
+- kind: txn
   ancestor: yes
   properties:
   - name: PaymentDate

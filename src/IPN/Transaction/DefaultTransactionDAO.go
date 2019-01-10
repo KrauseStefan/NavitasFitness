@@ -111,3 +111,18 @@ func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx context.Context,
 
 	return NewTransactionMsgDTOList(txnDsDtoList, keys), nil
 }
+
+func GetTransactionsAboutToExpire(ctx context.Context) ([]*datastore.Key, error) {
+	subscriptionDurationInMonth := 6
+	warningDeltaDays := 7
+
+	paymentExpiratinDate := time.Now().AddDate(0, subscriptionDurationInMonth, 0)
+
+	q := datastore.NewQuery(TXN_KIND).
+		Filter("PaymentDate>=", paymentExpiratinDate.AddDate(0, 0, -warningDeltaDays)).
+		Filter("PaymentDate<=", paymentExpiratinDate).
+		Filter("ExpirationWarningGiven =", false).
+		KeysOnly()
+
+	return q.GetAll(ctx, nil)
+}
