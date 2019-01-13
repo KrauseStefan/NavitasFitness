@@ -6,6 +6,7 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
+	"google.golang.org/appengine/log"
 )
 
 type DefaultTransactionDao struct{}
@@ -116,12 +117,15 @@ func GetTransactionsAboutToExpire(ctx context.Context) ([]*datastore.Key, error)
 	subscriptionDurationInMonth := 6
 	warningDeltaDays := 7
 
-	paymentExpiratinDate := time.Now().AddDate(0, subscriptionDurationInMonth, 0)
+	paymentExpiratinDate := time.Now().AddDate(0, -subscriptionDurationInMonth, 0)
+	paymentWarningStartDate := paymentExpiratinDate.AddDate(0, 0, -warningDeltaDays)
+
+	log.Infof(ctx, "PaymentDate>=%s", paymentWarningStartDate)
+	log.Infof(ctx, "PaymentDate<=%s", paymentExpiratinDate)
 
 	q := datastore.NewQuery(TXN_KIND).
-		Filter("PaymentDate>=", paymentExpiratinDate.AddDate(0, 0, -warningDeltaDays)).
+		Filter("PaymentDate>=", paymentWarningStartDate).
 		Filter("PaymentDate<=", paymentExpiratinDate).
-		Filter("ExpirationWarningGiven =", false).
 		KeysOnly()
 
 	return q.GetAll(ctx, nil)
