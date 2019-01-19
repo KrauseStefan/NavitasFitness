@@ -206,7 +206,10 @@ func (u *DefaultUserDAO) SetSessionUUID(ctx context.Context, user *UserDTO, uuid
 func (u *DefaultUserDAO) GetUserFromSessionUUID(ctx context.Context, userKey *datastore.Key, uuid string) (*UserDTO, error) {
 	user := &UserDTO{}
 
-	if err := datastore.Get(ctx, userKey, user); err != nil {
+	err := datastore.Get(ctx, userKey, user)
+	if err == datastore.ErrNoSuchEntity {
+		err = nil
+	} else if err != nil {
 		return nil, err
 	}
 
