@@ -52,7 +52,7 @@ func (t *DefaultTransactionDao) PersistNewIpnMessage(ctx context.Context, ipnTxn
 	//Make sure indexed fields are updated
 	ipnTxn.parseMessage()
 	ipnTxn.key = newKey
-	if _, err := datastore.Put(ctx, newKey, &ipnTxn.dsDto); err != nil {
+	if _, err := datastore.Put(ctx, newKey, ipnTxn.dsDto); err != nil {
 		return err
 	}
 
@@ -64,8 +64,7 @@ func (t *DefaultTransactionDao) GetTransaction(ctx context.Context, txnId string
 		Filter("TxnId=", txnId).
 		Limit(1)
 
-	txnDtoList := make([]transactionMsgDsDTO, 0, 1)
-
+	var txnDtoList []*transactionMsgDsDTO
 	keys, err := q.GetAll(ctx, &txnDtoList)
 	if err != nil {
 		return nil, err
@@ -84,13 +83,7 @@ func (t *DefaultTransactionDao) GetTransactionsByUser(ctx context.Context, paren
 		Ancestor(parentUserKey).
 		Order("PaymentDate")
 
-	count, err := q.Count(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	txnDsDtoList := make([]transactionMsgDsDTO, 0, count)
-
+	var txnDsDtoList []*transactionMsgDsDTO
 	keys, err := q.GetAll(ctx, &txnDsDtoList)
 	if err != nil {
 		return nil, err
@@ -103,8 +96,7 @@ func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx context.Context,
 	q := datastore.NewQuery(TXN_KIND).
 		Filter("PaymentDate>=", date)
 
-	txnDsDtoList := make([]transactionMsgDsDTO, 0)
-
+	var txnDsDtoList []*transactionMsgDsDTO
 	keys, err := q.GetAll(ctx, &txnDsDtoList)
 	if err != nil {
 		return nil, err

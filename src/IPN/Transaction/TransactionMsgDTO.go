@@ -30,7 +30,7 @@ func NewTransactionMsgDTOFromIpn(ipnMessage string) *TransactionMsgDTO {
 func NewTransactionMsgDTOFromIpnWithKey(ipnMessage string, key *datastore.Key) *TransactionMsgDTO {
 	t := TransactionMsgDTO{
 		key:   key,
-		dsDto: *new(transactionMsgDsDTO),
+		dsDto: new(transactionMsgDsDTO),
 	}
 
 	t.AddNewIpnMessage(ipnMessage)
@@ -38,7 +38,7 @@ func NewTransactionMsgDTOFromIpnWithKey(ipnMessage string, key *datastore.Key) *
 	return &t
 }
 
-func NewTransactionMsgDTOFromDs(dto transactionMsgDsDTO, key *datastore.Key) *TransactionMsgDTO {
+func NewTransactionMsgDTOFromDs(dto *transactionMsgDsDTO, key *datastore.Key) *TransactionMsgDTO {
 	t := TransactionMsgDTO{
 		key:   key,
 		dsDto: dto,
@@ -47,7 +47,7 @@ func NewTransactionMsgDTOFromDs(dto transactionMsgDsDTO, key *datastore.Key) *Tr
 	return &t
 }
 
-func NewTransactionMsgDTOList(dtos []transactionMsgDsDTO, keys []*datastore.Key) []*TransactionMsgDTO {
+func NewTransactionMsgDTOList(dtos []*transactionMsgDsDTO, keys []*datastore.Key) []*TransactionMsgDTO {
 	txnDtoList := make([]*TransactionMsgDTO, len(dtos))
 
 	for i, dto := range dtos {
@@ -71,7 +71,7 @@ type transactionMsgDsDTO struct {
 }
 
 type TransactionMsgDTO struct {
-	dsDto transactionMsgDsDTO
+	dsDto *transactionMsgDsDTO
 	key   *datastore.Key
 
 	parsedIpnMessage url.Values
