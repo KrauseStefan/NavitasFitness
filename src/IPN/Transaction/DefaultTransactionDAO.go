@@ -105,7 +105,7 @@ func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx context.Context,
 	return NewTransactionMsgDTOList(txnDsDtoList, keys), nil
 }
 
-func GetTransactionsAboutToExpire(ctx context.Context) ([]*datastore.Key, error) {
+func GetTransactionsAboutToExpire(ctx context.Context) ([]*TransactionMsgDTO, error) {
 	subscriptionDurationInMonth := 6
 	warningDeltaDays := 7
 
@@ -117,8 +117,28 @@ func GetTransactionsAboutToExpire(ctx context.Context) ([]*datastore.Key, error)
 
 	q := datastore.NewQuery(TXN_KIND).
 		Filter("PaymentDate>=", paymentWarningStartDate).
-		Filter("PaymentDate<=", paymentExpiratinDate).
-		KeysOnly()
+		Filter("PaymentDate<=", paymentExpiratinDate)
 
-	return q.GetAll(ctx, nil)
+	var txns []*transactionMsgDsDTO
+	keys, err := q.GetAll(ctx, &txns)
+
+	aboutToExpireTxn := make([]*transactionMsgDsDTO, 0, len(txns))
+	for _, txn := range txns {
+		if txn.ExpirationWarningGiven {
+			aboutToExpireTxn = append(aboutToExpireTxn, txn)
+		}
+	}
+
+	return NewTransactionMsgDTOList(aboutToExpireTxn, keys), err
+}
+
+func SetExpirationWarningGiven(ctx context.Context, txns []*TransactionMsgDTO, value bool) error {
+	txnKeys := make([]*datastore.Key, len(txns))
+	for i, txn := range txns {
+		txn.dsDto.ExpirationWarningGiven = value
+		txnKeys[i] = txn.GetKey()
+	}
+
+	_, err := datastore.PutMulti(ctx, txnKeys, txns)
+	return err
 }

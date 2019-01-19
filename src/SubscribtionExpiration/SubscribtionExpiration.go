@@ -39,37 +39,53 @@ func IntegrateRoutes(router *mux.Router) {
 func dryRun(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
 	ctx := appengine.NewContext(r)
 
-	return dryRunImpl(ctx)
+	users, _, err := getAboutToExpireTxnsWithUsers(ctx)
+	return users, err
 }
 
 func send(w http.ResponseWriter, r *http.Request, callingUser *UserDao.UserDTO) (interface{}, error) {
 	ctx := appengine.NewContext(r)
 
-	users, err := dryRunImpl(ctx)
+	users, txns, err := getAboutToExpireTxnsWithUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, user := range users {
-		sendEmail(ctx, user, callingUser.Email)
+	errs := make([]error, 0)
+	warnedTxns := make([]*TransactionDao.TransactionMsgDTO, 0, len(txns))
+	for i, user := range users {
+		err := sendEmail(ctx, user, callingUser.Email)
+		if err != nil {
+			errs = append(errs, err)
+		} else {
+			warnedTxns = append(warnedTxns, txns[i])
+		}
 	}
 
-	return nil, nil
+	if len(errs) > 0 {
+		for _, err := range errs {
+			log.Errorf(ctx, err.Error())
+		}
+		return nil, errs[0]
+	}
+
+	err = TransactionDao.SetExpirationWarningGiven(ctx, warnedTxns, true)
+	return nil, err
 }
 
-func dryRunImpl(ctx context.Context) ([]*UserDao.UserDTO, error) {
-	txnKeys, err := TransactionDao.GetTransactionsAboutToExpire(ctx)
+func getAboutToExpireTxnsWithUsers(ctx context.Context) ([]*UserDao.UserDTO, []*TransactionDao.TransactionMsgDTO, error) {
+	txns, err := TransactionDao.GetTransactionsAboutToExpire(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	userKeys := make([]*datastore.Key, 0, len(txnKeys))
-
-	for _, key := range txnKeys {
-		userKeys = append(userKeys, key.Parent())
+	userKeys := make([]*datastore.Key, 0, len(txns))
+	for _, txn := range txns {
+		userKeys = append(userKeys, txn.GetUser())
 	}
 
-	return userDao.GetByKeys(ctx, userKeys)
+	users, err := userDao.GetByKeys(ctx, userKeys)
+	return users, txns, err
 }
 
 var subscriptionExpiredEmailBodyTbl = `
