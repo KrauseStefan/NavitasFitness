@@ -16,9 +16,9 @@ type TransactionIpnManipulator interface {
 type TransactionRetriever interface {
 	GetTransaction(ctx context.Context, txnId string) (*TransactionMsgDTO, error)
 
-	GetTransactionsByUser(ctx context.Context, parentUserKey *datastore.Key) ([]*TransactionMsgDTO, error)
+	GetTransactionsByUser(ctx context.Context, parentUserKey *datastore.Key) (TransactionList, error)
 
-	GetCurrentTransactionsAfter(ctx context.Context, date time.Time) ([]*TransactionMsgDTO, error)
+	GetCurrentTransactionsAfter(ctx context.Context, date time.Time) (TransactionList, error)
 }
 
 type TransactionDao interface {

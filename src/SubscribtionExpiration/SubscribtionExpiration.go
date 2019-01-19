@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"google.golang.org/appengine/log"
 	"net/http"
+	"time"
 
 	"IPN/Transaction"
 	"User/Dao"
@@ -13,7 +14,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"google.golang.org/appengine"
-	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/mail"
 )
 
@@ -52,7 +52,7 @@ func send(w http.ResponseWriter, r *http.Request, callingUser *UserDao.UserDTO) 
 	}
 
 	errs := make([]error, 0)
-	warnedTxns := make([]*TransactionDao.TransactionMsgDTO, 0, len(txns))
+	warnedTxns := make(TransactionDao.TransactionList, 0, len(txns))
 	for i, user := range users {
 		err := sendEmail(ctx, user, callingUser.Email)
 		if err != nil {
@@ -73,19 +73,26 @@ func send(w http.ResponseWriter, r *http.Request, callingUser *UserDao.UserDTO) 
 	return nil, err
 }
 
-func getAboutToExpireTxnsWithUsers(ctx context.Context) ([]*UserDao.UserDTO, []*TransactionDao.TransactionMsgDTO, error) {
-	txns, err := TransactionDao.GetTransactionsAboutToExpire(ctx)
+func getAboutToExpireTxnsWithUsers(ctx context.Context) ([]*UserDao.UserDTO, TransactionDao.TransactionList, error) {
+	subscriptionDurationInMonth := 6
+	warningDeltaDays := 7
+
+	paymentExpiratinDate := time.Now().AddDate(0, -subscriptionDurationInMonth, 0)
+	paymentWarningStartDate := paymentExpiratinDate.AddDate(0, 0, -warningDeltaDays)
+
+	log.Infof(ctx, "PaymentDate>=%s", paymentWarningStartDate)
+	log.Infof(ctx, "PaymentDate<=%s", paymentExpiratinDate)
+
+	txns, err := TransactionDao.GetTransactionsPayedBetween(ctx, paymentWarningStartDate, paymentExpiratinDate)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	userKeys := make([]*datastore.Key, 0, len(txns))
-	for _, txn := range txns {
-		userKeys = append(userKeys, txn.GetUser())
-	}
+	aboutToExpireTxn := txns.
+		Filter(func(txn *TransactionDao.TransactionMsgDTO) bool { return txn.ExpirationWarningGiven() })
 
-	users, err := userDao.GetByKeys(ctx, userKeys)
-	return users, txns, err
+	users, err := userDao.GetByKeys(ctx, aboutToExpireTxn.GetUserKeys())
+	return users, aboutToExpireTxn, err
 }
 
 var subscriptionExpiredEmailBodyTbl = `

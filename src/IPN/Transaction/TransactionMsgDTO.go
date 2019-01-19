@@ -47,7 +47,7 @@ func NewTransactionMsgDTOFromDs(dto *transactionMsgDsDTO, key *datastore.Key) *T
 	return &t
 }
 
-func NewTransactionMsgDTOList(dtos []*transactionMsgDsDTO, keys []*datastore.Key) []*TransactionMsgDTO {
+func NewTransactionMsgDTOList(dtos []*transactionMsgDsDTO, keys []*datastore.Key) TransactionList {
 	txnDtoList := make([]*TransactionMsgDTO, len(dtos))
 
 	for i, dto := range dtos {
@@ -70,70 +70,94 @@ type transactionMsgDsDTO struct {
 	ExpirationWarningGiven bool
 }
 
+func (t transactionMsgDsDTO) String() string {
+	js, _ := json.MarshalIndent(t, "", "  ")
+	return string(js)
+}
+
 type TransactionMsgDTO struct {
 	dsDto *transactionMsgDsDTO
 	key   *datastore.Key
 
 	parsedIpnMessage url.Values
 }
+type TransactionList []*TransactionMsgDTO
 
-func (txDto *TransactionMsgDTO) hasKey() bool {
-	return txDto.key != nil
+func (txns TransactionList) Filter(filterFn func(*TransactionMsgDTO) bool) TransactionList {
+	filteredTxns := make([]*TransactionMsgDTO, 0, len(txns))
+	for _, txn := range txns {
+		if filterFn(txn) {
+			filteredTxns = append(filteredTxns, txn)
+		}
+	}
+	return filteredTxns
 }
 
-func (txDto *TransactionMsgDTO) GetKey() *datastore.Key {
-	return txDto.key
+func (txns TransactionList) GetUserKeys() []*datastore.Key {
+	userKeys := make([]*datastore.Key, 0, len(txns))
+	for _, txn := range txns {
+		userKeys = append(userKeys, txn.GetUser())
+	}
+	return userKeys
 }
 
-func (txDto *TransactionMsgDTO) GetUser() *datastore.Key {
-	return txDto.key.Parent()
+func (t *TransactionMsgDTO) hasKey() bool {
+	return t.key != nil
 }
 
-func (txDto *TransactionMsgDTO) GetTxnId() string {
-	return txDto.dsDto.TxnId
+func (t *TransactionMsgDTO) GetKey() *datastore.Key {
+	return t.key
 }
 
-func (txDto *TransactionMsgDTO) GetPayerEmail() string {
-	return txDto.GetField(FIELD_PAYER_EMAIL)
+func (t *TransactionMsgDTO) GetUser() *datastore.Key {
+	return t.key.Parent()
 }
 
-func (txDto *TransactionMsgDTO) parseMessage() *url.Values {
-	if txDto.parsedIpnMessage == nil {
-		parsedIpnMessage, _ := url.ParseQuery(txDto.getLatestIPNMessage())
-		txDto.parsedIpnMessage = parsedIpnMessage
-		txDto.dsDto.PaymentDate = txDto.GetPaymentDate()
-		txDto.dsDto.TxnId = txDto.GetField(FIELD_TXN_ID)
+func (t *TransactionMsgDTO) GetTxnId() string {
+	return t.dsDto.TxnId
+}
+
+func (t *TransactionMsgDTO) GetPayerEmail() string {
+	return t.GetField(FIELD_PAYER_EMAIL)
+}
+
+func (t *TransactionMsgDTO) parseMessage() *url.Values {
+	if t.parsedIpnMessage == nil {
+		parsedIpnMessage, _ := url.ParseQuery(t.getLatestIPNMessage())
+		t.parsedIpnMessage = parsedIpnMessage
+		t.dsDto.PaymentDate = t.GetPaymentDate()
+		t.dsDto.TxnId = t.GetField(FIELD_TXN_ID)
 	}
 
-	return &txDto.parsedIpnMessage
+	return &t.parsedIpnMessage
 }
 
-func (txDto *TransactionMsgDTO) GetField(field string) string {
-	return txDto.parseMessage().Get(field)
+func (t *TransactionMsgDTO) GetField(field string) string {
+	return t.parseMessage().Get(field)
 }
 
-func (txDto *TransactionMsgDTO) getLatestIPNMessage() string {
-	if len(txDto.dsDto.IpnMessages) > 0 {
-		return txDto.dsDto.IpnMessages[0]
+func (t *TransactionMsgDTO) getLatestIPNMessage() string {
+	if len(t.dsDto.IpnMessages) > 0 {
+		return t.dsDto.IpnMessages[0]
 	} else {
 		return ""
 	}
 }
 
-func (txDto *TransactionMsgDTO) AddNewIpnMessage(ipnMessage string) *TransactionMsgDTO {
-	txDto.dsDto.IpnMessages = append([]string{ipnMessage}, txDto.dsDto.IpnMessages...)
-	txDto.parsedIpnMessage = nil
-	txDto.parseMessage()
-	return txDto
+func (t *TransactionMsgDTO) AddNewIpnMessage(ipnMessage string) *TransactionMsgDTO {
+	t.dsDto.IpnMessages = append([]string{ipnMessage}, t.dsDto.IpnMessages...)
+	t.parsedIpnMessage = nil
+	t.parseMessage()
+	return t
 }
 
-func (txDto *TransactionMsgDTO) GetPaymentStatus() string {
-	return txDto.parseMessage().Get(FIELD_PAYMENT_STATUS)
+func (t *TransactionMsgDTO) GetPaymentStatus() string {
+	return t.parseMessage().Get(FIELD_PAYMENT_STATUS)
 }
 
-func (txDto *TransactionMsgDTO) GetPaymentDate() time.Time {
+func (t *TransactionMsgDTO) GetPaymentDate() time.Time {
 	const layout = "15:04:05 Jan 02, 2006 MST"
-	fieldValue := txDto.parseMessage().Get(FIELD_PAYMENT_DATE)
+	fieldValue := t.parseMessage().Get(FIELD_PAYMENT_DATE)
 	splitPoint := strings.LastIndex(fieldValue, " ") + 1
 	timeZone := fieldValue[splitPoint:]
 
@@ -142,50 +166,49 @@ func (txDto *TransactionMsgDTO) GetPaymentDate() time.Time {
 		panic(err)
 	}
 
-	t, _ := time.ParseInLocation(layout, fieldValue, loc)
+	paymentDate, _ := time.ParseInLocation(layout, fieldValue, loc)
 	locCET, err := time.LoadLocation("CET")
 	if err != nil {
 		panic(err)
 	}
 
-	return t.In(locCET)
+	return paymentDate.In(locCET)
 }
 
-func (txDto *TransactionMsgDTO) GetAmount() float64 {
-	value, _ := strconv.ParseFloat(txDto.parseMessage().Get(FIELD_MC_GROSS), 64)
+func (t *TransactionMsgDTO) GetAmount() float64 {
+	value, _ := strconv.ParseFloat(t.parseMessage().Get(FIELD_MC_GROSS), 64)
 	return value
 }
 
-func (txDto *TransactionMsgDTO) GetCurrency() string {
-	return txDto.parseMessage().Get(FIELD_MC_CURRENCY)
+func (t *TransactionMsgDTO) GetCurrency() string {
+	return t.parseMessage().Get(FIELD_MC_CURRENCY)
 }
 
-func (txDto *TransactionMsgDTO) PaymentIsCompleted() bool {
-	return txDto.GetPaymentStatus() == STATUS_COMPLEATED
+func (t *TransactionMsgDTO) PaymentIsCompleted() bool {
+	return t.GetPaymentStatus() == STATUS_COMPLEATED
 }
 
-func (txDto *TransactionMsgDTO) GetIpnMessages() []string {
-	return txDto.dsDto.IpnMessages
+func (t *TransactionMsgDTO) GetIpnMessages() []string {
+	return t.dsDto.IpnMessages
 }
 
-func (txDto *TransactionMsgDTO) GetReceiverEmail() string {
-	return txDto.parseMessage().Get(FIELD_RECEIVER_EMAIL)
+func (t *TransactionMsgDTO) GetReceiverEmail() string {
+	return t.parseMessage().Get(FIELD_RECEIVER_EMAIL)
 }
 
-func (txDto TransactionMsgDTO) String() string {
+func (t TransactionMsgDTO) String() string {
 
-	dsDto := fmt.Sprintf("dsDto: %s\n", txDto.dsDto.String())
-	json, _ := json.MarshalIndent(txDto.parsedIpnMessage, "", "  ")
+	dsDto := fmt.Sprintf("dsDto: %s\n", t.dsDto.String())
+	json, _ := json.MarshalIndent(t.parsedIpnMessage, "", "  ")
 
 	return dsDto + string(json)
 }
 
-func (txDto transactionMsgDsDTO) String() string {
-	js, _ := json.MarshalIndent(txDto, "", "  ")
-	return string(js)
+func (t *TransactionMsgDTO) IsActive() bool {
+	endTime := t.GetPaymentDate().AddDate(0, 6, 0)
+	return t.GetPaymentDate().Before(time.Now()) && time.Now().Before(endTime)
 }
 
-func (txDto *TransactionMsgDTO) IsActive() bool {
-	endTime := txDto.GetPaymentDate().AddDate(0, 6, 0)
-	return txDto.GetPaymentDate().Before(time.Now()) && time.Now().Before(endTime)
+func (t *TransactionMsgDTO) ExpirationWarningGiven() bool {
+	return t.dsDto.ExpirationWarningGiven
 }

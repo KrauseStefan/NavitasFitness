@@ -62,13 +62,13 @@ func IntegrateRoutes(router *mux.Router) {
 
 }
 
-type UserTransactionMap map[datastore.Key][]*TransactionDao.TransactionMsgDTO
+type UserTransactionMap map[datastore.Key]TransactionDao.TransactionList
 
-func validateTransactions(ctx context.Context, txns []*TransactionDao.TransactionMsgDTO) ([]*TransactionDao.TransactionMsgDTO, []*TransactionDao.TransactionMsgDTO) {
+func validateTransactions(ctx context.Context, txns TransactionDao.TransactionList) (TransactionDao.TransactionList, TransactionDao.TransactionList) {
 	validationEmails := strings.Split(AccessIdValidator.GetPaypalValidationEmail(ctx), ":")
 	validationEmailsLendth := len(validationEmails)
-	validTxns := make([]*TransactionDao.TransactionMsgDTO, 0, len(txns))
-	invalidTxns := make([]*TransactionDao.TransactionMsgDTO, 0, 5)
+	validTxns := make(TransactionDao.TransactionList, 0, len(txns))
+	invalidTxns := make(TransactionDao.TransactionList, 0, 5)
 	for _, txn := range txns {
 		email := txn.GetReceiverEmail()
 		for i, validationEmail := range validationEmails {
@@ -85,12 +85,12 @@ func validateTransactions(ctx context.Context, txns []*TransactionDao.Transactio
 	return validTxns, invalidTxns
 }
 
-func getAllActiveSubscriptionsTxns(ctx context.Context) ([]*TransactionDao.TransactionMsgDTO, error) {
+func getAllActiveSubscriptionsTxns(ctx context.Context) (TransactionDao.TransactionList, error) {
 	expiredTransactionDate := time.Now().AddDate(0, -subscriptionPeriodMonth, 0)
 	return transactionDao.GetCurrentTransactionsAfter(ctx, expiredTransactionDate)
 }
 
-func getLatestTxnByUser(txns []*TransactionDao.TransactionMsgDTO) UserTransactionMap {
+func getLatestTxnByUser(txns TransactionDao.TransactionList) UserTransactionMap {
 	userTransactionMap := make(UserTransactionMap)
 
 	for _, txn := range txns {
@@ -98,7 +98,7 @@ func getLatestTxnByUser(txns []*TransactionDao.TransactionMsgDTO) UserTransactio
 		userTxns := userTransactionMap[userKey]
 
 		if userTxns == nil {
-			userTxns = make([]*TransactionDao.TransactionMsgDTO, 0, 2)
+			userTxns = make(TransactionDao.TransactionList, 0, 2)
 		}
 
 		userTransactionMap[userKey] = append(userTxns, txn)
@@ -106,7 +106,7 @@ func getLatestTxnByUser(txns []*TransactionDao.TransactionMsgDTO) UserTransactio
 	return userTransactionMap
 }
 
-func getUsers(ctx context.Context, usersTxnMap UserTransactionMap) ([]*UserDao.UserDTO, []*TransactionDao.TransactionMsgDTO, error) {
+func getUsers(ctx context.Context, usersTxnMap UserTransactionMap) ([]*UserDao.UserDTO, TransactionDao.TransactionList, error) {
 	if len(usersTxnMap) == 0 {
 		return nil, nil, nil
 	}
@@ -122,7 +122,7 @@ func getUsers(ctx context.Context, usersTxnMap UserTransactionMap) ([]*UserDao.U
 
 	users, err := userDAO.GetByKeys(ctx, userKeys)
 	if multiErr, ok := err.(appengine.MultiError); ok {
-		txnsWithNoUser := make([]*TransactionDao.TransactionMsgDTO, 0, len(usersTxnMap))
+		txnsWithNoUser := make(TransactionDao.TransactionList, 0, len(usersTxnMap))
 		foundUsers := make([]*UserDao.UserDTO, 0, len(usersTxnMap))
 		foundOtherError := false
 		for i, e := range multiErr {
@@ -177,7 +177,7 @@ func mapToUserNames(users []*UserDao.UserDTO) []string {
 	return userNames
 }
 
-func mapTxnToDate(txns []*TransactionDao.TransactionMsgDTO) []time.Time {
+func mapTxnToDate(txns TransactionDao.TransactionList) []time.Time {
 	dates := make([]time.Time, len(txns))
 	for i, txn := range txns {
 		dates[i] = txn.GetPaymentDate()

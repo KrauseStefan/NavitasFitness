@@ -58,7 +58,7 @@ func mockAccessIdValidator() *AccessIdValidatorTestHelper.AccessIdValidatorMock 
 	return accessIdValidatorMock
 }
 
-func mockTransactionRetriever(messages []*TransactionDao.TransactionMsgDTO, err error) *TransactionDaoTestHelper.TransactionRetrieverMock {
+func mockTransactionRetriever(messages TransactionDao.TransactionList, err error) *TransactionDaoTestHelper.TransactionRetrieverMock {
 	txnDaoMock = TransactionDaoTestHelper.NewTransactionRetrieverMock(messages, err)
 	transactionDao = txnDaoMock
 	return txnDaoMock
@@ -93,13 +93,13 @@ func mockAccessIdOverrideDao() {
 	mockAccessIdOverrideDaoWithIds(nil)
 }
 
-func createMessages(dates []time.Time, userKeys []*datastore.Key) []*TransactionDao.TransactionMsgDTO {
+func createMessages(dates []time.Time, userKeys []*datastore.Key) TransactionDao.TransactionList {
 	return createMessagesWithEmail(dates, userKeys, "gpmac_1231902686_biz@paypal.com")
 }
 
-func createMessagesWithEmail(dates []time.Time, userKeys []*datastore.Key, email string) []*TransactionDao.TransactionMsgDTO {
+func createMessagesWithEmail(dates []time.Time, userKeys []*datastore.Key, email string) TransactionDao.TransactionList {
 	const layout = "15:04:05 Jan 02, 2006 MST"
-	messages := make([]*TransactionDao.TransactionMsgDTO, 0, 5)
+	messages := make(TransactionDao.TransactionList, 0, 5)
 	for i, date := range dates {
 		txnKey := datastore.NewKey(ctx, "txn", "", int64(i)+1, userKeys[i])
 		dateStr := date.In(utc).Format(layout)

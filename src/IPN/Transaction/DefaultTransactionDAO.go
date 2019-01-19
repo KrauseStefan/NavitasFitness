@@ -6,7 +6,6 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
 )
 
 type DefaultTransactionDao struct{}
@@ -77,7 +76,7 @@ func (t *DefaultTransactionDao) GetTransaction(ctx context.Context, txnId string
 	return NewTransactionMsgDTOFromDs(txnDtoList[0], keys[0]), nil
 }
 
-func (t *DefaultTransactionDao) GetTransactionsByUser(ctx context.Context, parentUserKey *datastore.Key) ([]*TransactionMsgDTO, error) {
+func (t *DefaultTransactionDao) GetTransactionsByUser(ctx context.Context, parentUserKey *datastore.Key) (TransactionList, error) {
 
 	q := datastore.NewQuery(TXN_KIND).
 		Ancestor(parentUserKey).
@@ -92,7 +91,7 @@ func (t *DefaultTransactionDao) GetTransactionsByUser(ctx context.Context, paren
 	return NewTransactionMsgDTOList(txnDsDtoList, keys), nil
 }
 
-func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx context.Context, date time.Time) ([]*TransactionMsgDTO, error) {
+func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx context.Context, date time.Time) (TransactionList, error) {
 	q := datastore.NewQuery(TXN_KIND).
 		Filter("PaymentDate>=", date)
 
@@ -105,34 +104,21 @@ func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx context.Context,
 	return NewTransactionMsgDTOList(txnDsDtoList, keys), nil
 }
 
-func GetTransactionsAboutToExpire(ctx context.Context) ([]*TransactionMsgDTO, error) {
-	subscriptionDurationInMonth := 6
-	warningDeltaDays := 7
-
-	paymentExpiratinDate := time.Now().AddDate(0, -subscriptionDurationInMonth, 0)
-	paymentWarningStartDate := paymentExpiratinDate.AddDate(0, 0, -warningDeltaDays)
-
-	log.Infof(ctx, "PaymentDate>=%s", paymentWarningStartDate)
-	log.Infof(ctx, "PaymentDate<=%s", paymentExpiratinDate)
-
+func GetTransactionsPayedBetween(ctx context.Context, start time.Time, end time.Time) (TransactionList, error) {
 	q := datastore.NewQuery(TXN_KIND).
-		Filter("PaymentDate>=", paymentWarningStartDate).
-		Filter("PaymentDate<=", paymentExpiratinDate)
+		Filter("PaymentDate>=", start).
+		Filter("PaymentDate<=", end)
 
 	var txns []*transactionMsgDsDTO
 	keys, err := q.GetAll(ctx, &txns)
-
-	aboutToExpireTxn := make([]*transactionMsgDsDTO, 0, len(txns))
-	for _, txn := range txns {
-		if txn.ExpirationWarningGiven {
-			aboutToExpireTxn = append(aboutToExpireTxn, txn)
-		}
+	if err != nil {
+		return nil, err
 	}
 
-	return NewTransactionMsgDTOList(aboutToExpireTxn, keys), err
+	return NewTransactionMsgDTOList(txns, keys), err
 }
 
-func SetExpirationWarningGiven(ctx context.Context, txns []*TransactionMsgDTO, value bool) error {
+func SetExpirationWarningGiven(ctx context.Context, txns TransactionList, value bool) error {
 	txnKeys := make([]*datastore.Key, len(txns))
 	for i, txn := range txns {
 		txn.dsDto.ExpirationWarningGiven = value
