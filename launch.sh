@@ -16,3 +16,4 @@ cd -
 
 #gnome-terminal -e "dev_appserver.py $root/src/NavitasFitness/app.yaml" &
 gnome-terminal --tab -e "npm start" --working-directory="$root/websrc" --title="client" --tab -e "npm start" --working-directory="$root/ipn-simulator" --title="IPN" --tab -e "dev_appserver.py --dev_appserver_log_level=warning $root/src/NavitasFitness/app.yaml" --title="server"
+# gnome-terminal --tab -e "npm start" --working-directory="$root/websrc" --title="client" --tab -e "npm start" --working-directory="$root/ipn-simulator" --title="IPN" --tab -e "dev_appserver.py $root/src/NavitasFitness/app.yaml" --title="server"
