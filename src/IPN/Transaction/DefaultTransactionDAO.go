@@ -23,7 +23,7 @@ var (
 
 func (t *DefaultTransactionDao) UpdateIpnMessage(ctx context.Context, ipnTxn *TransactionMsgDTO) error {
 
-	key := ipnTxn.GetDataStoreKey(ctx)
+	key := ipnTxn.GetKey()
 
 	// Make sure indexed fields are updated
 	ipnTxn.parseMessage()
