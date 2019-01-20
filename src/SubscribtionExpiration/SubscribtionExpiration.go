@@ -78,18 +78,21 @@ func getAboutToExpireTxnsWithUsers(ctx context.Context) ([]*UserDao.UserDTO, Tra
 	warningDeltaDays := 7
 
 	paymentExpiratinDate := time.Now().AddDate(0, -subscriptionDurationInMonth, 0)
-	paymentWarningStartDate := paymentExpiratinDate.AddDate(0, 0, -warningDeltaDays)
+	paymentWarningDate := paymentExpiratinDate.AddDate(0, 0, warningDeltaDays)
 
-	log.Infof(ctx, "PaymentDate>=%s", paymentWarningStartDate)
-	log.Infof(ctx, "PaymentDate<=%s", paymentExpiratinDate)
+	format := "02-01-06T15:04:05-07:00"
+	log.Infof(ctx, "PaymentDate>=DATETIME('%s')", paymentExpiratinDate.Format(format))
+	log.Infof(ctx, "PaymentDate<=DATETIME('%s')", paymentWarningDate.Format(format))
 
-	txns, err := TransactionDao.GetTransactionsPayedBetween(ctx, paymentWarningStartDate, paymentExpiratinDate)
+	txns, err := TransactionDao.GetTransactionsPayedBetween(ctx, paymentExpiratinDate, paymentWarningDate)
 	if err != nil {
 		return nil, nil, err
 	}
+	log.Infof(ctx, "txns found %d", len(txns))
 
 	aboutToExpireTxn := txns.
-		Filter(func(txn *TransactionDao.TransactionMsgDTO) bool { return txn.ExpirationWarningGiven() })
+		Filter(func(txn *TransactionDao.TransactionMsgDTO) bool { return !txn.ExpirationWarningGiven() })
+	log.Infof(ctx, "aboutToExpireTxn found %d", len(aboutToExpireTxn))
 
 	users, err := userDao.GetByKeys(ctx, aboutToExpireTxn.GetUserKeys())
 	return users, aboutToExpireTxn, err
@@ -112,7 +115,6 @@ Navitas-Fitness
 `
 
 func sendEmail(ctx context.Context, user *UserDao.UserDTO, sendTo string) error {
-	log.Infof(ctx, "Subscription expiration mail sent to '%s'", user.Email)
 
 	msg := &mail.Message{
 		Sender:   "noreply - Navitass Fitness <navitas-fitness-aarhus@appspot.gserviceaccount.com>",
@@ -121,5 +123,9 @@ func sendEmail(ctx context.Context, user *UserDao.UserDTO, sendTo string) error 
 		HTMLBody: fmt.Sprintf(subscriptionExpiredEmailBodyTbl, user.AccessId),
 	}
 
-	return mail.Send(ctx, msg)
+	err := mail.Send(ctx, msg)
+	if err == nil {
+		log.Infof(ctx, "Subscription expiration mail sent to '%s'", user.Email)
+	}
+	return err
 }
