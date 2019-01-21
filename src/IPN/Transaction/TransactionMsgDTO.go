@@ -101,6 +101,16 @@ func (txns TransactionList) GetUserKeys() []*datastore.Key {
 	return userKeys
 }
 
+func (txns TransactionList) getDatastoreKeyAndDtos() ([]*datastore.Key, []*transactionMsgDsDTO) {
+	txnKeys := make([]*datastore.Key, len(txns))
+	dsTxns := make([]*transactionMsgDsDTO, len(txns))
+	for _, txn := range txns {
+		txnKeys = append(txnKeys, txn.key)
+		dsTxns = append(dsTxns, txn.dsDto)
+	}
+	return txnKeys, dsTxns
+}
+
 func (t *TransactionMsgDTO) hasKey() bool {
 	return t.key != nil
 }

@@ -119,12 +119,15 @@ func GetTransactionsPayedBetween(ctx context.Context, start time.Time, end time.
 }
 
 func SetExpirationWarningGiven(ctx context.Context, txns TransactionList, value bool) error {
-	txnKeys := make([]*datastore.Key, len(txns))
-	for i, txn := range txns {
+	for _, txn := range txns {
 		txn.dsDto.ExpirationWarningGiven = value
-		txnKeys[i] = txn.GetKey()
 	}
 
-	_, err := datastore.PutMulti(ctx, txnKeys, txns)
+	_, err := putMulti(ctx, txns)
 	return err
+}
+
+func putMulti(ctx context.Context, txns TransactionList) ([]*datastore.Key, error) {
+	txnKeys, dsTxns := txns.getDatastoreKeyAndDtos()
+	return datastore.PutMulti(ctx, txnKeys, dsTxns)
 }
