@@ -297,7 +297,7 @@ func getActiveTransactionList(ctx context.Context, newTxn *TransactionDao.Transa
 		return nil, err
 	}
 
-	overrideEndDate := time.Now().AddDate(0, 2, 0)
+	overrideEndDate := time.Date(2035, 12, 31, 0, 0, 0, 0, time.Local)
 
 	for _, override := range accessIdOverrides {
 		activeUsersWithPariod[override.AccessId] = &UserSubscriptionInfo{
