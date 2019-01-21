@@ -19,16 +19,20 @@ type DefaultHttpError struct {
 	StatusCode int
 }
 
-func (e *DefaultHttpError) Error() string {
-	if errs, ok := e.InnerError.(appengine.MultiError); ok && len(errs) > 1 {
-		strs := make([]string, len(errs)+1)
-		strs[0] = "Multi Error:"
-		for i, err := range errs {
-			if err != nil {
-				strs[i+1] = err.Error()
-			}
+func extractMultiErrors(multiError appengine.MultiError) string {
+	strs := make([]string, len(multiError)+1)
+	strs[0] = "Multi Error:"
+	for i, err := range multiError {
+		if err != nil {
+			strs[i+1] = err.Error()
 		}
-		return strings.Join(strs, "\n")
+	}
+	return strings.Join(strs, "\n")
+}
+
+func (e *DefaultHttpError) Error() string {
+	if multiError, ok := e.InnerError.(appengine.MultiError); ok && len(multiError) > 1 {
+		return extractMultiErrors(multiError)
 	} else {
 		return e.InnerError.Error()
 	}
