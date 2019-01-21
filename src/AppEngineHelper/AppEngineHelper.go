@@ -23,7 +23,13 @@ func HandlerW(f HttpHandler) func(http.ResponseWriter, *http.Request) {
 
 		dto, err := f(w, r)
 		if err == nil && dto != nil {
-			_, err = WriteJSON(w, dto)
+			if dtoStr, ok := dto.(string); ok {
+				w.Write([]byte(dtoStr))
+			} else if dtoBytes, ok := dto.([]byte); ok {
+				w.Write(dtoBytes)
+			} else {
+				_, err = WriteJSON(w, dto)
+			}
 		}
 
 		if err != nil {
