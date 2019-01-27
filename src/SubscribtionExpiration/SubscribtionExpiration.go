@@ -1,10 +1,13 @@
 package subscriptionExpiration
 
 import (
+	"DAOHelper"
 	"context"
+	"encoding/json"
 	"fmt"
 	"google.golang.org/appengine/log"
 	"net/http"
+	"strings"
 	"time"
 
 	"IPN/Transaction"
@@ -39,8 +42,20 @@ func IntegrateRoutes(router *mux.Router) {
 func dryRun(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
 	ctx := appengine.NewContext(r)
 
-	users, _, err := getAboutToExpireTxnsWithUsers(ctx)
-	return users, err
+	users, _, usersErr := getAboutToExpireTxnsWithUsers(ctx)
+	usersJson, err := json.Marshal(users)
+	if err != nil {
+		return nil, err
+	}
+
+	strs := []string{string(usersJson)}
+
+	if usersErr != nil {
+		httpError := DAOHelper.DefaultHttpError{InnerError: usersErr}
+		strs = append(strs, httpError.Error())
+	}
+
+	return strings.Join(strs, "\n"), nil
 }
 
 func send(w http.ResponseWriter, r *http.Request, callingUser *UserDao.UserDTO) (interface{}, error) {

@@ -23,7 +23,9 @@ func extractMultiErrors(multiError appengine.MultiError) string {
 	strs := make([]string, len(multiError)+1)
 	strs[0] = "Multi Error:"
 	for i, err := range multiError {
-		if err != nil {
+		if err == nil {
+			strs[i+1] = "nil"
+		} else {
 			strs[i+1] = err.Error()
 		}
 	}
