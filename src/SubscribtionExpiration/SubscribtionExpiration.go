@@ -1,11 +1,11 @@
 package subscriptionExpiration
 
 import (
+	"AppEngineHelper"
 	"DAOHelper"
 	"context"
 	"encoding/json"
 	"fmt"
-	"google.golang.org/appengine/log"
 	"net/http"
 	"strings"
 	"time"
@@ -17,6 +17,8 @@ import (
 	"github.com/gorilla/mux"
 
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/datastore"
+	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/mail"
 )
 
@@ -88,7 +90,7 @@ func send(w http.ResponseWriter, r *http.Request, callingUser *UserDao.UserDTO) 
 	return nil, err
 }
 
-func getAboutToExpireTxnsWithUsers(ctx context.Context) ([]*UserDao.UserDTO, TransactionDao.TransactionList, error) {
+func getAboutToExpireTxnsWithUsers(ctx context.Context) (UserDao.UserList, TransactionDao.TransactionList, error) {
 	subscriptionDurationInMonth := 6
 	warningDeltaDays := 7
 
@@ -109,7 +111,26 @@ func getAboutToExpireTxnsWithUsers(ctx context.Context) ([]*UserDao.UserDTO, Tra
 		Filter(func(txn *TransactionDao.TransactionMsgDTO) bool { return !txn.ExpirationWarningGiven() })
 	log.Infof(ctx, "aboutToExpireTxn found %d", len(aboutToExpireTxn))
 
-	users, err := userDao.GetByKeys(ctx, aboutToExpireTxn.GetUserKeys())
+	usersResp, err := userDao.GetByKeys(ctx, aboutToExpireTxn.GetUserKeys())
+
+	err = AppEngineHelper.ToMultiError(err).
+		Filter(func(err error, i int) bool {
+			if err != nil {
+				if err == datastore.ErrNoSuchEntity {
+					txn := aboutToExpireTxn[i]
+					log.Warningf(ctx, "Ignoring Error from email: '%s', id: '%s', error: '%s'", txn.GetPayerEmail(), txn.GetTxnId(), err.Error())
+				} else {
+					return true
+				}
+			}
+			return false
+		}).
+		ToError()
+
+	users := usersResp.Filter(func(user *UserDao.UserDTO) bool {
+		return user != nil
+	})
+
 	return users, aboutToExpireTxn, err
 }
 

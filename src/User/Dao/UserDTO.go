@@ -96,3 +96,15 @@ func (user *UserDTO) VerifyPassword(password string) error {
 func (user *UserDTO) IsEquivalent(other *UserDTO) bool {
 	return user.AccessId == other.AccessId || user.Email == other.Email
 }
+
+type UserList []*UserDTO
+
+func (users UserList) Filter(filterFn func(*UserDTO) bool) UserList {
+	filteredUsers := make(UserList, 0, len(users))
+	for _, user := range users {
+		if filterFn(user) {
+			filteredUsers = append(filteredUsers, user)
+		}
+	}
+	return filteredUsers
+}

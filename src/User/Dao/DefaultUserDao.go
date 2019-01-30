@@ -92,11 +92,11 @@ func (u *DefaultUserDAO) GetByAccessId(ctx context.Context, accessId string) (*U
 	return &userDtoList[0], nil
 }
 
-func (u *DefaultUserDAO) GetAll(ctx context.Context) ([]*datastore.Key, []*UserDTO, error) {
+func (u *DefaultUserDAO) GetAll(ctx context.Context) ([]*datastore.Key, UserList, error) {
 	query := datastore.NewQuery(USER_KIND).
 		Ancestor(userCollectionParentKey(ctx))
 
-	users := new([]*UserDTO)
+	users := new(UserList)
 	keys, err := query.GetAll(ctx, users)
 	if err != nil {
 		return keys, *users, err
@@ -105,8 +105,8 @@ func (u *DefaultUserDAO) GetAll(ctx context.Context) ([]*datastore.Key, []*UserD
 	return keys, *users, nil
 }
 
-func (u *DefaultUserDAO) GetByKeys(ctx context.Context, keys []*datastore.Key) ([]*UserDTO, error) {
-	users := make([]*UserDTO, len(keys))
+func (u *DefaultUserDAO) GetByKeys(ctx context.Context, keys []*datastore.Key) (UserList, error) {
+	users := make(UserList, len(keys))
 	err := datastore.GetMulti(ctx, keys, users)
 
 	for i, user := range users {
