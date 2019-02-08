@@ -52,6 +52,20 @@ func AsUser(f CustomHttpHandler) func(http.ResponseWriter, *http.Request) {
 }
 
 func getUserFromSession(ctx context.Context, r *http.Request) (*UserDao.UserDTO, error) {
+
+	if r.Header.Get("X-Appengine-Cron") == "true" {
+		log.Infof(ctx, "X-Appengine-Cron %v", r.Header.Get("X-Appengine-Cron"))
+		// if user, err := userDao.GetByEmail(ctx, u.Email); err == nil && user != nil {
+		// 	return user, nil
+		// }
+		user := &UserDao.UserDTO{
+			Name:    "Internal Appengine Admin User",
+			Email:   "stefan.krausekjaer@gmail.com",
+			IsAdmin: true,
+		}
+		return user, nil
+	}
+
 	sessionData, err := Auth.GetSessionData(r)
 
 	if err == nil && sessionData.HasLoginInfo() {
