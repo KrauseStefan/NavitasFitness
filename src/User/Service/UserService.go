@@ -52,12 +52,11 @@ func AsUser(f CustomHttpHandler) func(http.ResponseWriter, *http.Request) {
 }
 
 func getUserFromSession(ctx context.Context, r *http.Request) (*UserDao.UserDTO, error) {
-
-	if r.Header.Get("X-Appengine-Cron") == "true" {
+	// https://cloud.google.com/appengine/docs/standard/go/config/cron#securing_urls_for_cron
+	if r.Header.Get("X-Appengine-Cron") == "true" && r.RemoteAddr == "0.1.0.1" {
 		log.Infof(ctx, "X-Appengine-Cron %v", r.Header.Get("X-Appengine-Cron"))
-		// if user, err := userDao.GetByEmail(ctx, u.Email); err == nil && user != nil {
-		// 	return user, nil
-		// }
+		log.Infof(ctx, "Ip address %s", r.RemoteAddr)
+
 		user := &UserDao.UserDTO{
 			Name:    "Internal Appengine Admin User",
 			Email:   "stefan.krausekjaer@gmail.com",

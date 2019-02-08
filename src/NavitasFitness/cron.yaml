@@ -1,0 +1,7 @@
+cron:
+- description: "Daily subscription about to expire user notification task"
+#   url: /rest/subscriptionExpiration/send
+  url: /rest/subscriptionExpiration/dryRun
+  schedule: every 24 hours
+  target: v1-8-0
+  timezone: CET
