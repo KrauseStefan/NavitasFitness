@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"google.golang.org/appengine/datastore"
 
 	"AppEngineHelper"
-	"strings"
+	"constants"
 )
 
 const (
@@ -215,7 +216,7 @@ func (t TransactionMsgDTO) String() string {
 }
 
 func (t *TransactionMsgDTO) IsActive() bool {
-	endTime := t.GetPaymentDate().AddDate(0, 6, 0)
+	endTime := t.GetPaymentDate().AddDate(0, constants.SubscriptionDurationInMonth, 0)
 	return t.GetPaymentDate().Before(time.Now()) && time.Now().Before(endTime)
 }
 

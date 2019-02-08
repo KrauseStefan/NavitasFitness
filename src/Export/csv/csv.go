@@ -20,6 +20,7 @@ import (
 	"IPN/Transaction"
 	"User/Dao"
 	"User/Service"
+	"constants"
 	"strings"
 )
 
@@ -35,8 +36,7 @@ var (
 )
 
 const (
-	csvDateFormat           = "02-01-2006"
-	subscriptionPeriodMonth = 6
+	csvDateFormat = "02-01-2006"
 )
 
 type UserSubscriptionInfo struct {
@@ -86,7 +86,7 @@ func validateTransactions(ctx context.Context, txns TransactionDao.TransactionLi
 }
 
 func getAllActiveSubscriptionsTxns(ctx context.Context) (TransactionDao.TransactionList, error) {
-	expiredTransactionDate := time.Now().AddDate(0, -subscriptionPeriodMonth, 0)
+	expiredTransactionDate := time.Now().AddDate(0, -constants.SubscriptionDurationInMonth, 0)
 	return transactionDao.GetCurrentTransactionsAfter(ctx, expiredTransactionDate)
 }
 
@@ -209,7 +209,7 @@ func mapUsersToActivePeriod(ctx context.Context, validUsers []*UserDao.UserDTO, 
 		newUserSubscriptionInfo := &UserSubscriptionInfo{
 			userKey:   user.Key,
 			startDate: min,
-			endDate:   max.AddDate(0, subscriptionPeriodMonth, 0),
+			endDate:   max.AddDate(0, constants.SubscriptionDurationInMonth, 0),
 		}
 
 		prevUserSubscriptionInfo := usersWithPeroid[user.AccessId]

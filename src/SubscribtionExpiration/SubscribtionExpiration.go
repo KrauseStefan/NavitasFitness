@@ -13,6 +13,7 @@ import (
 	"IPN/Transaction"
 	"User/Dao"
 	"User/Service"
+	"constants"
 
 	"github.com/gorilla/mux"
 
@@ -23,6 +24,8 @@ import (
 )
 
 var userDao = UserDao.GetInstance()
+
+const ExpirationWarningOffsetDays = 7
 
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/subscriptionExpiration"
@@ -91,11 +94,8 @@ func send(w http.ResponseWriter, r *http.Request, callingUser *UserDao.UserDTO) 
 }
 
 func getAboutToExpireTxnsWithUsers(ctx context.Context) (UserDao.UserList, TransactionDao.TransactionList, error) {
-	subscriptionDurationInMonth := 6
-	warningDeltaDays := 7
-
-	paymentExpiratinDate := time.Now().AddDate(0, -subscriptionDurationInMonth, 0)
-	paymentWarningDate := paymentExpiratinDate.AddDate(0, 0, warningDeltaDays)
+	paymentExpiratinDate := time.Now().AddDate(0, -constants.SubscriptionDurationInMonth, 0)
+	paymentWarningDate := paymentExpiratinDate.AddDate(0, 0, ExpirationWarningOffsetDays)
 
 	format := "02-01-06T15:04:05-07:00"
 	log.Infof(ctx, "PaymentDate>=DATETIME('%s')", paymentExpiratinDate.Format(format))
@@ -136,8 +136,7 @@ func getAboutToExpireTxnsWithUsers(ctx context.Context) (UserDao.UserList, Trans
 
 var subscriptionExpiredEmailBodyTbl = `
 This is a reminder that your membership to Navitas fitnes is about to expire
-
-Your membership to Navitas fitness will expire within 7 days, after that date you will no longer have access.
+Your membership to Navitas fitness will expire within %d days, after that date you will no longer have access.
 
 If you which to extend your membership you may follow the below directions:
 <ol>
@@ -156,7 +155,7 @@ func sendEmail(ctx context.Context, user *UserDao.UserDTO, sendTo string) error 
 		Sender:   "noreply - Navitass Fitness <navitas-fitness-aarhus@appspot.gserviceaccount.com>",
 		To:       []string{sendTo},
 		Subject:  "Your membership to Navitas-Fitness is about to expire - " + user.Email,
-		HTMLBody: fmt.Sprintf(subscriptionExpiredEmailBodyTbl, user.AccessId),
+		HTMLBody: fmt.Sprintf(subscriptionExpiredEmailBodyTbl, ExpirationWarningOffsetDays, user.AccessId),
 	}
 
 	err := mail.Send(ctx, msg)
