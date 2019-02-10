@@ -59,7 +59,6 @@ func getUserFromSession(ctx context.Context, r *http.Request) (*UserDao.UserDTO,
 
 		user := &UserDao.UserDTO{
 			Name:    "Internal Appengine Admin User",
-			Email:   "stefan.krausekjaer@gmail.com",
 			IsAdmin: true,
 		}
 		return user, nil

@@ -74,7 +74,12 @@ func send(w http.ResponseWriter, r *http.Request, callingUser *UserDao.UserDTO) 
 	errs := make([]error, 0)
 	warnedTxns := make(TransactionDao.TransactionList, 0, len(txns))
 	for i, user := range users {
-		err := sendEmail(ctx, user, callingUser.Email)
+		bcc := []string{"stefan.krausekjaer@gmail.com"}
+		if callingUser != nil && callingUser.Email != "" {
+			bcc = []string{callingUser.Email}
+		}
+
+		err := sendEmail(ctx, user, bcc)
 		if err != nil {
 			errs = append(errs, err)
 		} else {
@@ -149,12 +154,12 @@ Kind regards
 Navitas-Fitness
 `
 
-func sendEmail(ctx context.Context, user *UserDao.UserDTO, sendTo string) error {
-
+func sendEmail(ctx context.Context, user *UserDao.UserDTO, bcc []string) error {
 	msg := &mail.Message{
 		Sender:   "noreply - Navitass Fitness <navitas-fitness-aarhus@appspot.gserviceaccount.com>",
-		To:       []string{sendTo},
-		Subject:  "Your membership to Navitas-Fitness is about to expire - " + user.Email,
+		To:       []string{user.Email},
+		Bcc:      bcc,
+		Subject:  "Your membership to Navitas-Fitness is about to expire",
 		HTMLBody: fmt.Sprintf(subscriptionExpiredEmailBodyTbl, ExpirationWarningOffsetDays, user.AccessId),
 	}
 
