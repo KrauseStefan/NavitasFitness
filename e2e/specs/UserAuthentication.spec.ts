@@ -37,7 +37,7 @@ describe('User Autentication', () => {
     if (isDisplayed) {
       await NavigationPageObject.menuLogout.click();
     } else {
-      await browser.actions().sendKeys(protractor.Key.ESCAPE).perform();
+      await NavigationPageObject.menuLogin.sendKeys(protractor.Key.ESCAPE);
     }
   });
 

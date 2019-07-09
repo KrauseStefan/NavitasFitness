@@ -65,7 +65,7 @@ export const config: Config = {
     browserName: 'chrome',
     maxInstances: 5,
     shardTestFiles: cmdOpts.parallel,
-    chromeOptions: { args: ['--headless', '--disable-gpu', '--window-size=1920,1080'] },
+    chromeOptions: { args: ['--headless', '--window-size=1920,1080'] },
     // }, {
     // browserName: 'edge',
     // maxInstances: 1,
