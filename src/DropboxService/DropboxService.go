@@ -7,7 +7,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
 
 	"AccessIdValidator"
 	"AppEngineHelper"
@@ -65,8 +64,6 @@ func getRedirectUri(r *http.Request) string {
 }
 
 func authorizeWithDropboxHandler(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	log.Errorf(appengine.NewContext(r), "I was here!!")
-
 	conf, err := ConfigurationReader.GetConfiguration()
 	if err != nil {
 		return nil, err

@@ -1,7 +1,6 @@
 #application: navitas-fitness-aarhus #navitas-fitness
 #version: 1
-runtime: go
-api_version: go1
+runtime: go111
 
 instance_class: F1
 
@@ -13,26 +12,17 @@ automatic_scaling:
   max_concurrent_requests: 50
 
 handlers:
-- url: /rest/.*
-  script: _go_app
+- url: /rest/.+
+  script: auto
 
 - url: /(.*\.(js|html|css|gif|png|jpg|map|json|ico|woff))$
   static_files: webapp/\1
   upload: webapp/.*\.(js|html|css|gif|png|jpg|json|ico|woff)$
 
-- url: /.*
+- url: /[\w|-]*/*
   static_files: webapp/index.html
   upload: webapp/index.html
 
-skip_files:
-- ^(.*/)?.*/node_modules/.*$
-- ^(.*/)?.*/.git/.*$
-- ^(.*/)?.*/.vscode/.*$
-
-- ^\websrc/.*$
-- ^\.idea/.*$
-- ^\.vscode/.*$
-- ^.*.gitignore$
 
 #F{1-4} auto        Free 28 instance hours
 #B{1-4} man/Basic   Free  8 instance hours

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"AccessIdOverride"
-	"SubscribtionExpiration"
 	"errors"
 	"math/rand"
 	"net/http"
@@ -11,13 +9,16 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"google.golang.org/appengine"
 	"gopkg.in/validator.v2"
 
+	"AccessIdOverride"
 	"Auth"
 	"DropboxService"
 	"Export/csv"
 	"IPN"
 	"MainPage"
+	"SubscribtionExpiration"
 	"User"
 )
 
@@ -63,3 +64,7 @@ func init() {
 //	//	w.WriteHeader(http.StatusFound)
 //	fmt.Fprint(w, "Hello, world!")
 //}
+
+func main() {
+	appengine.Main()
+}

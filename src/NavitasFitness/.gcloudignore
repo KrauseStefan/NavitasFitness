@@ -1,0 +1,8 @@
+node_modules/
+.git/
+.vscode/
+
+websrc/.*
+.idea/.*
+.vscode/.*
+.gitignore
