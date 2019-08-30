@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+. ./configure-gopath.sh
 cd $root
 cp "$root/../NavitasFitnessConfig.Json" "$root/src/NavitasFitness/config.json"
-
-export GOPATH="$GOPATH:$root"
 
 cd $root/websrc
 npm install
