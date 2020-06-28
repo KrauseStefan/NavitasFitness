@@ -167,6 +167,21 @@ func (t *TransactionMsgDTO) GetPaymentStatus() string {
 }
 
 func (t *TransactionMsgDTO) GetPaymentDate() time.Time {
+	paymentDate := t.dsDto.PaymentDate
+
+	if paymentDate == (time.Time{}) {
+		paymentDate = t.getIpnPaymentDate()
+	}
+
+	locCET, err := time.LoadLocation("CET")
+	if err != nil {
+		panic(err)
+	}
+
+	return paymentDate.In(locCET)
+}
+
+func (t *TransactionMsgDTO) getIpnPaymentDate() time.Time {
 	const layout = "15:04:05 Jan 02, 2006 MST"
 	fieldValue := t.parseMessage().Get(FIELD_PAYMENT_DATE)
 	splitPoint := strings.LastIndex(fieldValue, " ") + 1
@@ -178,12 +193,7 @@ func (t *TransactionMsgDTO) GetPaymentDate() time.Time {
 	}
 
 	paymentDate, _ := time.ParseInLocation(layout, fieldValue, loc)
-	locCET, err := time.LoadLocation("CET")
-	if err != nil {
-		panic(err)
-	}
-
-	return paymentDate.In(locCET)
+	return paymentDate
 }
 
 func (t *TransactionMsgDTO) GetAmount() float64 {
