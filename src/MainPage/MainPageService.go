@@ -12,8 +12,8 @@ import (
 	"google.golang.org/appengine/datastore"
 
 	"AppEngineHelper"
-	"User/Dao"
-	"User/Service"
+	UserDao "User/Dao"
+	UserService "User/Service"
 )
 
 type MainPageEntry struct {

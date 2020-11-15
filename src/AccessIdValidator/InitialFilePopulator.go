@@ -4,9 +4,10 @@ import (
 	"DAOHelper"
 	"Dropbox"
 	"bytes"
-	"golang.org/x/net/context"
-	"google.golang.org/appengine/log"
+	log "logger"
 	"net/http"
+
+	"golang.org/x/net/context"
 )
 
 func PushMissingSampleData(ctx context.Context, accessToken string) {

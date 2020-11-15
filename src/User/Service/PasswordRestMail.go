@@ -1,14 +1,13 @@
 package UserService
 
 import (
+	UserDao "User/Dao"
 	"fmt"
 	"net/url"
 
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/mail"
-
-	"User/Dao"
 )
 
 const KeyFieldName = "passwordResetKey"

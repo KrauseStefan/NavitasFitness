@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	log "logger"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -13,13 +14,12 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/taskqueue"
 	"google.golang.org/appengine/urlfetch"
 
 	"Export/csv"
-	"IPN/Transaction"
-	"User/Dao"
+	TransactionDao "IPN/Transaction"
+	UserDao "User/Dao"
 )
 
 var (

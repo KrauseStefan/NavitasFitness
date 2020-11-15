@@ -1,10 +1,11 @@
 package AccessIdValidator
 
 import (
+	log "logger"
+
 	"golang.org/x/net/context"
 
 	"SystemSettingDAO"
-	"google.golang.org/appengine/log"
 )
 
 const (

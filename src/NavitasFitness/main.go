@@ -17,9 +17,9 @@ import (
 	"DropboxService"
 	"Export/csv"
 	"IPN"
-	"MainPage"
-	"SubscribtionExpiration"
-	"User"
+	MainPageService "MainPage"
+	subscriptionExpiration "SubscribtionExpiration"
+	UserRest "User"
 )
 
 const emailRegStr = `^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$`

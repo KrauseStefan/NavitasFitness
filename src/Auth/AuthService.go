@@ -1,6 +1,8 @@
 package Auth
 
 import (
+	log "logger"
+
 	"github.com/gorilla/mux"
 
 	"crypto/rand"
@@ -10,10 +12,10 @@ import (
 	"net/http"
 
 	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
 
 	"AppEngineHelper"
-	"User/Dao"
+	UserDao "User/Dao"
+
 	"google.golang.org/appengine/datastore"
 )
 

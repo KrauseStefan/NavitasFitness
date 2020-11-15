@@ -1,12 +1,12 @@
 package DAOHelper
 
 import (
+	log "logger"
 	"net/http"
 	"strings"
 
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
 )
 
 type HttpError interface {

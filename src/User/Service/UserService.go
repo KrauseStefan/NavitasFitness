@@ -12,12 +12,12 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
 
 	"Auth"
 	"DAOHelper"
-	"IPN/Transaction"
-	"User/Dao"
+	TransactionDao "IPN/Transaction"
+	UserDao "User/Dao"
+	log "logger"
 )
 
 var (

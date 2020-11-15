@@ -1,10 +1,11 @@
 package csv
 
 import (
-	"AccessIdOverride/dao"
+	AccessIdOverrideDao "AccessIdOverride/dao"
 	"bytes"
 	"errors"
 	"io"
+	log "logger"
 	"net/http"
 	"time"
 
@@ -13,13 +14,12 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
 
 	"AccessIdValidator"
 	"Dropbox"
-	"IPN/Transaction"
-	"User/Dao"
-	"User/Service"
+	TransactionDao "IPN/Transaction"
+	UserDao "User/Dao"
+	UserService "User/Service"
 	"constants"
 	"strings"
 )

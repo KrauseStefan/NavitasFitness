@@ -3,10 +3,10 @@ package AccessIdValidator
 import (
 	"bytes"
 	"io/ioutil"
+	log "logger"
 	"time"
 
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/log"
 
 	"Dropbox"
 )

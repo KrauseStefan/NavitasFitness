@@ -10,16 +10,16 @@ import (
 	"strings"
 	"time"
 
-	"IPN/Transaction"
-	"User/Dao"
-	"User/Service"
+	TransactionDao "IPN/Transaction"
+	UserDao "User/Dao"
+	UserService "User/Service"
 	"constants"
+	log "logger"
 
 	"github.com/gorilla/mux"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/mail"
 )
 

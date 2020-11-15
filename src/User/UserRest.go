@@ -2,19 +2,19 @@ package UserRest
 
 import (
 	"encoding/json"
+	log "logger"
 	"net/http"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
-	"google.golang.org/appengine/log"
 
 	"github.com/gorilla/mux"
 
 	"AccessIdValidator"
 	"AppEngineHelper"
 	"Auth"
-	"User/Dao"
-	"User/Service"
+	UserDao "User/Dao"
+	UserService "User/Service"
 )
 
 const emailKey = "email"
