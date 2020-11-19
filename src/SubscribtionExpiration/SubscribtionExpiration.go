@@ -3,6 +3,7 @@ package subscriptionExpiration
 import (
 	"AppEngineHelper"
 	"DAOHelper"
+	"NavitasFitness/mail"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -18,7 +19,6 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"google.golang.org/appengine/mail"
 	"cloud.google.com/go/datastore"
 )
 
@@ -155,11 +155,11 @@ Navitas-Fitness
 
 func sendEmail(ctx context.Context, user *UserDao.UserDTO, bcc []string) error {
 	msg := &mail.Message{
-		Sender:   "noreply - Navitass Fitness <navitas-fitness-aarhus@appspot.gserviceaccount.com>",
-		To:       []string{user.Email},
+		To:       user,
 		Bcc:      bcc,
 		Subject:  "Your membership to Navitas-Fitness is about to expire",
 		HTMLBody: fmt.Sprintf(subscriptionExpiredEmailBodyTbl, ExpirationWarningOffsetDays, user.AccessId),
+		CustomID: "SupscriptionAboutToExpire",
 	}
 
 	err := mail.Send(ctx, msg)

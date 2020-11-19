@@ -5,8 +5,8 @@ import (
 	"net/url"
 
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/mail"
 
+	"NavitasFitness/mail"
 	UserDao "User/Dao"
 	log "logger"
 )
@@ -29,15 +29,15 @@ func SendConfirmationMail(ctx context.Context, user *UserDao.UserDTO) error {
 
 	log.Infof(ctx, "Password Reset URL: "+confirmationUrl)
 	msg := &mail.Message{
-		Sender:  "Navitass Fitness <navitas-fitness-aarhus@appspot.gserviceaccount.com>",
-		To:      []string{user.Email},
-		Subject: "Confirm your registration",
-		Body:    fmt.Sprintf(confirmMessage, confirmationUrl),
+		To:       user,
+		Subject:  "Confirm your registration",
+		Body:     fmt.Sprintf(confirmMessage, confirmationUrl),
+		CustomID: "ConfirmYourRegistration",
 	}
 
 	if err := mail.Send(ctx, msg); err != nil {
 		return err
 	}
-	log.Debugf(ctx, "Data: %+v\n", res)
+
 	return nil
 }

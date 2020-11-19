@@ -1,11 +1,11 @@
 package UserService
 
 import (
+	"NavitasFitness/mail"
 	"fmt"
 	"net/url"
 
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/mail"
 
 	UserDao "User/Dao"
 	log "logger"
@@ -35,15 +35,11 @@ func SendPasswordResetMail(ctx context.Context, user *UserDao.UserDTO, secret st
 
 	log.Infof(ctx, "Password Reset URL: "+passwordResetUrl)
 	msg := &mail.Message{
-		Sender:  "noreply - Navitass Fitness <navitas-fitness-aarhus@appspot.gserviceaccount.com>",
-		To:      []string{user.Email},
-		Subject: "Password Reset Request",
-		Body:    fmt.Sprintf(passwordResetMessageTpl, passwordResetUrl),
+		To:       user,
+		Subject:  "Password Reset Request",
+		Body:     fmt.Sprintf(passwordResetMessageTpl, passwordResetUrl),
+		CustomID: "PasswordResetRequest",
 	}
 
-	if err := mail.Send(ctx, msg); err != nil {
-		return err
-	}
-	log.Debugf(ctx, "Data: %+v\n", res)
-	return nil
+	return mail.Send(ctx, msg)
 }
