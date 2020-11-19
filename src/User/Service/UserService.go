@@ -9,13 +9,13 @@ import (
 	"net/http"
 	"time"
 
+	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/datastore"
 
 	"Auth"
 	"DAOHelper"
 	TransactionDao "IPN/Transaction"
+	nf_datastore "NavitasFitness/datastore"
 	UserDao "User/Dao"
 	log "logger"
 )
@@ -39,7 +39,7 @@ func AsAdmin(f CustomHttpHandler) func(http.ResponseWriter, *http.Request) {
 
 func AsUser(f CustomHttpHandler) func(http.ResponseWriter, *http.Request) {
 	return AppEngineHelper.HandlerW(func(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-		ctx := appengine.NewContext(r)
+		ctx := r.Context()
 
 		user, err := getUserFromSession(ctx, r)
 		if err != nil {
@@ -140,19 +140,24 @@ func newTransactionMsgClientDTO(source *TransactionDao.TransactionMsgDTO) *Trans
 }
 
 func MarkUserVerified(ctx context.Context, encodedKey string) error {
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return err
+	}
+
 	key, err := datastore.DecodeKey(encodedKey)
 	if err != nil {
 		return err
 	}
 
 	userDto := &UserDao.UserDTO{}
-	if err := datastore.Get(ctx, key, userDto); err != nil {
+	if err := dsClient.Get(ctx, key, userDto); err != nil {
 		return err
 	}
 
 	userDto.Verified = true
 
-	if _, err := datastore.Put(ctx, key, userDto); err != nil {
+	if _, err := dsClient.Put(ctx, key, userDto); err != nil {
 		return err
 	}
 
@@ -214,6 +219,11 @@ func ResetUserPassword(ctx context.Context, respBody io.ReadCloser) error {
 	user := &UserDao.UserDTO{}
 	maxAge := time.Now().Add(time.Minute * -30)
 
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return err
+	}
+
 	decoder := json.NewDecoder(respBody)
 	if err := decoder.Decode(dto); err != nil {
 		return resetInputInvalidError
@@ -224,7 +234,7 @@ func ResetUserPassword(ctx context.Context, respBody io.ReadCloser) error {
 		return resetInputInvalidError
 	}
 
-	if err := datastore.Get(ctx, key, user); err != nil {
+	if err := dsClient.Get(ctx, key, user); err != nil {
 		return resetInputInvalidError
 	}
 
@@ -244,7 +254,7 @@ func ResetUserPassword(ctx context.Context, respBody io.ReadCloser) error {
 	user.PasswordResetTime = time.Time{}
 	user.PasswordResetSecret = ""
 
-	if _, err := datastore.Put(ctx, key, user); err != nil {
+	if _, err := dsClient.Put(ctx, key, user); err != nil {
 		return err
 	}
 

@@ -4,8 +4,10 @@ import (
 	"errors"
 	"time"
 
+	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/datastore"
+
+	nf_datastore "NavitasFitness/datastore"
 )
 
 type DefaultTransactionDao struct{}
@@ -21,13 +23,17 @@ var (
 )
 
 func (t *DefaultTransactionDao) UpdateIpnMessage(ctx context.Context, ipnTxn *TransactionMsgDTO) error {
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return err
+	}
 
 	key := ipnTxn.GetKey()
 
 	// Make sure indexed fields are updated
 	ipnTxn.parseMessage()
 
-	if _, err := datastore.Put(ctx, key, ipnTxn.dsDto); err != nil {
+	if _, err := dsClient.Put(ctx, key, ipnTxn.dsDto); err != nil {
 		return err
 	}
 
@@ -35,6 +41,10 @@ func (t *DefaultTransactionDao) UpdateIpnMessage(ctx context.Context, ipnTxn *Tr
 }
 
 func (t *DefaultTransactionDao) PersistNewIpnMessage(ctx context.Context, ipnTxn *TransactionMsgDTO, userKey *datastore.Key) error {
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return err
+	}
 
 	var newKey *datastore.Key
 
@@ -43,15 +53,15 @@ func (t *DefaultTransactionDao) PersistNewIpnMessage(ctx context.Context, ipnTxn
 	}
 
 	if userKey == nil {
-		newKey = datastore.NewIncompleteKey(ctx, TXN_KIND, txnCollectionParentKey(ctx))
+		newKey = datastore.IncompleteKey(TXN_KIND, txnCollectionParentKey)
 	} else {
-		newKey = datastore.NewIncompleteKey(ctx, TXN_KIND, userKey)
+		newKey = datastore.IncompleteKey(TXN_KIND, userKey)
 	}
 
 	//Make sure indexed fields are updated
 	ipnTxn.parseMessage()
 	ipnTxn.key = newKey
-	if _, err := datastore.Put(ctx, newKey, ipnTxn.dsDto); err != nil {
+	if _, err := dsClient.Put(ctx, newKey, ipnTxn.dsDto); err != nil {
 		return err
 	}
 
@@ -59,12 +69,17 @@ func (t *DefaultTransactionDao) PersistNewIpnMessage(ctx context.Context, ipnTxn
 }
 
 func (t *DefaultTransactionDao) GetTransaction(ctx context.Context, txnId string) (*TransactionMsgDTO, error) {
-	q := datastore.NewQuery(TXN_KIND).
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return nil, err
+	}
+
+	query := datastore.NewQuery(TXN_KIND).
 		Filter("TxnId=", txnId).
 		Limit(1)
 
 	var txnDtoList []*transactionMsgDsDTO
-	keys, err := q.GetAll(ctx, &txnDtoList)
+	keys, err := dsClient.GetAll(ctx, query, &txnDtoList)
 	if err != nil {
 		return nil, err
 	}
@@ -77,13 +92,17 @@ func (t *DefaultTransactionDao) GetTransaction(ctx context.Context, txnId string
 }
 
 func (t *DefaultTransactionDao) GetTransactionsByUser(ctx context.Context, parentUserKey *datastore.Key) (TransactionList, error) {
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return nil, err
+	}
 
-	q := datastore.NewQuery(TXN_KIND).
+	query := datastore.NewQuery(TXN_KIND).
 		Ancestor(parentUserKey).
 		Order("PaymentDate")
 
 	var txnDsDtoList []*transactionMsgDsDTO
-	keys, err := q.GetAll(ctx, &txnDsDtoList)
+	keys, err := dsClient.GetAll(ctx, query, &txnDsDtoList)
 	if err != nil {
 		return nil, err
 	}
@@ -92,11 +111,16 @@ func (t *DefaultTransactionDao) GetTransactionsByUser(ctx context.Context, paren
 }
 
 func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx context.Context, date time.Time) (TransactionList, error) {
-	q := datastore.NewQuery(TXN_KIND).
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return nil, err
+	}
+
+	query := datastore.NewQuery(TXN_KIND).
 		Filter("PaymentDate>=", date)
 
 	var txnDsDtoList []*transactionMsgDsDTO
-	keys, err := q.GetAll(ctx, &txnDsDtoList)
+	keys, err := dsClient.GetAll(ctx, query, &txnDsDtoList)
 	if err != nil {
 		return nil, err
 	}
@@ -105,12 +129,17 @@ func (t *DefaultTransactionDao) GetCurrentTransactionsAfter(ctx context.Context,
 }
 
 func GetTransactionsPayedBetween(ctx context.Context, start time.Time, end time.Time) (TransactionList, error) {
-	q := datastore.NewQuery(TXN_KIND).
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return nil, err
+	}
+
+	query := datastore.NewQuery(TXN_KIND).
 		Filter("PaymentDate>=", start).
 		Filter("PaymentDate<=", end)
 
 	var txns []*transactionMsgDsDTO
-	keys, err := q.GetAll(ctx, &txns)
+	keys, err := dsClient.GetAll(ctx, query, &txns)
 	if err != nil {
 		return nil, err
 	}
@@ -128,6 +157,11 @@ func SetExpirationWarningGiven(ctx context.Context, txns TransactionList, value 
 }
 
 func putMulti(ctx context.Context, txns TransactionList) ([]*datastore.Key, error) {
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return nil, err
+	}
+
 	txnKeys, dsTxns := txns.getDatastoreKeyAndDtos()
-	return datastore.PutMulti(ctx, txnKeys, dsTxns)
+	return dsClient.PutMulti(ctx, txnKeys, dsTxns)
 }

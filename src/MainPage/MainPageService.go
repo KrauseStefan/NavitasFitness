@@ -8,10 +8,10 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/datastore"
+	"cloud.google.com/go/datastore"
 
 	"AppEngineHelper"
+	nf_datastore "NavitasFitness/datastore"
 	UserDao "User/Dao"
 	UserService "User/Service"
 )
@@ -30,8 +30,7 @@ func (mainPage MainPageEntry) hasId() bool {
 const MAIN_PAGE_KIND = "mainPage"
 const MAIN_PAGE_PARENT_STRING_ID = "default_main_page_entry"
 
-var mainPageCollectionParentKey = AppEngineHelper.CollectionParentKeyGetFnGenerator(MAIN_PAGE_KIND, MAIN_PAGE_PARENT_STRING_ID, 0)
-var mainPageIntIDToKeyInt64 = AppEngineHelper.IntIDToKeyInt64(MAIN_PAGE_KIND, mainPageCollectionParentKey)
+var mainPageCollectionParentKey = datastore.NameKey(MAIN_PAGE_KIND, MAIN_PAGE_PARENT_STRING_ID, nil)
 
 func IntegrateRoutes(router *mux.Router) {
 	path := "/rest/mainPage"
@@ -50,18 +49,24 @@ func IntegrateRoutes(router *mux.Router) {
 }
 
 func getMainPage(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	ctx := appengine.NewContext(r)
-	q := datastore.NewQuery(MAIN_PAGE_KIND).Ancestor(mainPageCollectionParentKey(ctx))
+	ctx := r.Context()
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return nil, err
+	}
+
+	query := datastore.NewQuery(MAIN_PAGE_KIND).
+		Ancestor(mainPageCollectionParentKey)
 
 	frontPageEntries := make([]MainPageEntry, 0, 1)
 
-	keys, err := q.GetAll(ctx, &frontPageEntries)
+	keys, err := dsClient.GetAll(ctx, query, &frontPageEntries)
 	if err != nil {
 		return nil, err
 	}
 
 	for i, key := range keys {
-		frontPageEntries[i].Key = strconv.FormatInt(key.IntID(), 10)
+		frontPageEntries[i].Key = strconv.FormatInt(key.ID, 10)
 	}
 
 	if len(keys) == 0 {
@@ -72,7 +77,7 @@ func getMainPage(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 }
 
 func updateMainPage(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 	var mainPage MainPageEntry
 	var key *datastore.Key
 
@@ -83,13 +88,18 @@ func updateMainPage(w http.ResponseWriter, r *http.Request, user *UserDao.UserDT
 	}
 
 	if mainPage.hasId() {
-		key = mainPageIntIDToKeyInt64(ctx, mainPage.Key)
+		intId, _ := strconv.ParseInt(mainPage.Key, 10, 64)
+		key = datastore.IDKey(MAIN_PAGE_KIND, intId, mainPageCollectionParentKey)
 	} else {
-		key = datastore.NewIncompleteKey(ctx, MAIN_PAGE_KIND, mainPageCollectionParentKey(ctx))
+		key = datastore.IncompleteKey(MAIN_PAGE_KIND, mainPageCollectionParentKey)
 	}
 	mainPage.Date = time.Now()
 	mainPage.LastEditedBy = user.Email
 
-	key, err = datastore.Put(ctx, key, &mainPage)
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return nil, err
+	}
+	key, err = dsClient.Put(ctx, key, &mainPage)
 	return mainPage, err
 }

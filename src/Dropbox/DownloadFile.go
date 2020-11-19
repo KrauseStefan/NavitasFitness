@@ -8,9 +8,9 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"DAOHelper"
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/urlfetch"
+
+	"DAOHelper"
 )
 
 const serviceUrl = "https://content.dropboxapi.com/2/files/download"
@@ -55,8 +55,6 @@ func DownloadFile(ctx context.Context, accessToken string, fileUrl string) (io.R
 		return nil, nil, errors.New("Invalid arguments for downloading file")
 	}
 
-	client := urlfetch.Client(ctx)
-
 	req, err := http.NewRequest("POST", serviceUrl, nil)
 	if err != nil {
 		return nil, nil, err
@@ -70,7 +68,7 @@ func DownloadFile(ctx context.Context, accessToken string, fileUrl string) (io.R
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 	req.Header.Set("Dropbox-API-Arg", string(js))
 
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, nil, err
 	}

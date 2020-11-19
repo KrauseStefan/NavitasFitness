@@ -11,9 +11,9 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
-	"google.golang.org/appengine/datastore"
 
 	"AccessIdValidator"
 	"Dropbox"
@@ -349,7 +349,7 @@ func createCsvFile(ctx context.Context, w io.Writer, newTxn *TransactionDao.Tran
 }
 
 func downloadCsvHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 	var buffer bytes.Buffer
 	var err error
 
@@ -368,7 +368,7 @@ func downloadCsvHandler(w http.ResponseWriter, r *http.Request, user *UserDao.Us
 }
 
 func exportCsvHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	err := CreateAndUploadFile(ctx, nil)
 	return nil, err

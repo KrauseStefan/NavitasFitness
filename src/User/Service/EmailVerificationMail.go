@@ -1,13 +1,14 @@
 package UserService
 
 import (
-	UserDao "User/Dao"
 	"fmt"
 	"net/url"
 
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/mail"
+
+	UserDao "User/Dao"
+	log "logger"
 )
 
 const confirmMessage = `
@@ -26,7 +27,7 @@ func createConfirmationURL(key string) string {
 func SendConfirmationMail(ctx context.Context, user *UserDao.UserDTO) error {
 	confirmationUrl := createConfirmationURL(user.Key.Encode())
 
-	log.Infof(ctx, "Confirmatin URL: "+confirmationUrl)
+	log.Infof(ctx, "Password Reset URL: "+confirmationUrl)
 	msg := &mail.Message{
 		Sender:  "Navitass Fitness <navitas-fitness-aarhus@appspot.gserviceaccount.com>",
 		To:      []string{user.Email},
@@ -37,6 +38,6 @@ func SendConfirmationMail(ctx context.Context, user *UserDao.UserDTO) error {
 	if err := mail.Send(ctx, msg); err != nil {
 		return err
 	}
-
+	log.Debugf(ctx, "Data: %+v\n", res)
 	return nil
 }

@@ -1,7 +1,7 @@
 package csv
 
 import (
-	"AccessIdOverride/dao"
+	AccessIdOverrideDao "AccessIdOverride/dao"
 	"bytes"
 	"context"
 	"errors"
@@ -11,14 +11,13 @@ import (
 	"testing"
 	"time"
 
-	"google.golang.org/appengine/datastore"
-
-	"IPN/Transaction"
-	"User/Dao"
+	"cloud.google.com/go/datastore"
 
 	"AccessIdValidator/AccessIdValidatorTestHelper"
+	TransactionDao "IPN/Transaction"
 	"IPN/Transaction/TransactionDaoTestHelper"
 	"TestHelper"
+	UserDao "User/Dao"
 	"User/Dao/UserDaoTestHelper"
 )
 
@@ -101,7 +100,7 @@ func createMessagesWithEmail(dates []time.Time, userKeys []*datastore.Key, email
 	const layout = "15:04:05 Jan 02, 2006 MST"
 	messages := make(TransactionDao.TransactionList, 0, 5)
 	for i, date := range dates {
-		txnKey := datastore.NewKey(ctx, "txn", "", int64(i)+1, userKeys[i])
+		txnKey := datastore.IDKey("txn", int64(i)+1, userKeys[i])
 		dateStr := date.In(utc).Format(layout)
 		dateIpnMsg := TransactionDao.FIELD_PAYMENT_DATE + "=" + dateStr
 		receiverEmail := TransactionDao.FIELD_RECEIVER_EMAIL + "=" + email
@@ -116,7 +115,7 @@ func createUsers(accessIds []string) ([]*datastore.Key, []*UserDao.UserDTO) {
 	keys := make([]*datastore.Key, 0, 6)
 	users := make([]*UserDao.UserDTO, 0, 5)
 	for i, accessId := range accessIds {
-		userKey := datastore.NewKey(ctx, "user", "", int64(i)+1, nil)
+		userKey := datastore.IDKey("user", int64(i)+1, nil)
 		users = append(users, &UserDao.UserDTO{AccessId: accessId, Key: userKey})
 		keys = append(keys, userKey)
 	}

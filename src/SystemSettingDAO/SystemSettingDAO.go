@@ -1,13 +1,12 @@
 package SystemSettingDAO
 
 import (
-	log "logger"
-
 	"golang.org/x/net/context"
 
-	"google.golang.org/appengine/datastore"
+	"cloud.google.com/go/datastore"
 
-	"AppEngineHelper"
+	nf_datastore "NavitasFitness/datastore"
+	log "logger"
 )
 
 const (
@@ -15,10 +14,7 @@ const (
 	SETTING_PARENT_STRING_ID = "default_setting"
 )
 
-var (
-	settingCollectionParentKey = AppEngineHelper.CollectionParentKeyGetFnGenerator(SETTING_KIND, SETTING_PARENT_STRING_ID, 0)
-	settingIntIDToKeyInt64     = AppEngineHelper.IntIDToKeyInt64(SETTING_KIND, settingCollectionParentKey)
-)
+var settingCollectionParentKey = datastore.NameKey(SETTING_KIND, SETTING_PARENT_STRING_ID, nil)
 
 type systemSetting struct {
 	Key   string
@@ -32,9 +28,14 @@ func PersistSetting(ctx context.Context, key string, value string) error {
 		return err
 	}
 
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return err
+	}
+
 	if value == "" {
 		if dsKey != nil {
-			datastore.Delete(ctx, dsKey)
+			dsClient.Delete(ctx, dsKey)
 		}
 		return nil
 	}
@@ -44,10 +45,10 @@ func PersistSetting(ctx context.Context, key string, value string) error {
 	}
 
 	if dsKey == nil {
-		dsKey = datastore.NewIncompleteKey(ctx, SETTING_KIND, settingCollectionParentKey(ctx))
+		dsKey = datastore.IncompleteKey(SETTING_KIND, settingCollectionParentKey)
 	}
 
-	_, err = datastore.Put(ctx, dsKey, &systemSetting{Key: key, Value: value})
+	_, err = dsClient.Put(ctx, dsKey, &systemSetting{Key: key, Value: value})
 	if err != nil {
 		return err
 	}
@@ -59,13 +60,18 @@ func PersistSetting(ctx context.Context, key string, value string) error {
 func GetSetting(ctx context.Context, key string) (*datastore.Key, string, error) {
 	log.Debugf(ctx, "GetSetting with key: %s", key)
 
-	settings := make([]systemSetting, 0, 1)
-	keys, err := datastore.NewQuery(SETTING_KIND).
-		Ancestor(settingCollectionParentKey(ctx)).
-		Filter("Key = ", key).
-		Limit(1).
-		GetAll(ctx, &settings)
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return nil, "", err
+	}
 
+	settings := make([]systemSetting, 0, 1)
+	query := datastore.NewQuery(SETTING_KIND).
+		Ancestor(settingCollectionParentKey).
+		Filter("Key = ", key).
+		Limit(1)
+
+	keys, err := dsClient.GetAll(ctx, query, &settings)
 	if err != nil {
 		return nil, "", err
 	}

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"google.golang.org/appengine/datastore"
+	"cloud.google.com/go/datastore"
 
 	"AppEngineHelper"
 	"constants"
@@ -20,8 +20,7 @@ const (
 )
 
 var (
-	txnCollectionParentKey = AppEngineHelper.CollectionParentKeyGetFnGenerator(TXN_KIND, TXN_PARENT_STRING_ID, 0)
-	txnIntIDToKeyInt64     = AppEngineHelper.IntIDToKeyInt64(TXN_KIND, txnCollectionParentKey)
+	txnCollectionParentKey = datastore.NameKey(TXN_KIND, TXN_PARENT_STRING_ID, nil)
 )
 
 func NewTransactionMsgDTOFromIpn(ipnMessage string) *TransactionMsgDTO {
@@ -121,7 +120,7 @@ func (t *TransactionMsgDTO) GetKey() *datastore.Key {
 }
 
 func (t *TransactionMsgDTO) GetUser() *datastore.Key {
-	return t.key.Parent()
+	return t.key.Parent
 }
 
 func (t *TransactionMsgDTO) GetTxnId() string {

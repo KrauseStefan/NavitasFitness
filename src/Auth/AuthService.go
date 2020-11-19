@@ -11,12 +11,10 @@ import (
 	"errors"
 	"net/http"
 
-	"google.golang.org/appengine"
-
 	"AppEngineHelper"
 	UserDao "User/Dao"
 
-	"google.golang.org/appengine/datastore"
+	"cloud.google.com/go/datastore"
 )
 
 var userDAO = UserDao.GetInstance()
@@ -111,7 +109,7 @@ func setSessionCookie(w http.ResponseWriter, sessionData *SessionData) error {
 }
 
 func doLogout(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	sessionData, err := GetSessionData(r)
 	if err != nil {
@@ -141,7 +139,7 @@ func doLogout(w http.ResponseWriter, r *http.Request) {
 }
 
 func doLogin(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	loginRequestUser := new(UserLogin)
 
@@ -233,7 +231,7 @@ func GetSessionData(r *http.Request) (SessionData, error) {
 	}
 
 	if s.Decode(sessionCookieName, cookie.Value, &sessionData); err != nil {
-		ctx := appengine.NewContext(r)
+		ctx := r.Context()
 		log.Errorf(ctx, "Coockie decode error: "+err.Error())
 		return *sessionData, nil
 	}

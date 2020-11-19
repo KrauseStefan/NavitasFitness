@@ -2,12 +2,13 @@ package UserDao
 
 import (
 	"errors"
+	"strconv"
 
+	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/datastore"
 
-	"AppEngineHelper"
 	"DAOHelper"
+	nf_datastore "NavitasFitness/datastore"
 )
 
 type DefaultUserDAO struct{}
@@ -40,23 +41,28 @@ var (
 )
 
 var (
-	userCollectionParentKey = AppEngineHelper.CollectionParentKeyGetFnGenerator(USER_KIND, USER_PARENT_STRING_ID, 0)
-	userIntIDToKeyInt64     = AppEngineHelper.IntIDToKeyInt64(USER_KIND, userCollectionParentKey)
+	userCollectionParentKey = datastore.NameKey(USER_KIND, USER_PARENT_STRING_ID, nil)
 )
 
 func (u *DefaultUserDAO) StringToKey(ctx context.Context, key string) *datastore.Key {
-	return userIntIDToKeyInt64(ctx, key)
+	intId, _ := strconv.ParseInt(key, 10, 64)
+	return datastore.IDKey(USER_KIND, intId, userCollectionParentKey)
 }
 
 func (u *DefaultUserDAO) GetByEmail(ctx context.Context, email string) (*UserDTO, error) {
-	q := datastore.NewQuery(USER_KIND).
-		Ancestor(userCollectionParentKey(ctx)).
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return nil, err
+	}
+
+	query := datastore.NewQuery(USER_KIND).
+		Ancestor(userCollectionParentKey).
 		Filter("Email=", email).
 		Limit(1)
 
 	userDtoList := make([]UserDTO, 0, 1)
 
-	keys, err := q.GetAll(ctx, &userDtoList)
+	keys, err := dsClient.GetAll(ctx, query, &userDtoList)
 	if err != nil {
 		return nil, err
 	}
@@ -71,14 +77,19 @@ func (u *DefaultUserDAO) GetByEmail(ctx context.Context, email string) (*UserDTO
 }
 
 func (u *DefaultUserDAO) GetByAccessId(ctx context.Context, accessId string) (*UserDTO, error) {
-	q := datastore.NewQuery(USER_KIND).
-		Ancestor(userCollectionParentKey(ctx)).
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return nil, err
+	}
+
+	query := datastore.NewQuery(USER_KIND).
+		Ancestor(userCollectionParentKey).
 		Filter("AccessId=", accessId).
 		Limit(1)
 
 	userDtoList := make([]UserDTO, 0, 1)
 
-	keys, err := q.GetAll(ctx, &userDtoList)
+	keys, err := dsClient.GetAll(ctx, query, &userDtoList)
 	if err != nil {
 		return nil, err
 	}
@@ -93,11 +104,16 @@ func (u *DefaultUserDAO) GetByAccessId(ctx context.Context, accessId string) (*U
 }
 
 func (u *DefaultUserDAO) GetAll(ctx context.Context) ([]*datastore.Key, UserList, error) {
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return nil, nil, err
+	}
+
 	query := datastore.NewQuery(USER_KIND).
-		Ancestor(userCollectionParentKey(ctx))
+		Ancestor(userCollectionParentKey)
 
 	users := new(UserList)
-	keys, err := query.GetAll(ctx, users)
+	keys, err := dsClient.GetAll(ctx, query, users)
 	if err != nil {
 		return keys, *users, err
 	}
@@ -106,8 +122,13 @@ func (u *DefaultUserDAO) GetAll(ctx context.Context) ([]*datastore.Key, UserList
 }
 
 func (u *DefaultUserDAO) GetByKeys(ctx context.Context, keys []*datastore.Key) (UserList, error) {
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return nil, err
+	}
+
 	users := make(UserList, len(keys))
-	err := datastore.GetMulti(ctx, keys, users)
+	err = dsClient.GetMulti(ctx, keys, users)
 
 	for i, user := range users {
 		if user != nil {
@@ -131,10 +152,14 @@ func (u *DefaultUserDAO) Create(ctx context.Context, user *UserDTO, keyHint *dat
 		// At this point it is concluded that the existing user found by the key hit is not equivalent
 	}
 
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return err
+	}
 	if user, _ := u.GetByEmail(ctx, user.Email); user != nil {
 		if user.Verified {
 			return UniqueConstraint_email
-		} else if err := datastore.Delete(ctx, user.Key); err != nil {
+		} else if err := dsClient.Delete(ctx, user.Key); err != nil {
 			return err
 		}
 	}
@@ -142,7 +167,7 @@ func (u *DefaultUserDAO) Create(ctx context.Context, user *UserDTO, keyHint *dat
 	if user, _ := u.GetByAccessId(ctx, user.AccessId); user != nil {
 		if user.Verified {
 			return UniqueConstraint_accessId
-		} else if err := datastore.Delete(ctx, user.Key); err != nil {
+		} else if err := dsClient.Delete(ctx, user.Key); err != nil {
 			return err
 		}
 	}
@@ -151,8 +176,8 @@ func (u *DefaultUserDAO) Create(ctx context.Context, user *UserDTO, keyHint *dat
 		return err
 	}
 
-	key := datastore.NewIncompleteKey(ctx, USER_KIND, userCollectionParentKey(ctx))
-	newKey, err := datastore.Put(ctx, key, user)
+	key := datastore.IncompleteKey(USER_KIND, userCollectionParentKey)
+	newKey, err := dsClient.Put(ctx, key, user)
 	if err != nil {
 		return err
 	}
@@ -163,13 +188,20 @@ func (u *DefaultUserDAO) Create(ctx context.Context, user *UserDTO, keyHint *dat
 }
 
 func (u *DefaultUserDAO) DeleteUsers(ctx context.Context, ids []*datastore.Key) error {
-	return datastore.DeleteMulti(ctx, ids)
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return err
+	}
+	return dsClient.DeleteMulti(ctx, ids)
 }
 
 func (u *DefaultUserDAO) GetByKey(ctx context.Context, key *datastore.Key) (*UserDTO, error) {
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return nil, err
+	}
 	var user = &UserDTO{}
-
-	if err := datastore.Get(ctx, key, user); err != nil {
+	if err := dsClient.Get(ctx, key, user); err != nil {
 		return nil, err
 	}
 
@@ -188,7 +220,12 @@ func (u *DefaultUserDAO) SaveUser(ctx context.Context, user *UserDTO) error {
 		}
 	}
 
-	key, err := datastore.Put(ctx, user.Key, user)
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return err
+	}
+
+	key, err := dsClient.Put(ctx, user.Key, user)
 	if err != nil {
 		return err
 	}
@@ -204,9 +241,14 @@ func (u *DefaultUserDAO) SetSessionUUID(ctx context.Context, user *UserDTO, uuid
 }
 
 func (u *DefaultUserDAO) GetUserFromSessionUUID(ctx context.Context, userKey *datastore.Key, uuid string) (*UserDTO, error) {
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return nil, err
+	}
+
 	user := &UserDTO{}
 
-	err := datastore.Get(ctx, userKey, user)
+	err = dsClient.Get(ctx, userKey, user)
 	if err == datastore.ErrNoSuchEntity {
 		err = nil
 	} else if err != nil {

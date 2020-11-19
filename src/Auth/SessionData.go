@@ -1,7 +1,7 @@
 package Auth
 
 import (
-	"google.golang.org/appengine/datastore"
+	"cloud.google.com/go/datastore"
 )
 
 type SessionData struct {

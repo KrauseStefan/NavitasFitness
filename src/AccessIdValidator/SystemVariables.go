@@ -9,12 +9,14 @@ import (
 )
 
 const (
-	defaultDropboxPrefix           = "/Test/3210 Navitas ADK - Fitness"
+	// Below prefix is the default and is used for testing,
+	// in the production environment this is overwriten to be the real path
+	defaultTestDropboxPrefix       = "/Test/3210 Navitas ADK - Fitness"
 	fitnessAccessIdsPathSettingKey = "fitnessAccessIdsPath"
-	defaultFitnessAccessIdsPath    = defaultDropboxPrefix + "/AccessIds/AccessIds.csv"
+	defaultFitnessAccessIdsPath    = defaultTestDropboxPrefix + "/AccessIds/AccessIds.csv"
 
 	fitnessAccessListPathSettingKey = "fitnessAccessListPath"
-	defaultFitnessAccessListPath    = defaultDropboxPrefix + "/FitnessAccessList/FitnessAccessList.csv"
+	defaultFitnessAccessListPath    = defaultTestDropboxPrefix + "/FitnessAccessList/FitnessAccessList.csv"
 
 	paypallValidationEmailSettingKey = "paypallValidationEmail"
 	defaultPaypallValidationEmail    = "navitasShop2@mail.dk:gpmac_1231902686_biz@paypal.com:navitasShop@mail.dk"

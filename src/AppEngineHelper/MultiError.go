@@ -1,8 +1,6 @@
 package AppEngineHelper
 
-import (
-	"google.golang.org/appengine"
-)
+import "google.golang.org/appengine"
 
 // type MultiError []error
 type MultiError struct {

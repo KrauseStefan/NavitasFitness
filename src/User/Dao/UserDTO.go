@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/net/context"
 	"gopkg.in/validator.v2"
 
-	"golang.org/x/net/context"
-	"google.golang.org/appengine/datastore"
+	"cloud.google.com/go/datastore"
 
 	"AccessIdValidator"
 )

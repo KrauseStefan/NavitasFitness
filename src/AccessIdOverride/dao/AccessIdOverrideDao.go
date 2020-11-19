@@ -1,11 +1,13 @@
 package AccessIdOverrideDao
 
 import (
-	"AppEngineHelper"
 	"context"
 	"errors"
-	"google.golang.org/appengine/datastore"
 	"time"
+
+	"cloud.google.com/go/datastore"
+
+	nf_datastore "NavitasFitness/datastore"
 )
 
 type DefaultAccessIdOverrideDao struct{}
@@ -28,17 +30,20 @@ const (
 )
 
 var (
-	accessIdOverrideCollectionParentKey = AppEngineHelper.CollectionParentKeyGetFnGenerator(ACCESS_ID_OVERRIDE_KIND, ACCESS_ID_OVERRIDE_PARENT_STRING_ID, 0)
-	accessIdOverrideIntIDToKeyInt64     = AppEngineHelper.IntIDToKeyInt64(ACCESS_ID_OVERRIDE_KIND, accessIdOverrideCollectionParentKey)
-
-	AccessIdNotFoundError = errors.New("AccessId does not exist in datastore")
+	accessIdOverrideCollectionParentKey = datastore.NameKey(ACCESS_ID_OVERRIDE_KIND, ACCESS_ID_OVERRIDE_PARENT_STRING_ID, nil)
+	AccessIdNotFoundError               = errors.New("AccessId does not exist in datastore")
 )
 
 func (dao *DefaultAccessIdOverrideDao) GetAllAccessIdOverrides(ctx context.Context) ([]*AccessIdOverride, error) {
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return nil, err
+	}
+
 	accessIdList := make([]*AccessIdOverride, 0, 1)
-	keys, err := datastore.NewQuery(ACCESS_ID_OVERRIDE_KIND).
-		Ancestor(accessIdOverrideCollectionParentKey(ctx)).
-		GetAll(ctx, &accessIdList)
+	query := datastore.NewQuery(ACCESS_ID_OVERRIDE_KIND).
+		Ancestor(accessIdOverrideCollectionParentKey)
+	keys, err := dsClient.GetAll(ctx, query, &accessIdList)
 
 	keysLen := len(keys)
 	for i, id := range accessIdList {
@@ -51,20 +56,30 @@ func (dao *DefaultAccessIdOverrideDao) GetAllAccessIdOverrides(ctx context.Conte
 }
 
 func (dao *DefaultAccessIdOverrideDao) CreateOrUpdateAccessIdOverride(ctx context.Context, accessIdOverride *AccessIdOverride) error {
-	key := datastore.NewIncompleteKey(ctx, ACCESS_ID_OVERRIDE_KIND, accessIdOverrideCollectionParentKey(ctx))
-	newKey, err := datastore.Put(ctx, key, accessIdOverride)
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return err
+	}
+
+	key := datastore.IncompleteKey(ACCESS_ID_OVERRIDE_KIND, accessIdOverrideCollectionParentKey)
+	newKey, err := dsClient.Put(ctx, key, accessIdOverride)
 
 	accessIdOverride.Key = newKey
 	return err
 }
 
 func (dao *DefaultAccessIdOverrideDao) DeleteAccessIdOverride(ctx context.Context, accessId string) error {
+	dsClient, err := nf_datastore.GetDsClient()
+	if err != nil {
+		return err
+	}
+
 	accessIdList := make([]AccessIdOverride, 1)
-	keys, err := datastore.NewQuery(ACCESS_ID_OVERRIDE_KIND).
-		Ancestor(accessIdOverrideCollectionParentKey(ctx)).
+	query := datastore.NewQuery(ACCESS_ID_OVERRIDE_KIND).
+		Ancestor(accessIdOverrideCollectionParentKey).
 		Filter("AccessId=", accessId).
-		Limit(1).
-		GetAll(ctx, &accessIdList)
+		Limit(1)
+	keys, err := dsClient.GetAll(ctx, query, &accessIdList)
 
 	if err != nil {
 		return err
@@ -74,5 +89,5 @@ func (dao *DefaultAccessIdOverrideDao) DeleteAccessIdOverride(ctx context.Contex
 		return AccessIdNotFoundError
 	}
 
-	return datastore.Delete(ctx, keys[0])
+	return dsClient.Delete(ctx, keys[0])
 }

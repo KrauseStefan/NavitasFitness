@@ -6,20 +6,18 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	log "logger"
 	"net/http"
 
 	"github.com/gorilla/mux"
 
+	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/taskqueue"
-	"google.golang.org/appengine/urlfetch"
 
 	"Export/csv"
 	TransactionDao "IPN/Transaction"
 	UserDao "User/Dao"
+	log "logger"
 )
 
 var (
@@ -68,7 +66,7 @@ func IntegrateRoutes(router *mux.Router) {
 //This is need in order to close the original request before responding
 func processIPN(w http.ResponseWriter, r *http.Request) {
 
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	content, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -98,8 +96,7 @@ func verifyMassageWithPaypal(ctx context.Context, content string, testIpnField s
 
 	log.Infof(ctx, "Sending msg to: "+paypalIpnUrl)
 	extraData := []byte("cmd=_notify-validate&")
-	client := urlfetch.Client(ctx)
-	resp, err := client.Post(paypalIpnUrl, FromEncodedContentType, bytes.NewBuffer(append(extraData, content...)))
+	resp, err := http.DefaultClient.Post(paypalIpnUrl, FromEncodedContentType, bytes.NewBuffer(append(extraData, content...)))
 	if err != nil {
 		return err
 	}
@@ -121,7 +118,7 @@ func verifyMassageWithPaypal(ctx context.Context, content string, testIpnField s
 // Lookup Transaction to update (or create new)
 // Lookup user, if it exists verify that it is the same as a found transaction
 func ipnDoResponseTaskHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	if err := ipnDoResponseTask(ctx, r); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

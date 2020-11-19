@@ -1,10 +1,10 @@
 package UserDaoTestHelper
 
 import (
+	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/datastore"
 
-	"User/Dao"
+	UserDao "User/Dao"
 )
 
 type CallArgs struct {

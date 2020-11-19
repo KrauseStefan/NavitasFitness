@@ -18,9 +18,8 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/mail"
+	"cloud.google.com/go/datastore"
 )
 
 var userDao = UserDao.GetInstance()
@@ -45,7 +44,7 @@ func IntegrateRoutes(router *mux.Router) {
 }
 
 func dryRun(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	users, _, usersErr := getAboutToExpireTxnsWithUsers(ctx)
 	usersJson, err := json.Marshal(users)
@@ -64,7 +63,7 @@ func dryRun(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (inte
 }
 
 func send(w http.ResponseWriter, r *http.Request, callingUser *UserDao.UserDTO) (interface{}, error) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	users, txns, err := getAboutToExpireTxnsWithUsers(ctx)
 	if err != nil {

@@ -8,15 +8,10 @@ import (
 	"testing"
 
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/aetest"
 )
 
 func GetContext() context.Context {
-	ctx, done, err := aetest.NewContext()
-	if err != nil {
-		panic(err)
-	}
-	defer done()
+	ctx := context.Background()
 	return ctx
 }
 

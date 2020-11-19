@@ -6,15 +6,13 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"google.golang.org/appengine"
-
 	"AccessIdValidator"
 	"AppEngineHelper"
 	"ConfigurationReader"
 	"Dropbox"
 	"Export/csv"
-	"User/Dao"
-	"User/Service"
+	UserDao "User/Dao"
+	UserService "User/Service"
 )
 
 const (
@@ -43,7 +41,7 @@ func IntegrateRoutes(router *mux.Router) {
 
 func asAdminIfAlreadyConfigured(f func(http.ResponseWriter, *http.Request) (interface{}, error)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := appengine.NewContext(r)
+		ctx := r.Context()
 		tokens, err := Dropbox.GetAccessTokens(ctx)
 		if err != nil || len(tokens) > 0 {
 			UserService.AsAdmin(func(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
@@ -83,7 +81,7 @@ func authorizeWithDropboxHandler(w http.ResponseWriter, r *http.Request) (interf
 }
 
 func authorizationCallbackHandler(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 	r.ParseForm()
 
 	code := r.Form["code"][0]

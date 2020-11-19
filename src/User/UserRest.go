@@ -5,8 +5,7 @@ import (
 	log "logger"
 	"net/http"
 
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/datastore"
+	"cloud.google.com/go/datastore"
 
 	"github.com/gorilla/mux"
 
@@ -86,7 +85,7 @@ func getAllUsersHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserD
 		User []*UserDao.UserDTO `json:"users"`
 	}
 
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	keys, users, err := UserService.GetAllUsers(ctx)
 
@@ -99,7 +98,7 @@ func getAllUsersHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserD
 }
 
 func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 	if user == nil {
 		log.Debugf(ctx, "User is not logged in")
 		return nil, nil
@@ -124,13 +123,13 @@ func getUserFromSessionHandler(w http.ResponseWriter, r *http.Request, user *Use
 }
 
 func getCurrentUserTransactionsHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	return UserService.GetUserTransactions(ctx, user.Key)
 }
 
 func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request, _ *UserDao.UserDTO) (interface{}, error) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	userKeyStr := mux.Vars(r)[userKey]
 	userKey, err := datastore.DecodeKey(userKeyStr)
@@ -142,7 +141,7 @@ func getUserTransactionsHandler(w http.ResponseWriter, r *http.Request, _ *UserD
 }
 
 func createUserHandler(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 	user := &UserDao.UserDTO{}
 
 	sessionData, err := Auth.GetSessionData(r)
@@ -168,7 +167,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) (interface{}, err
 }
 
 func verifyUserRequestHandler(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	if err := r.ParseForm(); err != nil {
 		return nil, err
@@ -184,7 +183,7 @@ func verifyUserRequestHandler(w http.ResponseWriter, r *http.Request) (interface
 }
 
 func requestResetUserPasswordHandler(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 	email := mux.Vars(r)[emailKey]
 
 	err := UserService.RequestResetUserPassword(ctx, email)
@@ -192,7 +191,7 @@ func requestResetUserPasswordHandler(w http.ResponseWriter, r *http.Request) (in
 }
 
 func resetUserPasswordHandler(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	err := UserService.ResetUserPassword(ctx, r.Body)
 	return nil, err

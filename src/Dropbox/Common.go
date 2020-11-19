@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/urlfetch"
 
 	"AppEngineHelper"
 	"ConfigurationReader"
@@ -79,8 +78,6 @@ func RetrieveAccessToken(ctx context.Context, code string, redirectUri string) (
 
 	paramStr := AppEngineHelper.CreateQueryParamString(params)
 
-	client := urlfetch.Client(ctx)
-
 	req, err := http.NewRequest("POST", tokenUrl+"?"+paramStr, &bytes.Buffer{})
 	if err != nil {
 		return "", err
@@ -88,7 +85,10 @@ func RetrieveAccessToken(ctx context.Context, code string, redirectUri string) (
 
 	req.SetBasicAuth(conf.ClientKey, conf.ClientSecret)
 
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		all, _ := ioutil.ReadAll(resp.Body)

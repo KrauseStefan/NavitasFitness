@@ -1,13 +1,14 @@
 package UserService
 
 import (
-	UserDao "User/Dao"
 	"fmt"
 	"net/url"
 
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/mail"
+
+	UserDao "User/Dao"
+	log "logger"
 )
 
 const KeyFieldName = "passwordResetKey"
@@ -43,6 +44,6 @@ func SendPasswordResetMail(ctx context.Context, user *UserDao.UserDTO, secret st
 	if err := mail.Send(ctx, msg); err != nil {
 		return err
 	}
-
+	log.Debugf(ctx, "Data: %+v\n", res)
 	return nil
 }

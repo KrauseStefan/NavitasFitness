@@ -1,13 +1,13 @@
 package AccessIdOverride
 
 import (
-	"AccessIdOverride/dao"
-	"User/Dao"
-	"User/Service"
+	AccessIdOverrideDao "AccessIdOverride/dao"
+	UserDao "User/Dao"
+	UserService "User/Service"
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"google.golang.org/appengine"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 const accessIdKey = "accessId"
@@ -37,13 +37,13 @@ func IntegrateRoutes(router *mux.Router) {
 }
 
 func getAllAccessIdOverrideHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	return accessIdOverrideDao.GetAllAccessIdOverrides(ctx)
 }
 
 func createOrUpdateAccessIdOverrideHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	accessId := &AccessIdOverrideDao.AccessIdOverride{}
 
@@ -58,7 +58,7 @@ func createOrUpdateAccessIdOverrideHandler(w http.ResponseWriter, r *http.Reques
 }
 
 func deleteAccessIdOverrideHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	accessId := mux.Vars(r)[accessIdKey]
 

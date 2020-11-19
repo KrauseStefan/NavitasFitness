@@ -3,10 +3,10 @@ package TransactionDaoTestHelper
 import (
 	"time"
 
+	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/datastore"
 
-	"IPN/Transaction"
+	TransactionDao "IPN/Transaction"
 )
 
 type CallArgs struct {

@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/urlfetch"
 )
 
 const uploadUrl = "/2/files/upload"
@@ -36,8 +35,6 @@ type UploadDto struct {
 
 func UploadDoc(ctx context.Context, accessToken string, filePath string, file io.Reader) (*UploadResp, error) {
 
-	client := urlfetch.Client(ctx)
-
 	req, err := http.NewRequest("POST", baseUrl+uploadUrl, file)
 	if err != nil {
 		return nil, err
@@ -63,7 +60,7 @@ func UploadDoc(ctx context.Context, accessToken string, filePath string, file io
 	req.Header.Set("Content-Type", "application/octet-stream")
 	req.Header.Set("Dropbox-API-Arg", string(js))
 
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
