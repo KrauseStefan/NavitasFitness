@@ -42,7 +42,7 @@ class UserStatus {
 
   public getSubmitUrl() {
     if (this.isLocalhost()) {
-      return 'http://localhost:8081/processPayment';
+      return 'http://localhost:8082/processPayment';
     } else {
       return 'https://www.sandbox.paypal.com/cgi-bin/webscr';
     }

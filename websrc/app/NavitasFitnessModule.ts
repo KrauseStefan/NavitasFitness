@@ -51,7 +51,7 @@ export const navitasFitnessModule = module('NavitasFitness', [
     $sceDelegateProvider.resourceUrlWhitelist([
       // Allow same origin resource loads.
       'self',
-      'http://localhost:8081/processPayment',
+      'http://localhost:8082/processPayment',
       'https://www.sandbox.paypal.com/cgi-bin/webscr',
       'https://www.paypal.com/cgi-bin/webscr',
     ]);

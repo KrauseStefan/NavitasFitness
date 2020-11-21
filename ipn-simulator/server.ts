@@ -26,7 +26,7 @@ interface IMoment extends momentOrg.Moment {
  */
 
 const configuration = {
-  serverPort: 8081,
+  serverPort: 8082,
   serverProcessPaymentUrl: '/processPayment',
   serverIpnCallback: '/cgi-bin/webscr',
 
