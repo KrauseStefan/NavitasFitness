@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"golang.org/x/net/context"
 )
@@ -60,10 +61,12 @@ func UploadDoc(ctx context.Context, accessToken string, filePath string, file io
 	req.Header.Set("Content-Type", "application/octet-stream")
 	req.Header.Set("Dropbox-API-Arg", string(js))
 
-	resp, err := http.DefaultClient.Do(req)
+	client := http.Client{Timeout: time.Second * 10}
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		all, _ := ioutil.ReadAll(resp.Body)

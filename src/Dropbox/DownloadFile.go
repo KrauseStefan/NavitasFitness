@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"io"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"golang.org/x/net/context"
 
@@ -50,7 +50,7 @@ type FieldDto struct {
 	Value string
 }
 
-func DownloadFile(ctx context.Context, accessToken string, fileUrl string) (io.ReadCloser, *FileDownloadResponseDto, error) {
+func DownloadFile(ctx context.Context, accessToken string, fileUrl string) ([]byte, *FileDownloadResponseDto, error) {
 	if accessToken == "" || fileUrl == "" {
 		return nil, nil, errors.New("Invalid arguments for downloading file")
 	}
@@ -68,10 +68,12 @@ func DownloadFile(ctx context.Context, accessToken string, fileUrl string) (io.R
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 	req.Header.Set("Dropbox-API-Arg", string(js))
 
-	resp, err := http.DefaultClient.Do(req)
+	client := http.Client{Timeout: time.Second * 10}
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, nil, err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		jsonError, _ := ioutil.ReadAll(resp.Body)
@@ -99,5 +101,10 @@ func DownloadFile(ctx context.Context, accessToken string, fileUrl string) (io.R
 		return nil, nil, err
 	}
 
-	return resp.Body, &fileDownloadResponseDto, nil
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return data, &fileDownloadResponseDto, nil
 }

@@ -2,7 +2,6 @@ package AccessIdValidator
 
 import (
 	"bytes"
-	"io/ioutil"
 	log "logger"
 	"time"
 
@@ -27,12 +26,7 @@ func GetInstance() AccessIdValidator {
 
 func (v *DefaultAccessIdValidator) downloadValidAccessIds(ctx context.Context, dropboxAccessToken string) ([][]byte, error) {
 	log.Infof(ctx, "Downloading AccessIds: %s", dropboxAccessToken)
-	resp, _, err := Dropbox.DownloadFile(ctx, dropboxAccessToken, GetAccessIdPath(ctx))
-	if err != nil {
-		return nil, err
-	}
-
-	data, err := ioutil.ReadAll(resp)
+	data, _, err := Dropbox.DownloadFile(ctx, dropboxAccessToken, GetAccessIdPath(ctx))
 	if err != nil {
 		return nil, err
 	}

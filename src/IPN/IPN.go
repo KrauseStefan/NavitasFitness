@@ -6,13 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 
 	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
-	"google.golang.org/appengine/taskqueue"
 
 	"Export/csv"
 	TransactionDao "IPN/Transaction"
@@ -53,20 +54,12 @@ func IntegrateRoutes(router *mux.Router) {
 		Name("ipn notification").
 		HandlerFunc(processIPN)
 
-	router.
-		Methods("POST").
-		Path(ipnRespondTaskUrl).
-		Name("ipn notification responder task").
-		HandlerFunc(ipnDoResponseTaskHandler)
-
 }
 
-//Receives the IPN message from PayPal and sends a empty response back code 200
-//The received package is parsed to the task queue, where the appropriate response is made
-//This is need in order to close the original request before responding
+// Receives the IPN message from PayPal and sends a empty response back code 200
+// The received package is proccessed after the connection is closed
+// This is needed in order to close the original request before responding
 func processIPN(w http.ResponseWriter, r *http.Request) {
-
-	ctx := r.Context()
 
 	content, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -74,13 +67,18 @@ func processIPN(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task := newTask(ipnRespondTaskUrl, content)
-	if _, err := taskqueue.Add(ctx, task, IpnQueueName); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	ctx := r.Context()
+	server, _ := ctx.Value(http.ServerContextKey).(*http.Server)
+	server.ConnState = func(n net.Conn, cs http.ConnState) {
+		log.Debugf(ctx, "Callback State Change: %s", cs.String())
+		if cs == http.StateClosed {
+			bgCtx := context.Background()
+			server.ConnState = nil
+			if err := ipnDoResponseTask(bgCtx, content); err != nil {
+				log.Errorf(ctx, "Error accepting IPN response: %s", err.Error())
+			}
+		}
 	}
-
-	// Persist transaction details in unconfirmed state (processing?)
 }
 
 func verifyMassageWithPaypal(ctx context.Context, content string, testIpnField string) error {
@@ -96,13 +94,14 @@ func verifyMassageWithPaypal(ctx context.Context, content string, testIpnField s
 
 	log.Infof(ctx, "Sending msg to: "+paypalIpnUrl)
 	extraData := []byte("cmd=_notify-validate&")
-	resp, err := http.DefaultClient.Post(paypalIpnUrl, FromEncodedContentType, bytes.NewBuffer(append(extraData, content...)))
+	client := http.Client{Timeout: time.Second * 10}
+	resp, err := client.Post(paypalIpnUrl, FromEncodedContentType, bytes.NewBuffer(append(extraData, content...)))
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	respBody, err := ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
 
 	log.Debugf(ctx, "Ipn Validation response "+string(respBody))
 
@@ -117,24 +116,8 @@ func verifyMassageWithPaypal(ctx context.Context, content string, testIpnField s
 // Verify message //discard if message cannot be verified
 // Lookup Transaction to update (or create new)
 // Lookup user, if it exists verify that it is the same as a found transaction
-func ipnDoResponseTaskHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	if err := ipnDoResponseTask(ctx, r); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Errorf(ctx, err.Error())
-		return
-	}
-
-}
-
-func ipnDoResponseTask(ctx context.Context, r *http.Request) error {
+func ipnDoResponseTask(ctx context.Context, content []byte) error {
 	const expectedAmount = 300 // kr
-
-	content, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return err
-	}
 
 	txn := TransactionDao.NewTransactionMsgDTOFromIpn(string(content))
 	testIpnField := txn.GetField(TransactionDao.FIELD_TEST_IPN)
@@ -213,15 +196,4 @@ func ipnDoResponseTask(ctx context.Context, r *http.Request) error {
 	}
 
 	return nil
-}
-
-func newTask(path string, data []byte) *taskqueue.Task {
-	h := make(http.Header)
-	h.Set("Content-Type", "application/x-www-form-urlencoded")
-	return &taskqueue.Task{
-		Path:    path,
-		Payload: data,
-		Header:  h,
-		Method:  "POST",
-	}
 }
