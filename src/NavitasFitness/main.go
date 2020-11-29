@@ -2,14 +2,19 @@ package main
 
 import (
 	"errors"
+	"fmt"
+	"log"
+	"path"
+	"strings"
+
 	"math/rand"
 	"net/http"
+	"os"
 	"reflect"
 	"regexp"
 	"time"
 
 	"github.com/gorilla/mux"
-	"google.golang.org/appengine"
 	"gopkg.in/validator.v2"
 
 	"AccessIdOverride"
@@ -38,33 +43,67 @@ func validateEmail(v interface{}, param string) error {
 	return nil
 }
 
-// http://blog.golang.org/context
-// http://blog.golang.org/go-videos-from-google-io-2012
-
 func init() {
-	rand.Seed(time.Now().UnixNano())
+	log.Printf("Init")
+	goPaths := strings.Split(os.Getenv("GOPATH"), ":")
+	webappFolder := "./webapp"
+	for _, goPath := range goPaths {
+		folder := path.Join(goPath, "/src/NavitasFitness/webapp")
+		_, err := os.Stat(folder)
+		if err == nil {
+			webappFolder = folder
+		}
 
-	router := mux.NewRouter().StrictSlash(true)
-	subscriptionExpiration.IntegrateRoutes(router)
-	MainPageService.IntegrateRoutes(router)
-	UserRest.IntegrateRoutes(router)
-	Auth.IntegrateRoutes(router)
-	IPN.IntegrateRoutes(router)
-	csv.IntegrateRoutes(router)
-	DropboxService.IntegrateRoutes(router)
-	AccessIdOverride.IntegrateRoutes(router)
-	http.Handle("/", router)
-	//	http.HandleFunc("/rest/", root)
+		fmt.Println("goPath:", goPath)
+	}
+	if webappFolder == "./webapp" {
+		folder := path.Join(os.Args[0], "webapp")
+		_, err := os.Stat(folder)
+		if err == nil {
+			webappFolder = folder
+		}
+	}
+
+	fmt.Println("webappFolder:", webappFolder)
+
+	r := mux.NewRouter() //.StrictSlash(true)
+
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if strings.HasPrefix(r.RequestURI, "/rest/") {
+				log.Println(r.RequestURI)
+			}
+			next.ServeHTTP(w, r)
+		})
+	})
+
+	subscriptionExpiration.IntegrateRoutes(r)
+	MainPageService.IntegrateRoutes(r)
+	UserRest.IntegrateRoutes(r)
+	Auth.IntegrateRoutes(r)
+	IPN.IntegrateRoutes(r)
+	csv.IntegrateRoutes(r)
+	DropboxService.IntegrateRoutes(r)
+	AccessIdOverride.IntegrateRoutes(r)
+
+	spa := spaHandler{staticPath: webappFolder, indexPath: "index.html"}
+	r.PathPrefix("/").Handler(spa)
+
+	http.Handle("/", r)
 
 	validator.SetValidationFunc("email", validateEmail)
 }
 
-//func root(w http.ResponseWriter, r *http.Request) {
-//	//	w.Header().Set("Location", "static/index.html")
-//	//	w.WriteHeader(http.StatusFound)
-//	fmt.Fprint(w, "Hello, world!")
-//}
-
 func main() {
-	appengine.Main()
+	rand.Seed(time.Now().UnixNano())
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("Defaulting to port %s", port)
+	}
+
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }
