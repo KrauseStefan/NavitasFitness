@@ -12,6 +12,7 @@
      * Any rules specified here will override those from the base config we are extending
      */
     "quotemark": [true, "single"],
+    "max-classes-per-file": [false],
     "no-string-literal": false,
     "whitespace": [
       true,
@@ -23,8 +24,10 @@
       // "check-typecast"
     ],
     "object-literal-sort-keys": false,
+    "object-literal-key-quotes": [true, "consistant"],
     "no-angle-bracket-type-assertion": false,
-    "interface-name": [true, "never-prefix"]
+    "interface-name": [true, "never-prefix"],
+    "no-submodule-imports": [true, "rxjs", "@angular/platform-browser", "@angular/core/testing", "@google-cloud/datastore/build/src/query"]
   },
   "rulesDirectory": [
     /*

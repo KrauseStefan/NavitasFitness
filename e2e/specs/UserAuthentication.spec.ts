@@ -24,7 +24,6 @@ describe('User Autentication', () => {
 
   it('[META] ensure test user does not exist', async () => {
     await browser.get('/');
-    await DataStoreManipulator.loadUserKinds();
     await DataStoreManipulator.removeUserByEmail(userInfo.email);
     await DataStoreManipulator.removeUserByAccessId(userInfo.accessId);
     await DataStoreManipulator.removeUserByEmail(alternateUserInfo.email);
@@ -83,8 +82,7 @@ describe('User Autentication', () => {
       await regDialog.buttonRegister.click();
       await AlerDialogPageObject.mainButton.click();
 
-      await DataStoreManipulator.loadUserKinds();
-      keyUserDifferntEmail = await DataStoreManipulator.getUserEntityIdFromEmail(alternateUserInfo.email);
+      keyUserDifferntEmail = await DataStoreManipulator.getUserId(alternateUserInfo.email);
 
       await expect(regDialog.formContainer.isPresent()).toBe(false);
     });
@@ -100,8 +98,7 @@ describe('User Autentication', () => {
       await regDialog.buttonRegister.click();
       await AlerDialogPageObject.mainButton.click();
 
-      await DataStoreManipulator.loadUserKinds();
-      keyUserDifferntAccessId = await DataStoreManipulator.getUserEntityIdFromEmail(userInfo.email);
+      keyUserDifferntAccessId = await DataStoreManipulator.getUserId(userInfo.email);
 
       await expect(regDialog.formContainer.isPresent()).toBe(false);
     });
@@ -117,8 +114,7 @@ describe('User Autentication', () => {
       await regDialog.buttonRegister.click();
       await AlerDialogPageObject.mainButton.click();
 
-      await DataStoreManipulator.loadUserKinds();
-      keyUser = await DataStoreManipulator.getUserEntityIdFromEmail(userInfo.email);
+      keyUser = await DataStoreManipulator.getUserId(userInfo.email);
 
       await expect(regDialog.formContainer.isPresent()).toBe(false);
     });
@@ -143,7 +139,7 @@ describe('User Autentication', () => {
 
   });
 
-  describe('registration validation', async () => {
+  describe('registration validation', () => {
     let regDialog: RegistrationDialogPageObject;
 
     beforeEach(async () => {

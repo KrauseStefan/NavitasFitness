@@ -21,7 +21,6 @@ describe('Reset password', () => {
 
   it('[META] create user', async () => {
     await browser.get('/');
-    await DataStoreManipulator.loadUserKinds();
     await DataStoreManipulator.removeUserByEmail(userInfo.email);
     const regDialog = await NavigationPageObject.openRegistrationDialog();
 
@@ -51,8 +50,7 @@ describe('Reset password', () => {
   });
 
   it('should be able to reset password', async () => {
-    await DataStoreManipulator.loadUserKinds();
-    const passwordResetKey = await DataStoreManipulator.getUserEntityIdFromEmail(userInfo.email);
+    const passwordResetKey = await DataStoreManipulator.getUserId(userInfo.email);
     const passwordResetSecret = await DataStoreManipulator.getUserEntityResetSecretFromEmail(userInfo.email);
 
     const parms = stringify({ passwordResetKey, passwordResetSecret });
@@ -68,7 +66,6 @@ describe('Reset password', () => {
   });
 
   it('should fail login with old password', async () => {
-    await DataStoreManipulator.loadUserKinds();
     await DataStoreManipulator.performEmailVerification(userInfo.email);
     const loginDialog = await NavigationPageObject.openLoginDialog();
 
@@ -79,6 +76,7 @@ describe('Reset password', () => {
     await loginDialog.loginButton.click();
 
     await expect(loginDialog.formContainer.isDisplayed()).toBe(true);
+
     await expect(loginDialog.errorCredentialsInvalid.isDisplayed()).toBe(true);
 
     await loginDialog.safeClick(loginDialog.cancelButton);

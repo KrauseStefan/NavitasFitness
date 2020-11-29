@@ -1,7 +1,6 @@
 import * as commandLineArgs from 'command-line-args';
-import { browser, Config, PluginConfig, ProtractorBy } from 'protractor';
-
-import { DataStoreManipulator } from './PageObjects/DataStoreManipulator';
+import { browser, Config, ProtractorBy } from 'protractor';
+import * as HtmlReporter from 'protractor-beautiful-reporter';
 
 const optionDefinitions = [
   { name: 'parallel', type: Boolean, defaultOption: false },
@@ -9,46 +8,18 @@ const optionDefinitions = [
 
 const cmdOpts = commandLineArgs(optionDefinitions);
 
-const timeoutMils = 1000 * 60;
+const second = 1000;
+const testTimeout = 10 * second;
+const scriptTimeout = 10 * second;
 
 declare const angular: any;
 declare const by: ProtractorBy;
-
-interface Jasmine2ProtractorUtilsConfig extends PluginConfig {
-  clearFoldersBeforeTest?: boolean;
-  disableHTMLReport?: boolean;
-  disableScreenshot?: boolean;
-  failTestOnErrorLog?: {
-    excludeKeywords: string[], // {A JSON Array}
-    failTestOnErrorLogLevel: number,
-  };
-  htmlReportDir?: string;
-  screenshotOnExpectFailure?: boolean;
-  screenshotOnSpecFailure?: boolean;
-  screenshotPath?: string;
-}
-
-const utilsPlugin: Jasmine2ProtractorUtilsConfig = {
-  clearFoldersBeforeTest: true,
-  disableHTMLReport: true,
-  disableScreenshot: false,
-  failTestOnErrorLog: {
-    excludeKeywords: [], // {A JSON Array}
-    failTestOnErrorLogLevel: 900,
-  },
-  htmlReportDir: './reports/htmlReports',
-  package: 'jasmine2-protractor-utils',
-  screenshotOnExpectFailure: true,
-  screenshotOnSpecFailure: true,
-  screenshotPath: './screenshots',
-};
 
 const webdriverFolder = 'node_modules/protractor/node_modules/webdriver-manager/selenium/';
 
 export const config: Config = {
   SELENIUM_PROMISE_MANAGER: false,
   jvmArgs: [
-    // '-Dwebdriver.ie.driver=${webdriverFolder}IEDriverServer3.4.0.exe',
     `-Dwebdriver.gecko.driver=${webdriverFolder}geckodriver-v0.16.1`,
   ],
   baseUrl: 'http://localhost:8080',
@@ -56,24 +27,17 @@ export const config: Config = {
   // directConnect: true,
   framework: 'jasmine2',
   jasmineNodeOpts: {
-    defaultTimeoutInterval: timeoutMils,
+    defaultTimeoutInterval: testTimeout,
+    failFast: true,
     realtimeFailure: true,
   },
   disableChecks: true,
-  allScriptsTimeout: 60000,
+  allScriptsTimeout: scriptTimeout,
   multiCapabilities: [{
     browserName: 'chrome',
     maxInstances: 5,
     shardTestFiles: cmdOpts.parallel,
     chromeOptions: { args: ['--headless', '--window-size=1920,1080'] },
-    // }, {
-    // browserName: 'edge',
-    // maxInstances: 1,
-    // shardTestFiles: cmdOpts.parallel,
-    // }, {
-    // browserName: 'internet explorer',
-    // maxInstances: 1,
-    // shardTestFiles: cmdOpts.parallel,
     // }, {
     //     browserName: 'firefox',
     //     maxInstances: 3,
@@ -81,6 +45,27 @@ export const config: Config = {
     //     shardTestFiles: cmdOpts.parallel,
   }],
   onPrepare: async () => {
+    jasmine.getEnv().addReporter(new HtmlReporter({
+      baseDirectory: 'reports',
+      clientDefaults: {
+        columnSettings: {
+          displayTime: true,
+          displayBrowser: false,
+          displaySessionId: false,
+          displayOS: false,
+          inlineScreenshots: true,
+        },
+        preserveDirectory: false,
+        searchSettings: {
+          allselected: false,
+          passed: false,
+          failed: true,
+          pending: true,
+          withLog: true,
+        },
+      },
+    }).getJasmine2Reporter());
+
     function disableNgAnimate() {
       angular.module('disableNgAnimate', []).run(['$animate', ($animate) => $animate.enabled(false)]);
     }
@@ -114,11 +99,7 @@ export const config: Config = {
       }
       return null;
     });
-
-    await DataStoreManipulator.init();
   },
-  onComplete: () => DataStoreManipulator.destroy(),
-  plugins: [utilsPlugin],
   // seleniumArgs: [
   // '-Dwebdriver.gecko.driver=./node_modules/protractor/node_modules/webdriver-manager/selenium/geckodriver-v0.11.1',
   // ],

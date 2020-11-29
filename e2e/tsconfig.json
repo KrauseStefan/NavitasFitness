@@ -5,7 +5,7 @@
         "allowUnusedLabels": false,
         "forceConsistentCasingInFileNames": true,
         "sourceMap": true,
-        "listEmittedFiles": true,
+        "listEmittedFiles": false,
         "module": "commonjs",
         // "watch": true,
         "moduleResolution": "node",
@@ -14,9 +14,9 @@
         "noImplicitThis": true,
         "noUnusedLocals": true,
         "pretty": true,
-        "target": "es2016",
+        "target": "ESNext",
         "noUnusedParameters": true
-        },
+    },
     "exclude": [
         "node_modules"
     ]

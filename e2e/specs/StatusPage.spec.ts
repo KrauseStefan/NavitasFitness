@@ -20,7 +20,6 @@ describe('Payments', () => {
 
     it('[META] create user', async () => {
       await browser.get('/');
-      await DataStoreManipulator.loadUserKinds();
       await DataStoreManipulator.removeUserByEmail(userInfo.email);
 
       const regDialog = await NavigationPageObject.openRegistrationDialog();
@@ -45,7 +44,6 @@ describe('Payments', () => {
 
     it('[META] login user', async () => {
       const loginDialog = await NavigationPageObject.openLoginDialog();
-      await DataStoreManipulator.loadUserKinds();
       await DataStoreManipulator.performEmailVerification(userInfo.email);
 
       await loginDialog.fillForm({
