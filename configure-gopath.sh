@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+root="$(git rev-parse --show-toplevel)"
 
 export GOPATH="$GOPATH:$root"
