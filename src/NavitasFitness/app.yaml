@@ -1,6 +1,6 @@
 #application: navitas-fitness-aarhus #navitas-fitness
 #version: 1
-runtime: go111
+runtime: go114
 
 instance_class: F1
 
