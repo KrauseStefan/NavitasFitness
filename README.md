@@ -1,5 +1,9 @@
 # NavitasFitnes
 
+# Environment setup
+
+install google cloud SDK
+run `gcloud components install cloud-datastore-emulator`
 
 ## Getting started
 
@@ -17,3 +21,7 @@ run all tests with `./runTests.sh`
 
 ## script descriptions
 TODO
+
+## relevant links
+
+https://cloud.google.com/datastore/docs/tools/datastore-emulator
