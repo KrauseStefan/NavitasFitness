@@ -66,7 +66,7 @@ func init() {
 
 	fmt.Println("webappFolder:", webappFolder)
 
-	r := mux.NewRouter() //.StrictSlash(true)
+	r := mux.NewRouter().StrictSlash(true)
 
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

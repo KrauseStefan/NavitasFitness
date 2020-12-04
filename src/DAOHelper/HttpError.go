@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
+	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
-	"google.golang.org/appengine"
 )
 
 type HttpError interface {
@@ -19,7 +19,7 @@ type DefaultHttpError struct {
 	StatusCode int
 }
 
-func extractMultiErrors(multiError appengine.MultiError) string {
+func extractMultiErrors(multiError datastore.MultiError) string {
 	strs := make([]string, len(multiError)+1)
 	strs[0] = "Multi Error:"
 	for i, err := range multiError {
@@ -33,7 +33,7 @@ func extractMultiErrors(multiError appengine.MultiError) string {
 }
 
 func (e *DefaultHttpError) Error() string {
-	if multiError, ok := e.InnerError.(appengine.MultiError); ok && len(multiError) > 1 {
+	if multiError, ok := e.InnerError.(datastore.MultiError); ok && len(multiError) > 1 {
 		return extractMultiErrors(multiError)
 	} else {
 		return e.InnerError.Error()

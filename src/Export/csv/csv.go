@@ -13,7 +13,6 @@ import (
 
 	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
-	"google.golang.org/appengine"
 
 	"AccessIdValidator"
 	"Dropbox"
@@ -59,7 +58,6 @@ func IntegrateRoutes(router *mux.Router) {
 		Path(path + "/download/csv").
 		Name("downlad csv").
 		HandlerFunc(UserService.AsAdmin(downloadCsvHandler))
-
 }
 
 type UserTransactionMap map[datastore.Key]TransactionDao.TransactionList
@@ -121,29 +119,23 @@ func getUsers(ctx context.Context, usersTxnMap UserTransactionMap) ([]*UserDao.U
 	}
 
 	users, err := userDAO.GetByKeys(ctx, userKeys)
-	if multiErr, ok := err.(appengine.MultiError); ok {
+	if multiErr, ok := err.(datastore.MultiError); ok {
 		txnsWithNoUser := make(TransactionDao.TransactionList, 0, len(usersTxnMap))
 		foundUsers := make([]*UserDao.UserDTO, 0, len(usersTxnMap))
-		foundOtherError := false
 		for i, e := range multiErr {
 			if e == nil {
 				foundUsers = append(foundUsers, users[i])
 			} else if e == datastore.ErrNoSuchEntity {
 				txnsWithNoUser = append(txnsWithNoUser, usersTxnMap[*userKeys[i]]...)
 			} else {
-				foundOtherError = true
-				return nil, nil, err
+				return nil, nil, errors.New("Error getting users by key (multierror): " + err.Error())
 			}
 		}
 
-		if foundOtherError {
-			return foundUsers, txnsWithNoUser, err
-		} else {
-			return foundUsers, txnsWithNoUser, nil
-		}
+		return foundUsers, txnsWithNoUser, nil
 	}
 
-	return users, nil, err
+	return users, nil, errors.New("Error getting users by key: " + err.Error())
 }
 
 func partitionUsersByValidity(ctx context.Context, users []*UserDao.UserDTO) ([]*UserDao.UserDTO, []*UserDao.UserDTO, error) {
@@ -259,7 +251,7 @@ func getValidAccessIdOverrides(ctx context.Context) ([]*AccessIdOverrideDao.Acce
 func getActiveTransactionList(ctx context.Context, newTxn *TransactionDao.TransactionMsgDTO) (map[string]*UserSubscriptionInfo, error) {
 	txns, err := getAllActiveSubscriptionsTxns(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("Error getting active subscription txns: " + err.Error())
 	}
 	if newTxn != nil {
 		txns = append(txns, newTxn)
@@ -269,7 +261,7 @@ func getActiveTransactionList(ctx context.Context, newTxn *TransactionDao.Transa
 	usersWithActiveSubscriptions := getLatestTxnByUser(validTxns)
 	users, badTxns, err := getUsers(ctx, usersWithActiveSubscriptions)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("Error getting txn users: " + err.Error())
 	}
 
 	if len(users) == 0 {
@@ -287,14 +279,14 @@ func getActiveTransactionList(ctx context.Context, newTxn *TransactionDao.Transa
 
 	validUsers, invalidUsers, err := partitionUsersByValidity(ctx, users)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("Error sorting valid and invalid users: " + err.Error())
 	}
 
 	activeUsersWithPariod := mapUsersToActivePeriod(ctx, validUsers, usersWithActiveSubscriptions)
 
 	accessIdOverrides, invalidIds, err := getValidAccessIdOverrides(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("Error getting access overrides: " + err.Error())
 	}
 
 	overrideEndDate := time.Date(2035, 12, 31, 0, 0, 0, 0, time.Local)
@@ -323,7 +315,7 @@ func getActiveTransactionList(ctx context.Context, newTxn *TransactionDao.Transa
 func createCsvFile(ctx context.Context, w io.Writer, newTxn *TransactionDao.TransactionMsgDTO) error {
 	activeUsersWithPariod, err := getActiveTransactionList(ctx, newTxn)
 	if err != nil {
-		return err
+		return errors.New("Error getting active transactions: " + err.Error())
 	}
 
 	//bomPrefix := []byte{0xef, 0xbb, 0xbf}
@@ -351,18 +343,15 @@ func createCsvFile(ctx context.Context, w io.Writer, newTxn *TransactionDao.Tran
 func downloadCsvHandler(w http.ResponseWriter, r *http.Request, user *UserDao.UserDTO) (interface{}, error) {
 	ctx := r.Context()
 	var buffer bytes.Buffer
-	var err error
 
-	if err = createCsvFile(ctx, &buffer, nil); err != nil {
-		err = errors.New("Error generating CSV file: " + err.Error())
+	if err := createCsvFile(ctx, &buffer, nil); err != nil {
+		return nil, errors.New("Error generating CSV file: " + err.Error())
 	}
 
-	if err == nil {
-		w.Header().Add("Content-Disposition", "attachment; filename=FitnessAccessList.csv")
-		w.Header().Add("Content-Type", "text/csv")
+	w.Header().Add("Content-Disposition", "attachment; filename=FitnessAccessList.csv")
+	w.Header().Add("Content-Type", "text/csv")
 
-		_, err = buffer.WriteTo(w)
-	}
+	_, err := buffer.WriteTo(w)
 
 	return nil, err
 }

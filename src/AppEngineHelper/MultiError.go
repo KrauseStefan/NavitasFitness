@@ -1,10 +1,12 @@
 package AppEngineHelper
 
-import "google.golang.org/appengine"
+import (
+	"cloud.google.com/go/datastore"
+)
 
 // type MultiError []error
 type MultiError struct {
-	appengine.MultiError
+	datastore.MultiError
 }
 
 func ToMultiError(err error) MultiError {
@@ -12,7 +14,7 @@ func ToMultiError(err error) MultiError {
 		return MultiError{}
 	}
 
-	if multiError, ok := err.(appengine.MultiError); ok {
+	if multiError, ok := err.(datastore.MultiError); ok {
 		return MultiError{multiError}
 	}
 
