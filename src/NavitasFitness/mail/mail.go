@@ -47,7 +47,7 @@ func Send(ctx context.Context, msg *Message) error {
 				to,
 			},
 			Bcc:      &bccsConverted,
-			Subject:  "Password Reset Request",
+			Subject:  msg.Subject,
 			TextPart: msg.Body,
 			HTMLPart: msg.HTMLBody,
 			CustomID: msg.CustomID,
