@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+set -o errexit
+set -o pipefail
+set -o errtrace
+set -o nounset
+# set -o xtrace
 
 root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export GOPATH="$GOPATH:$root"

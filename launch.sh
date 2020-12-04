@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+set -o errexit
+set -o pipefail
+set -o errtrace
+set -o nounset
+# set -o xtrace
 
 . ./configure-gopath.sh
 cd "$root" || exit 1
@@ -31,7 +36,7 @@ eval "$(gcloud beta emulators datastore env-init)"
 #   --tab -e "go run NavitasFitness" --title="server"
 
 # WSL2 with conemu code
-bash.exe -new_console:t:"Client" -c "source \$HOME/.profile; cd $root/websrc; npm start"
-bash.exe -new_console:t:"IPN" -c "source \$HOME/.profile; cd $root/ipn-simulator; npm start"
-bash.exe -new_console:t:"Datastore simulator" -c "gcloud beta emulators datastore start --consistency=1.0"
-bash.exe -new_console:t:"server" -c "source \$HOME/.profile; source ./configure-gopath.sh; eval \"$(gcloud beta emulators datastore env-init)\"; cd src/NavitasFitness/ ; go run NavitasFitness"
+bash.exe -new_console:t:"Client" -c "source \$HOME/.profile; cd $root/websrc; npm start" || true
+bash.exe -new_console:t:"IPN" -c "source \$HOME/.profile; cd $root/ipn-simulator; npm start" || true
+bash.exe -new_console:t:"Datastore simulator" -c "gcloud beta emulators datastore start --consistency=1.0" || true
+bash.exe -new_console:t:"server" -c "source \$HOME/.profile; source ./configure-gopath.sh; eval \"$(gcloud beta emulators datastore env-init)\"; cd src/NavitasFitness/ ; go run NavitasFitness" || true

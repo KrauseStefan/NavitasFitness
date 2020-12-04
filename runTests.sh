@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+set -o errexit
+set -o pipefail
+set -o errtrace
+set -o nounset
+# set -o xtrace
 
 echo "setting env variables:"
 gcloud beta emulators datastore env-init
