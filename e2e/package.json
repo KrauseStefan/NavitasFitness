@@ -6,7 +6,7 @@
     "test-serial": "npm run clean && npm run build && protractor",
     "test:E2E": "npm run clean && npm run build && protractor --parallel",
     "test:tslint": "tslint --project .",
-    "clean": "rimraf PageObjects/*.js && rimraf specs/*.js && rimraf *.js"
+    "clean": "rimraf PageObjects/*.js && rimraf specs/*.js && rimraf *.js && rimraf reports"
   },
   "dependencies": {
     "@google-cloud/datastore": "6.3.0",
