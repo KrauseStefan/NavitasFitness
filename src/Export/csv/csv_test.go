@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -164,7 +165,7 @@ func TestShouldReturnPassErrorFromTxnDaoThrough(t *testing.T) {
 	mockAccessIdValidator()
 	mockTransactionRetriever(nil, err)
 
-	assert(t, createCsvFile(ctx, buffer, nil)).Equals(err)
+	assert(t, reflect.TypeOf(createCsvFile(ctx, buffer, nil))).Equals(reflect.TypeOf(err))
 }
 
 func TestShouldNotBeAbleToCreateCsvWhenTxnHasWrongEmail(t *testing.T) {

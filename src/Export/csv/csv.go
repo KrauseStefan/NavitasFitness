@@ -135,7 +135,10 @@ func getUsers(ctx context.Context, usersTxnMap UserTransactionMap) ([]*UserDao.U
 		return foundUsers, txnsWithNoUser, nil
 	}
 
-	return users, nil, errors.New("Error getting users by key: " + err.Error())
+	if err != nil {
+		err = errors.New("Error getting users by key: " + err.Error())
+	}
+	return users, nil, err
 }
 
 func partitionUsersByValidity(ctx context.Context, users []*UserDao.UserDTO) ([]*UserDao.UserDTO, []*UserDao.UserDTO, error) {

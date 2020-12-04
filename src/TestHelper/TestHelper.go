@@ -44,7 +44,7 @@ func (a *AssertObj) Equals(rightSide interface{}) {
 
 	// nil does not equal nil (nil == nil) => false
 	if !reflect.DeepEqual(leftSide, rightSide) && (leftSide != nil && rightSide != nil) {
-		logError(a.t, fmt.Sprintln("Fail:", leftSide, "did not equal", rightSide))
+		logError(a.t, fmt.Sprintln("Fail: '", leftSide, "' did not equal' ", rightSide, "'"))
 
 		if leftSide != nil && rightSide != nil {
 			typeLeft := reflect.TypeOf(leftSide).String()
