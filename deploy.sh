@@ -8,6 +8,7 @@ set -o nounset
 root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 version=v2-0-0
 
+gcloud info --run-diagnostics
 gcloud app deploy $root/src/NavitasFitness/app.yaml -v $version --no-promote --no-stop-previous-version
 git tag -f $version
 git push -f origin --tags
