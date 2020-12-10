@@ -9,12 +9,12 @@ set -o nounset
 cd "$root" || exit 1
 cp "$root/../NavitasFitnessConfig.Json" "$root/src/config.json"
 
-cd $root/websrc || exit 1
+cd "$root/websrc" || exit 1
 yarn --frozen
 yarn clean
 cd - || exit 1
 
-cd $root/src/ || exit 1
+cd "$root/src/" || exit 1
 go get -v ./... > /dev/null
 cd - || exit 1
 
@@ -39,4 +39,4 @@ eval "$(gcloud beta emulators datastore env-init)"
 bash.exe -new_console:t:"Client" -c "source \$HOME/.profile; cd $root/websrc; npm start" || true
 bash.exe -new_console:t:"IPN" -c "source \$HOME/.profile; cd $root/ipn-simulator; npm start" || true
 bash.exe -new_console:t:"Datastore simulator" -c "gcloud beta emulators datastore start --consistency=1.0" || true
-bash.exe -new_console:t:"server" -c "source \$HOME/.profile; source ./configure-gopath.sh; eval \"$(gcloud beta emulators datastore env-init)\"; cd src/ ; go run NavitasFitness/main.go" || true
+bash.exe -new_console:t:"server" -c "source \$HOME/.profile; source ./configure-gopath.sh; eval \"$(gcloud beta emulators datastore env-init)\"; cd src/ ; go run main.go" || true

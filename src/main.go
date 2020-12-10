@@ -46,24 +46,24 @@ func validateEmail(v interface{}, param string) error {
 
 func init() {
 	log.Printf("Init")
-	goPaths := strings.Split(os.Getenv("GOPATH"), ":")
+	// goPaths := strings.Split(os.Getenv("GOPATH"), ":")
 	webappFolder := "./webapp"
-	for _, goPath := range goPaths {
-		folder := path.Join(goPath, "/src/NavitasFitness/webapp")
-		_, err := os.Stat(folder)
-		if err == nil {
-			webappFolder = folder
-		}
+	// for _, goPath := range goPaths {
+	// 	folder := path.Join(goPath, "/src/webapp")
+	// 	_, err := os.Stat(folder)
+	// 	if err == nil {
+	// 		webappFolder = folder
+	// 	}
 
-		fmt.Println("goPath:", goPath)
+	// 	fmt.Println("goPath:", goPath)
+	// }
+	// if webappFolder == "./webapp" {
+	folder := path.Join(os.Args[0], "webapp")
+	_, err := os.Stat(folder)
+	if err == nil {
+		webappFolder = folder
 	}
-	if webappFolder == "./webapp" {
-		folder := path.Join(os.Args[0], "webapp")
-		_, err := os.Stat(folder)
-		if err == nil {
-			webappFolder = folder
-		}
-	}
+	// }
 
 	fmt.Println("webappFolder:", webappFolder)
 

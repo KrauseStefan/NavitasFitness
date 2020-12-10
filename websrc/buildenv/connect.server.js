@@ -7,7 +7,7 @@ const serveStatic = require('serve-static');
 const serverPort = 9000;
 
 // below paths are relative to this script
-const appServerFolder = __dirname + '/../../src/NavitasFitness/webapp';
+const appServerFolder = __dirname + '/../../src/webapp';
 const srcServeFolder = __dirname + '/../app';
 
 connect()
