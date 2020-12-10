@@ -5,8 +5,8 @@ import (
 
 	"cloud.google.com/go/datastore"
 
-	nf_datastore "NavitasFitness/datastore"
-	log "logger"
+	nf_datastore "github.com/KrauseStefan/NavitasFitness/NavitasFitness/datastore"
+	log "github.com/KrauseStefan/NavitasFitness/logger"
 )
 
 const (

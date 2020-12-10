@@ -1,26 +1,25 @@
 package csv
 
 import (
-	AccessIdOverrideDao "AccessIdOverride/dao"
 	"bytes"
 	"errors"
 	"io"
-	log "logger"
 	"net/http"
+	"strings"
 	"time"
 
-	"github.com/gorilla/mux"
-
 	"cloud.google.com/go/datastore"
+	"github.com/gorilla/mux"
 	"golang.org/x/net/context"
 
-	"AccessIdValidator"
-	"Dropbox"
-	TransactionDao "IPN/Transaction"
-	UserDao "User/Dao"
-	UserService "User/Service"
-	"constants"
-	"strings"
+	AccessIdOverrideDao "github.com/KrauseStefan/NavitasFitness/AccessIdOverride/dao"
+	"github.com/KrauseStefan/NavitasFitness/AccessIdValidator"
+	"github.com/KrauseStefan/NavitasFitness/Dropbox"
+	TransactionDao "github.com/KrauseStefan/NavitasFitness/IPN/Transaction"
+	UserDao "github.com/KrauseStefan/NavitasFitness/User/Dao"
+	UserService "github.com/KrauseStefan/NavitasFitness/User/Service"
+	"github.com/KrauseStefan/NavitasFitness/constants"
+	log "github.com/KrauseStefan/NavitasFitness/logger"
 )
 
 type GetAccessIdOverridesDao interface {

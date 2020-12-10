@@ -2,12 +2,12 @@ package AccessIdValidator
 
 import (
 	"bytes"
-	log "logger"
 	"time"
 
 	"golang.org/x/net/context"
 
-	"Dropbox"
+	"github.com/KrauseStefan/NavitasFitness/Dropbox"
+	log "github.com/KrauseStefan/NavitasFitness/logger"
 )
 
 type DefaultAccessIdValidator struct{}

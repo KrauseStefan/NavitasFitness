@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	"DAOHelper"
+	"github.com/KrauseStefan/NavitasFitness/DAOHelper"
 )
 
 const serviceUrl = "https://content.dropboxapi.com/2/files/download"

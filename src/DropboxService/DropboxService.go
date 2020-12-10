@@ -6,13 +6,13 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"AccessIdValidator"
-	"AppEngineHelper"
-	"ConfigurationReader"
-	"Dropbox"
-	"Export/csv"
-	UserDao "User/Dao"
-	UserService "User/Service"
+	"github.com/KrauseStefan/NavitasFitness/AccessIdValidator"
+	"github.com/KrauseStefan/NavitasFitness/AppEngineHelper"
+	"github.com/KrauseStefan/NavitasFitness/ConfigurationReader"
+	"github.com/KrauseStefan/NavitasFitness/Dropbox"
+	"github.com/KrauseStefan/NavitasFitness/Export/csv"
+	UserDao "github.com/KrauseStefan/NavitasFitness/User/Dao"
+	UserService "github.com/KrauseStefan/NavitasFitness/User/Service"
 )
 
 const (

@@ -1,13 +1,14 @@
 package AccessIdOverride
 
 import (
-	AccessIdOverrideDao "AccessIdOverride/dao"
-	UserDao "User/Dao"
-	UserService "User/Service"
 	"encoding/json"
 	"net/http"
 
 	"github.com/gorilla/mux"
+
+	AccessIdOverrideDao "github.com/KrauseStefan/NavitasFitness/AccessIdOverride/dao"
+	UserDao "github.com/KrauseStefan/NavitasFitness/User/Dao"
+	UserService "github.com/KrauseStefan/NavitasFitness/User/Service"
 )
 
 const accessIdKey = "accessId"

@@ -1,11 +1,12 @@
 package AccessIdValidator
 
 import (
-	"DAOHelper"
-	"Dropbox"
 	"bytes"
-	log "logger"
 	"net/http"
+
+	"github.com/KrauseStefan/NavitasFitness/DAOHelper"
+	"github.com/KrauseStefan/NavitasFitness/Dropbox"
+	log "github.com/KrauseStefan/NavitasFitness/logger"
 
 	"golang.org/x/net/context"
 )

@@ -3,7 +3,7 @@ package Auth
 import (
 	"github.com/gorilla/securecookie"
 
-	"ConfigurationReader"
+	"github.com/KrauseStefan/NavitasFitness/ConfigurationReader"
 )
 
 func GetSecureCookieInst() (*securecookie.SecureCookie, error) {

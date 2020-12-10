@@ -10,9 +10,9 @@ import (
 
 	"golang.org/x/net/context"
 
-	"AppEngineHelper"
-	"ConfigurationReader"
-	"SystemSettingDAO"
+	"github.com/KrauseStefan/NavitasFitness/AppEngineHelper"
+	"github.com/KrauseStefan/NavitasFitness/ConfigurationReader"
+	"github.com/KrauseStefan/NavitasFitness/SystemSettingDAO"
 )
 
 var (

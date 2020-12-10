@@ -2,7 +2,8 @@ package datastore
 
 import (
 	"context"
-	log "logger"
+
+	log "github.com/KrauseStefan/NavitasFitness/logger"
 
 	"cloud.google.com/go/datastore"
 )

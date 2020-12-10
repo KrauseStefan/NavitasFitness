@@ -17,14 +17,15 @@ import (
 	"github.com/gorilla/mux"
 	"gopkg.in/validator.v2"
 
-	"AccessIdOverride"
-	"Auth"
-	"DropboxService"
-	"Export/csv"
-	"IPN"
-	MainPageService "MainPage"
-	subscriptionExpiration "SubscribtionExpiration"
-	UserRest "User"
+	"github.com/KrauseStefan/NavitasFitness/AccessIdOverride"
+	"github.com/KrauseStefan/NavitasFitness/Auth"
+	"github.com/KrauseStefan/NavitasFitness/DropboxService"
+	"github.com/KrauseStefan/NavitasFitness/Export/csv"
+	"github.com/KrauseStefan/NavitasFitness/IPN"
+	MainPageService "github.com/KrauseStefan/NavitasFitness/MainPage"
+	"github.com/KrauseStefan/NavitasFitness/NavitasFitness/spaHandler"
+	subscriptionExpiration "github.com/KrauseStefan/NavitasFitness/SubscribtionExpiration"
+	UserRest "github.com/KrauseStefan/NavitasFitness/User"
 )
 
 const emailRegStr = `^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$`
@@ -86,7 +87,7 @@ func init() {
 	DropboxService.IntegrateRoutes(r)
 	AccessIdOverride.IntegrateRoutes(r)
 
-	spa := spaHandler{staticPath: webappFolder, indexPath: "index.html"}
+	spa := spaHandler.SpaHandler{StaticPath: webappFolder, IndexPath: "index.html"}
 	r.PathPrefix("/").Handler(spa)
 
 	http.Handle("/", r)

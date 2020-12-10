@@ -1,9 +1,10 @@
 package DAOHelper
 
 import (
-	log "logger"
 	"net/http"
 	"strings"
+
+	log "github.com/KrauseStefan/NavitasFitness/logger"
 
 	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"

@@ -1,9 +1,10 @@
 package AppEngineHelper
 
 import (
-	"DAOHelper"
 	"encoding/json"
 	"net/http"
+
+	"github.com/KrauseStefan/NavitasFitness/DAOHelper"
 )
 
 type HTTPHandler func(http.ResponseWriter, *http.Request) (interface{}, error)

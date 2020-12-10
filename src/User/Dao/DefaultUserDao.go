@@ -7,8 +7,8 @@ import (
 	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
 
-	"DAOHelper"
-	nf_datastore "NavitasFitness/datastore"
+	"github.com/KrauseStefan/NavitasFitness/DAOHelper"
+	nf_datastore "github.com/KrauseStefan/NavitasFitness/NavitasFitness/datastore"
 )
 
 type DefaultUserDAO struct{}

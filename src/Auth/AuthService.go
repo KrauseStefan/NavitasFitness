@@ -1,8 +1,6 @@
 package Auth
 
 import (
-	log "logger"
-
 	"github.com/gorilla/mux"
 
 	"crypto/rand"
@@ -11,8 +9,9 @@ import (
 	"errors"
 	"net/http"
 
-	"AppEngineHelper"
-	UserDao "User/Dao"
+	"github.com/KrauseStefan/NavitasFitness/AppEngineHelper"
+	UserDao "github.com/KrauseStefan/NavitasFitness/User/Dao"
+	log "github.com/KrauseStefan/NavitasFitness/logger"
 
 	"cloud.google.com/go/datastore"
 )

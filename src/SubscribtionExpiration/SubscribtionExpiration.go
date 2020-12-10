@@ -1,9 +1,6 @@
 package subscriptionExpiration
 
 import (
-	"AppEngineHelper"
-	"DAOHelper"
-	"NavitasFitness/mail"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -11,15 +8,17 @@ import (
 	"strings"
 	"time"
 
-	TransactionDao "IPN/Transaction"
-	UserDao "User/Dao"
-	UserService "User/Service"
-	"constants"
-	log "logger"
-
+	"cloud.google.com/go/datastore"
 	"github.com/gorilla/mux"
 
-	"cloud.google.com/go/datastore"
+	"github.com/KrauseStefan/NavitasFitness/AppEngineHelper"
+	"github.com/KrauseStefan/NavitasFitness/DAOHelper"
+	TransactionDao "github.com/KrauseStefan/NavitasFitness/IPN/Transaction"
+	"github.com/KrauseStefan/NavitasFitness/NavitasFitness/mail"
+	UserDao "github.com/KrauseStefan/NavitasFitness/User/Dao"
+	UserService "github.com/KrauseStefan/NavitasFitness/User/Service"
+	"github.com/KrauseStefan/NavitasFitness/constants"
+	log "github.com/KrauseStefan/NavitasFitness/logger"
 )
 
 var userDao = UserDao.GetInstance()

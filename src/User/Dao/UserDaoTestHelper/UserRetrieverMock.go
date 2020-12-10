@@ -4,7 +4,7 @@ import (
 	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
 
-	UserDao "User/Dao"
+	UserDao "github.com/KrauseStefan/NavitasFitness/User/Dao"
 )
 
 type CallArgs struct {

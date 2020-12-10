@@ -2,18 +2,17 @@ package UserRest
 
 import (
 	"encoding/json"
-	log "logger"
 	"net/http"
 
 	"cloud.google.com/go/datastore"
-
 	"github.com/gorilla/mux"
 
-	"AccessIdValidator"
-	"AppEngineHelper"
-	"Auth"
-	UserDao "User/Dao"
-	UserService "User/Service"
+	"github.com/KrauseStefan/NavitasFitness/AccessIdValidator"
+	"github.com/KrauseStefan/NavitasFitness/AppEngineHelper"
+	"github.com/KrauseStefan/NavitasFitness/Auth"
+	UserDao "github.com/KrauseStefan/NavitasFitness/User/Dao"
+	UserService "github.com/KrauseStefan/NavitasFitness/User/Service"
+	log "github.com/KrauseStefan/NavitasFitness/logger"
 )
 
 const emailKey = "email"

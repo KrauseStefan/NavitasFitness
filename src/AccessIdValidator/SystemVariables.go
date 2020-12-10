@@ -1,11 +1,10 @@
 package AccessIdValidator
 
 import (
-	log "logger"
-
 	"golang.org/x/net/context"
 
-	"SystemSettingDAO"
+	"github.com/KrauseStefan/NavitasFitness/SystemSettingDAO"
+	log "github.com/KrauseStefan/NavitasFitness/logger"
 )
 
 const (

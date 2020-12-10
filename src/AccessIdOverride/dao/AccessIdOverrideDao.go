@@ -7,7 +7,7 @@ import (
 
 	"cloud.google.com/go/datastore"
 
-	nf_datastore "NavitasFitness/datastore"
+	nf_datastore "github.com/KrauseStefan/NavitasFitness/NavitasFitness/datastore"
 )
 
 type DefaultAccessIdOverrideDao struct{}

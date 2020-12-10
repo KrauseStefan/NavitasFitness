@@ -6,14 +6,13 @@ import (
 	"strconv"
 	"time"
 
+	"cloud.google.com/go/datastore"
 	"github.com/gorilla/mux"
 
-	"cloud.google.com/go/datastore"
-
-	"AppEngineHelper"
-	nf_datastore "NavitasFitness/datastore"
-	UserDao "User/Dao"
-	UserService "User/Service"
+	"github.com/KrauseStefan/NavitasFitness/AppEngineHelper"
+	nf_datastore "github.com/KrauseStefan/NavitasFitness/NavitasFitness/datastore"
+	UserDao "github.com/KrauseStefan/NavitasFitness/User/Dao"
+	UserService "github.com/KrauseStefan/NavitasFitness/User/Service"
 )
 
 type MainPageEntry struct {

@@ -1,11 +1,12 @@
 package mail
 
 import (
-	UserDao "User/Dao"
 	"context"
-	log "logger"
 
 	mailjet "github.com/mailjet/mailjet-apiv3-go"
+
+	UserDao "github.com/KrauseStefan/NavitasFitness/User/Dao"
+	log "github.com/KrauseStefan/NavitasFitness/logger"
 )
 
 type Message struct {

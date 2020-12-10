@@ -6,7 +6,7 @@ import (
 	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
 
-	TransactionDao "IPN/Transaction"
+	TransactionDao "github.com/KrauseStefan/NavitasFitness/IPN/Transaction"
 )
 
 type CallArgs struct {

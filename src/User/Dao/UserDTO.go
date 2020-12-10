@@ -1,7 +1,6 @@
 package UserDao
 
 import (
-	"DAOHelper"
 	"crypto/rand"
 	"time"
 
@@ -11,7 +10,8 @@ import (
 
 	"cloud.google.com/go/datastore"
 
-	"AccessIdValidator"
+	"github.com/KrauseStefan/NavitasFitness/AccessIdValidator"
+	"github.com/KrauseStefan/NavitasFitness/DAOHelper"
 )
 
 var accessIdValidator = AccessIdValidator.GetInstance()

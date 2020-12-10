@@ -10,8 +10,8 @@ import (
 
 	"cloud.google.com/go/datastore"
 
-	"AppEngineHelper"
-	"constants"
+	"github.com/KrauseStefan/NavitasFitness/AppEngineHelper"
+	"github.com/KrauseStefan/NavitasFitness/constants"
 )
 
 const (

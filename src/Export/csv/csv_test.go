@@ -1,7 +1,6 @@
 package csv
 
 import (
-	AccessIdOverrideDao "AccessIdOverride/dao"
 	"bytes"
 	"context"
 	"errors"
@@ -14,12 +13,13 @@ import (
 
 	"cloud.google.com/go/datastore"
 
-	"AccessIdValidator/AccessIdValidatorTestHelper"
-	TransactionDao "IPN/Transaction"
-	"IPN/Transaction/TransactionDaoTestHelper"
-	"TestHelper"
-	UserDao "User/Dao"
-	"User/Dao/UserDaoTestHelper"
+	AccessIdOverrideDao "github.com/KrauseStefan/NavitasFitness/AccessIdOverride/dao"
+	"github.com/KrauseStefan/NavitasFitness/AccessIdValidator/AccessIdValidatorTestHelper"
+	TransactionDao "github.com/KrauseStefan/NavitasFitness/IPN/Transaction"
+	"github.com/KrauseStefan/NavitasFitness/IPN/Transaction/TransactionDaoTestHelper"
+	"github.com/KrauseStefan/NavitasFitness/TestHelper"
+	UserDao "github.com/KrauseStefan/NavitasFitness/User/Dao"
+	"github.com/KrauseStefan/NavitasFitness/User/Dao/UserDaoTestHelper"
 )
 
 var (

@@ -10,15 +10,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
-
 	"cloud.google.com/go/datastore"
+	"github.com/gorilla/mux"
 	"golang.org/x/net/context"
 
-	"Export/csv"
-	TransactionDao "IPN/Transaction"
-	UserDao "User/Dao"
-	log "logger"
+	"github.com/KrauseStefan/NavitasFitness/Export/csv"
+	TransactionDao "github.com/KrauseStefan/NavitasFitness/IPN/Transaction"
+	UserDao "github.com/KrauseStefan/NavitasFitness/User/Dao"
+	log "github.com/KrauseStefan/NavitasFitness/logger"
 )
 
 var (

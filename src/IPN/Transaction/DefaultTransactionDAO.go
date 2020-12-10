@@ -7,7 +7,7 @@ import (
 	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
 
-	nf_datastore "NavitasFitness/datastore"
+	nf_datastore "github.com/KrauseStefan/NavitasFitness/NavitasFitness/datastore"
 )
 
 type DefaultTransactionDao struct{}

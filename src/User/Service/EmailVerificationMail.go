@@ -6,9 +6,9 @@ import (
 
 	"golang.org/x/net/context"
 
-	"NavitasFitness/mail"
-	UserDao "User/Dao"
-	log "logger"
+	"github.com/KrauseStefan/NavitasFitness/NavitasFitness/mail"
+	UserDao "github.com/KrauseStefan/NavitasFitness/User/Dao"
+	log "github.com/KrauseStefan/NavitasFitness/logger"
 )
 
 const confirmMessage = `

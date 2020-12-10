@@ -1,14 +1,14 @@
 package UserService
 
 import (
-	"NavitasFitness/mail"
 	"fmt"
 	"net/url"
 
 	"golang.org/x/net/context"
 
-	UserDao "User/Dao"
-	log "logger"
+	"github.com/KrauseStefan/NavitasFitness/NavitasFitness/mail"
+	UserDao "github.com/KrauseStefan/NavitasFitness/User/Dao"
+	log "github.com/KrauseStefan/NavitasFitness/logger"
 )
 
 const KeyFieldName = "passwordResetKey"

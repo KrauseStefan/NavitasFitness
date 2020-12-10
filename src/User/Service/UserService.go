@@ -1,7 +1,6 @@
 package UserService
 
 import (
-	"AppEngineHelper"
 	"encoding/json"
 	"errors"
 	"io"
@@ -12,12 +11,13 @@ import (
 	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
 
-	"Auth"
-	"DAOHelper"
-	TransactionDao "IPN/Transaction"
-	nf_datastore "NavitasFitness/datastore"
-	UserDao "User/Dao"
-	log "logger"
+	"github.com/KrauseStefan/NavitasFitness/AppEngineHelper"
+	"github.com/KrauseStefan/NavitasFitness/Auth"
+	"github.com/KrauseStefan/NavitasFitness/DAOHelper"
+	TransactionDao "github.com/KrauseStefan/NavitasFitness/IPN/Transaction"
+	nf_datastore "github.com/KrauseStefan/NavitasFitness/NavitasFitness/datastore"
+	UserDao "github.com/KrauseStefan/NavitasFitness/User/Dao"
+	log "github.com/KrauseStefan/NavitasFitness/logger"
 )
 
 var (
