@@ -12,7 +12,7 @@ describe('Reset password', () => {
   const newPassword = 'Password2';
   const userInfo = {
     name: 'test',
-    email: 'reset-test@domain.com',
+    email: 'reset-test@nonexisting-domain.noway.findesikke.dk',
     accessId: 'reset-test',
     password: 'Password1',
   };

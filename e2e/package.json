@@ -3,8 +3,8 @@
     "build": "tsc",
     "install": "webdriver-manager update",
     "test": "npm-run-all test:*",
-    "test-serial": "npm run clean && npm run build && protractor",
-    "test:E2E": "npm run clean && npm run build && protractor --parallel",
+    "test-serial": "yarn clean && yarn build && protractor",
+    "test:E2E": "yarn clean && yarn build && protractor --parallel",
     "test:tslint": "tslint --project .",
     "clean": "rimraf PageObjects/*.js && rimraf specs/*.js && rimraf *.js && rimraf reports"
   },

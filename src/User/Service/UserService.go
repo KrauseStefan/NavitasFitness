@@ -117,22 +117,24 @@ func GetUserTransactions(ctx context.Context, userKey *datastore.Key) ([]*Transa
 }
 
 type TransactionMsgClientDTO struct {
-	Amount      float64   `json:"amount"`
-	Currency    string    `json:"currency"`
-	PaymentDate time.Time `json:"paymentDate"`
-	Status      string    `json:"status"`
-	IsActive    bool      `json:"isActive"`
+	Amount        float64   `json:"amount"`
+	Currency      string    `json:"currency"`
+	PaymentDate   time.Time `json:"paymentDate"`
+	Status        string    `json:"status"`
+	IsActive      bool      `json:"isActive"`
+	ReceiverEmail string    `json:"receiverEmail"`
 	// IpnMessages           []string  `json:"ipnMessages"` // History of IpnMessages
 }
 
 func newTransactionMsgClientDTO(source *TransactionDao.TransactionMsgDTO) *TransactionMsgClientDTO {
 
 	txClient := TransactionMsgClientDTO{
-		Amount:      source.GetAmount(),
-		Currency:    source.GetCurrency(),
-		PaymentDate: source.GetPaymentDate(),
-		Status:      source.GetPaymentStatus(),
-		IsActive:    source.IsActive(),
+		Amount:        source.GetAmount(),
+		Currency:      source.GetCurrency(),
+		PaymentDate:   source.GetPaymentDate(),
+		Status:        source.GetPaymentStatus(),
+		IsActive:      source.IsActive(),
+		ReceiverEmail: source.GetReceiverEmail(),
 		// IpnMessages:           source.GetIpnMessages(),
 	}
 

@@ -9,7 +9,7 @@ describe('Payments', () => {
 
   const userInfo = {
     name: 'status',
-    email: 'status@domain.com',
+    email: 'status@nonexisting-domain.noway.findesikke.dk',
     accessId: 'status',
     password: 'Password1',
   };

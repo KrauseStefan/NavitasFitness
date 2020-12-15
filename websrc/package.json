@@ -16,7 +16,7 @@
     "copy:ui-grid-fonts": "mkdir -p ../src/webapp/styles && cp node_modules/angular-ui-grid/fonts/ui-grid.woff ../src/webapp/styles/",
     "test": "npm-run-all test:*",
     "test:tslint": "tslint --project .",
-    "clean": "rm -rf ../src/webapp/* && npm run creatWebappDir",
+    "clean": "rm -rf ../src/webapp/* && yarn creatWebappDir",
     "webserver": "node buildenv/connect.server.js"
   },
   "author": "Stefan Krause-Kjær",

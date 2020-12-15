@@ -73,7 +73,13 @@ func validateTransactions(ctx context.Context, txns TransactionDao.TransactionLi
 				validTxns = append(validTxns, txn)
 				break
 			} else if i == validationEmailsLendth-1 {
-				log.Warningf(ctx, "Invalid Email used to validate Txn entry: %s, txnId: %s", txn.GetReceiverEmail(), txn.GetTxnId())
+				log.Warningf(
+					ctx,
+					"Payment receiver email is not in approved list, recived payment to %s from %s - txnID: %s\n The paying user will not grant access!!!",
+					txn.GetReceiverEmail(),
+					txn.GetPayerEmail(),
+					txn.GetTxnId(),
+				)
 				invalidTxns = append(invalidTxns, txn)
 			}
 		}

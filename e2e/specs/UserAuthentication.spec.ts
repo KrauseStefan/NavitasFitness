@@ -8,13 +8,13 @@ import { verifyBrowserLog } from '../utility';
 
 const userInfo = {
   name: 'test',
-  email: 'auth-test-1@domain.com',
+  email: 'auth-test-1@nonexisting-domain.noway.findesikke.dk',
   accessId: 'auth-test-1',
   password: 'Password123',
 };
 
 const alternateUserInfo = {
-  email: 'auth-test-2@domain.dk',
+  email: 'auth-test-2@nonexisting-domain.noway.findesikke.dk',
   accessId: 'auth-test-2',
 };
 
